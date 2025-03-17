@@ -1,5 +1,5 @@
 {
-  "name": "nombre-del-proyecto",
+  "name": "daviweb",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:nombre-del-proyecto": "node dist/nombre-del-proyecto/server/server.mjs"
+    "serve:ssr:Daviweb": "node dist/daviweb/server/server.mjs"
   },
   "private": true,
   "dependencies": {
