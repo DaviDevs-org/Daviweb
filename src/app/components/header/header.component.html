@@ -1,0 +1,29 @@
+<!-- src/app/components/header/header.component.html -->
+<header class="bg-black text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center py-6">
+      <div class="flex items-center gap-4">
+        <img src="assets/logo.png" alt="Logo" class="h-10" />
+        <div class="flex items-center gap-2">
+          <ng-container *ngIf="isOpen; else closedTpl">
+            <span class="text-green-400 font-medium">Abierto</span>
+          </ng-container>
+          <ng-template #closedTpl>
+            <span class="text-red-500 font-medium">Cerrado</span>
+            <p class="text-white mt-1">{{ nextOpenText }}</p>
+          </ng-template>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-4">
+        <a href="#booking"
+           class="bg-white text-black px-6 py-3 rounded-md font-medium hover:bg-gray-100 transition">
+          Reserva tu cita
+        </a>
+        <a href="#featured"
+           class="bg-transparent text-white border border-white px-6 py-3 rounded-md font-medium hover:bg-white hover:text-black transition">
+          Ver nuestros cortes
+        </a>
+      </div>
+    </div>
+  </div>
+</header>

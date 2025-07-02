@@ -1,0 +1,20 @@
+<!-- src/app/components/price-list-section/price-list-section.component.html -->
+<section id="prices" class="py-16 bg-white">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-3xl font-bold text-center mb-8">Precios y Tiempos</h2>
+    <ul>
+      <li *ngFor="let s of services" class="flex justify-between items-center py-4 border-b">
+        <div>
+          <span [ngClass]="{'font-semibold': s.premium}" class="text-lg">{{ s.name }}</span>
+        </div>
+        <div>
+          <span class="text-lg">{{ s.price }}</span>
+          <span class="text-gray-500 ml-2">({{ s.duration }})</span>
+        </div>
+      </li>
+    </ul>
+    <p class="text-sm text-gray-500 mt-4">
+      Los tiempos pueden variar según tipo de cabello. Consulta si necesitas un servicio personalizado.
+    </p>
+  </div>
+</section>

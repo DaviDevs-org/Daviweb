@@ -1,5 +1,8 @@
-import { Component} from '@angular/core';
-import { AppModule } from './app.module';
+// src/app/app.module.ts
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { ReactiveFormsModule } from '@angular/forms';
+import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
 import { LocationSectionComponent } from './components/location-section/location-section.component';
 import { ReviewsSectionComponent } from './components/reviews-section/reviews-section.component';
@@ -12,28 +15,28 @@ import { USPSectionComponent } from './components/usp-section/usp-section.compon
 import { AboutSectionComponent } from './components/about-section/about-section.component';
 import { FAQSectionComponent } from './components/faq-section/faq-section.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { isBarberShopOpen, getNextOpeningTime } from './lib/utils';
 
-@Component({
-  selector: 'app-root',
-  imports: [HeaderComponent, LocationSectionComponent, ReviewsSectionComponent, CarouselSectionComponent,
-            FeaturedCutsSectionComponent, PriceListSectionComponent, ProductsSectionComponent,
-            BookingSectionComponent, USPSectionComponent, AboutSectionComponent, FAQSectionComponent,
-            FooterComponent
+@NgModule({
+  declarations: [
+    
   ],
-  template: `
-    <app-header></app-header>
-    <app-location-section></app-location-section>
-    <app-reviews-section></app-reviews-section>
-    <app-carousel-section></app-carousel-section>
-    <app-featured-cuts-section></app-featured-cuts-section>
-    <app-price-list-section></app-price-list-section>
-    <app-products-section></app-products-section>
-    <app-booking-section></app-booking-section>
-    <app-usp-section></app-usp-section>
-    <app-about-section></app-about-section>
-    <app-faq-section></app-faq-section>
-    <app-footer></app-footer>
-  `,
+  imports: [
+    BrowserModule,
+    ReactiveFormsModule,
+    AppComponent,
+    HeaderComponent,
+    LocationSectionComponent,
+    ReviewsSectionComponent,
+    CarouselSectionComponent,
+    FeaturedCutsSectionComponent,
+    PriceListSectionComponent,
+    ProductsSectionComponent,
+    BookingSectionComponent,
+    USPSectionComponent,
+    AboutSectionComponent,
+    FAQSectionComponent,
+    FooterComponent
+  ],
 })
-export class AppComponent {}
-
+export class AppModule { }
