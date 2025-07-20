@@ -1,4 +1,4 @@
-.header_11-87 {
+.header {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -8,7 +8,7 @@
   box-sizing: border-box;
   width: -webkit-fill-available;
 }
-.future-content_11-111 {
+.future-content {
   padding: 8px 0px 8px 0px;
   display: flex;
   flex-direction: column;
@@ -21,7 +21,7 @@
   background: #000000;
   width: -webkit-fill-available;
 }
-.text-pr-ximamente--reservas-online-y-pago-telem-tico_11-113 {
+.text-next {
   color: #ffffff;
   font-size: 11.899999618530273px;
   font-family: Inter;
@@ -33,8 +33,7 @@
   width: 303px;
   height: 20px;
 }
-
-.nav_11-89 {
+.nav {
   padding: 16px 16px 16px 24px;
   display: flex;
   flex-direction: row;
@@ -51,13 +50,13 @@
   height: 64px;
   width: -webkit-fill-available;
 }
-.heading_11-91 {
+.heading {
   position: relative;
   box-sizing: border-box;
   width: 246px;
   height: 32px;
 }
-.text-peluquer-a-moderna_11-92 {
+.heading-text {
   top: 0px;
   left: 0px;
   position: absolute;
@@ -73,8 +72,7 @@
   width: 246px;
   height: 32px;
 }
-
-.anchors---status_11-93 {
+.anchors {
   padding: 2px 0px 2px 0px;
   display: flex;
   flex-direction: row;
@@ -86,7 +84,7 @@
   width: 402px;
   height: 34px;
 }
-.location-anchor_11-94 {
+.anchor {
   padding: 1px 0px 1px 0px;
   display: flex;
   flex-direction: row;
@@ -94,33 +92,11 @@
   flex-wrap: nowrap;
   align-items: center;
   gap: 4px;
-  box-sizing: border-box;
+  box-sizing: content-box;
 }
-.frame_11-95 {
-  position: relative;
-  box-sizing: border-box;
-  overflow: hidden;
-  display: flex;
-}
-.vector_11-96 {
-  top: 1px;
-  left: 3px;
-  position: absolute;
-  display: flex;
-  display: flex;
-}
-
-.vector_11-97 {
-  top: 5px;
-  left: 6px;
-  position: absolute;
-  display: flex;
-  display: flex;
-}
-
-.text-ubicaci-n_11-98 {
+.anchor-text {
   color: #404040;
-  font-size: 13.600000381469727px;
+  font-size: 13.6px;
   font-family: Inter;
   line-height: 24px;
   letter-spacing: 0%;
@@ -129,117 +105,32 @@
   text-align: left;
   width: 70px;
   height: 21px;
+  padding-bottom: 3.5px;
 }
-
-.services-anchor_11-99 {
-  padding: 1px 0px 1px 0px;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 4px;
-  box-sizing: border-box;
-}
-.frame_11-100 {
-  position: relative;
-  box-sizing: border-box;
-  overflow: hidden;
-  display: flex;
-}
-.vector_11-101 {
-  top: 1px;
-  left: 1px;
-  position: absolute;
-  display: flex;
-  display: flex;
-}
-
-.vector_11-102 {
-  top: 4px;
-  left: 8px;
-  position: absolute;
-  display: flex;
-  display: flex;
-}
-
-.text-servicios_11-103 {
-  color: #404040;
-  font-size: 13.600000381469727px;
-  font-family: Inter;
-  line-height: 24px;
-  letter-spacing: 0%;
-  text-decoration: none;
-  font-weight: 400;
-  text-align: right;
-  width: 61px;
-  height: 21px;
-}
-
-.contact-anchor_11-104 {
-  position: relative;
-  box-sizing: border-box;
-  width: 84px;
-  height: 24px;
-}
-.frame_11-105 {
-  top: 4px;
-  left: 0px;
-  position: absolute;
-  display: flex;
-  box-sizing: border-box;
-  overflow: hidden;
-  display: flex;
-}
-.vector_11-106 {
-  top: 1px;
-  left: 1px;
-  position: absolute;
-  display: flex;
-  display: flex;
-}
-
-.text-contacto_11-107 {
-  top: 1px;
-  left: 20px;
-  position: absolute;
-  display: flex;
-  color: #404040;
-  font-size: 13.600000381469727px;
-  font-family: Inter;
-  line-height: 24px;
-  letter-spacing: 0%;
-  text-decoration: none;
-  font-weight: 400;
-  text-align: left;
-  width: 64px;
-  height: 21px;
-}
-
-.status_11-108 {
+.status {
   position: relative;
   box-sizing: border-box;
   width: 75px;
   height: 28px;
 }
-.container_11-109 {
+.status-container {
   top: 0px;
   left: 0px;
-  position: absolute;
   display: flex;
   box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
   border-radius: 9999px;
   background: #ef4444;
   width: 75px;
   height: 28px;
 }
-.text-cerrado_11-110 {
+.status-text {
   top: 4px;
   left: 12px;
-  position: absolute;
   display: flex;
   color: #ffffff;
-  font-size: 11.899999618530273px;
+  font-size: 11.9px;
   font-family: Inter;
   line-height: 20px;
   letter-spacing: 0%;
@@ -249,18 +140,10 @@
   width: 51px;
   height: 19px;
 }
-
-.welcome-photo_11-88 {
+.welcome-photo {
   position: relative;
   box-sizing: border-box;
   background: #ffffff;
   height: 407px;
   width: -webkit-fill-available;
-}
-.rectangle-1_15-123 {
-  top: 0px;
-  left: 0px;
-  position: absolute;
-  display: flex;
-  display: flex;
 }
