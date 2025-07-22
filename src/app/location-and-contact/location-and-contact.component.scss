@@ -1,0 +1,112 @@
+.location-and-contact_31-210 {
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 64px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  background: rgba(97, 53, 35, 0.6);
+  border-radius: 16px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  color: #0f172a;
+  font-family: 'Inter', sans-serif;
+  margin-top: 2%;
+}
+
+.heading_31-211 {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.map-and-info_31-213 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 40px;
+  width: 100%;
+  max-width: 1180px;
+  box-sizing: border-box;
+}
+
+.map_31-215 {
+  flex: 1 1 55%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+  max-height: 384px;
+}
+
+.info_31-266 {
+  flex: 1 1 40%;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  background-color: rgba(255, 255, 255, 0.28);
+  border-radius: 12px;
+  padding: 24px 32px;
+  box-sizing: border-box;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  min-width: 300px;
+}
+
+/* Contenedor para las tres secciones (dirección, contacto, horario) en columna */
+.frame-1_34-130 {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  width: 100%;
+}
+
+/* Cada bloque info */
+.direction_31-267, .contact_31-280, .schedule_31-291 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.heading_31-268, .heading_31-281, .heading_31-292 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 18px;
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+/* Texto info */
+.paragraph_31-273 span, .paragraph_31-275 span, .paragraph_31-288 span,
+.paragraph_31-285 span, .paragraph_31-300 span, .paragraph_31-304 span, .paragraph_31-308 span {
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.4;
+  color: #0f172a;
+}
+
+/* Container para el horario para que quede en dos columnas */
+.schedule_31-291 .container_31-297 {
+  display: grid;
+  grid-template-columns: auto auto;
+  row-gap: 8px;
+  column-gap: 16px;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+/* Icon containers centrados verticalmente */
+.frame_31-269, .frame_31-282, .frame_31-293 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+}
+

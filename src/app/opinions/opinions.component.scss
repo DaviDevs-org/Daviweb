@@ -1,0 +1,99 @@
+.opinions_21-122 {
+  max-width: 1180px;
+  margin: 30px auto;
+  padding: 48px 24px;
+  background: rgba(97, 53, 35, 0.6);
+  border-radius: 16px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  font-family: 'Inter', sans-serif;
+  color: #0f172a;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.heading_21-123 {
+  font-weight: 600;
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.description_21-125 {
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.4;
+  margin-bottom: 36px;
+  color: #333;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.opinion-container_21-128 {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: visible; /* Cambio clave para que no corte el hover */
+}
+
+.opinion_28-47,
+.opinion_28-70,
+.opinion_28-93 {
+  background-color: rgba(120, 74, 56, 0.27);
+  border-radius: 40px;
+  padding: 20px 20px 12px 20px; /* Menos padding abajo */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  flex: 1 1 300px;
+  max-width: 320px;
+  box-sizing: border-box;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Gap ajustado para compactar */
+  transition: transform 0.2s ease;
+  min-width: 280px;
+  cursor: pointer;
+}
+
+.opinion_28-47:hover,
+.opinion_28-70:hover,
+.opinion_28-93:hover {
+  transform: translateY(-4px);
+}
+
+.opinion-text {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #0f172a;
+  text-align: justify;
+}
+
+.more-reviews_21-200 {
+  text-align: center;
+  margin-top: 36px;
+  margin-bottom: 10px;
+}
+
+.text-ver-m-s-rese-as-en-google_21-202 {
+  color: #5c301e;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.more-reviews_21-200 .frame_21-203 {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 8px;
+  stroke: #5c301e;
+  transition: transform 0.3s ease;
+}
+
+.more-reviews_21-200:hover .frame_21-203 {
+  transform: translateX(4px);
+}

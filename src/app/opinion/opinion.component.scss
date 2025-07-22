@@ -1,0 +1,71 @@
+.opinion_28-23 {
+  background-color: rgba(112, 62, 40, 0.6); /* marrón transparente */
+  border-radius: 12px;
+  padding: 24px 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  color: #0f172a;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+}
+
+.container_21-177 {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ellipse-1_22-207 {
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(64, 34, 21, 0.61); /* fallback si no hay imagen */
+}
+
+.container_21-180 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.text-google_21-184 {
+  font-weight: 700;
+  font-size: 14px;
+  color: #5c301e; /* marrón oscuro */
+}
+
+.heading_21-181 {
+  font-weight: 800;
+  font-size: 18px;
+  color: #0f172a;
+  margin-top: 2px;
+}
+
+.rating_21-185 {
+  display: flex;
+  gap: 6px;
+}
+
+.paragraph_21-196 {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #0f172a;
+  text-align: justify;
+}
+
+/* Ajuste para las estrellas si quieres */
+
+.star_28-6, .star_28-9, .star_28-12, .star_28-15, .star_28-18 {
+  width: 22px;
+  height: 22px;
+  fill: #f59e0b; /* dorado */
+}

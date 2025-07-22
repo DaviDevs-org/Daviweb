@@ -1,0 +1,63 @@
+.about-us_37-132 {
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 64px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1180px;
+  margin: 20px auto 0;
+  background: rgba(97, 53, 35, 0.6);
+  border-radius: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 45px;
+  font-family: 'Inter', sans-serif;
+}
+
+.info_37-135 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 32px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.paragraph_37-136 {
+  flex: 1 1 auto;
+  min-width: 280px;    /* Texto más estrecho */
+  max-width: 500px;    /* Para que nunca ocupe demasiado */
+  padding: 0 24px;
+  box-sizing: border-box;
+  margin-left: 4%;
+}
+
+.text-block {
+  font-size: 16px;
+  font-weight: 545;
+  line-height: 25px;
+  margin: 0;
+  text-align: justify;
+  color: #000000;
+  font-family: 'Inter', sans-serif;
+}
+
+.image_37-152 {
+  flex: 0 0 40%;
+  width: 400px;        /* Ajusta el ancho fijo de la imagen */
+  max-width: 100%;     /* No se pase del contenedor */
+  height: auto;
+  display: flex;
+  justify-content: center;  /* Centrado horizontal */
+  align-items: center;      /* Centrado vertical */
+  overflow: hidden;
+  border-radius: 8px;
+  margin-right: 4%;
+}
+
+.image_37-152 svg {
+  width: 100%;
+  height: auto;       /* Mantiene proporción */
+  display: block;
+}

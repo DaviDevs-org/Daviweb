@@ -1,0 +1,63 @@
+<div
+  class="root"
+  [ngClass]="{
+    root_property1Default: property1 === 'Default',
+    root_property1Deployed: property1 === 'Deployed',
+  }"
+>
+  <div *ngIf="property1 === 'Deployed'" class="container">
+    <div class="text">
+      <span class="comoReservoSiAunNoEstaHabilitadoElSistemaOnline"
+        >¿Cómo reservo si aún no está habilitado el sistema online?</span
+      >
+    </div>
+    <div class="deployable">
+      <div class="vector">
+        <svg
+          width="8"
+          height="12"
+          viewBox="0 0 8 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M1.95312 11L6.95312 6L1.95312 1"
+            stroke="#0F172A"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="property1 === 'Deployed'" class="answer">
+    <span class="siemprePuedesLlamarPorTelefonoDentroDelHorario"
+      >Siempre puedes llamar por teléfono dentro del horario</span
+    >
+  </div>
+  <div *ngIf="property1 === 'Default'" class="text">
+    <span class="comoReservoSiAunNoEstaHabilitadoElSistemaOnline"
+      >¿Cómo reservo si aún no está habilitado el sistema online?</span
+    >
+  </div>
+  <div *ngIf="property1 === 'Default'" class="deployable">
+    <div class="vector">
+      <svg
+        width="13"
+        height="8"
+        viewBox="0 0 13 8"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M1.95312 1.5L6.95312 6.5L11.9531 1.5"
+          stroke="#0F172A"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
+  </div>
+</div>

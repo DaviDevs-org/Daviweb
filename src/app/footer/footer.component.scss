@@ -1,0 +1,94 @@
+.footer_51-157 {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 48px 24px 24px;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+.footer-container_51-158 {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.info_51-159 {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.links_51-196,
+.contact_51-160,
+.schedule_51-180,
+.social-media_51-215 {
+  flex: 1 1 220px;
+  min-width: 200px;
+}
+
+.heading_51-197,
+.heading_51-161,
+.heading_51-181,
+.heading_51-216 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.text-enlaces_51-198,
+.text-contacto_51-162,
+.text-horario_51-182,
+.text-s-guenos_51-217 {
+  color: white;
+}
+
+.container_51-199,
+.container_51-218,
+.container_51-183 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.container_51-163,
+.container_51-169,
+.container_51-174 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.text-calle-falsa-123--ciudad--pa-s_51-168,
+.text--34-600-000-000_51-173,
+.text-info-barberiamoderna-com_51-179,
+.text-nuestros-cortes_51-202,
+.text-servicios-y-precios_51-205,
+.text-reservar-cita_51-208,
+.text-pol-tica-de-privacidad_51-211,
+.text-t-rminos-y-condiciones_51-214,
+.text-lunes-a-viernes-_51-185,
+.text-10-00-20-00_51-187,
+.text-s-bado-_51-189,
+.text-9-00-18-00_51-191,
+.text-domingo-_51-193,
+.text-cerrado_51-195 {
+  color: #cfcfcf;
+  font-size: 14px;
+}
+
+.social-media_51-215 svg,
+.contact_51-160 svg {
+  fill: white;
+}
+
+.copyright_51-227 {
+  text-align: center;
+  font-size: 14px;
+  color: #a1a1a1;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 24px;
+}

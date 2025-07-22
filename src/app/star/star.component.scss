@@ -1,0 +1,32 @@
+.root {
+  position: relative;
+  box-sizing: border-box;
+  overflow: visible; /* Para que las estrellas no se corten */
+  background: rgba(255, 255, 255, 0);
+  display: flex;
+  gap: 4px; /* Espacio entre estrellas */
+  align-items: center;
+}
+
+.vector {
+  position: relative; /* mejor que absolute para layout normal */
+  display: flex;
+  box-sizing: content-box;
+  cursor: pointer;
+}
+
+.vector_property1Empty {
+  /* Estrella vacía, gris clarito */
+  svg path {
+    fill: none !important;
+    stroke: #D1D5DB !important;
+  }
+}
+
+.vector_property1Default {
+  /* Estrella llena, amarilla */
+  svg path {
+    fill: #FBBF24 !important;
+    stroke: #F59E0B !important;
+  }
+}

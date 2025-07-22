@@ -1,0 +1,98 @@
+.root {
+  padding-top: 16px;
+  box-sizing: border-box;
+  background: #ffffff;  // blanco puro para uniformidad
+  font-family: 'Inter', sans-serif;
+  color: #0f172a;       // texto oscuro homogéneo
+  width: 100%;          // que ocupe todo el ancho posible
+  max-width: 460px;     // igual que el ancho de .root_property1Default
+  margin: 0 auto;       // para centrarlo en pantallas grandes
+}
+
+.root_property1Default {
+  padding: 16px 10px 16px 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;             // reduce un poco el gap brutal que tenías (312px)
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;   // para que los items vayan alineados verticalmente
+  border-radius: 9px;
+  background-color: rgba(202, 136, 111, 0.51);
+}
+
+.root_property1Deployed {
+  padding: 8px 8px 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: auto;          // que se adapte al contenido
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  border: 1px solid #bababa;
+  border-radius: 12px;
+  padding: 8px 12px;
+  background-color: #fff;
+  width: 100%;
+}
+
+.text {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 423px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: #0f172a;
+  text-align: left;
+}
+
+.comoReservoSiAunNoEstaHabilitadoElSistemaOnline,
+.siemprePuedesLlamarPorTelefonoDentroDelHorario {
+  display: flex;
+  color: #0f172a;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  text-align: left;
+  width: 100%;
+}
+
+.deployable {
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #ffffff;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.deployable:hover {
+  background-color: #f0f0f0;
+}
+
+.vector {
+  position: absolute;
+  top: 8px;
+  left: 5px;
+  display: flex;
+  box-sizing: content-box;
+}
