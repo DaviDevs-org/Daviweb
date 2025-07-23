@@ -1,4 +1,4 @@
-.faq_37-173 {
+.faq {
   padding: 32px 40px 48px 40px;
   max-width: 1180px; /* igual que otros bloques */
   margin: 0 auto;
@@ -10,14 +10,12 @@
   align-items: center;
   gap: 48px;
   box-sizing: border-box;
-  color: #0f172a;
-  font-family: 'Inter', sans-serif;
   text-align: center;
   width: 100%;
   margin-bottom: 2%;
 }
 
-.faq-container_37-176 {
+.faq-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -26,11 +24,12 @@
   box-sizing: border-box;
   align-items: center;
 }
+.heading{
+  font-size: 36px;
+  font-weight: 700;
+}
 
-.button_40-237,
-.button_40-243,
-.button_40-249,
-.button_40-255 {
+.button {
   width: 100%;
   max-width: 1120px; /* igual que el contenedor padre para no salirse */
   padding: 14px 26px;
@@ -50,10 +49,7 @@
   text-shadow: 0 1px 1px rgba(0,0,0,0.2);
 }
 
-.button_40-237:hover,
-.button_40-243:hover,
-.button_40-249:hover,
-.button_40-255:hover {
+.button:hover {
   background-color: rgb(140, 84, 62);
   border-color: #7a4828;
   transform: translateY(-3px);

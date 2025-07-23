@@ -64,8 +64,8 @@
   transition: color 0.3s ease;
 }
 .icon-link {
-  text-decoration: none;   // quita subrayado
-  color: inherit;          // usa el color del icono (no el azul de los <a>)
+  text-decoration: none;   
+  color: inherit;          
   display: inline-block;
   width: fit-content;
   scale: 1.4;
