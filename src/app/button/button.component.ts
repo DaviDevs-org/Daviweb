@@ -12,4 +12,14 @@ import {CommonModule, NgClass} from '@angular/common';
 })
 export class ButtonComponent {
   @Input() property1: "Default" | "Deployed" = "Default";
+  question:string = "¿Cómo reservo si aún no está habilitado el sistema online?";
+  answer:string = "Siempre puedes llamar por teléfono dentro del horario"
+  changeState(){
+    if (this.property1==="Default"){
+      this.property1 = "Deployed"
+    }
+    else{
+      this.property1 = "Default"
+    }
+  }
 }
