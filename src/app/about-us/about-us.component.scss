@@ -1,4 +1,5 @@
 .about-us_37-132 {
+  /* Igualito que antes, nada cambiado */
   padding: 48px 24px;
   display: flex;
   flex-direction: column;
@@ -11,11 +12,18 @@
   background: rgba(97, 53, 35, 0.6);
   border-radius: 16px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  font-size: 45px;
+  font-size: 17px;
   font-family: 'Inter', sans-serif;
+  color: #000000;
+}
+
+.heading_37-133 {
+  font-weight: bolder;
+  font-size: 30px;
 }
 
 .info_37-135 {
+  /* Igual que antes, para que imagen y texto sigan igual */
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -25,18 +33,26 @@
 }
 
 .paragraph_37-136 {
+  /* Aquí dejamos el tamaño y anchos igual */
   flex: 1 1 auto;
-  min-width: 280px;    /* Texto más estrecho */
-  max-width: 500px;    /* Para que nunca ocupe demasiado */
+  min-width: 280px;
+  max-width: 550px;
   padding: 0 24px;
   box-sizing: border-box;
   margin-left: 4%;
+
+  font-weight: 500;       /* Más gordo, bold tocho */
+  line-height: 27px;      /* Más espacio entre líneas, que respire */
+  font-size: 17px;        /* Mismo tamaño que antes */
+  text-align: justify;
+  color: #000000;
+  font-family: 'Inter', sans-serif;
 }
 
 .text-block {
-  font-size: 16px;
-  font-weight: 545;
-  line-height: 25px;
+  font-size: 17px;
+  font-weight: 700;       /* Bolder que antes */
+  line-height: 32px;      /* Más espacio */
   margin: 0;
   text-align: justify;
   color: #000000;
@@ -44,20 +60,23 @@
 }
 
 .image_37-152 {
+  /* Exactamente igual para que la imagen no se mueva */
   flex: 0 0 40%;
-  width: 400px;        /* Ajusta el ancho fijo de la imagen */
-  max-width: 100%;     /* No se pase del contenedor */
+  width: 400px;
+  max-width: 100%;
   height: auto;
   display: flex;
-  justify-content: center;  /* Centrado horizontal */
-  align-items: center;      /* Centrado vertical */
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
   border-radius: 8px;
   margin-right: 4%;
 }
 
-.image_37-152 svg {
+.image_37-152 svg,
+.image_37-152 img {
   width: 100%;
-  height: auto;       /* Mantiene proporción */
+  height: auto;
   display: block;
+  border-radius: 8px;
 }

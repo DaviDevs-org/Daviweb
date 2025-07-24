@@ -1,5 +1,5 @@
-.opinion_28-23 {
-  background-color: rgba(112, 62, 40, 0.6); /* marrón transparente */
+.opinion {
+  background-color: rgba(112, 62, 40, 0.6);
   border-radius: 12px;
   padding: 24px 32px;
   margin-bottom: 24px;
@@ -15,46 +15,46 @@
   max-width: 600px;
 }
 
-.container_21-177 {
+.opinion-header {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.ellipse-1_22-207 {
+.avatar {
   width: 43px;
   height: 43px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  background: rgba(64, 34, 21, 0.61); /* fallback si no hay imagen */
+  background: rgba(64, 34, 21, 0.61);
 }
 
-.container_21-180 {
+.opinion-info {
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.text-google_21-184 {
+.platform {
   font-weight: 700;
   font-size: 14px;
   color: #5c301e; /* marrón oscuro */
 }
 
-.heading_21-181 {
+.user-name {
   font-weight: 800;
   font-size: 18px;
   color: #0f172a;
   margin-top: 2px;
 }
 
-.rating_21-185 {
+.rating {
   display: flex;
   gap: 6px;
 }
 
-.paragraph_21-196 {
+.opinion-text {
   font-size: 15px;
   font-weight: 600;
   line-height: 1.5;
@@ -62,9 +62,7 @@
   text-align: justify;
 }
 
-/* Ajuste para las estrellas si quieres */
-
-.star_28-6, .star_28-9, .star_28-12, .star_28-15, .star_28-18 {
+.rating app-star {
   width: 22px;
   height: 22px;
   fill: #f59e0b; /* dorado */
