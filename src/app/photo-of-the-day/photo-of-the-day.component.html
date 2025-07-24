@@ -1,13 +1,17 @@
 <div class="photo-of-the-day">
   <div class="heading">Fotos del día</div>
   <div class="description">Algunos de los trabajos más recientes realizados en nuestra peluquería.</div>
-  
+
   <div class="photo-carousel">
     <!-- Contenedor de imágenes -->
     <div class="carousel-container">
       <div class="carousel-track" [style.transform]="'translateX(-' + (currentSlide * 25) + '%)'">
         <div class="carousel-slide" *ngFor="let item of carouselItems; let i = index">
-          <img [src]="item.image" [alt]="item.alt" class="carousel-image">
+          <img [ngSrc]="item.image"
+               [alt]="item.alt"
+               width="400"
+               height="300"
+               class="carousel-image">
           <div class="carousel-caption">
             <span>{{item.caption}}</span>
           </div>
@@ -21,7 +25,7 @@
         <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
-    
+
     <button class="carousel-btn carousel-btn-next" (click)="nextSlide()" type="button">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -30,9 +34,9 @@
 
     <!-- Indicadores -->
     <div class="carousel-indicators">
-      <button 
+      <button
         *ngFor="let item of carouselItems; let i = index"
-        class="indicator" 
+        class="indicator"
         [class.active]="i === currentSlide"
         (click)="goToSlide(i)"
         type="button">

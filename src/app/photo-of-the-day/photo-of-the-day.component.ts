@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 interface CarouselItem {
@@ -11,10 +11,10 @@ interface CarouselItem {
   selector: 'app-photo-of-the-day',
   templateUrl: './photo-of-the-day.component.html',
   styleUrls: ['./photo-of-the-day.component.scss'],
-  imports:[CommonModule]
+  imports: [CommonModule, NgOptimizedImage]
 })
 export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
-  
+
   carouselItems: CarouselItem[] = [
     {
       image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
@@ -54,12 +54,12 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
   private startAutoPlay() {
     this.intervalId = window.setInterval(() => {
       this.nextSlide();
-    }, 5000); 
+    }, 5000);
   }
 
   goToSlide(index: number) {
     this.currentSlide = index;
-    
+
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.startAutoPlay();
@@ -71,12 +71,12 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
   }
 
   prevSlide() {
-    this.currentSlide = this.currentSlide === 0 
-      ? this.carouselItems.length - 1 
+    this.currentSlide = this.currentSlide === 0
+      ? this.carouselItems.length - 1
       : this.currentSlide - 1;
   }
 
-  
+
   pauseAutoPlay() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
@@ -84,7 +84,7 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
     }
   }
 
-  
+
   resumeAutoPlay() {
     if (!this.intervalId) {
       this.startAutoPlay();
