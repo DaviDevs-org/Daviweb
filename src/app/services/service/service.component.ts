@@ -5,4 +5,8 @@ import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
   styleUrls: ["./service.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ServiceComponent {}
+export class ServiceComponent {
+  @Input() name:string = "Corte Clásico"
+  @Input() time:number = 25
+  @Input() price:number = 20
+}

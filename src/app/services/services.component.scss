@@ -1,25 +1,23 @@
-.services_29-120 {
-  padding: 0px 24px 0px 24px;
+.services {
+  padding: 32px 40px 48px 40px;
+  max-width: 1180px; /* igual que otros bloques */
+  margin: 0 auto;
+  background: rgba(97, 53, 35, 0.6);
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
   align-items: center;
-  gap: 32px;
+  gap: 48px;
   box-sizing: border-box;
-  width: -webkit-fill-available;
+  text-align: center;
+  width: 100%;
 }
-.heading_29-121 {
+.heading {
   position: relative;
   box-sizing: border-box;
   width: 755px;
   height: 36px;
-}
-.text-servicios-y-precios_29-122 {
-  top: -2px;
-  left: 248px;
-  position: absolute;
-  display: flex;
   color: #0f172a;
   font-size: 25.5px;
   font-family: Inter;
@@ -28,22 +26,13 @@
   text-decoration: none;
   font-weight: 700;
   text-align: center;
-  width: 259px;
-  height: 40px;
 }
-
-.paragraph_29-123 {
+.paragraph {
   position: relative;
   box-sizing: border-box;
   width: 672px;
   height: 24px;
-}
-.text-ofrecemos-una-amplia-gama-de-servicios-de-barber-a-profesional-a-precios-competitivos-_29-124 {
-  top: 1px;
-  left: 24px;
-  position: absolute;
-  display: flex;
-  color: #525252;
+  color: #0f172a;
   font-size: 13.600000381469727px;
   font-family: Inter;
   line-height: 24px;
@@ -51,11 +40,8 @@
   text-decoration: none;
   font-weight: 400;
   text-align: center;
-  width: 624px;
-  height: 21px;
 }
-
-.services-container_29-125 {
+.services-container {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -63,67 +49,15 @@
   align-items: flex-start;
   gap: 17px;
   box-sizing: border-box;
+  width: 75%;
 }
-.services_29-126 {
+.services-flex {
   padding: 10px 0px 10px 0px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   flex-wrap: nowrap;
-  align-items: center;
   gap: 11px;
   box-sizing: border-box;
-  width: 755px;
-}
-.service_29-302 {
-  position: relative;
-  height: 88px;
-  width: -webkit-fill-available;
-}
-
-.service_29-316 {
-  position: relative;
-  width: 755px;
-  height: 88px;
-}
-
-.service_29-344 {
-  position: relative;
-  width: 755px;
-  height: 88px;
-}
-
-.service_29-358 {
-  position: relative;
-  width: 755px;
-  height: 88px;
-}
-
-.service_29-372 {
-  position: relative;
-  width: 755px;
-  height: 88px;
-}
-
-.paragraph_29-247 {
-  position: relative;
-  box-sizing: border-box;
-  width: 755px;
-  height: 20px;
-}
-.text---los-tiempos-pueden-variar-seg-n-tipo-de-cabello--consulta-si-necesitas-un-servicio-personalizado-_29-248 {
-  top: 0px;
-  left: 0px;
-  position: absolute;
-  display: flex;
-  color: #737373;
-  font-size: 11.899999618530273px;
-  font-family: Inter;
-  line-height: 20px;
-  letter-spacing: 0%;
-  text-decoration: none;
-  font-weight: 400;
-  text-align: left;
-  width: 589px;
-  height: 19px;
+  width: 95%;
 }
