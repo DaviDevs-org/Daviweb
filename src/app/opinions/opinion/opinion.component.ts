@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
-import {StarComponent} from '../star/star.component';
+import { StarComponent } from "./star/star.component";
+
 @Component({
   selector: "app-opinion",
   templateUrl: "./opinion.component.html",
@@ -9,4 +10,6 @@ import {StarComponent} from '../star/star.component';
     StarComponent
   ]
 })
-export class OpinionComponent {}
+export class OpinionComponent {
+  
+}

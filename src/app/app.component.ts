@@ -6,12 +6,16 @@ import {OpinionsComponent} from './opinions/opinions.component';
 import {FaqComponent} from './faq/faq.component';
 import {FooterComponent} from './footer/footer.component';
 import { PhotoOfTheDayComponent } from './photo-of-the-day/photo-of-the-day.component';
+import { FeaturedCutsComponent } from './featured-cuts/featured-cuts.component';
+import { AppointmentComponent } from './appointment/appointment.component';
+import { ServicesComponent } from './services/services.component';
 
 @Component({
   selector: 'app-root',
   imports: 
   [HeaderComponent, AboutUsComponent, LocationAndContactComponent, 
-  OpinionsComponent, FaqComponent, FooterComponent, PhotoOfTheDayComponent],
+  OpinionsComponent, FaqComponent, FooterComponent, PhotoOfTheDayComponent,
+  FeaturedCutsComponent, AppointmentComponent, ServicesComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
