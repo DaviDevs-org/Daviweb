@@ -11,19 +11,19 @@
     <div class="anchors">
       <div class="anchor" id="location">
         <i class="bi bi-geo-alt-fill"></i>
-        <span class="anchor-text">Ubicación</span>
+        <a class="anchor-text" href="#" (click)="scrollToSection('location-and-contact'); $event.preventDefault()">Ubicación</a>
       </div>
-      <div class="anchor" id="services">
+      <div class="anchor" id="service">
         <i class="bi bi-clock-fill"></i>
-        <span class="anchor-text">Servicios</span>
+        <a class="anchor-text" href="#" (click)="scrollToSection('services'); $event.preventDefault()">Servicios</a>
       </div>
-      <div class="anchor" id="contact">
-        <i class="bi bi-telephone-fill"></i>
-        <span class="anchor-text">Contacto</span>
+      <div class="anchor" id="appointment">
+        <i class="bi bi-calendar-fill"></i>
+        <a class="anchor-text" href="#" (click)="scrollToSection('appointments'); $event.preventDefault()">Cita</a>
       </div>
       <div class="status">
         <div class="status-container">
-          <span class="status-text">Cerrado</span>
+          <span class="status-text" >Cerrado</span>
         </div>
       </div>
     </div>

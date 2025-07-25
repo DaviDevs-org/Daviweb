@@ -44,13 +44,14 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  cursor: pointer;
 }
 
 .anchor-text {
   font-size: 14px;
   font-family: Inter, sans-serif;
   color: #404040;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .status {
