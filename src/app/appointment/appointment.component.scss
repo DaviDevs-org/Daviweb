@@ -85,7 +85,7 @@
   z-index: 2;
   flex-shrink: 0;
   font-size: 16px;
-  
+
   &.textarea-icon {
     top: 16px;
     transform: none;
@@ -105,17 +105,17 @@
   border-radius: 8px;
   transition: all 0.3s ease;
   box-sizing: border-box;
-  
+
   &::placeholder {
     color: #95a5a6;
   }
-  
+
   &:focus {
     outline: none;
     border-color: #3498db;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
   }
-  
+
   &:hover {
     border-color: #95a5a6;
   }
@@ -145,17 +145,17 @@
   resize: vertical;
   min-height: 80px;
   box-sizing: border-box;
-  
+
   &::placeholder {
     color: #95a5a6;
   }
-  
+
   &:focus {
     outline: none;
     border-color: #3498db;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
   }
-  
+
   &:hover {
     border-color: #95a5a6;
   }
@@ -178,22 +178,22 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(52, 152, 219, 0.3);
-  
+
   &:hover:not(.disabled) {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
     background: linear-gradient(135deg, #2980b9, #3498db);
   }
-  
+
   &:active:not(.disabled) {
     transform: translateY(0);
   }
-  
+
   &.disabled {
     background: #7f8c8d;
     cursor: not-allowed;
     box-shadow: none;
-    
+
     &:hover {
       transform: none;
     }
@@ -207,7 +207,7 @@
   font-weight: 400;
   color: #7f8c8d;
   line-height: 1.5;
-  
+
   strong {
     font-weight: 600;
     color: #34495e;
@@ -219,28 +219,28 @@
   .appointment-section {
     padding: 32px 24px;
   }
-  
+
   .appointment-title {
     font-size: 28px;
   }
-  
+
   .appointment-description {
     font-size: 15px;
   }
-  
+
   .appointment-form {
     padding: 24px;
   }
-  
+
   .form-grid {
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  
+
   .form-column {
     gap: 20px;
   }
-  
+
   .form-input,
   .form-select,
   .form-textarea {
@@ -252,20 +252,28 @@
   .appointment-section {
     padding: 24px 16px;
   }
-  
+
   .appointment-form {
     padding: 20px;
   }
-  
+
   .form-grid {
     gap: 20px;
   }
-  
+
   .form-column {
     gap: 16px;
   }
-  
+
   .appointment-title {
     font-size: 24px;
   }
+}
+.error-message {
+  color: #e63946;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: block;
+  font-weight: 600;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }

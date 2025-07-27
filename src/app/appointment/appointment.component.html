@@ -6,7 +6,7 @@
     </p>
   </div>
 
-  <div class="appointment-form">
+  <form [formGroup]="appointmentForm" (ngSubmit)="registerAppointment()" class="appointment-form">
     <div class="form-grid">
       <!-- Columna izquierda -->
       <div class="form-column">
@@ -14,24 +14,57 @@
           <label class="form-label">Nombre completo</label>
           <div class="input-wrapper">
             <i class="bi bi-person input-icon"></i>
-            <input type="text" class="form-input" placeholder="Tu nombre completo">
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Tu nombre completo"
+              formControlName="appointmentName"
+            />
           </div>
+          <small class="error-message" *ngIf="hasError('appointmentName', 'required')">
+            El nombre es obligatorio.
+          </small>
+          <small class="error-message" *ngIf="hasError('appointmentName', 'pattern')">
+            El nombre solo puede contener letras y espacios.
+          </small>
         </div>
 
         <div class="form-group">
           <label class="form-label">Teléfono</label>
           <div class="input-wrapper">
             <i class="bi bi-telephone input-icon"></i>
-            <input type="tel" class="form-input" placeholder="Tu número de teléfono">
+            <input
+              type="tel"
+              class="form-input"
+              placeholder="Tu número de teléfono"
+              formControlName="appointmentPhone"
+            />
           </div>
+          <small class="error-message" *ngIf="hasError('appointmentPhone', 'required')">
+            El teléfono es obligatorio.
+          </small>
+          <small class="error-message" *ngIf="hasError('appointmentPhone', 'pattern')">
+            El teléfono debe tener 9 dígitos.
+          </small>
         </div>
 
         <div class="form-group">
           <label class="form-label">Correo electrónico</label>
           <div class="input-wrapper">
             <i class="bi bi-envelope input-icon"></i>
-            <input type="email" class="form-input" placeholder="tu@email.com">
+            <input
+              type="email"
+              class="form-input"
+              placeholder="tu@email.com"
+              formControlName="appointmentMail"
+            />
           </div>
+          <small class="error-message" *ngIf="hasError('appointmentMail', 'required')">
+            El correo es obligatorio.
+          </small>
+          <small class="error-message" *ngIf="hasError('appointmentMail', 'email')">
+            Introduce un correo válido.
+          </small>
         </div>
       </div>
 
@@ -41,41 +74,60 @@
           <label class="form-label">Fecha deseada</label>
           <div class="input-wrapper">
             <i class="bi bi-calendar3 input-icon"></i>
-            <input type="date" class="form-input">
+            <input
+              type="date"
+              class="form-input"
+              formControlName="appointmentDate"
+            />
           </div>
+          <small class="error-message" *ngIf="hasError('appointmentDate', 'required')">
+            La fecha es obligatoria.
+          </small>
+          <small class="error-message" *ngIf="hasError('appointmentDate', 'invalidDate')">
+            La fecha debe ser hoy o una fecha futura.
+          </small>
+
         </div>
 
         <div class="form-group">
           <label class="form-label">Servicio</label>
           <div class="input-wrapper">
             <i class="bi bi-scissors input-icon"></i>
-            <select class="form-select">
+            <select class="form-select" formControlName="appointmentService">
               <option value="">Seleccionar servicio</option>
               <option value="corte-clasico">Corte Clásico</option>
               <option value="barba">Arreglo de Barba</option>
               <option value="completo">Corte + Barba</option>
             </select>
           </div>
+          <small class="error-message" *ngIf="hasError('appointmentService', 'required')">
+            Debes seleccionar un servicio.
+          </small>
         </div>
 
         <div class="form-group">
           <label class="form-label">Comentarios adicionales</label>
           <div class="input-wrapper">
             <i class="bi bi-chat-text input-icon textarea-icon"></i>
-            <textarea class="form-textarea" placeholder="Comentarios o peticiones especiales..." rows="3"></textarea>
+            <textarea
+              class="form-textarea"
+              placeholder="Comentarios o peticiones especiales..."
+              rows="3"
+              formControlName="appointmentCommentaries"
+            ></textarea>
           </div>
         </div>
       </div>
     </div>
 
     <div class="form-actions">
-      <button type="button" class="submit-button disabled">
+      <button type="submit" class="submit-button">
         Enviar solicitud de cita
       </button>
       <p class="form-disclaimer">
-        Estamos adaptándonos para ofrecerte la mejor experiencia de reserva online. Mientras tanto, 
+        Estamos adaptándonos para ofrecerte la mejor experiencia de reserva online. Mientras tanto,
         <strong>llámanos o envíanos un WhatsApp al +34 600 000 000</strong>
       </p>
     </div>
-  </div>
+  </form>
 </div>
