@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthenticationService } from '../authentication.service';
+import { Router } from '@angular/router';
+import { Firestore} from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-login',
@@ -10,6 +13,9 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
+  private auth = inject(AuthenticationService)
+  private router = inject(Router);
+  private firestore = inject(Firestore)
   loginData = {
     email: '',
     password: ''
@@ -18,16 +24,18 @@ export class LoginComponent {
   showPassword = false;
   isLoading = false;
 
-  onSubmit() {
+  async onSubmit() {
     if (this.loginData.email && this.loginData.password) {
       this.isLoading = true;
-      
-      // Simular llamada al backend
-      setTimeout(() => {
-        console.log('Login attempt:', this.loginData);
-        this.isLoading = false;
-        // Aquí implementarías la lógica real de autenticación
-      }, 2000);
+      const response = await this.auth.login(this.loginData.email, this.loginData.password);
+      if (response.success){
+        this.router.navigate(['admin'])
+      }
+      else{
+        console.log(response.error)
+        alert(response.error)
+      }
+      this.isLoading = false
     }
   }
 
@@ -37,6 +45,7 @@ export class LoginComponent {
 
   onForgotPassword() {
     console.log('Recuperar contraseña');
-    // Implementar lógica de recuperación de contraseña
+    
   }
+  
 }

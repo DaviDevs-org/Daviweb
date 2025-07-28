@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "Daviweb": {
+    "daviweb": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -89,10 +89,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "Daviweb:build:production"
+              "buildTarget": "daviweb:build:production"
             },
             "development": {
-              "buildTarget": "Daviweb:build:development"
+              "buildTarget": "daviweb:build:development"
             }
           },
           "defaultConfiguration": "development"

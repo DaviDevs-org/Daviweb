@@ -1,7 +1,7 @@
 <div class="login-container">
   <div class="login-card">
     <div class="login-header">
-      <div class="scissors-icon">✂️</div>
+      <div class="scissors-icon"><i class="bi bi-scissors"></i></div>
       <h2>PELUQUERÍA MODERNA</h2>
       <p>Acceso al sistema</p>
     </div>
@@ -21,7 +21,7 @@
             class="form-input"
             [class.error]="loginForm.submitted && !loginData.email"
           >
-          <span class="input-icon">👤</span>
+          <span class="input-icon"><i class="bi bi-person-fill"></i></span>
         </div>
         <div class="error-message" *ngIf="loginForm.submitted && !loginData.email">
           El email es requerido
@@ -46,7 +46,8 @@
             class="password-toggle"
             (click)="togglePasswordVisibility()"
           >
-            {{ showPassword ? '🙈' : '👁️' }}
+            <i *ngIf="showPassword" class="bi bi-eye-fill"></i>
+            <i *ngIf="!showPassword" class="bi bi-eye-slash-fill"></i>
           </button>
         </div>
         <div class="error-message" *ngIf="loginForm.submitted && !loginData.password">
