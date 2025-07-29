@@ -1,0 +1,64 @@
+<section class="content-section">
+    <div class="section-header">
+        <h2>
+            <i class="bi bi-scissors"></i>
+            Servicios y Precios
+        </h2>
+        <p>Gestiona los servicios ofrecidos y sus precios</p>
+    </div>
+
+    <!-- Añadir nuevo servicio -->
+    <div class="add-service-section">
+        <h3>Añadir Nuevo Servicio</h3>
+        <form class="service-form" (ngSubmit)="addService()">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nombre del Servicio</label>
+                    <input type="text" [(ngModel)]="newService.name" name="serviceName"
+                        placeholder="Ej: Corte de Pelo Masculino" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Precio</label>
+                    <div class="price-input-group">
+                        <input type="number" [(ngModel)]="newService.price" name="servicePrice" placeholder="25"
+                            class="form-input price-input">
+                        <span class="currency">€</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea [(ngModel)]="newService.description" name="serviceDescription"
+                    placeholder="Descripción del servicio..." class="form-textarea"></textarea>
+            </div>
+            <button type="submit" class="add-service-btn">
+                <i class="bi bi-plus-circle"></i>
+                Añadir Servicio
+            </button>
+        </form>
+    </div>
+
+    <!-- Lista de servicios actuales -->
+    <div class="services-list">
+        <h3>Servicios Actuales</h3>
+        <div class="services-grid">
+            <div class="service-card" *ngFor="let service of services; let i = index">
+                <div class="service-header">
+                    <h4>{{ service.name }}</h4>
+                    <div class="service-price">{{ service.price }}€</div>
+                </div>
+                <p class="service-description">{{ service.description }}</p>
+                <div class="service-actions">
+                    <button class="action-btn edit-btn" (click)="editService(i)">
+                        <i class="bi bi-pencil"></i>
+                        Editar
+                    </button>
+                    <button class="action-btn delete-btn" (click)="deleteService(i)">
+                        <i class="bi bi-trash"></i>
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

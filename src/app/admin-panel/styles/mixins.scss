@@ -1,0 +1,57 @@
+@mixin button-style($bg-color, $hover-color: null) {
+    background: linear-gradient(135deg, $bg-color, darken($bg-color, 10%));
+    color: $white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+
+    @if $hover-color {
+        &:hover:not(:disabled) {
+            background: linear-gradient(135deg, $hover-color, darken($hover-color, 10%));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba($hover-color, 0.3);
+        }
+    }
+
+    @else {
+        &:hover:not(:disabled) {
+            background: linear-gradient(135deg, darken($bg-color, 5%), darken($bg-color, 15%));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba($bg-color, 0.3);
+        }
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+@mixin card-style {
+    background: $white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+@mixin form-input-style {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid $border-color;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+
+    &:focus {
+        outline: none;
+        border-color: $primary-gold;
+        box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+    }
+}

@@ -1,0 +1,84 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+@import "../../styles/responsive";
+
+.admin-header {
+    background: linear-gradient(135deg, $primary-gold, $secondary-gold);
+    color: $white;
+    padding: 20px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        @include mobile {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+    }
+
+    .brand-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+
+        @include mobile {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .scissors-icon {
+            font-size: 2rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .admin-badge {
+            background: rgba($white, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+    }
+
+    .user-section {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        .welcome-text {
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: rgba($white, 0.1);
+            border: 2px solid rgba($white, 0.3);
+            color: $white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            &:hover {
+                background: rgba($white, 0.2);
+                border-color: rgba($white, 0.5);
+            }
+        }
+    }
+}

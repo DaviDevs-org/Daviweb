@@ -1,0 +1,106 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+@import '../../styles/responsive';
+
+.info-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 30px;
+
+    @include mobile {
+        grid-template-columns: 1fr;
+    }
+}
+
+.info-card {
+    @include card-style;
+
+    h3 {
+        color: $dark-brown;
+        font-size: 1.5rem;
+        margin: 0 0 20px 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        i {
+            color: $primary-gold;
+        }
+    }
+}
+
+.schedule-grid {
+    margin-bottom: 20px;
+}
+
+.schedule-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba($border-color, 0.5);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    @include mobile {
+        grid-template-columns: 1fr;
+        gap: 10px;
+
+        .day-label {
+            text-align: center;
+            padding-bottom: 5px;
+        }
+    }
+
+    .day-label {
+        font-weight: 600;
+        color: $dark-brown;
+    }
+
+    .time-inputs {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+
+        .time-input {
+            padding: 8px 12px;
+            border: 2px solid $border-color;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+
+            &:focus {
+                outline: none;
+                border-color: $primary-gold;
+                box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+            }
+
+            &:disabled {
+                background: $light-gray;
+                opacity: 0.6;
+            }
+        }
+
+        .time-separator {
+            color: $text-gray;
+            font-weight: 600;
+        }
+
+        .closed-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: $text-gray;
+            font-size: 0.9rem;
+            cursor: pointer;
+
+            input[type="checkbox"] {
+                cursor: pointer;
+            }
+        }
+    }
+}
