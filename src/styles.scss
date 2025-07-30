@@ -9,3 +9,119 @@ html{
 }
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+//ANGULAR MATERIALS CALENDAR START
+
+mat-calendar {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  color: #333;
+  background: rgba(97, 53, 35, 0.6);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+  padding: 8px 12px 16px 12px;
+  user-select: none;
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+.mat-calendar-header {
+  font-size: 1rem;
+  color: #444;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.mat-calendar-body {
+  padding: 6px 0;
+}
+
+.mat-calendar-body-table {
+  border-collapse: separate !important;
+  border-spacing: 6px 6px;
+}
+
+.mat-calendar-body-cell {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  box-sizing: border-box;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.mat-calendar-body-cell-content {
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+  line-height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.mat-calendar-body-cell:hover:not(.mat-calendar-body-disabled):not(.mat-calendar-body-selected) .mat-calendar-body-cell-content {
+  background-color: #f0f8ff;
+  cursor: pointer;
+}
+
+.day-available .mat-calendar-body-cell-content {
+  background-color: rgba(255, 193, 79, 0.71) !important;
+  color: white !important;
+  font-weight: 700;
+  border-radius: 40% !important;
+  box-shadow: 0 0 6px 2px rgba(103, 95, 69, 0.37);
+}
+
+.day-available .mat-calendar-body-cell-content:hover {
+  background-color: #a3d97f !important;
+  color: #1a3a09 !important;
+}
+
+.mat-calendar-body-selected .mat-calendar-body-cell-content {
+  background-color: #5a9bd8 !important;
+  color: white !important;
+  font-weight: 700;
+  box-shadow: 0 0 6px 2px rgba(90, 155, 216, 0.6);
+}
+
+.mat-calendar-body-today .mat-calendar-body-cell-content {
+  border: 2px solid #76baff;
+}
+
+.mat-calendar-body-disabled .mat-calendar-body-cell-content {
+  color: #ccc;
+  cursor: default;
+}
+
+.day-unavailable .mat-calendar-body-cell-content {
+  background-color: #6b4c3b !important; /* marrón oscuro */
+  color: #d9cfc7 !important;           /* texto clarito para contraste */
+  font-weight: 600;
+  border-radius: 40% !important;
+  box-shadow: none !important;
+  cursor: default;
+}
+
+.day-unavailable .mat-calendar-body-cell-content:hover {
+  background-color: #5a3d2a !important;
+  color: #cfc2b9 !important;
+  cursor: default;
+}
+
+.mat-calendar-body-label {
+  color: transparent !important;       // oculta el texto del mes
+  font-size: 0 !important;             // elimina cualquier espacio por fuente
+  line-height: 0 !important;           // compacta altura
+  padding: 0 !important;               // sin espacio vertical
+  height: 0 !important;                // sin altura
+  border: none !important;            // por si tiene
+  background: transparent !important; // sin fondo
+}
+
+
+
+//ANGULAR MATERIALS CALENDAR FINAL

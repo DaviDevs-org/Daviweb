@@ -8,7 +8,7 @@ import {DatePipe, NgIf} from '@angular/common';
   imports: [
     CalendarSelectorComponent,
     DatePipe,
-    NgIf
+    NgIf,
   ],
   templateUrl: './appointment.component.html',
   styleUrls: ['./appointment.component.scss']
