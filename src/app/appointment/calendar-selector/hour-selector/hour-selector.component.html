@@ -1,1 +1,16 @@
-<p>hour-selector works!</p>
+<div class="hour-selector-wrapper">
+  <h3>Horas disponibles para {{ date | date:'fullDate' }}</h3>
+
+  <ul class="hours-list">
+    <li *ngFor="let hour of hours"
+        (click)="selectHour(hour)"
+        [class.selected]="hour === selectedHour">
+      {{ hour }}
+    </li>
+  </ul>
+
+  <div class="buttons">
+    <button (click)="goBack()">Volver</button>
+    <button [disabled]="!selectedHour" (click)="confirm()">Confirmar</button>
+  </div>
+</div>

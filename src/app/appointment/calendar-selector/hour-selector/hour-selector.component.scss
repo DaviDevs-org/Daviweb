@@ -1,0 +1,121 @@
+.hour-selector-wrapper {
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  color: #613523;
+
+  /* Ocupar todo el ancho y alto disponible */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.hours-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+
+  /* Cambiado a 100% para ocupar todo el ancho disponible */
+  width: 100%;
+
+  /* Altura máxima para que no se pase del contenedor */
+  max-height: calc(100vh - 250px); /* ajusta según tu layout */
+
+  overflow-y: auto;
+
+  border-radius: 12px;
+  background: rgba(110, 77, 41, 0.94);
+
+  /* Ocultar scrollbar para chrome y firefox */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hours-list::-webkit-scrollbar {
+  display: none; /* Chrome, Safari y Opera */
+}
+
+.hours-list li {
+  padding: 12px 0;
+  cursor: pointer;
+  border-bottom: 1px solid #d4b258;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+
+.hours-list li:last-child {
+  border-bottom: none;
+}
+
+.hours-list li:hover {
+  background-color: #e8d69a;
+}
+
+.hours-list li.selected {
+  background-color: #d4b258;
+  color: white;
+  font-weight: 700;
+}
+
+.buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.buttons button {
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 10px;
+  border: none;
+  background-color: #d4b258;
+  color: #613523;
+  transition: background-color 0.3s ease;
+  flex: 1;
+}
+
+.buttons button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+.buttons button:hover:not(:disabled) {
+  background-color: #b8953a;
+}
+
+.hours-list li {
+  padding: 14px 0;           /* Más alto para que se note más */
+  cursor: pointer;
+  border-bottom: 1px solid rgba(212, 178, 88, 0.3); /* línea más suave */
+  border-radius: 8px;       /* redondeamos esquinas */
+  margin: 6px 10px;          /* margen para separar un poco las casillas */
+  font-size: 1.1rem;         /* letra un poco más grande */
+  font-weight: 600;          /* un pelín más gordo */
+  background: rgba(241, 215, 143, 0.98);
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.35); /* sombra interna suave */
+  transition:
+    background-color 0.35s ease,
+    box-shadow 0.35s ease,
+    color 0.35s ease;
+  user-select: none;
+}
+
+.hours-list li:hover {
+  background-color: #e8d69a;
+  box-shadow: 0 0 12px rgba(212, 178, 88, 0.5);
+  color: #4a351e;
+}
+
+.hours-list li.selected {
+  background-color: #d4b258;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 0 12px 4px rgba(213, 160, 50, 0.4);
+  border-radius: 12px;
+}

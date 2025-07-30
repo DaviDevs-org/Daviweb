@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {HourSelectorComponent} from './hour-selector/hour-selector.component';
 
 @Component({
   selector: 'app-calendar-selector',
@@ -9,7 +10,8 @@ import {FormsModule} from '@angular/forms';
     NgForOf,
     FormsModule,
     NgIf,
-    NgClass
+    NgClass,
+    HourSelectorComponent
   ],
   styleUrls: ['./calendar-selector.component.scss']
 })
@@ -29,6 +31,8 @@ export class CalendarSelectorComponent {
   calendarMatrix: (Date | null)[][] = [];
 
   selectedDate: Date | null = null;
+
+  showHours = false;  // Estado para alternar vista calendario / horas
 
   constructor() {
     const startYear = this.selectedYear - 10;
@@ -88,8 +92,6 @@ export class CalendarSelectorComponent {
   }
 
   isAvailable(date: Date | null): boolean {
-    // Aquí puedes meter tu lógica para deshabilitar fechas
-    // Por ejemplo, no permitir días pasados
     if (!date) return false;
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -100,6 +102,7 @@ export class CalendarSelectorComponent {
     if (!date || !this.isAvailable(date)) return;
     this.selectedDate = date;
     this.dateSelected.emit(date);
+    this.showHours = true;  // Cambiamos a vista horas
   }
 
   prevMonth() {
@@ -120,6 +123,11 @@ export class CalendarSelectorComponent {
       this.selectedMonth++;
     }
     this.onDateChange();
+  }
+
+  backToCalendar() {
+    this.showHours = false;
+    this.selectedDate = null;
   }
 
 }
