@@ -1,10 +1,10 @@
-@import "../../styles/variables";
-@import "../../styles/mixins";
-@import "../../styles/responsive";
+@use "../../styles/variables";
+@use "../../styles/mixins";
+@use "../../styles/responsive";
 
 .admin-header {
-    background: linear-gradient(135deg, $primary-gold, $secondary-gold);
-    color: $white;
+    background: linear-gradient(135deg, variables.$primary-gold, variables.$secondary-gold);
+    color: variables.$white;
     padding: 20px 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
@@ -16,7 +16,7 @@
         justify-content: space-between;
         align-items: center;
 
-        @include mobile {
+        @include responsive.mobile {
             flex-direction: column;
             gap: 15px;
             text-align: center;
@@ -28,7 +28,7 @@
         align-items: center;
         gap: 15px;
 
-        @include mobile {
+        @include responsive.mobile {
             flex-direction: column;
             gap: 10px;
         }
@@ -45,7 +45,7 @@
         }
 
         .admin-badge {
-            background: rgba($white, 0.2);
+            background: rgba(variables.$white, 0.2);
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
@@ -63,9 +63,9 @@
         }
 
         .logout-btn {
-            background: rgba($white, 0.1);
-            border: 2px solid rgba($white, 0.3);
-            color: $white;
+            background: rgba(variables.$white, 0.1);
+            border: 2px solid rgba(variables.$white, 0.3);
+            color: variables.$white;
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
@@ -76,8 +76,8 @@
             gap: 8px;
 
             &:hover {
-                background: rgba($white, 0.2);
-                border-color: rgba($white, 0.5);
+                background: rgba(variables.$white, 0.2);
+                border-color: rgba(variables.$white, 0.5);
             }
         }
     }

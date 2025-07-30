@@ -1,6 +1,6 @@
-@import '../../styles/variables';
-@import '../../styles/mixins';
-@import '../../styles/responsive';
+@use '../../styles/variables';
+@use '../../styles/mixins';
+@use '../../styles/responsive';
 
 .stats-grid {
     display: grid;
@@ -8,13 +8,13 @@
     gap: 20px;
     margin-bottom: 40px;
 
-    @include mobile {
+    @include responsive.mobile {
         grid-template-columns: 1fr;
     }
 }
 
 .stat-card {
-    background: $white;
+    background: variables.$white;
     border-radius: 12px;
     padding: 25px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -28,15 +28,15 @@
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
-    @include mobile {
+    @include responsive.mobile {
         flex-direction: column;
         text-align: center;
         gap: 15px;
     }
 
     .stat-icon {
-        background: linear-gradient(135deg, $primary-gold, $secondary-gold);
-        color: $white;
+        background: linear-gradient(135deg, variables.$primary-gold, variables.$secondary-gold);
+        color: variables.$white;
         width: 60px;
         height: 60px;
         border-radius: 12px;
@@ -52,7 +52,7 @@
 
         h3 {
             margin: 0 0 8px 0;
-            color: $dark-brown;
+            color: variables.$dark-brown;
             font-size: 0.9rem;
             font-weight: 600;
             text-transform: uppercase;
@@ -62,11 +62,11 @@
         .stat-number {
             font-size: 2rem;
             font-weight: 700;
-            color: $dark-brown;
+            color: variables.$dark-brown;
             margin: 0 0 5px 0;
             line-height: 1;
 
-            @include mobile {
+            @include responsive.mobile {
                 font-size: 1.5rem;
             }
         }
@@ -76,37 +76,37 @@
             font-weight: 500;
 
             &.positive {
-                color: $success-green;
+                color: variables.$success-green;
             }
 
             &.negative {
-                color: $danger-red;
+                color: variables.$danger-red;
             }
 
             &.neutral {
-                color: $text-gray;
+                color: variables.$text-gray;
             }
         }
     }
 }
 
 .chart-section {
-    @include card-style;
+    @include mixins.card-style;
 
     h3 {
-        color: $dark-brown;
+        color: variables.$dark-brown;
         font-size: 1.5rem;
         margin: 0 0 20px 0;
         font-weight: 600;
     }
 
     .chart-placeholder {
-        background: rgba($primary-gold, 0.05);
-        border: 2px dashed $primary-gold;
+        background: rgba(variables.$primary-gold, 0.05);
+        border: 2px dashed variables.$primary-gold;
         border-radius: 8px;
         padding: 60px 20px;
         text-align: center;
-        color: $text-gray;
+        color: variables.$text-gray;
 
         p {
             margin: 0 0 5px 0;

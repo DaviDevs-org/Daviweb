@@ -1,9 +1,9 @@
-@import '../../styles/variables';
-@import '../../styles/responsive';
+@use '../../styles/variables';
+@use '../../styles/responsive';
 
 .admin-nav {
-    background: $white;
-    border-bottom: 1px solid $border-color;
+    background: variables.$white;
+    border-bottom: 1px solid variables.$border-color;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -15,7 +15,7 @@
         display: flex;
         gap: 0;
 
-        @include mobile {
+        @include responsive.mobile {
             flex-wrap: wrap;
             justify-content: center;
         }
@@ -27,14 +27,14 @@
         padding: 15px 25px;
         cursor: pointer;
         font-weight: 500;
-        color: $text-gray;
+        color: variables.$text-gray;
         border-bottom: 3px solid transparent;
         transition: all 0.3s ease;
         display: flex;
         align-items: center;
         gap: 8px;
 
-        @include mobile {
+        @include responsive.mobile {
             padding: 12px 20px;
             font-size: 0.9rem;
         }
@@ -44,14 +44,14 @@
         }
 
         &:hover {
-            color: $primary-gold;
-            background: rgba($primary-gold, 0.05);
+            color: variables.$primary-gold;
+            background: rgba(variables.$primary-gold, 0.05);
         }
 
         &.active {
-            color: $primary-gold;
-            border-bottom-color: $primary-gold;
-            background: rgba($primary-gold, 0.05);
+            color: variables.$primary-gold;
+            border-bottom-color: variables.$primary-gold;
+            background: rgba(variables.$primary-gold, 0.05);
         }
     }
 }

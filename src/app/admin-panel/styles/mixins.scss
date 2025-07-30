@@ -1,5 +1,8 @@
+@use "sass:color";
+@use "variables" as *;
+
 @mixin button-style($bg-color, $hover-color: null) {
-    background: linear-gradient(135deg, $bg-color, darken($bg-color, 10%));
+    background: linear-gradient(135deg, $bg-color, color.adjust($bg-color, $lightness: -10%, $space: hsl));
     color: $white;
     border: none;
     padding: 12px 24px;
@@ -13,7 +16,7 @@
 
     @if $hover-color {
         &:hover:not(:disabled) {
-            background: linear-gradient(135deg, $hover-color, darken($hover-color, 10%));
+            background: linear-gradient(135deg, $hover-color, color.adjust($hover-color, $lightness: -10%, $space: hsl));
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba($hover-color, 0.3);
         }
@@ -21,7 +24,7 @@
 
     @else {
         &:hover:not(:disabled) {
-            background: linear-gradient(135deg, darken($bg-color, 5%), darken($bg-color, 15%));
+            background: linear-gradient(135deg, color.adjust($bg-color, $lightness: -5%, $space: hsl), color.adjust($bg-color, $lightness: -15%, $space: hsl));
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba($bg-color, 0.3);
         }
