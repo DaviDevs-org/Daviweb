@@ -1,7 +1,7 @@
-<h2>Reserva tu cita</h2>
+<h2>Reservar cita</h2>
 
-<app-calendar-selector (daySelected)="onDaySelected($event)"></app-calendar-selector>
+<app-calendar-selector (dateSelected)="onDateSelected($event)"></app-calendar-selector>
 
-<div *ngIf="selectedDay">
-  <p>Has seleccionado: {{ selectedDay | date: 'fullDate' }}</p>
-</div>
+<p *ngIf="selectedDate">
+  Has elegido el día: {{ selectedDate | date: 'fullDate' }}
+</p>

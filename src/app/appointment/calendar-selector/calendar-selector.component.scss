@@ -1,0 +1,247 @@
+/* Contenedor del calendario */
+.calendar-wrapper {
+  max-width: 700px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  user-select: none;
+
+  background: rgba(97, 53, 35, 0.6);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+  padding: 16px 20px 24px 20px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabecera */
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+/* Botones flecha */
+.arrow-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #f3e1b0;
+  padding: 6px 10px;
+  user-select: none;
+  transition: color 0.3s ease;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.arrow-btn:hover {
+  color: #d4b258;
+}
+
+/* Botón mes y año */
+.month-year-btn {
+  background: #f3e1b0;
+  border: none;
+  color: #613523;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  min-width: 140px;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.month-year-btn .arrow {
+  transition: transform 0.3s ease;
+  color: #613523;
+}
+
+.month-year-btn .arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Contenedor del dropdown del selector mes/año */
+.picker-dropdown {
+  margin: 12px auto;
+  background: rgba(243, 225, 176, 0.12);
+  border: 1px solid rgba(212, 178, 88, 0.3); /* más visible */
+  padding: 10px 14px;
+  border-radius: 20px; /* más curvo */
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(6px);
+}
+
+/* Estilo select (mes y año) */
+.picker-dropdown select {
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: #f3e1b0;
+  border: 1.8px solid #d4b258;
+  border-radius: 14px;
+  padding: 8px 38px 8px 14px; /* espacio para flecha */
+  font-size: 15px;
+  color: #613523;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+  outline: none;
+  width: 100%;
+  max-width: 140px;
+  user-select: none;
+  text-align-last: center; /* Centra texto en Firefox */
+}
+
+/* Flecha custom para el select */
+.picker-dropdown select::-ms-expand {
+  display: none; /* Quitar flecha en IE */
+}
+.picker-dropdown select::after,
+.picker-dropdown select::-webkit-calendar-picker-indicator {
+  display: none;
+}
+.picker-dropdown select::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 8px solid #613523;
+  transform: translateY(-50%);
+}
+
+/* Hover y focus */
+.picker-dropdown select:hover {
+  background-color: #e8d69a;
+  border-color: #b8953a;
+  color: #4a2f1a;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.15);
+}
+
+.picker-dropdown select:focus {
+  box-shadow: 0 0 0 3px rgba(212, 178, 88, 0.7);
+  border-color: #d4b258;
+}
+
+/* Quitar scroll de la lista de años en Firefox y Chrome */
+.picker-dropdown select::-webkit-scrollbar {
+  background: transparent;
+}
+.picker-dropdown select {
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Tabla calendario */
+.calendar-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 6px;
+  border-radius: 12px;
+  overflow: hidden;
+  user-select: none;
+  background: rgba(243, 225, 176, 0.15);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+  min-height: 500px;
+  max-height: 80vh;
+}
+
+.calendar-table th {
+  font-weight: 600;
+  color: #613523;
+  border-bottom: none;
+  padding-bottom: 12px;
+  text-align: center;
+}
+
+.calendar-table th,
+.calendar-table td {
+  width: 14.28%;
+  padding: 8px 0;
+  border-radius: 25%;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+}
+
+.calendar-table td {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: background-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease, border-radius 0.4s ease;
+}
+
+.calendar-table td.disabled {
+  color: #ccc;
+  cursor: default;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.calendar-table td.selected {
+  background-color: rgba(97, 53, 35, 0.6);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 0 12px 4px rgba(213, 160, 50, 0.28);
+  border-radius: 20%;
+  transition: background-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease, border-radius 0.4s ease;
+}
+
+.day-available {
+  background-color: #f9f4d7 !important;
+  color: #6b4c3b !important;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 12px;
+
+  transform: scale(1);
+  will-change: transform;
+
+  transition:
+    transform 0.35s ease-in-out,
+    background-color 0.35s ease-in-out,
+    color 0.35s ease-in-out,
+    box-shadow 0.35s ease-in-out;
+}
+
+.day-available:hover {
+  background-color: #e6dcab !important;
+  color: #4a351e !important;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+}
+
+.day-unavailable {
+  background-color: #6b4c3b !important;
+  color: #d9cfc7 !important;
+  font-weight: 600;
+  cursor: default;
+  box-shadow: none !important;
+  border-radius: 12px;
+}
+
+.day-unavailable:hover {
+  background-color: #5a3f2a !important;
+  color: #cfc2b9 !important;
+  cursor: default;
+}

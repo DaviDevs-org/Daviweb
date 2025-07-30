@@ -1,53 +1,125 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import {NgClass, NgForOf, NgIf} from '@angular/common';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-calendar-selector',
-  standalone: true,
-  imports: [MatDatepickerModule, MatNativeDateModule],
   templateUrl: './calendar-selector.component.html',
+  imports: [
+    NgForOf,
+    FormsModule,
+    NgIf,
+    NgClass
+  ],
   styleUrls: ['./calendar-selector.component.scss']
 })
 export class CalendarSelectorComponent {
+
+  @Output() dateSelected = new EventEmitter<Date>();
+
+  monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+  years: number[] = [];
+  selectedYear = new Date().getFullYear();
+  selectedMonth = new Date().getMonth();
+  showPicker = false;
+
+  calendarMatrix: (Date | null)[][] = [];
+
   selectedDate: Date | null = null;
 
-  @Output() daySelected = new EventEmitter<Date>();
-
-  excludedDays: string[] = [
-    // Pon aquí los días que quieras excluir manualmente (en formato ISO)
-    // Ejemplo: '2025-08-04'
-  ];
-
-  isWeekday(date: Date): boolean {
-    const day = date.getDay();
-    // 1 = lunes ... 5 = viernes
-    return day >= 1 && day <= 5;
+  constructor() {
+    const startYear = this.selectedYear - 10;
+    const endYear = this.selectedYear + 10;
+    for(let y = startYear; y <= endYear; y++) {
+      this.years.push(y);
+    }
+    this.generateCalendar();
   }
 
-  isDateInPast(date: Date): boolean {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // quitamos la hora para comparar sólo fecha
-    return date < today;
+  togglePicker() {
+    this.showPicker = !this.showPicker;
   }
 
-  getAvailableDays = (date: Date): string => {
-    const dateString = date.toISOString().split('T')[0];
+  onDateChange() {
+    this.showPicker = false;
+    this.generateCalendar();
+  }
 
-    if (this.isDateInPast(date)) return 'day-unavailable';
+  generateCalendar() {
+    this.calendarMatrix = [];
 
-    if (!this.isWeekday(date)) return 'day-unavailable';
+    const firstDayOfMonth = new Date(this.selectedYear, this.selectedMonth, 1);
+    const lastDayOfMonth = new Date(this.selectedYear, this.selectedMonth + 1, 0);
 
-    if (this.excludedDays.includes(dateString)) return 'day-unavailable';
+    // Ajustar el primer día para que la semana empiece en lunes
+    let startDay = firstDayOfMonth.getDay();
+    startDay = startDay === 0 ? 7 : startDay; // Domingo = 0, ponlo a 7
 
-    return 'day-available';
-  };
+    let currentDay = 1 - (startDay - 1); // Día para empezar la matriz
 
-
-  onDaySelected(date: Date | null) {
-    if (date) {
-      this.selectedDate = date;
-      this.daySelected.emit(date);
+    while (currentDay <= lastDayOfMonth.getDate()) {
+      const week: (Date | null)[] = [];
+      for(let i = 0; i < 7; i++) {
+        if (currentDay > 0 && currentDay <= lastDayOfMonth.getDate()) {
+          week.push(new Date(this.selectedYear, this.selectedMonth, currentDay));
+        } else {
+          week.push(null);
+        }
+        currentDay++;
+      }
+      this.calendarMatrix.push(week);
     }
   }
+
+  isToday(date: Date | null): boolean {
+    if (!date) return false;
+    const today = new Date();
+    return date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate();
+  }
+
+  isSelected(date: Date | null): boolean {
+    if (!date || !this.selectedDate) return false;
+    return date.getTime() === this.selectedDate.getTime();
+  }
+
+  isAvailable(date: Date | null): boolean {
+    // Aquí puedes meter tu lógica para deshabilitar fechas
+    // Por ejemplo, no permitir días pasados
+    if (!date) return false;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return date >= today;
+  }
+
+  selectDate(date: Date | null) {
+    if (!date || !this.isAvailable(date)) return;
+    this.selectedDate = date;
+    this.dateSelected.emit(date);
+  }
+
+  prevMonth() {
+    if (this.selectedMonth === 0) {
+      this.selectedMonth = 11;
+      this.selectedYear--;
+    } else {
+      this.selectedMonth--;
+    }
+    this.onDateChange();
+  }
+
+  nextMonth() {
+    if (this.selectedMonth === 11) {
+      this.selectedMonth = 0;
+      this.selectedYear++;
+    } else {
+      this.selectedMonth++;
+    }
+    this.onDateChange();
+  }
+
 }

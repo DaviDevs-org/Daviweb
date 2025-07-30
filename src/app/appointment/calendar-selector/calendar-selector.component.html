@@ -1,5 +1,50 @@
-<mat-calendar
-  [selected]="selectedDate"
-  [dateClass]="getAvailableDays"
-  (selectedChange)="onDaySelected($event)">
-</mat-calendar>
+<div class="calendar-wrapper">
+
+  <div class="header">
+    <button class="arrow-btn" (click)="prevMonth()" aria-label="Mes anterior">&#9664;</button>
+
+    <button class="month-year-btn" (click)="togglePicker()">
+      {{ monthNames[selectedMonth] }} {{ selectedYear }}
+      <span class="arrow" [class.open]="showPicker">&#9662;</span>
+    </button>
+
+    <button class="arrow-btn" (click)="nextMonth()" aria-label="Mes siguiente">&#9654;</button>
+  </div>
+
+  <!-- Picker dentro del wrapper, justo debajo del header -->
+  <div *ngIf="showPicker" class="picker-dropdown">
+    <select [(ngModel)]="selectedMonth" (change)="onDateChange()">
+      <option *ngFor="let m of monthNames; let i = index" [value]="i">{{ m }}</option>
+    </select>
+
+    <select [(ngModel)]="selectedYear" (change)="onDateChange()">
+      <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+    </select>
+  </div>
+
+  <!-- Calendario -->
+  <table class="calendar-table">
+    <thead>
+    <tr>
+      <th *ngFor="let day of weekDays">{{ day }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let week of calendarMatrix">
+      <td *ngFor="let day of week"
+          [ngClass]="{
+                      'day-available': day && isAvailable(day),
+                      'day-unavailable': day && !isAvailable(day),
+                      'today': isToday(day),
+                      'selected': isSelected(day),
+                      'disabled': !day
+                      }"
+          (click)="selectDate(day)">
+        {{ day?.getDate() || '' }}
+      </td>
+
+    </tr>
+    </tbody>
+  </table>
+
+</div>
