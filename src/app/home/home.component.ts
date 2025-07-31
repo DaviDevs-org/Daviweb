@@ -8,13 +8,13 @@ import { FaqComponent } from '../faq/faq.component';
 import { FeaturedCutsComponent } from '../featured-cuts/featured-cuts.component';
 import { FooterComponent } from '../footer/footer.component';
 import { PhotoOfTheDayComponent } from '../photo-of-the-day/photo-of-the-day.component';
-import { ServicesComponent } from '../services/services.component';
+import {PricesAndServicesComponent} from '../prices-and-services/prices-and-services.component';
 
 @Component({
   selector: 'app-home',
-  imports: [HeaderComponent, AboutUsComponent, LocationAndContactComponent, 
+  imports: [HeaderComponent, AboutUsComponent, LocationAndContactComponent,
   OpinionsComponent, FaqComponent, FooterComponent, PhotoOfTheDayComponent,
-  FeaturedCutsComponent, AppointmentComponent, ServicesComponent],
+  FeaturedCutsComponent, AppointmentComponent, PricesAndServicesComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })

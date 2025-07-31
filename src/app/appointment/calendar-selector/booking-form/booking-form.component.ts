@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { NgIf } from '@angular/common';
+import {AppointmentService} from '../../../services/appointments.service';
 
 @Component({
   selector: 'app-booking-form',
@@ -27,7 +28,7 @@ import { NgIf } from '@angular/common';
 
       <div class="form-group">
         <label for="phone">Teléfono</label>
-        <input id="phone" type="tel" name="phone" ngModel required pattern="^[0-9\\s+()-]{7,15}$" />
+        <input id="phone" type="tel" name="phone" ngModel required pattern="^[0-9\\s+()\\-]{7,15}$"/>
         <div class="error" [class.visible]="phoneInvalid">
           Teléfono obligatorio y formato válido.
         </div>
@@ -123,7 +124,13 @@ import { NgIf } from '@angular/common';
 })
 export class BookingFormComponent {
 
+  constructor(private appointmentService: AppointmentService) {}
+
+  @Input() date?: string | null = null;
+  @Input() time?: string | null = null;
+
   @Output() formSubmitted = new EventEmitter<{ name: string; email: string; phone: string; description?: string }>();
+  @Output() back = new EventEmitter<void>();
 
   submitted = false;
   formRef?: NgForm;
@@ -133,11 +140,26 @@ export class BookingFormComponent {
     this.formRef = form;
 
     if (form.valid) {
-      this.formSubmitted.emit(form.value);
-      form.resetForm();
-      this.submitted = false;
+      const appointmentData = {
+        ...form.value,
+        date: this.date || '',
+        time: this.time || ''
+      };
+
+      this.appointmentService.addAppointment(appointmentData)
+        .then(() => {
+          console.log('Cita guardada en Firestore ✅');
+          this.formSubmitted.emit(appointmentData);
+          form.resetForm();
+          this.submitted = false;
+        })
+        .catch((err) => {
+          console.error('Error al guardar la cita ❌', err);
+        });
     }
   }
+
+
 
   get nameInvalid() {
     const name = this.formRef?.controls['name'];

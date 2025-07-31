@@ -8,7 +8,7 @@ import { GalleryManagementComponent } from './components/gallery-management/gall
 import { ServicesManagementComponent } from './components/services-management/services-management.component';
 import { InfoManagementComponent } from './components/info-management/info-management.component';
 import { StatsDashboardComponent } from './components/stats-dashboard/stats-dashboard.component';
-import { AuthenticationService } from '../authentication.service';
+import { AuthenticationService } from '../services/authentication.service';
 
 @Component({
   selector: 'app-admin-panel',

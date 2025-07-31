@@ -60,7 +60,10 @@
   <div *ngIf="showForm">
     <button class="back-button" (click)="showForm = false; showHours = true;">← Cambiar hora</button>
     <app-booking-form
-      (formSubmitted)="handleFormSubmit($event)">
+      [date]="selectedDateString"
+      [time]="selectedHour"
+      (formSubmitted)="handleFormSubmit($event)"
+      (back)="showForm = false; showHours = true;">
     </app-booking-form>
   </div>
 

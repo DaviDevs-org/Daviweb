@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {HourSelectorComponent} from './hour-selector/hour-selector.component';
-import {BookingFormComponent} from './booking-form/booking-form.component';
+import { NgClass, NgForOf, NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HourSelectorComponent } from './hour-selector/hour-selector.component';
+import { BookingFormComponent } from './booking-form/booking-form.component';
 
 @Component({
   selector: 'app-calendar-selector',
@@ -35,11 +35,14 @@ export class CalendarSelectorComponent {
   selectedDate: Date | null = null;
 
   showHours = false;  // Estado para alternar vista calendario / horas
+  showForm = false;   // Estado para mostrar formulario tras hora
+
+  selectedHour: string | null = null;
 
   constructor() {
     const startYear = this.selectedYear - 10;
     const endYear = this.selectedYear + 10;
-    for(let y = startYear; y <= endYear; y++) {
+    for (let y = startYear; y <= endYear; y++) {
       this.years.push(y);
     }
     this.generateCalendar();
@@ -68,7 +71,7 @@ export class CalendarSelectorComponent {
 
     while (currentDay <= lastDayOfMonth.getDate()) {
       const week: (Date | null)[] = [];
-      for(let i = 0; i < 7; i++) {
+      for (let i = 0; i < 7; i++) {
         if (currentDay > 0 && currentDay <= lastDayOfMonth.getDate()) {
           week.push(new Date(this.selectedYear, this.selectedMonth, currentDay));
         } else {
@@ -96,7 +99,7 @@ export class CalendarSelectorComponent {
   isAvailable(date: Date | null): boolean {
     if (!date) return false;
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
     return date >= today;
   }
 
@@ -105,6 +108,7 @@ export class CalendarSelectorComponent {
     this.selectedDate = date;
     this.dateSelected.emit(date);
     this.showHours = true;  // Cambiamos a vista horas
+    this.showForm = false;
   }
 
   prevMonth() {
@@ -129,11 +133,10 @@ export class CalendarSelectorComponent {
 
   backToCalendar() {
     this.showHours = false;
+    this.showForm = false;
     this.selectedDate = null;
+    this.selectedHour = null;
   }
-
-  selectedHour: string | null = null;
-  showForm = false;
 
   onHourSelected(hour: string) {
     this.selectedHour = hour;
@@ -143,9 +146,9 @@ export class CalendarSelectorComponent {
 
   handleFormSubmit(data: any) {
     const bookingData = {
-      date: this.selectedDate,
-      hour: this.selectedHour,
-      ...data // nombre, contacto, descripción
+      date: this.selectedDate?.toISOString().split('T')[0] || '',
+      time: this.selectedHour || '',
+      ...data // nombre, email, teléfono, descripción
     };
 
     console.log('Reserva completa:', bookingData);
@@ -159,5 +162,10 @@ export class CalendarSelectorComponent {
     this.showForm = false;
     this.showHours = false;
   }
+
+  get selectedDateString(): string {
+    return this.selectedDate ? this.selectedDate.toISOString().split('T')[0] : '';
+  }
+
 
 }

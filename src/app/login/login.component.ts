@@ -1,7 +1,7 @@
 import { Component, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthenticationService } from '../authentication.service';
+import { AuthenticationService } from '../services/authentication.service';
 import { Router } from '@angular/router';
 import { Firestore} from '@angular/fire/firestore';
 
@@ -45,7 +45,7 @@ export class LoginComponent {
 
   onForgotPassword() {
     console.log('Recuperar contraseña');
-    
+
   }
-  
+
 }

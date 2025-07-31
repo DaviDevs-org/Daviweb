@@ -1,7 +1,7 @@
 // admin-header.component.ts
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthenticationService } from '../../../authentication.service';
+import { AuthenticationService } from '../../../services/authentication.service';
 
 @Component({
   selector: 'app-admin-header',
