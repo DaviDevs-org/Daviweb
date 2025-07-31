@@ -1,15 +1,11 @@
 // services-management.component.ts
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Auth, onAuthStateChanged, user } from '@angular/fire/auth';
+import { ServiceManager } from '../services/services-management.service';
+import {Service} from '../../types/admin.types'
 
-export interface Service {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  active: boolean;
-}
 
 interface NewService {
   name: string;
@@ -25,51 +21,28 @@ interface NewService {
   styleUrls: ['./services-management.component.scss']
 })
 export class ServicesManagementComponent {
-  services: Service[] = [
-    {
-      id: '1',
-      name: 'Corte de Pelo Masculino',
-      price: 25,
-      description: 'Corte profesional con acabado moderno y personalizado',
-      active: true
-    },
-    {
-      id: '2',
-      name: 'Corte de Pelo Femenino',
-      price: 35,
-      description: 'Corte y peinado adaptado a tu estilo personal',
-      active: true
-    },
-    {
-      id: '3',
-      name: 'Arreglo de Barba',
-      price: 15,
-      description: 'Perfilado y arreglo profesional de barba',
-      active: true
-    },
-    {
-      id: '4',
-      name: 'Coloración',
-      price: 45,
-      description: 'Tinte y coloración con productos premium',
-      active: true
-    },
-    {
-      id: '5',
-      name: 'Peinado para Eventos',
-      price: 40,
-      description: 'Peinado especial para bodas, comuniones y eventos',
-      active: true
-    }
-  ];
+  private auth = inject(Auth)
+  private service = inject(ServiceManager)
 
+  services: Service[] = [];
+  ngOnInit(){
+    onAuthStateChanged(this.auth, user=> {
+      if (user) {
+        user.getIdToken().then(token => {
+          this.service.getServices().subscribe(service => {
+            this.services = service
+          })
+        })
+      }
+    })
+  }
   newService: NewService = {
     name: '',
     price: 0,
     description: ''
   };
 
-  addService(): void {
+  async addService(){
     if (!this.newService.name.trim()) {
       alert('Por favor, ingresa el nombre del servicio.');
       return;
@@ -80,15 +53,10 @@ export class ServicesManagementComponent {
       return;
     }
 
-    const service: Service = {
-      id: Date.now().toString(),
-      name: this.newService.name.trim(),
-      price: this.newService.price,
-      description: this.newService.description.trim(),
-      active: true
-    };
+    const serviceNew = new Service(this.newService.name, this.newService.description, true, this.newService.price)
 
-    this.services.unshift(service);
+    const response = await this.service.addService(serviceNew)
+    console.log(response)
 
     this.newService = {
       name: '',
@@ -99,13 +67,13 @@ export class ServicesManagementComponent {
     alert('Servicio añadido correctamente!');
   }
 
-  editService(index: number): void {
-    const service = this.services[index];
+  async editService(index: number){
+    const serviceU = this.services[index];
     
-    const newName = prompt('Nuevo nombre del servicio:', service.name);
+    const newName = prompt('Nuevo nombre del servicio:', serviceU.name);
     if (newName === null) return;
 
-    const newPriceStr = prompt('Nuevo precio (€):', service.price.toString());
+    const newPriceStr = prompt('Nuevo precio (€):', serviceU.price.toString());
     if (newPriceStr === null) return;
 
     const newPrice = parseFloat(newPriceStr);
@@ -114,39 +82,20 @@ export class ServicesManagementComponent {
       return;
     }
 
-    const newDescription = prompt('Nueva descripción:', service.description);
+    const newDescription = prompt('Nueva descripción:', serviceU.description);
     if (newDescription === null) return;
 
-    service.name = newName.trim();
-    service.price = newPrice;
-    service.description = newDescription.trim();
+    const response = await this.service.updateService(serviceU.id!, new Service(newName, newDescription, true, newPrice))
 
     alert('Servicio actualizado correctamente!');
   }
 
-  deleteService(index: number): void {
+  async deleteService(index: number){
     const service = this.services[index];
     
     if (confirm(`¿Estás seguro de que quieres eliminar "${service.name}"?`)) {
-      this.services.splice(index, 1);
+      const response = await this.service.deleteService(service.id!)
+      alert(`El servicio ${service.name} ha sido borrado con éxito`)
     }
-  }
-
-  getActiveServices(): Service[] {
-    return this.services.filter(service => service.active);
-  }
-
-  getTotalServices(): number {
-    return this.services.length;
-  }
-
-  getAveragePrice(): number {
-    if (this.services.length === 0) return 0;
-    const total = this.services.reduce((sum, service) => sum + service.price, 0);
-    return total / this.services.length;
-  }
-
-  formatPrice(price: number): string {
-    return price.toFixed(2);
   }
 }
