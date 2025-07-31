@@ -6,12 +6,28 @@ export interface GalleryPhoto {
   uploadDate: Date;
 }
 
-export interface Service {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  active: boolean;
+export class Service {
+  id?: string;
+  name: string = "";
+  price: number = 0;
+  description: string = "";
+  active: boolean = true;
+
+  constructor(name:string, description:string, active:boolean, price:number){
+      this.name = name;
+      this.description = description;
+      this.active = active;
+      this.price = price;
+    }
+  toJson(){
+    return {
+      ...(this.id && {id:this.id}),
+      name: this.name,
+      price: this.price,
+      description: this.description,
+      active: this.active
+    }
+  }
 }
 
 export interface NewService {

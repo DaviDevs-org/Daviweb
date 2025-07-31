@@ -3,12 +3,10 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import {
   GalleryPhoto,
-  Service,
   ScheduleDay,
   ContactInfo,
   Statistics,
 } from '../../types/admin.types';
-
 @Injectable({
   providedIn: 'root',
 })
@@ -36,43 +34,6 @@ export class AdminDataService {
   ]);
 
   // Services State
-  private servicesSubject = new BehaviorSubject<Service[]>([
-    {
-      id: '1',
-      name: 'Corte de Pelo Masculino',
-      price: 25,
-      description: 'Corte profesional con acabado moderno y personalizado',
-      active: true,
-    },
-    {
-      id: '2',
-      name: 'Corte de Pelo Femenino',
-      price: 35,
-      description: 'Corte y peinado adaptado a tu estilo personal',
-      active: true,
-    },
-    {
-      id: '3',
-      name: 'Arreglo de Barba',
-      price: 15,
-      description: 'Perfilado y arreglo profesional de barba',
-      active: true,
-    },
-    {
-      id: '4',
-      name: 'Coloración',
-      price: 45,
-      description: 'Tinte y coloración con productos premium',
-      active: true,
-    },
-    {
-      id: '5',
-      name: 'Peinado para Eventos',
-      price: 40,
-      description: 'Peinado especial para bodas, comuniones y eventos',
-      active: true,
-    },
-  ]);
 
   // Schedule State
   private scheduleSubject = new BehaviorSubject<ScheduleDay[]>([
@@ -167,26 +128,7 @@ export class AdminDataService {
   }
 
   // Services Methods
-  getServices(): Observable<Service[]> {
-    return this.servicesSubject.asObservable();
-  }
 
-  addService(service: Service): void {
-    const currentServices = this.servicesSubject.value;
-    this.servicesSubject.next([service, ...currentServices]);
-  }
-
-  updateService(index: number, updatedService: Partial<Service>): void {
-    const currentServices = [...this.servicesSubject.value];
-    currentServices[index] = { ...currentServices[index], ...updatedService };
-    this.servicesSubject.next(currentServices);
-  }
-
-  deleteService(index: number): void {
-    const currentServices = [...this.servicesSubject.value];
-    currentServices.splice(index, 1);
-    this.servicesSubject.next(currentServices);
-  }
 
   // Schedule Methods
   getSchedule(): Observable<ScheduleDay[]> {
@@ -243,17 +185,6 @@ export class AdminDataService {
   }
 
   // Statistics Calculations
-  getAverageServicePrice(): number {
-    const services = this.servicesSubject.value;
-    if (services.length === 0) return 0;
-    const total = services.reduce((sum, service) => sum + service.price, 0);
-    return total / services.length;
-  }
-
-  getActiveServicesCount(): number {
-    return this.servicesSubject.value.filter((service) => service.active)
-      .length;
-  }
 
   getRecentPhotosCount(days: number = 30): number {
     const photos = this.galleryPhotosSubject.value;

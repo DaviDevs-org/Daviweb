@@ -1,5 +1,5 @@
 // admin-panel.component.ts (Refactorizado)
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { AdminHeaderComponent } from './components/admin-header/admin-header.component';
@@ -8,6 +8,7 @@ import { GalleryManagementComponent } from './components/gallery-management/gall
 import { ServicesManagementComponent } from './components/services-management/services-management.component';
 import { InfoManagementComponent } from './components/info-management/info-management.component';
 import { StatsDashboardComponent } from './components/stats-dashboard/stats-dashboard.component';
+import { AuthenticationService } from '../authentication.service';
 
 @Component({
   selector: 'app-admin-panel',
@@ -25,6 +26,7 @@ import { StatsDashboardComponent } from './components/stats-dashboard/stats-dash
   styleUrls: ['./admin-panel.component.scss']
 })
 export class AdminPanelComponent {
+  private auth = inject(AuthenticationService)
   activeTab: AdminTab = 'gallery';
 
   onTabChange(tab: AdminTab): void {
@@ -32,9 +34,6 @@ export class AdminPanelComponent {
   }
 
   onLogout(): void {
-    // Aquí iría la lógica para cerrar sesión
-    // Por ejemplo, limpiar localStorage, redirigir, etc.
-    alert('Sesión cerrada correctamente.');
-    console.log('Redirigiendo al login...');
+    this.auth.logOut()
   }
 }

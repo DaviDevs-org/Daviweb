@@ -28,10 +28,7 @@
             <div class="gallery-item" *ngFor="let photo of galleryPhotos; let i = index">
                 <img [src]="photo.url" [alt]="photo.title">
                 <div class="photo-overlay">
-                    <div class="photo-info">
-                        <input type="text" [(ngModel)]="photo.title" placeholder="Título de la foto"
-                            class="photo-title-input">
-                    </div>
+                    <div class="photo-info">{{photo.title}}</div>
                     <div class="photo-actions">
                         <button class="action-btn edit-btn" (click)="editPhoto(i)">
                             <i class="bi bi-pencil"></i>
