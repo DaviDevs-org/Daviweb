@@ -11,12 +11,12 @@ export class Service {
   name: string = "";
   price: number = 0;
   description: string = "";
-  active: boolean = true;
+  time: number = 0;
 
-  constructor(name:string, description:string, active:boolean, price:number){
+  constructor(name:string, description:string, time:number, price:number){
       this.name = name;
       this.description = description;
-      this.active = active;
+      this.time = time;
       this.price = price;
     }
   toJson(){
@@ -25,7 +25,7 @@ export class Service {
       name: this.name,
       price: this.price,
       description: this.description,
-      active: this.active
+      time: this.time
     }
   }
 }

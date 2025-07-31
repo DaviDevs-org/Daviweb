@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth, onAuthStateChanged, user } from '@angular/fire/auth';
-import { ServiceManager } from '../services/services-management.service';
+import { ServiceManager } from '../../../services/admin-panel/services-management.service';
 import {Service} from '../../types/admin.types'
 
 
@@ -11,6 +11,7 @@ interface NewService {
   name: string;
   price: number;
   description: string;
+  time: number;
 }
 
 @Component({
@@ -39,7 +40,8 @@ export class ServicesManagementComponent {
   newService: NewService = {
     name: '',
     price: 0,
-    description: ''
+    description: '',
+    time: 0
   };
 
   async addService(){
@@ -53,7 +55,7 @@ export class ServicesManagementComponent {
       return;
     }
 
-    const serviceNew = new Service(this.newService.name, this.newService.description, true, this.newService.price)
+    const serviceNew = new Service(this.newService.name, this.newService.description, this.newService.time, this.newService.price)
 
     const response = await this.service.addService(serviceNew)
     console.log(response)
@@ -61,7 +63,8 @@ export class ServicesManagementComponent {
     this.newService = {
       name: '',
       price: 0,
-      description: ''
+      description: '',
+      time: 0
     };
 
     alert('Servicio añadido correctamente!');
@@ -82,10 +85,19 @@ export class ServicesManagementComponent {
       return;
     }
 
+    const newTimeStr = prompt('Nuevo tiempo (min):', serviceU.price.toString());
+    if (newTimeStr === null) return;
+
+    const newTime = parseFloat(newTimeStr);
+    if (isNaN(newTime) || newTime <= 0) {
+      alert('Por favor, ingresa un tiempo estimado válido.');
+      return;
+    }
+    
     const newDescription = prompt('Nueva descripción:', serviceU.description);
     if (newDescription === null) return;
 
-    const response = await this.service.updateService(serviceU.id!, new Service(newName, newDescription, true, newPrice))
+    const response = await this.service.updateService(serviceU.id!, new Service(newName, newDescription, newTime, newPrice))
 
     alert('Servicio actualizado correctamente!');
   }

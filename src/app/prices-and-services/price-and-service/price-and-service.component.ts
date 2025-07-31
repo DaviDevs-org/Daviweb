@@ -9,4 +9,5 @@ export class PriceAndServiceComponent {
   @Input() name:string = "Corte Clásico"
   @Input() time:number = 25
   @Input() price:number = 20
+  @Input() description:string = "Un corte normal"
 }

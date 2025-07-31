@@ -25,6 +25,14 @@
                         <span class="currency">€</span>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label>Tiempo estimado</label>
+                    <div class="price-input-group">
+                        <input type="number" [(ngModel)]="newService.time" name="serviceTime" placeholder="40"
+                            class="form-input price-input">
+                        <span class="currency">min</span>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label>Descripción</label>
@@ -45,7 +53,11 @@
             <div class="service-card" *ngFor="let service of services; let i = index">
                 <div class="service-header">
                     <h4>{{ service.name }}</h4>
-                    <div class="service-price">{{ service.price }}€</div>
+                    <div class="service-header-data">
+                        <div class="service-price">{{ service.price }}€</div>
+                        <div class="service-time"> {{service.time}}m</div>
+                    </div>
+                    
                 </div>
                 <p class="service-description">{{ service.description }}</p>
                 <div class="service-actions">
