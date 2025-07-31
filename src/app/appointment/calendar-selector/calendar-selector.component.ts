@@ -2,6 +2,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {HourSelectorComponent} from './hour-selector/hour-selector.component';
+import {BookingFormComponent} from './booking-form/booking-form.component';
 
 @Component({
   selector: 'app-calendar-selector',
@@ -11,7 +12,8 @@ import {HourSelectorComponent} from './hour-selector/hour-selector.component';
     FormsModule,
     NgIf,
     NgClass,
-    HourSelectorComponent
+    HourSelectorComponent,
+    BookingFormComponent
   ],
   styleUrls: ['./calendar-selector.component.scss']
 })
@@ -128,6 +130,34 @@ export class CalendarSelectorComponent {
   backToCalendar() {
     this.showHours = false;
     this.selectedDate = null;
+  }
+
+  selectedHour: string | null = null;
+  showForm = false;
+
+  onHourSelected(hour: string) {
+    this.selectedHour = hour;
+    this.showHours = false;
+    this.showForm = true;
+  }
+
+  handleFormSubmit(data: any) {
+    const bookingData = {
+      date: this.selectedDate,
+      hour: this.selectedHour,
+      ...data // nombre, contacto, descripción
+    };
+
+    console.log('Reserva completa:', bookingData);
+
+    this.resetAll();
+  }
+
+  resetAll() {
+    this.selectedDate = null;
+    this.selectedHour = null;
+    this.showForm = false;
+    this.showHours = false;
   }
 
 }

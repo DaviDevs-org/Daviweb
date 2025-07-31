@@ -245,3 +245,34 @@
   color: #cfc2b9 !important;
   cursor: default;
 }
+
+.back-button {
+  background-color: transparent;
+  border: 2px solid #d4b258;
+  color: #f3e1b0;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.15);
+  margin: 1% 0 2% 0.5%;
+
+  &:hover {
+    background-color: #d4b258;
+    color: #613523;
+    box-shadow: 0 4px 12px rgba(212, 178, 88, 0.4);
+  }
+
+  &:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 6px rgba(212, 178, 88, 0.2);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(212, 178, 88, 0.4);
+  }
+}

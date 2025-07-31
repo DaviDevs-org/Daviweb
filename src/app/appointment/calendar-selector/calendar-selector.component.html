@@ -1,6 +1,7 @@
 <div class="calendar-wrapper">
 
-  <div *ngIf="!showHours">
+  <!-- Mostrar calendario si no mostramos horas ni formulario -->
+  <div *ngIf="!showHours && !showForm">
     <div class="header">
       <button class="arrow-btn" (click)="prevMonth()" aria-label="Mes anterior">&#9664;</button>
 
@@ -12,7 +13,6 @@
       <button class="arrow-btn" (click)="nextMonth()" aria-label="Mes siguiente">&#9654;</button>
     </div>
 
-    <!-- Picker dentro del wrapper, justo debajo del header -->
     <div *ngIf="showPicker" class="picker-dropdown">
       <select [(ngModel)]="selectedMonth" (change)="onDateChange()">
         <option *ngFor="let m of monthNames; let i = index" [value]="i">{{ m }}</option>
@@ -23,7 +23,6 @@
       </select>
     </div>
 
-    <!-- Calendario -->
     <table class="calendar-table">
       <thead>
       <tr>
@@ -48,8 +47,21 @@
     </table>
   </div>
 
-  <div *ngIf="showHours">
-    <app-hour-selector [date]="selectedDate" (back)="backToCalendar()"></app-hour-selector>
+  <!-- Mostrar selector de horas -->
+  <div *ngIf="showHours && !showForm">
+    <app-hour-selector
+      [date]="selectedDate"
+      (back)="backToCalendar()"
+      (hourSelected)="onHourSelected($event)">
+    </app-hour-selector>
+  </div>
+
+  <!-- Mostrar formulario de reserva -->
+  <div *ngIf="showForm">
+    <button class="back-button" (click)="showForm = false; showHours = true;">← Cambiar hora</button>
+    <app-booking-form
+      (formSubmitted)="handleFormSubmit($event)">
+    </app-booking-form>
   </div>
 
 </div>
