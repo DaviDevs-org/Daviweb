@@ -22,9 +22,16 @@
         <a class="anchor-text" href="#" (click)="scrollToSection('appointments'); $event.preventDefault()">Cita</a>
       </div>
       <div class="status">
-        <div class="status-container">
-          <span class="status-text" >Cerrado</span>
-        </div>
+        @if (businessInfo().isOpen){
+          <div class="status-container open">
+            <span class="status-text" >Abierto</span>
+          </div>
+        }
+        @else {
+          <div class="status-container closed">
+            <span class="status-text" >Cerrado</span>
+          </div>
+        }
       </div>
     </div>
   </div>

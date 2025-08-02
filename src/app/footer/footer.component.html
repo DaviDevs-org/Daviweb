@@ -16,23 +16,23 @@
         <div class="heading">Contacto</div>
         <div class="container-row">
           <i class="bi bi-geo-alt-fill"></i>
-          <div class="text">Calle Falsa 123, Ciudad, País</div>
+          <div class="text">{{location}}</div>
         </div>
         <div class="container-row">
           <i class="bi bi-telephone-fill"></i>
-          <div class="text">+34 600 000 000</div>
+          <div class="text">{{telephone}}</div>
         </div>
         <div class="container-row">
           <i class="bi bi-envelope-fill"></i>
-          <div class="text">info&#64;barberiamoderna.com</div>
+          <div class="text">{{email}}</div>
         </div>
       </div>
       <div class="container-column">
         <div class="heading">Horario</div>
         <div class="container-column">
-          <span class="text">Lunes a Viernes: 10:00-20:00</span>
-          <span class="text">Sábado: 9:00-18:00</span>
-          <span class="text">Domingo: Cerrado</span>
+          @for (item of scheduleText; track $index) {
+            <span class="text">{{item}}</span>
+          }
         </div>
       </div>
       <div class="container-column">

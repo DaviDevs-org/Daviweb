@@ -60,13 +60,18 @@
 }
 
 .status-container {
-  background-color: #ef4444;
   color: white;
   border-radius: 9999px;
-  padding: 4px 12px;
-  font-size: 12px;
+  padding: 8px 24px;
+  font-size: 14px;
   font-weight: 500;
   font-family: Inter, sans-serif;
+}
+.open{
+    background-color: rgb(32, 160, 32);
+}
+.closed{
+  background-color: rgb(235, 39, 39);
 }
 
 .welcome-photo {
