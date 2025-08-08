@@ -15,6 +15,9 @@
             <small>Formatos: JPG, PNG, WebP (máx. 5MB)</small>
             <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;">
         </div>
+        <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" [style.width]="progress()"></div>
+        </div>
         <button class="upload-btn" [disabled]="!selectedFile" (click)="uploadImage()">
             <i class="bi bi-upload"></i>
             Subir Imagen
@@ -25,17 +28,17 @@
     <div class="current-gallery">
         <h3>Fotos Actuales</h3>
         <div class="gallery-grid">
-            <div class="gallery-item" *ngFor="let photo of galleryPhotos; let i = index">
-                <img [src]="photo.url" [alt]="photo.title">
+            <div class="gallery-item" *ngFor="let photo of galleryPhotos(); let i = index">
+                <img [src]="photo.url" [alt]="photo.name">
                 <div class="photo-overlay">
-                    <div class="photo-info">{{photo.title}}</div>
                     <div class="photo-actions">
-                        <button class="action-btn edit-btn" (click)="editPhoto(i)">
+                        <button class="action-btn edit-btn" >
                             <i class="bi bi-pencil"></i>
                         </button>
-                        <button class="action-btn delete-btn" (click)="deletePhoto(i)">
-                            <i class="bi bi-trash"></i>
+                        <button class="action-btn delete-btn" >
+                            <i class="bi bi-trash" (click)="deleteImage(i)"></i>
                         </button>
+                        <div class="photo-info">{{photo.name}}</div>
                     </div>
                 </div>
             </div>

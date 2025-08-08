@@ -2,17 +2,10 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Auth, onAuthStateChanged, user } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { ServiceManager } from '../../../services/admin-panel/services-management.service';
-import {Service} from '../../types/admin.types'
+import { Service, NewService } from '../../types/admin.types'
 
-
-interface NewService {
-  name: string;
-  price: number;
-  description: string;
-  time: number;
-}
 
 @Component({
   selector: 'app-services-management',

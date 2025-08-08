@@ -1,9 +1,16 @@
 // shared/types/admin.types.ts
-export interface GalleryPhoto {
-  id: string;
-  url: string;
-  title: string;
-  uploadDate: Date;
+export class GalleryPhoto {
+  name: string = "";
+  url: string = "";
+  lastModified: string = "";
+  id?:string
+
+  constructor(name: string, url: string, lastModified: string, id:string){
+    this.name = name;
+    this.url = url;
+    this.lastModified = lastModified;
+    this.id = id
+  }
 }
 
 export class Service {
@@ -34,8 +41,8 @@ export interface NewService {
   name: string;
   price: number;
   description: string;
+  time: number;
 }
-
 export interface ScheduleDay {
   name: string;
   day: string;
