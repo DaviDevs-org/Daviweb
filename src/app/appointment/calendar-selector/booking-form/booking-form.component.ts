@@ -1,7 +1,6 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { NgIf } from '@angular/common';
-import {AppointmentService} from '../../../services/appointments.service';
+import { AppointmentService } from '../../../services/appointments.service';
 
 @Component({
   selector: 'app-booking-form',
@@ -20,18 +19,22 @@ import {AppointmentService} from '../../../services/appointments.service';
 
       <div class="form-group">
         <label for="email">Correo electrónico</label>
-        <input id="email" type="email" name="email" ngModel required email />
+        <input id="email" type="email" name="email" ngModel />
         <div class="error" [class.visible]="emailInvalid">
-          Introduce un email válido.
+          Introduce un email válido si decides rellenarlo.
         </div>
       </div>
 
       <div class="form-group">
         <label for="phone">Teléfono</label>
-        <input id="phone" type="tel" name="phone" ngModel required pattern="^[0-9\\s+()\\-]{7,15}$"/>
+        <input id="phone" type="tel" name="phone" ngModel />
         <div class="error" [class.visible]="phoneInvalid">
-          Teléfono obligatorio y formato válido.
+          Introduce un teléfono válido si decides rellenarlo.
         </div>
+      </div>
+
+      <div class="error" [class.visible]="contactEmpty">
+        Debes rellenar al menos un medio de contacto: email o teléfono.
       </div>
 
       <div class="form-group">
@@ -139,27 +142,49 @@ export class BookingFormComponent {
     this.submitted = true;
     this.formRef = form;
 
-    if (form.valid) {
-      const appointmentData = {
-        ...form.value,
-        date: this.date || '',
-        time: this.time || ''
-      };
+    const email = form.value.email?.trim();
+    const phone = form.value.phone?.trim();
 
-      this.appointmentService.addAppointment(appointmentData)
-        .then(() => {
-          console.log('Cita guardada en Firestore ✅');
-          this.formSubmitted.emit(appointmentData);
-          form.resetForm();
-          this.submitted = false;
-        })
-        .catch((err) => {
-          console.error('Error al guardar la cita ❌', err);
-        });
-    }
+    const hasEmail = !!email;
+    const hasPhone = !!phone;
+
+    const emailValid = hasEmail ? this.isEmailValid(email) : true;
+    const phoneValid = hasPhone ? this.isPhoneValid(phone) : true;
+    const hasContact = hasEmail || hasPhone;
+
+    if (form.controls['name']?.invalid || !hasContact || !emailValid || !phoneValid) return;
+
+    const appointmentData = {
+      ...form.value,
+      date: this.date || '',
+      time: this.time || ''
+    };
+
+    this.appointmentService.addAppointment(appointmentData)
+      .then(() => {
+        console.log('Cita guardada en Firestore ✅');
+        this.formSubmitted.emit(appointmentData);
+        form.resetForm();
+        this.submitted = false;
+      })
+      .catch((err) => {
+        console.error('Error al guardar la cita ❌', err);
+      });
+  }
+
+  // Validación de teléfono simple
+  isPhoneValid(phone: string): boolean {
+    const phoneRegex = /^[0-9]{9}$/;
+    return phoneRegex.test(phone);
   }
 
 
+
+  // Validación básica de email con HTML5
+  isEmailValid(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
 
   get nameInvalid() {
     const name = this.formRef?.controls['name'];
@@ -168,11 +193,19 @@ export class BookingFormComponent {
 
   get emailInvalid() {
     const email = this.formRef?.controls['email'];
-    return this.submitted && email?.invalid;
+    const value = email?.value?.trim();
+    return this.submitted && !!value && !this.isEmailValid(value);
   }
 
   get phoneInvalid() {
     const phone = this.formRef?.controls['phone'];
-    return this.submitted && phone?.invalid;
+    const value = phone?.value?.trim();
+    return this.submitted && !!value && !this.isPhoneValid(value);
+  }
+
+  get contactEmpty() {
+    const email = this.formRef?.controls['email']?.value?.trim();
+    const phone = this.formRef?.controls['phone']?.value?.trim();
+    return this.submitted && !email && !phone;
   }
 }
