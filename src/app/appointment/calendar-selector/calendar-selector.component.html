@@ -51,6 +51,7 @@
   <div *ngIf="showHours && !showForm">
     <app-hour-selector
       [date]="selectedDate"
+      [bookedHours]="bookedSlotsByDate[selectedDateString] || []"
       (back)="backToCalendar()"
       (hourSelected)="onHourSelected($event)">
     </app-hour-selector>
@@ -60,11 +61,12 @@
   <div *ngIf="showForm">
     <button class="back-button" (click)="showForm = false; showHours = true;">← Cambiar hora</button>
     <app-booking-form
+      *ngIf="selectedDate && selectedHour"
       [date]="selectedDateString"
       [time]="selectedHour"
       (formSubmitted)="handleFormSubmit($event)"
-      (back)="showForm = false; showHours = true;">
-    </app-booking-form>
+    ></app-booking-form>
+
   </div>
 
 </div>

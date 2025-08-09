@@ -5,11 +5,11 @@
     <li *ngFor="let hour of hours"
         (click)="selectHour(hour)"
         (dblclick)="confirmDirect(hour)"
-        [class.selected]="hour === selectedHour">
+        [class.selected]="hour === selectedHour"
+        [class.disabled]="!isHourAvailable(hour)">
       {{ hour }}
     </li>
   </ul>
-
 
   <div class="buttons">
     <button (click)="goBack()">Volver</button>

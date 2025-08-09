@@ -1,19 +1,30 @@
+// src/app/services/appointments.service.ts
 import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, CollectionReference } from '@angular/fire/firestore';
-import { Appointment } from '../models/appointment.model';
+import { Functions, httpsCallable } from '@angular/fire/functions';
+
+export interface Appointment {
+  date: string;
+  time: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  description?: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppointmentService {
 
-  private appointmentsCollection: CollectionReference<Appointment>;
+  private addAppointmentFn: (data: any) => Promise<any>;
 
-  constructor(private firestore: Firestore) {
-    this.appointmentsCollection = collection(this.firestore, 'appointments') as CollectionReference<Appointment>;
+  constructor(private functions: Functions) {
+    // httpsCallable devuelve una función que devuelve Promise en la SDK moderna
+    this.addAppointmentFn = httpsCallable(this.functions, 'addAppointment') as any;
   }
 
-  addAppointment(appointment: Appointment) {
-    return addDoc(this.appointmentsCollection, appointment);
+  // Ahora devuelve una Promise para que `await` funcione como es debido
+  addAppointment(appointment: Appointment): Promise<any> {
+    return this.addAppointmentFn(appointment);
   }
 }

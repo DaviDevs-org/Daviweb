@@ -3,6 +3,8 @@ import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HourSelectorComponent } from './hour-selector/hour-selector.component';
 import { BookingFormComponent } from './booking-form/booking-form.component';
+import { ReservedSlotsService, ReservedSlot } from '../../services/reserved-slots';
+import { AppointmentService } from '../../services/appointments.service';
 
 @Component({
   selector: 'app-calendar-selector',
@@ -33,19 +35,33 @@ export class CalendarSelectorComponent {
   calendarMatrix: (Date | null)[][] = [];
 
   selectedDate: Date | null = null;
-
-  showHours = false;  // Estado para alternar vista calendario / horas
-  showForm = false;   // Estado para mostrar formulario tras hora
-
   selectedHour: string | null = null;
 
-  constructor() {
+  showHours = false;
+  showForm = false;
+
+  isSubmitting = false;
+
+  allPossibleHours = [
+    '09:00','09:30','10:00','10:30','11:00','11:30',
+    '12:00','12:30','13:00','13:30','14:00','14:30',
+    '15:00','15:30','16:00','16:30','17:00','17:30',
+    '18:00','18:30','19:00','19:30','20:00','20:30','21:00'
+  ];
+
+  bookedSlotsByDate: Record<string, string[]> = {};
+
+  constructor(
+    private reservedSlotsService: ReservedSlotsService,
+    private appointmentService: AppointmentService
+  ) {
     const startYear = this.selectedYear - 10;
     const endYear = this.selectedYear + 10;
     for (let y = startYear; y <= endYear; y++) {
       this.years.push(y);
     }
     this.generateCalendar();
+    this.loadBookedSlots();
   }
 
   togglePicker() {
@@ -63,17 +79,17 @@ export class CalendarSelectorComponent {
     const firstDayOfMonth = new Date(this.selectedYear, this.selectedMonth, 1);
     const lastDayOfMonth = new Date(this.selectedYear, this.selectedMonth + 1, 0);
 
-    // Ajustar el primer día para que la semana empiece en lunes
+    // Ajuste para lunes = 0, domingo = 6
     let startDay = firstDayOfMonth.getDay();
-    startDay = startDay === 0 ? 7 : startDay; // Domingo = 0, ponlo a 7
-
-    let currentDay = 1 - (startDay - 1); // Día para empezar la matriz
+    startDay = startDay === 0 ? 7 : startDay; // Domingo pasa a 7 para contar bien
+    let currentDay = 1 - (startDay - 1);
 
     while (currentDay <= lastDayOfMonth.getDate()) {
       const week: (Date | null)[] = [];
       for (let i = 0; i < 7; i++) {
         if (currentDay > 0 && currentDay <= lastDayOfMonth.getDate()) {
-          week.push(new Date(this.selectedYear, this.selectedMonth, currentDay));
+          const date = new Date(this.selectedYear, this.selectedMonth, currentDay);
+          week.push(date);
         } else {
           week.push(null);
         }
@@ -96,18 +112,26 @@ export class CalendarSelectorComponent {
     return date.getTime() === this.selectedDate.getTime();
   }
 
+  isDayFullyBooked(date: Date): boolean {
+    const dateKey = this.formatDate(date);
+    const bookedHours = this.bookedSlotsByDate[dateKey] || [];
+    return this.allPossibleHours.every(hour => bookedHours.includes(hour));
+  }
+
   isAvailable(date: Date | null): boolean {
     if (!date) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return date >= today;
+    if (date < today) return false;
+
+    return !this.isDayFullyBooked(date);
   }
 
   selectDate(date: Date | null) {
     if (!date || !this.isAvailable(date)) return;
     this.selectedDate = date;
     this.dateSelected.emit(date);
-    this.showHours = true;  // Cambiamos a vista horas
+    this.showHours = true;
     this.showForm = false;
   }
 
@@ -144,16 +168,40 @@ export class CalendarSelectorComponent {
     this.showForm = true;
   }
 
-  handleFormSubmit(data: any) {
+  async handleFormSubmit(data: { name: string; email: string; phone: string; description?: string }) {
+    console.log('[CalendarSelector] handleFormSubmit recibido:', data);
+
+    if (!this.selectedDate || !this.selectedHour) {
+      alert('Error: Fecha u hora no seleccionada');
+      return;
+    }
+
+    if (this.isSubmitting) {
+      return; // evita reentradas
+    }
+
     const bookingData = {
-      date: this.selectedDate?.toISOString().split('T')[0] || '',
-      time: this.selectedHour || '',
-      ...data // nombre, email, teléfono, descripción
+      date: this.selectedDateString,
+      time: this.selectedHour,
+      ...data
     };
 
-    console.log('Reserva completa:', bookingData);
+    console.log('handleFormSubmit recibido:', bookingData);
 
-    this.resetAll();
+    this.isSubmitting = true;
+    try {
+      const result = await this.appointmentService.addAppointment(bookingData);
+      console.log('Resultado addAppointment:', result);
+      alert('Cita guardada correctamente 👌');
+      this.resetAll();
+      // recarga slots después de que se confirme el guardado
+      this.loadBookedSlots();
+    } catch (error: any) {
+      console.error('Error guardando la cita:', error);
+      alert('Error al guardar la cita: ' + (error.message || JSON.stringify(error)));
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 
   resetAll() {
@@ -164,8 +212,32 @@ export class CalendarSelectorComponent {
   }
 
   get selectedDateString(): string {
-    return this.selectedDate ? this.selectedDate.toISOString().split('T')[0] : '';
+    if (!this.selectedDate) return '';
+    return this.formatDate(this.selectedDate);
   }
 
+  loadBookedSlots() {
+    this.reservedSlotsService.getReservedSlots().subscribe((slots: ReservedSlot[]) => {
+      this.bookedSlotsByDate = {};
 
+      slots.forEach(slot => {
+        const date = slot.date;
+        const time = slot.time;
+
+        if (!this.bookedSlotsByDate[date]) {
+          this.bookedSlotsByDate[date] = [];
+        }
+        this.bookedSlotsByDate[date].push(time);
+      });
+
+      this.generateCalendar();
+    });
+  }
+
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 }

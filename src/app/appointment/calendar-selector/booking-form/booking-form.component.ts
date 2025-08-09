@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AppointmentService } from '../../../services/appointments.service';
 
@@ -7,8 +7,11 @@ import { AppointmentService } from '../../../services/appointments.service';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <form #bookingForm="ngForm" (ngSubmit)="onSubmit(bookingForm)" novalidate class="booking-form-container">
+    <p><strong>DEBUG - fecha:</strong> {{ date }}</p>
+    <p><strong>DEBUG - hora:</strong> {{ time }}</p>
 
+    <form #bookingForm="ngForm" (ngSubmit)="onSubmit(bookingForm)" novalidate class="booking-form-container">
+      <!-- campos -->
       <div class="form-group">
         <label for="name">Nombre</label>
         <input id="name" name="name" ngModel required minlength="2" />
@@ -42,7 +45,7 @@ import { AppointmentService } from '../../../services/appointments.service';
         <textarea id="description" name="description" ngModel rows="3"></textarea>
       </div>
 
-      <button type="submit" class="submit-btn">Enviar Reserva</button>
+      <button type="submit" class="submit-btn" [disabled]="!date || !time || submitting">Enviar Reserva</button>
     </form>
   `,
   styles: [`
@@ -125,22 +128,32 @@ import { AppointmentService } from '../../../services/appointments.service';
     }
   `]
 })
-export class BookingFormComponent {
-
-  constructor(private appointmentService: AppointmentService) {}
+export class BookingFormComponent implements OnChanges {
 
   @Input() date?: string | null = null;
   @Input() time?: string | null = null;
 
   @Output() formSubmitted = new EventEmitter<{ name: string; email: string; phone: string; description?: string }>();
-  @Output() back = new EventEmitter<void>();
 
   submitted = false;
   formRef?: NgForm;
+  submitting = false; // evita múltiples pulsaciones rápidas
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['date']) {
+      console.log('BookingFormComponent recibió date:', this.date);
+    }
+    if (changes['time']) {
+      console.log('BookingFormComponent recibió time:', this.time);
+    }
+  }
 
   onSubmit(form: NgForm) {
+    console.log('[BookingForm] onSubmit - form value:', form.value);
     this.submitted = true;
     this.formRef = form;
+
+    if (this.submitting) return;
 
     const email = form.value.email?.trim();
     const phone = form.value.phone?.trim();
@@ -155,32 +168,32 @@ export class BookingFormComponent {
     if (form.controls['name']?.invalid || !hasContact || !emailValid || !phoneValid) return;
 
     const appointmentData = {
-      ...form.value,
-      date: this.date || '',
-      time: this.time || ''
+      name: form.value.name.trim(),
+      email: email || '',
+      phone: phone || '',
+      description: form.value.description?.trim() || ''
     };
 
-    this.appointmentService.addAppointment(appointmentData)
-      .then(() => {
-        console.log('Cita guardada en Firestore ✅');
-        this.formSubmitted.emit(appointmentData);
-        form.resetForm();
-        this.submitted = false;
-      })
-      .catch((err) => {
-        console.error('Error al guardar la cita ❌', err);
-      });
+    this.submitting = true;
+    this.formSubmitted.emit(appointmentData);
+
+    // no reseteamos aquí: el padre reseteará al confirmarse el guardado
+    // Pero reseteamos el flag de submitting después de un pequeño delay si quieres:
+    setTimeout(() => this.submitting = false, 1000);
   }
 
-  // Validación de teléfono simple
+  resetAll() {
+    if (this.formRef) {
+      this.formRef.resetForm();
+    }
+    this.submitted = false;
+  }
+
   isPhoneValid(phone: string): boolean {
     const phoneRegex = /^[0-9]{9}$/;
     return phoneRegex.test(phone);
   }
 
-
-
-  // Validación básica de email con HTML5
   isEmailValid(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);

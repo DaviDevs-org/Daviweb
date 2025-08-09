@@ -7,12 +7,18 @@ import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 
 
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideFunctions, getFunctions } from '@angular/fire/functions';
+import {environment} from './app/environments/environment';
+
 registerLocaleData(localeEs);
 
 bootstrapApplication(AppComponent, {
   ...appConfig,
   providers: [
     ...(appConfig.providers || []),
-    { provide: LOCALE_ID, useValue: 'es-ES' }
+    { provide: LOCALE_ID, useValue: 'es-ES' },
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideFunctions(() => getFunctions())
   ]
 }).catch((err) => console.error(err));

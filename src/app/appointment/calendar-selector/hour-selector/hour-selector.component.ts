@@ -10,8 +10,9 @@ import { DatePipe, NgForOf } from '@angular/common';
 export class HourSelectorComponent {
 
   @Input() date: Date | null = null;
+  @Input() bookedHours: string[] = [];
   @Output() back = new EventEmitter<void>();
-  @Output() hourSelected = new EventEmitter<string>(); // <-- añadimos evento para la hora
+  @Output() hourSelected = new EventEmitter<string>();
 
   hours: string[] = [];
   selectedHour: string | null = null;
@@ -28,8 +29,24 @@ export class HourSelectorComponent {
     }
   }
 
+  isHourAvailable(hour: string): boolean {
+    if (!this.date) return false;
+
+    if (this.bookedHours.includes(hour)) return false;
+
+    const [hourStr, minStr] = hour.split(':');
+    const now = new Date();
+    return !(this.date.toDateString() === now.toDateString() &&
+      (parseInt(hourStr) < now.getHours() ||
+        (parseInt(hourStr) === now.getHours() && parseInt(minStr) <= now.getMinutes())));
+
+
+  }
+
   selectHour(hour: string) {
-    this.selectedHour = hour;
+    if (this.isHourAvailable(hour)) {
+      this.selectedHour = hour;
+    }
   }
 
   confirm() {
@@ -39,8 +56,10 @@ export class HourSelectorComponent {
   }
 
   confirmDirect(hour: string) {
-    this.selectedHour = hour;
-    this.hourSelected.emit(this.selectedHour);
+    if (this.isHourAvailable(hour)) {
+      this.selectedHour = hour;
+      this.hourSelected.emit(this.selectedHour);
+    }
   }
 
   goBack() {

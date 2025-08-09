@@ -119,3 +119,9 @@
   box-shadow: 0 0 12px 4px rgba(213, 160, 50, 0.4);
   border-radius: 12px;
 }
+
+.hours-list li.disabled {
+  pointer-events: none;
+  opacity: 0.4;
+  cursor: not-allowed;
+}
