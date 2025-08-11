@@ -9,14 +9,18 @@
 
     <!-- Subir nueva foto -->
     <div class="upload-section">
-        <div class="upload-area" (click)="fileInput.click()">
-            <i class="bi bi-cloud-upload"></i>
-            <p>Haz clic o arrastra una imagen aquí</p>
-            <small>Formatos: JPG, PNG, WebP (máx. 5MB)</small>
+        <div class="upload-area" (click)="fileInput.click()" [class.has-image]="selectedFile"
+            [style.background-image]="selectedFile ? 'url(' + getImagePreview() + ')' : null">
+            <div class="upload-content">
+                <i class="bi bi-cloud-upload"></i>
+                <p>{{ selectedFile ? 'Cambiar imagen' : 'Haz clic o arrastra una imagen aquí' }}</p>
+                <small>{{ selectedFile ? selectedFile.name : 'Formatos: JPG, PNG, WebP (máx. 5MB)' }}</small>
+            </div>
             <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;">
         </div>
         <div class="progress">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" [style.width]="progress()"></div>
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75"
+                aria-valuemin="0" aria-valuemax="100" [style.width]="progress()"></div>
         </div>
         <button class="upload-btn" [disabled]="!selectedFile" (click)="uploadImage()">
             <i class="bi bi-upload"></i>
@@ -32,11 +36,11 @@
                 <img [src]="photo.url" [alt]="photo.name">
                 <div class="photo-overlay">
                     <div class="photo-actions">
-                        <button class="action-btn edit-btn" >
+                        <button class="action-btn edit-btn" (click)="updateImage(i)">
                             <i class="bi bi-pencil"></i>
                         </button>
-                        <button class="action-btn delete-btn" >
-                            <i class="bi bi-trash" (click)="deleteImage(i)"></i>
+                        <button class="action-btn delete-btn" (click)="deleteImage(i)">
+                            <i class="bi bi-trash"></i>
                         </button>
                         <div class="photo-info">{{photo.name}}</div>
                     </div>

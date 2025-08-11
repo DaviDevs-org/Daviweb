@@ -16,27 +16,67 @@
         cursor: pointer;
         transition: all 0.3s ease;
         background: rgba(variables.$primary-gold, 0.02);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        position: relative;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         &:hover {
             border-color: variables.$secondary-gold;
-            background: rgba(variables.$primary-gold, 0.05);
+            
+            &:not(.has-image) {
+                background: rgba(variables.$primary-gold, 0.05);
+            }
+
+            .upload-content {
+                background: rgba(variables.$white, 0.95);
+                transform: scale(1.02);
+            }
         }
 
-        i {
-            font-size: 3rem;
-            color: variables.$primary-gold;
-            margin-bottom: 15px;
+        &.has-image {
+            border-style: solid;
+            border-width: 3px;
+            
+            .upload-content {
+                background: rgba(variables.$white, 0.9);
+                backdrop-filter: blur(5px);
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                transition: all 0.3s ease;
+
+                i {
+                    font-size: 2rem;
+                }
+            }
         }
 
-        p {
-            font-size: 1.1rem;
-            color: variables.$dark-brown;
-            margin: 0 0 5px 0;
-            font-weight: 500;
-        }
+        .upload-content {
+            transition: all 0.3s ease;
 
-        small {
-            color: variables.$text-gray;
+            i {
+                font-size: 3rem;
+                color: variables.$primary-gold;
+                margin-bottom: 15px;
+                display: block;
+            }
+
+            p {
+                font-size: 1.1rem;
+                color: variables.$dark-brown;
+                margin: 0 0 5px 0;
+                font-weight: 500;
+            }
+
+            small {
+                color: variables.$text-gray;
+                font-weight: 400;
+            }
         }
     }
 

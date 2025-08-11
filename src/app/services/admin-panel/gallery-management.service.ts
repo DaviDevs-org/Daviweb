@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { ListResult, Storage, StorageReference, deleteObject, getDownloadURL, getMetadata, listAll, ref, uploadBytesResumable} from '@angular/fire/storage';
+import { ListResult, Storage, StorageReference, deleteObject, getDownloadURL, getMetadata, listAll, ref, uploadBytesResumable, updateMetadata} from '@angular/fire/storage';
 import { GalleryPhoto } from "../../admin-panel/types/admin.types";
 
 
@@ -51,6 +51,19 @@ export class GalleryService{
     async deleteImage(id:string){
         const reference = ref(this.storage, `pruebas/${id}`)
         const response = await deleteObject(reference)
-        return reference
+        return response
+    }
+    async updateImage(id:string, name:string){
+        const reference = ref(this.storage, `pruebas/${id}`)
+        const metadata = await getMetadata(reference)
+        const newMetadata = {
+        ...metadata,       
+        customMetadata: {
+            ...metadata.customMetadata, 
+            originalName: name        
+            }
+        };
+        const response = await updateMetadata(reference, newMetadata)
+        return response
     }
 }
