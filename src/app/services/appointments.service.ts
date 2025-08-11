@@ -1,30 +1,51 @@
 // src/app/services/appointments.service.ts
 import { Injectable } from '@angular/core';
-import { Functions, httpsCallable } from '@angular/fire/functions';
-
-export interface Appointment {
-  date: string;
-  time: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  description?: string;
-}
+import { Firestore, collection, addDoc, serverTimestamp } from '@angular/fire/firestore';
+import { Appointment } from '../models/appointment.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppointmentService {
+  constructor(private firestore: Firestore) {}
 
-  private addAppointmentFn: (data: any) => Promise<any>;
-
-  constructor(private functions: Functions) {
-    // httpsCallable devuelve una función que devuelve Promise en la SDK moderna
-    this.addAppointmentFn = httpsCallable(this.functions, 'addAppointment') as any;
+  private buildDateTimeFrom(yyyyMmDd: string | undefined, hhMm: string | undefined): Date {
+    if (!yyyyMmDd || !hhMm) throw new Error('Faltan date o time');
+    // Formato ISO local: "YYYY-MM-DDTHH:MM:SS"
+    const iso = `${yyyyMmDd}T${hhMm}:00`;
+    const dt = new Date(iso);
+    if (isNaN(dt.getTime())) throw new Error('Fecha/hora inválida: ' + iso);
+    return dt;
   }
 
-  // Ahora devuelve una Promise para que `await` funcione como es debido
-  addAppointment(appointment: Appointment): Promise<any> {
-    return this.addAppointmentFn(appointment);
+  async addAppointment(appointment: Appointment): Promise<{ success: true; appointmentId: string }> {
+    const appointmentsCol = collection(this.firestore, 'pruebas', 'data', 'appointments');
+    const reservedCol = collection(this.firestore, 'pruebas', 'data', 'reservedSlots');
+
+    try {
+      // Validación y construcción de datetime
+      const datetime = this.buildDateTimeFrom(appointment.date, appointment.time);
+
+      // Guardar appointment (puedes incluir datetime aquí si lo deseas)
+      const docRef = await addDoc(appointmentsCol, {
+        ...appointment,
+        datetime,
+        createdAt: serverTimestamp()
+      });
+
+      // Guardar reserved slot (campo datetime necesario para consultas "desde ahora")
+      await addDoc(reservedCol, {
+        date: appointment.date,
+        time: appointment.time,
+        datetime,
+        createdAt: serverTimestamp()
+      });
+
+      return { success: true, appointmentId: docRef.id };
+    } catch (err: any) {
+      // lanza el error para que el caller lo capture y muestre el mensaje adecuado
+      console.error('AppointmentService.addAppointment error:', err);
+      throw new Error(err?.message || 'Error añadiendo la cita');
+    }
   }
 }
