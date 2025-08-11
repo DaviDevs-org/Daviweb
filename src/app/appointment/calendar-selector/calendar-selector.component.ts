@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, OnDestroy } from '@angular/core';
 import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HourSelectorComponent } from './hour-selector/hour-selector.component';
 import { BookingFormComponent } from './booking-form/booking-form.component';
-import { ReservedSlotsService, ReservedSlot } from '../../services/reserved-slots';
+import { ReservedSlotsService, ReservedSlot } from '../../services/reserved-slots.service';
 import { AppointmentService } from '../../services/appointments.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-calendar-selector',
@@ -19,7 +20,7 @@ import { AppointmentService } from '../../services/appointments.service';
   ],
   styleUrls: ['./calendar-selector.component.scss']
 })
-export class CalendarSelectorComponent {
+export class CalendarSelectorComponent implements OnDestroy {
 
   @Output() dateSelected = new EventEmitter<Date>();
 
@@ -51,6 +52,8 @@ export class CalendarSelectorComponent {
 
   bookedSlotsByDate: Record<string, string[]> = {};
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private reservedSlotsService: ReservedSlotsService,
     private appointmentService: AppointmentService
@@ -62,6 +65,11 @@ export class CalendarSelectorComponent {
     }
     this.generateCalendar();
     this.loadBookedSlots();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   togglePicker() {
@@ -217,21 +225,26 @@ export class CalendarSelectorComponent {
   }
 
   loadBookedSlots() {
-    this.reservedSlotsService.getReservedSlots().subscribe((slots: ReservedSlot[]) => {
-      this.bookedSlotsByDate = {};
+    // Nos suscribimos a los reservedSlots desde hoy en adelante
+    this.reservedSlotsService.getReservedSlotsFromNow()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((slots: ReservedSlot[]) => {
+        this.bookedSlotsByDate = {};
 
-      slots.forEach(slot => {
-        const date = slot.date;
-        const time = slot.time;
+        slots.forEach(slot => {
+          const date = slot.date; // asumiendo YYYY-MM-DD guardado como string
+          const time = slot.time;
 
-        if (!this.bookedSlotsByDate[date]) {
-          this.bookedSlotsByDate[date] = [];
-        }
-        this.bookedSlotsByDate[date].push(time);
+          if (!this.bookedSlotsByDate[date]) {
+            this.bookedSlotsByDate[date] = [];
+          }
+          this.bookedSlotsByDate[date].push(time);
+        });
+
+        this.generateCalendar();
+      }, err => {
+        console.error('Error cargando reservedSlots:', err);
       });
-
-      this.generateCalendar();
-    });
   }
 
   private formatDate(date: Date): string {
