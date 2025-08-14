@@ -1,9 +1,11 @@
 <div class="cut">
   <div class="image">
-    <img 
-      ngSrc={{image}}
-      alt={{title}}
-      fill= "fill"
+    <img
+      [ngSrc]="image"
+      [alt]="title"
+      width="362"
+      height="240"
+      priority
       class="cut-image">
   </div>
   <div class="description">

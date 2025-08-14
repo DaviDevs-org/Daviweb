@@ -13,7 +13,7 @@
   text-align: center;
   width: 100%;
   margin-top: 2%;
-  
+
   .heading {
     font-size: 36px;
     font-weight: 700;
@@ -37,7 +37,7 @@
   align-items: center;
   gap: 16px;
   padding: 40px;
-  
+
   .loading-spinner {
     width: 40px;
     height: 40px;
@@ -46,7 +46,7 @@
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
-  
+
   p {
     color: white;
     font-size: 16px;
@@ -67,18 +67,18 @@
   gap: 16px;
   padding: 40px;
   color: white;
-  
+
   .no-images-icon {
     font-size: 48px;
     opacity: 0.7;
   }
-  
+
   p {
     font-size: 18px;
     margin: 0;
     font-weight: 500;
   }
-  
+
   small {
     font-size: 14px;
     opacity: 0.8;
@@ -91,21 +91,22 @@
 .single-image-container {
   width: 100%;
   max-width: 755px;
-  
+
   .single-image-wrapper {
     position: relative;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    
+
     .single-image {
       width: 100%;
-      height: 500px;
+      height: auto;
+      max-height: 500px;
       object-fit: cover;
       object-position: center;
       display: block;
     }
-    
+
     .image-caption {
       position: absolute;
       bottom: 0;
@@ -113,7 +114,7 @@
       right: 0;
       background: rgba(0, 0, 0, 0.5);
       padding: 16px;
-      
+
       span {
         color: #ffffff;
         font-size: 15.3px;
@@ -132,36 +133,39 @@
   width: 100%;
   max-width: 755px;
   position: relative;
-  
+
   .carousel-container {
     width: 100%;
-    height: 500px;
+    min-height: 300px;
+    max-height: 500px;
     overflow: hidden;
     border-radius: 8px;
     position: relative;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   }
-  
+
   .carousel-track {
     display: flex;
     height: 100%;
     transition: transform 0.5s ease-in-out;
   }
-  
+
   .carousel-slide {
     height: 100%;
     position: relative;
     flex-shrink: 0;
   }
-  
+
+  .single-image,
   .carousel-image {
     width: 100%;
-    height: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
     object-position: center;
     display: block;
   }
-  
+
   .carousel-caption {
     position: absolute;
     bottom: 0;
@@ -169,7 +173,7 @@
     right: 0;
     background: rgba(0, 0, 0, 0.5);
     padding: 16px;
-    
+
     span {
       color: #ffffff;
       font-size: 15.3px;
@@ -180,7 +184,7 @@
       text-align: left;
     }
   }
-  
+
   .carousel-btn {
     position: absolute;
     top: 50%;
@@ -196,37 +200,37 @@
     cursor: pointer;
     z-index: 10;
     transition: all 0.3s ease;
-    
+
     &:hover:not(:disabled) {
       background: rgba(0, 0, 0, 0.7);
       transform: translateY(-50%) scale(1.1);
     }
-    
+
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
-    
+
     svg {
       width: 20px;
       height: 20px;
     }
   }
-  
+
   .carousel-btn-prev {
     left: 8px;
   }
-  
+
   .carousel-btn-next {
     right: 8px;
   }
-  
+
   .carousel-indicators {
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-top: 16px;
-    
+
     .indicator {
       width: 12px;
       height: 12px;
@@ -235,12 +239,12 @@
       background-color: #d1d5db;
       cursor: pointer;
       transition: all 0.3s ease;
-      
+
       &:hover {
         background-color: #6b7280;
         transform: scale(1.1);
       }
-      
+
       &.active {
         background-color: #000000;
         transform: scale(1.2);
@@ -253,49 +257,52 @@
   .photo-of-the-day {
     padding: 24px 20px 36px 20px;
     gap: 32px;
-    
+
     .heading {
       font-size: 28px;
     }
-    
+
     .description {
       font-size: 12px;
     }
   }
-  
-  .single-image-container .single-image-wrapper .single-image,
-  .photo-carousel .carousel-container {
-    height: 300px;
+
+  .single-image-container .single-image-wrapper .single-image {
+    max-height: 300px;
   }
-  
+
+  .photo-carousel .carousel-container {
+    max-height: 300px;
+  }
+
   .single-image-container .single-image-wrapper .image-caption,
   .photo-carousel .carousel-caption {
     padding: 12px;
-    
+
     span {
       font-size: 14px;
       line-height: 20px;
     }
   }
-  
+
   .photo-carousel .carousel-btn {
     width: 35px;
     height: 35px;
-    
+
     svg {
       width: 16px;
       height: 16px;
     }
   }
-  
+
   .loading-container,
   .no-images-container {
     padding: 24px;
-    
+
     p {
       font-size: 16px;
     }
-    
+
     small {
       font-size: 12px;
     }
@@ -303,8 +310,11 @@
 }
 
 @media (max-width: 480px) {
-  .single-image-container .single-image-wrapper .single-image,
+  .single-image-container .single-image-wrapper .single-image {
+    max-height: 250px;
+  }
+
   .photo-carousel .carousel-container {
-    height: 250px;
+    max-height: 250px;
   }
 }

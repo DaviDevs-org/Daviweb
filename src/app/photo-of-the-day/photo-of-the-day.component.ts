@@ -17,12 +17,12 @@ interface CarouselItem {
 })
 export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
   private galleryService = inject(GalleryService);
-  
+
   carouselItems = signal<CarouselItem[]>([]);
   currentSlide = signal(0);
   totalSlides = signal(0);
   isLoading = signal(true);
-  
+
   private intervalId?: number;
 
   async ngOnInit() {
@@ -38,26 +38,26 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
   private async loadGalleryImages() {
     try {
       this.isLoading.set(true);
-      
+
       // Obtener las imágenes del storage
       const imagesList = await this.galleryService.getImages();
       const galleryPhotos = await this.galleryService.getImageInfo(imagesList);
-      
+
       // Convertir las fotos de la galería a elementos del carrusel
       const items: CarouselItem[] = galleryPhotos.map(photo => ({
         image: photo.url,
         caption: this.formatCaption(photo.name),
         alt: photo.name
       }));
-      
+
       this.carouselItems.set(items);
       this.totalSlides.set(items.length);
-      
+
       // Solo iniciar autoplay si hay imágenes
       if (items.length > 1) {
         this.startAutoPlay();
       }
-      
+
     } catch (error) {
       console.error('Error loading gallery images:', error);
       // Fallback con imágenes por defecto si hay error
@@ -90,7 +90,7 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
         alt: 'Estilo vintage'
       }
     ];
-    
+
     this.carouselItems.set(fallbackItems);
     this.totalSlides.set(fallbackItems.length);
     this.startAutoPlay();
@@ -99,19 +99,19 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
   private formatCaption(filename: string): string {
     // Remover la extensión del archivo
     const nameWithoutExtension = filename.replace(/\.[^/.]+$/, '');
-    
+
     // Capitalizar la primera letra y reemplazar guiones/underscore por espacios
     const formatted = nameWithoutExtension
       .replace(/[-_]/g, ' ')
       .replace(/\b\w/g, l => l.toUpperCase());
-    
+
     return formatted;
   }
 
   private startAutoPlay() {
     // Solo iniciar autoplay si hay más de una imagen
     if (this.totalSlides() <= 1) return;
-    
+
     this.intervalId = window.setInterval(() => {
       this.nextSlide();
     }, 5000);
@@ -126,10 +126,10 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
 
   goToSlide(index: number) {
     if (this.totalSlides() === 0) return;
-    
+
     this.currentSlide.set(index);
     this.stopAutoPlay();
-    
+
     // Reiniciar autoplay solo si hay múltiples imágenes
     if (this.totalSlides() > 1) {
       this.startAutoPlay();
@@ -138,7 +138,7 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
 
   nextSlide() {
     if (this.totalSlides() <= 1) return;
-    
+
     const current = this.currentSlide();
     const total = this.totalSlides();
     this.currentSlide.set((current + 1) % total);
@@ -146,7 +146,7 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
 
   prevSlide() {
     if (this.totalSlides() <= 1) return;
-    
+
     const current = this.currentSlide();
     const total = this.totalSlides();
     this.currentSlide.set(current === 0 ? total - 1 : current - 1);
