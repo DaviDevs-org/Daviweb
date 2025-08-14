@@ -1,5 +1,5 @@
 // gallery-management.component.ts
-import { Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, signal, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GalleryPhoto } from '../../types/admin.types';
@@ -15,11 +15,12 @@ import { percentage } from '@angular/fire/storage';
   templateUrl: "./gallery-management.component.html",
   styleUrls: ['./gallery-management.component.scss']
 })
-export class GalleryManagementComponent {
+export class GalleryManagementComponent implements OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   private gallery = inject(GalleryService)
 
   selectedFile: File | null = null;
+  imagePreviewUrl: string = '';
   progress = signal('0%');
   susbscription: Subscription | undefined = undefined;
   galleryPhotos = signal<GalleryPhoto[]>([])
@@ -45,15 +46,15 @@ export class GalleryManagementComponent {
         alert('El archivo es demasiado grande. Máximo 5MB.');
         return;
       }
+      
+      // Limpiar URL anterior si existe
+      if (this.imagePreviewUrl) {
+        URL.revokeObjectURL(this.imagePreviewUrl);
+      }
+      
       this.selectedFile = file;
+      this.imagePreviewUrl = URL.createObjectURL(file);
     }
-  }
-
-  getImagePreview(): string {
-    if (this.selectedFile) {
-      return URL.createObjectURL(this.selectedFile);
-    }
-    return '';
   }
 
   uploadImage() {
@@ -93,6 +94,13 @@ export class GalleryManagementComponent {
         ]);
 
         this.selectedFile = null;
+        
+        // Limpiar la URL de previsualización
+        if (this.imagePreviewUrl) {
+          URL.revokeObjectURL(this.imagePreviewUrl);
+          this.imagePreviewUrl = '';
+        }
+        
         setTimeout(() => {
           alert('Foto subida con éxito');
           this.progress.set('0%');
@@ -128,6 +136,18 @@ export class GalleryManagementComponent {
       };
       return updated;
     });
+  }
+
+  ngOnDestroy() {
+    // Limpiar la URL de previsualización al destruir el componente
+    if (this.imagePreviewUrl) {
+      URL.revokeObjectURL(this.imagePreviewUrl);
+    }
+    
+    // Limpiar suscripción si existe
+    if (this.susbscription) {
+      this.susbscription.unsubscribe();
+    }
   }
 
 }

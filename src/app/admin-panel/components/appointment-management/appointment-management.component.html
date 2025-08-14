@@ -1,0 +1,138 @@
+<section class="content-section appointment-section">
+    <div class="section-header">
+        <h2><i class="bi bi-calendar-event"></i> Gestión de citas</h2>
+        <p>Lista completa y calendario diario</p>
+    </div>
+
+    <div class="appointment-grid">
+        <!-- Lado izquierdo: lista extendida -->
+        <aside class="left-panel">
+            <div class="panel-header">
+                <h3>Todas las citas</h3>
+                <small class="muted">{{ (appointments$ | async)?.length || 0 }} en total</small>
+            </div>
+
+            <div class="list">
+                <div class="appointment-card" *ngFor="let a of appointments$ | async"
+                    [class.active]="(selectedAppointment$ | async)?.id === a.id" (click)="chooseAppointment(a.id)">
+                    <div class="card-top">
+                        <div class="card-title">{{ a.name }}</div>
+                        <div class="card-meta">
+                            <span class="date">{{ a.dateISO }}</span>
+                            <span class="time">{{ a.timeNormalized }}</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div><strong>Email:</strong> {{ a.email || '—' }}</div>
+                        <div><strong>Teléfono:</strong> {{ a.phone || '—' }}</div>
+                        <div *ngIf="a.description"><strong>Nota:</strong> {{ a.description }}</div>
+                    </div>
+                    <!-- Indicador visual si es del día actual -->
+                    <div class="card-indicator" *ngIf="a.dateISO === toISODate(selectedDate$.value)"
+                        title="Cita del día seleccionado">
+                        <i class="bi bi-calendar-event-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Lado derecho: calendario por día y detalles -->
+        <main class="right-panel">
+            <!-- Header del calendario con navegación mejorada -->
+            <div class="calendar-header">
+                <div class="calendar-nav">
+                    <button class="btn nav-btn" (click)="prevDay()" title="Día anterior">‹</button>
+                </div>
+                <div class="calendar-title">{{ formatDateHeader(selectedDate$.value) }}</div>
+                <div class="calendar-nav">
+                    <button class="btn nav-btn" (click)="nextDay()" title="Día siguiente">›</button>
+                    <button class="btn today-btn" (click)="goToToday()" title="Hoy">Hoy</button>
+                </div>
+            </div>
+
+            <!-- Calendario de horas -->
+            <div class="calendar-body" #calendarBody *ngIf="filteredForDay$ | async as dayList">
+                <div class="day-summary" *ngIf="dayList.length > 0">
+                    <i class="bi bi-bar-chart-line-fill"></i>
+                    <span class="summary-text">{{ dayList.length }} cita(s) programada(s)</span>
+                </div>
+
+                <div class="hours">
+                    <div class="hour-row" *ngFor="let h of hours" [attr.data-hour]="h"
+                        [class.has-appointment]="findReservation(dayList, h)">
+                        <div class="hour-label">{{ h }}</div>
+                        <div class="slot">
+                            <ng-container *ngIf="findReservation(dayList, h) as res; else emptySlot">
+                                <div class="reservation" (click)="chooseAppointment(res.id)"
+                                    [class.selected]="(selectedAppointment$ | async)?.id === res.id">
+                                    <div class="reservation-content">
+                                        <div class="res-header">
+                                            <div class="res-time">{{ res.timeNormalized }}</div>
+                                            <div class="res-duration">{{ getAppointmentDuration(res) }}</div>
+                                        </div>
+                                        <div class="res-name">{{ res.name }}</div>
+                                        <div class="res-contact" *ngIf="res.phone || res.email">
+                                            <span *ngIf="res.phone" class="contact-item"><i class="bi bi-telephone-fill"></i> {{ res.phone }}</span>
+                                            <span *ngIf="res.email" class="contact-item"><i class="bi bi-envelope-fill"></i> {{ res.email }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="appointment-actions">
+                                        <button class="action-btn" title="Ver detalles"><i class="bi bi-eye"></i></button>
+                                    </div>
+                                </div>
+                            </ng-container>
+                            <ng-template #emptySlot>
+                                <div class="empty-slot">
+                                    <span class="availability-text">Disponible</span>
+                                </div>
+                            </ng-template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado vacío -->
+            <div class="empty-day" *ngIf="(filteredForDay$ | async)?.length === 0">
+                <div class="empty-icon"><i class="bi bi-calendar2-x-fill"></i></div>
+                <h3>No hay citas programadas</h3>
+                <p>Este día no tiene citas programadas</p>
+            </div>
+
+            <!-- Detalle de la cita seleccionada -->
+            <div class="selected-detail" *ngIf="selectedAppointment$ | async as selected">
+                <div class="detail-header">
+                    <h4><i class="bi bi-clipboard2-fill"></i> Detalle de la cita</h4>
+                    <button class="close-btn" (click)="selectedAppointmentId$.next(null)" title="Cerrar">×</button>
+                </div>
+
+                <div class="detail-content">
+                    <div class="detail-item">
+                        <strong>Nombre:</strong>
+                        <span>{{ selected.name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Fecha y hora:</strong>
+                        <span>{{ selected.dateISO }} a las {{ selected.timeNormalized }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Email:</strong>
+                        <span>{{ selected.email || 'No especificado' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Teléfono:</strong>
+                        <span>{{ selected.phone || 'No especificado' }}</span>
+                    </div>
+                    <div class="detail-item" *ngIf="selected.description">
+                        <strong>Nota:</strong>
+                        <span>{{ selected.description }}</span>
+                    </div>
+                </div>
+
+                <div class="detail-actions">
+                    <button class="btn action-primary">Modificar</button>
+                    <button class="btn action-secondary">Contactar</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</section>

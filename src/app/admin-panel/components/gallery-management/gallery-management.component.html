@@ -10,7 +10,7 @@
     <!-- Subir nueva foto -->
     <div class="upload-section">
         <div class="upload-area" (click)="fileInput.click()" [class.has-image]="selectedFile"
-            [style.background-image]="selectedFile ? 'url(' + getImagePreview() + ')' : null">
+            [style.background-image]="imagePreviewUrl ? 'url(' + imagePreviewUrl + ')' : null">
             <div class="upload-content">
                 <i class="bi bi-cloud-upload"></i>
                 <p>{{ selectedFile ? 'Cambiar imagen' : 'Haz clic o arrastra una imagen aquí' }}</p>

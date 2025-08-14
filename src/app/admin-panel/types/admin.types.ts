@@ -12,7 +12,21 @@ export class GalleryPhoto {
     this.id = id
   }
 }
-
+export interface Appointment {
+  id?: string;
+  createdAt?: any; // Firestore Timestamp | string
+  date?: string;   // "YYYY-MM-DD"
+  datetime?: any;  // Firestore Timestamp
+  description?: string;
+  email?: string;
+  name?: string;
+  phone?: string;
+  time?: string;   // "13:00"
+  // campos normalizados usados internamente
+  dateISO?: string;
+  timeNormalized?: string;
+  duration?: string;
+}
 export class Service {
   id?: string;
   name: string = "";

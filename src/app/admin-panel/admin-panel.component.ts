@@ -7,8 +7,8 @@ import { AdminNavComponent, AdminTab } from './components/admin-nav/admin-nav.co
 import { GalleryManagementComponent } from './components/gallery-management/gallery-management.component';
 import { ServicesManagementComponent } from './components/services-management/services-management.component';
 import { InfoManagementComponent } from './components/info-management/info-management.component';
-import { StatsDashboardComponent } from './components/stats-dashboard/stats-dashboard.component';
 import { AuthenticationService } from '../services/authentication.service';
+import { AppointmentManagementComponent } from './components/appointment-management/appointment-management.component';
 
 @Component({
   selector: 'app-admin-panel',
@@ -20,7 +20,7 @@ import { AuthenticationService } from '../services/authentication.service';
     GalleryManagementComponent,
     ServicesManagementComponent,
     InfoManagementComponent,
-    StatsDashboardComponent
+    AppointmentManagementComponent
   ],
   templateUrl: "./admin-panel.component.html",
   styleUrls: ['./admin-panel.component.scss']
