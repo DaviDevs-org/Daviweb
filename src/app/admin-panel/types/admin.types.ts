@@ -33,6 +33,7 @@ export class Service {
   price: number = 0;
   description: string = "";
   time: number = 0;
+  imageUrl?: string;
 
   constructor(name:string, description:string, time:number, price:number){
       this.name = name;

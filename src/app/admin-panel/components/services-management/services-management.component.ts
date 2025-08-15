@@ -1,5 +1,5 @@
 // services-management.component.ts
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector, runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
@@ -16,18 +16,21 @@ import { Service, NewService } from '../../types/admin.types'
 })
 export class ServicesManagementComponent {
   private auth = inject(Auth)
+  private injector = inject(Injector)
   private service = inject(ServiceManager)
 
   services: Service[] = [];
   ngOnInit(){
-    onAuthStateChanged(this.auth, user=> {
-      if (user) {
-        user.getIdToken().then(token => {
-          this.service.getServices().subscribe(service => {
-            this.services = service
+    runInInjectionContext(this.injector, ()=>{
+      onAuthStateChanged(this.auth, user=> {
+        if (user) {
+          user.getIdToken().then(token => {
+            this.service.getServices().subscribe(service => {
+              this.services = service
+            })
           })
-        })
-      }
+        }
+      })
     })
   }
   newService: NewService = {

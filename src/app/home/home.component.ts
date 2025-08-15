@@ -5,16 +5,15 @@ import { LocationAndContactComponent } from '../location-and-contact/location-an
 import { OpinionsComponent } from '../opinions/opinions.component';
 import { AppointmentComponent } from '../appointment/appointment.component';
 import { FaqComponent } from '../faq/faq.component';
-import { FeaturedCutsComponent } from '../featured-cuts/featured-cuts.component';
 import { FooterComponent } from '../footer/footer.component';
 import { PhotoOfTheDayComponent } from '../photo-of-the-day/photo-of-the-day.component';
-import {PricesAndServicesComponent} from '../prices-and-services/prices-and-services.component';
+import { ServicesInfoComponent } from '../services-info/services-info.component';
 
 @Component({
   selector: 'app-home',
   imports: [HeaderComponent, AboutUsComponent, LocationAndContactComponent,
   OpinionsComponent, FaqComponent, FooterComponent, PhotoOfTheDayComponent,
-  FeaturedCutsComponent, AppointmentComponent, PricesAndServicesComponent],
+  ServicesInfoComponent, AppointmentComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
