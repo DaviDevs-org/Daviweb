@@ -35,11 +35,12 @@ export class Service {
   time: number = 0;
   imageUrl?: string;
 
-  constructor(name:string, description:string, time:number, price:number){
+  constructor(name:string, description:string, time:number, price:number, imageUrl: string){
       this.name = name;
       this.description = description;
       this.time = time;
       this.price = price;
+      this.imageUrl = imageUrl
     }
   toJson(){
     return {
@@ -47,7 +48,8 @@ export class Service {
       name: this.name,
       price: this.price,
       description: this.description,
-      time: this.time
+      time: this.time,
+      imageUrl: this.imageUrl
     }
   }
 }

@@ -46,7 +46,26 @@ export class GalleryService {
       return undefined;
     }
   }
+  uploadServiceImage(file: File) {
+    const id = crypto.randomUUID();
+    const path = `pruebas/services/${id}`;
+    const storageRef = ref(this.storage, path);
 
+    try {
+      // uploadBytesResumable devuelve un UploadTask inmediatamente
+      return runInInjectionContext(this.injector, () =>
+        uploadBytesResumable(storageRef, file, {
+          customMetadata: {
+            originalName: file.name,
+            date: file.lastModified.toString()
+          }
+        })
+      );
+    } catch (error) {
+      alert(error);
+      return undefined;
+    }
+  }
   /**
    * Obtener URL (si se usa fuera de runInInjectionContext, la envolvemos)
    */
