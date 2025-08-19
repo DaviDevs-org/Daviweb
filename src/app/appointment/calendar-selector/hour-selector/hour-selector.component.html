@@ -1,12 +1,12 @@
 <div class="hour-selector-wrapper">
-  <h3>Horas disponibles para {{ date | date:'fullDate' }}</h3>
+  <h3 *ngIf="date">Horas disponibles para {{ date | date:'fullDate' }}</h3>
 
   <ul class="hours-list">
     <li *ngFor="let hour of hours"
         (click)="selectHour(hour)"
         (dblclick)="confirmDirect(hour)"
         [class.selected]="hour === selectedHour"
-        [class.disabled]="!isHourAvailable(hour)">
+        [class.disabled]="!hours.includes(hour)">
       {{ hour }}
     </li>
   </ul>

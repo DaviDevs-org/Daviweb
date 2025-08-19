@@ -58,13 +58,13 @@ export class InfoManager {
   private availabilityPath = '/pruebas/data/availability/config';
 
   private defaultSchedule: ScheduleDay[] = [
-    { name: 'Lunes', day: 'monday', open: '09:00', close: '19:00', closed: false },
-    { name: 'Martes', day: 'tuesday', open: '09:00', close: '19:00', closed: false },
-    { name: 'Miércoles', day: 'wednesday', open: '09:00', close: '19:00', closed: false },
-    { name: 'Jueves', day: 'thursday', open: '09:00', close: '19:00', closed: false },
-    { name: 'Viernes', day: 'friday', open: '09:00', close: '20:00', closed: false },
-    { name: 'Sábado', day: 'saturday', open: '09:00', close: '18:00', closed: true },
-    { name: 'Domingo', day: 'sunday', open: '10:00', close: '14:00', closed: true }
+    { name: 'Lunes', day: 'lunes', open: '09:00', close: '19:00', closed: false },
+    { name: 'Martes', day: 'martes', open: '09:00', close: '19:00', closed: false },
+    { name: 'Miércoles', day: 'miércoles', open: '09:00', close: '19:00', closed: false },
+    { name: 'Jueves', day: 'jueves', open: '09:00', close: '19:00', closed: false },
+    { name: 'Viernes', day: 'viernes', open: '09:00', close: '20:00', closed: false },
+    { name: 'Sábado', day: 'sábado', open: '09:00', close: '18:00', closed: true },
+    { name: 'Domingo', day: 'domingo', open: '10:00', close: '14:00', closed: true }
   ];
 
   private defaultContactInfo: ContactInfo = {
@@ -73,7 +73,6 @@ export class InfoManager {
     address: 'Calle Principal, 123\n28001 Madrid, España'
   };
 
-  // ** NUEVA PROPIEDAD **
   private _availabilityData: AvailabilityData | null = null;
 
   /** Obtiene el documento de schedule */
@@ -132,7 +131,7 @@ export class InfoManager {
     }
   }
 
-  /** Comprueba si el negocio está abierto (usa getSchedule internamente) */
+  /** Comprueba si el negocio está abierto */
   async isBusinessOpen(): Promise<BusinessStatus> {
     try {
       const businessInfo = await this.getSchedule();
@@ -152,16 +151,12 @@ export class InfoManager {
     const currentTime = checkDate.getHours().toString().padStart(2, '0') + ':' +
       checkDate.getMinutes().toString().padStart(2, '0');
 
-    const dayMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayMap = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
     const currentDayKey = dayMap[dayIndex];
-
     const today = schedule.find(day => day.day === currentDayKey);
 
     if (!today) {
-      return {
-        isOpen: false,
-        currentDay: this.getDayName(dayIndex)
-      };
+      return { isOpen: false, currentDay: this.getDayName(dayIndex) };
     }
 
     const status: BusinessStatus = {
@@ -200,7 +195,7 @@ export class InfoManager {
   }
 
   private findNextOpenDay(schedule: ScheduleDay[], currentDayIndex: number): { day: string, time: string, date: Date } {
-    const dayMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayMap = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
     const now = new Date();
 
     for (let i = 1; i <= 7; i++) {
@@ -213,19 +208,11 @@ export class InfoManager {
         nextDate.setDate(nextDate.getDate() + i);
         const openDateTime = this.createDateTimeFromTime(nextDate, nextDay.open);
 
-        return {
-          day: nextDay.name,
-          time: nextDay.open,
-          date: openDateTime
-        };
+        return { day: nextDay.name, time: nextDay.open, date: openDateTime };
       }
     }
 
-    return {
-      day: 'Lunes',
-      time: '09:00',
-      date: new Date()
-    };
+    return { day: 'Lunes', time: '09:00', date: new Date() };
   }
 
   private createDateTimeFromTime(date: Date, timeString: string): Date {
@@ -239,9 +226,8 @@ export class InfoManager {
     const diffMs = to.getTime() - from.getTime();
     const diffMinutes = Math.floor(diffMs / 60000);
 
-    if (diffMinutes < 60) {
-      return `${diffMinutes} minutos`;
-    } else if (diffMinutes < 1440) {
+    if (diffMinutes < 60) return `${diffMinutes} minutos`;
+    else if (diffMinutes < 1440) {
       const hours = Math.floor(diffMinutes / 60);
       const minutes = diffMinutes % 60;
       return `${hours}h ${minutes}m`;
@@ -259,69 +245,38 @@ export class InfoManager {
 
   validateSchedule(schedule: ScheduleDay[]): { isValid: boolean, errors: string[] } {
     const errors: string[] = [];
-
     for (const day of schedule) {
       if (!day.closed) {
-        if (!day.open || !day.close) {
-          errors.push(`Completa los horarios para ${day.name}`);
-          continue;
-        }
-
-        if (day.open >= day.close) {
-          errors.push(`La hora de apertura debe ser anterior a la de cierre para ${day.name}`);
-        }
+        if (!day.open || !day.close) errors.push(`Completa los horarios para ${day.name}`);
+        else if (day.open >= day.close) errors.push(`La hora de apertura debe ser anterior a la de cierre para ${day.name}`);
       }
     }
-
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
+    return { isValid: errors.length === 0, errors };
   }
 
   validateContactInfo(contactInfo: ContactInfo): { isValid: boolean, errors: string[] } {
     const errors: string[] = [];
-
-    if (!contactInfo.phone?.trim()) {
-      errors.push('El teléfono es requerido');
-    }
-
-    if (!contactInfo.email?.trim()) {
-      errors.push('El email es requerido');
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(contactInfo.email)) {
-        errors.push('El email no tiene un formato válido');
-      }
-    }
-
-    if (!contactInfo.address?.trim()) {
-      errors.push('La dirección es requerida');
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
+    if (!contactInfo.phone?.trim()) errors.push('El teléfono es requerido');
+    if (!contactInfo.email?.trim()) errors.push('El email es requerido');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactInfo.email)) errors.push('El email no tiene un formato válido');
+    if (!contactInfo.address?.trim()) errors.push('La dirección es requerida');
+    return { isValid: errors.length === 0, errors };
   }
 
   /* ==========================
-     NUEVAS FUNCIONES: AVAILABILITY
+            AVAILABILITY
      ========================== */
 
-  /** Devuelve el mapa por defecto basado en this.defaultSchedule */
   private defaultScheduleMap(): Record<string, { open: string; close: string; closed: boolean }> {
     const map: Record<string, { open: string; close: string; closed: boolean }> = {};
     for (const d of this.defaultSchedule) {
-      map[d.name.toLowerCase()] = { open: d.open || '', close: d.close || '', closed: !!d.closed };
+      map[d.day.toLowerCase()] = { open: d.open || '', close: d.close || '', closed: !!d.closed };
     }
     return map;
   }
 
-  /** Obtiene availability (documento único) y guarda en _availabilityData */
   async getAvailability(): Promise<AvailabilityData> {
     if (this._availabilityData) return this._availabilityData;
-
     try {
       return await runInInjectionContext(this.injector, async () => {
         const ref = doc(this.firestore, this.availabilityPath);
@@ -339,7 +294,6 @@ export class InfoManager {
     }
   }
 
-  /** Guarda availability usando setDoc con merge */
   async saveAvailability(availability: AvailabilityData): Promise<void> {
     try {
       await runInInjectionContext(this.injector, async () => {
@@ -353,7 +307,6 @@ export class InfoManager {
     }
   }
 
-  /** Devuelve un array de horas entre open y close */
   hoursRangeFromOpenClose(open: string, close: string, stepMinutes = 30): string[] {
     const hours: string[] = [];
     const [openH, openM] = open.split(':').map(Number);
@@ -373,7 +326,6 @@ export class InfoManager {
     return hours;
   }
 
-  /** Devuelve las horas disponibles para una fecha concreta, teniendo en cuenta bookedHours */
   getAvailableHoursForDate(date: Date, bookedHours: string[]): string[] {
     if (!this._availabilityData) return [];
 
@@ -382,9 +334,11 @@ export class InfoManager {
     let hours: string[] = [];
 
     if (ex) {
-      if (!ex.closed && Array.isArray(ex.hours) && ex.hours.length) {
+      if (ex.closed) {
+        hours = [];
+      } else if (Array.isArray(ex.hours) && ex.hours.length) {
         hours = ex.hours.slice();
-      } else if (!ex.closed && (!ex.hours || !ex.hours.length)) {
+      } else {
         const ds = this._availabilityData.defaultSchedule[this.getDayKey(date)];
         if (ds && !ds.closed) hours = this.hoursRangeFromOpenClose(ds.open, ds.close);
       }
@@ -405,21 +359,15 @@ export class InfoManager {
     const ds = data?.defaultSchedule;
     const days = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
 
-    if (!ds) {
-      errors.push('Falta defaultSchedule.');
-    } else {
+    if (!ds) errors.push('Falta defaultSchedule.');
+    else {
       for (const day of days) {
         const cfg = ds[day];
-        if (!cfg) {
-          errors.push(`Falta configuración para ${day}.`);
-          continue;
-        }
-        if (!cfg.closed) {
-          if (!cfg.open || !cfg.close) {
-            errors.push(`Horas no definidas para ${day}.`);
-          } else if (cfg.open >= cfg.close) {
-            errors.push(`Apertura >= cierre en ${day}.`);
-          } else {
+        if (!cfg) errors.push(`Falta configuración para ${day}`);
+        else if (!cfg.closed) {
+          if (!cfg.open || !cfg.close) errors.push(`Horas no definidas para ${day}`);
+          else if (cfg.open >= cfg.close) errors.push(`Apertura >= cierre en ${day}`);
+          else {
             if (!/^\d{2}:\d{2}$/.test(cfg.open)) errors.push(`Formato inválido open en ${day}: ${cfg.open}`);
             if (!/^\d{2}:\d{2}$/.test(cfg.close)) errors.push(`Formato inválido close en ${day}: ${cfg.close}`);
           }
@@ -429,19 +377,13 @@ export class InfoManager {
 
     const ex = data?.exceptions || {};
     for (const key of Object.keys(ex)) {
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) {
-        errors.push(`Fecha de excepción inválida: ${key}`);
-      }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) errors.push(`Fecha de excepción inválida: ${key}`);
       const item = ex[key];
       if (item) {
-        if (typeof item.closed !== 'boolean') {
-          errors.push(`El campo 'closed' debe ser boolean en ${key}`);
-        }
+        if (typeof item.closed !== 'boolean') errors.push(`El campo 'closed' debe ser boolean en ${key}`);
         if (Array.isArray(item.hours)) {
           for (const h of item.hours) {
-            if (!/^\d{2}:\d{2}$/.test(h)) {
-              errors.push(`Hora inválida en ${key}: ${h}`);
-            }
+            if (!/^\d{2}:\d{2}$/.test(h)) errors.push(`Hora inválida en ${key}: ${h}`);
           }
         } else if (item.hours !== undefined && item.hours !== null) {
           errors.push(`'hours' debe ser un array para ${key}`);

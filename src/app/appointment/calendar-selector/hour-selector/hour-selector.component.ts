@@ -1,13 +1,13 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { DatePipe, NgForOf } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import {NgForOf, DatePipe, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-hour-selector',
   templateUrl: './hour-selector.component.html',
-  imports: [DatePipe, NgForOf],
+  imports: [DatePipe, NgForOf, NgIf],
   styleUrls: ['./hour-selector.component.scss']
 })
-export class HourSelectorComponent {
+export class HourSelectorComponent implements OnChanges {
 
   @Input() date: Date | null = null;
   @Input() bookedHours: string[] = [];
@@ -18,52 +18,57 @@ export class HourSelectorComponent {
   hours: string[] = [];
   selectedHour: string | null = null;
 
-  constructor() {
-    this.generateHours();
+  constructor() {}
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['availableHours'] || changes['date']) {
+      this.generateHours();
+    }
   }
 
   generateHours() {
-    this.hours = [];
-    for (let h = 9; h <= 21; h++) {
-      this.hours.push(`${h.toString().padStart(2, '0')}:00`);
-      if (h < 21) this.hours.push(`${h.toString().padStart(2, '0')}:30`);
+    const available = this['availableHours'] as string[]; // <-- acceso seguro
+    const booked = this['bookedHours'] as string[];
+    const date = this['date'] as Date | null;
+
+    if (!available || available.length === 0 || !date) {
+      this.hours = [];
+      return;
     }
-  }
 
-  isHourAvailable(hour: string): boolean {
-    if (!this.date) return false;
-
-    if (this.bookedHours.includes(hour)) return false;
-
-    const [hourStr, minStr] = hour.split(':');
     const now = new Date();
-    return !(this.date.toDateString() === now.toDateString() &&
-      (parseInt(hourStr) < now.getHours() ||
-        (parseInt(hourStr) === now.getHours() && parseInt(minStr) <= now.getMinutes())));
+    this.hours = available.filter(hour => {
+      if (booked.includes(hour)) return false;
 
+      const [hourStr, minStr] = hour.split(':').map(Number);
 
+      if (date.toDateString() === now.toDateString()) {
+        if (hourStr < now.getHours()) return false;
+        if (hourStr === now.getHours() && minStr <= now.getMinutes()) return false;
+      }
+
+      return true;
+    });
+
+    if (this.selectedHour && !this.hours.includes(this.selectedHour)) {
+      this.selectedHour = null;
+    }
   }
 
   selectHour(hour: string) {
-    if (this.isHourAvailable(hour)) {
-      this.selectedHour = hour;
-    }
+    if (this.hours.includes(hour)) this.selectedHour = hour;
   }
 
   confirm() {
-    if (this.selectedHour) {
-      this.hourSelected.emit(this.selectedHour);
-    }
+    if (this.selectedHour) this.hourSelected.emit(this.selectedHour);
   }
 
   confirmDirect(hour: string) {
-    if (this.isHourAvailable(hour)) {
+    if (this.hours.includes(hour)) {
       this.selectedHour = hour;
       this.hourSelected.emit(this.selectedHour);
     }
   }
 
-  goBack() {
-    this.back.emit();
-  }
+  goBack() { this.back.emit(); }
 }

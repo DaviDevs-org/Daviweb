@@ -6,8 +6,8 @@ import { HourSelectorComponent } from './hour-selector/hour-selector.component';
 import { BookingFormComponent } from './booking-form/booking-form.component';
 import { ReservedSlotsService, ReservedSlot } from '../../services/reserved-slots.service';
 import { AppointmentService } from '../../services/appointments.service';
-import {lastValueFrom, Subject, takeUntil} from 'rxjs';
-import {InfoManager} from '../../services/admin-panel/info-management.service';
+import { Subject, firstValueFrom } from 'rxjs';
+import { InfoManager } from '../../services/admin-panel/info-management.service';
 
 @Component({
   selector: 'app-calendar-selector',
@@ -26,9 +26,8 @@ export class CalendarSelectorComponent implements OnDestroy {
 
   @Output() dateSelected = new EventEmitter<Date>();
 
-  monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  weekDays = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 
   years: number[] = [];
   selectedYear = new Date().getFullYear();
@@ -55,9 +54,13 @@ export class CalendarSelectorComponent implements OnDestroy {
     private appointmentService: AppointmentService,
     private infoManager: InfoManager
   ) {
-    const startYear = this.selectedYear - 10;
-    const endYear = this.selectedYear + 10;
-    for (let y = startYear; y <= endYear; y++) this.years.push(y);
+    const startYear = this.selectedYear - 2;
+    const endYear = this.selectedYear + 2;
+    this.years = [];
+    for (let y = startYear; y <= endYear; y++) {
+      this.years.push(y);
+    }
+
 
     this.generateCalendar();
     this.loadData();
@@ -70,17 +73,20 @@ export class CalendarSelectorComponent implements OnDestroy {
 
   private async loadData() {
     try {
+      // Cargar availability
       const availability = await this.infoManager.getAvailability();
-      const slots = await this.reservedSlotsService.getReservedSlotsFromNow().toPromise();
-
       this.availabilityData = availability;
 
+      // Cargar reservas
+      const slots = await firstValueFrom(this.reservedSlotsService.getReservedSlotsFromNow());
       this.bookedSlotsByDate = {};
       (slots ?? []).forEach((slot: ReservedSlot) => {
-        if (!this.bookedSlotsByDate[slot.date]) this.bookedSlotsByDate[slot.date] = [];
-        this.bookedSlotsByDate[slot.date].push(slot.time);
+        const dateKey = slot.date; // Asegúrate de que slot.date es YYYY-MM-DD
+        if (!this.bookedSlotsByDate[dateKey]) this.bookedSlotsByDate[dateKey] = [];
+        this.bookedSlotsByDate[dateKey].push(slot.time);
       });
 
+      // Calcular horas disponibles ahora que tenemos datos
       this.computeAvailableHoursForCurrentMatrix();
     } catch (error) {
       console.error('Error cargando availability o reservas:', error);
@@ -92,7 +98,6 @@ export class CalendarSelectorComponent implements OnDestroy {
   onDateChange() {
     this.showPicker = false;
     this.generateCalendar();
-    this.computeAvailableHoursForCurrentMatrix();
   }
 
   generateCalendar() {
@@ -116,7 +121,6 @@ export class CalendarSelectorComponent implements OnDestroy {
       }
       this.calendarMatrix.push(week);
     }
-    this.computeAvailableHoursForCurrentMatrix();
   }
 
   isToday(date: Date | null): boolean {
@@ -147,9 +151,16 @@ export class CalendarSelectorComponent implements OnDestroy {
     if (!date) return false;
     const today = new Date(); today.setHours(0,0,0,0);
     if (date < today) return false;
+
     const dateKey = this.formatDate(date);
-    const available = this.availableHoursByDate[dateKey];
-    return available ? available.length > 0 : true;
+    const ex = this.availabilityData?.exceptions?.[dateKey];
+    if (ex) return !ex.closed && ((ex.hours?.length ?? 0) > 0 || ex.hours === undefined);
+
+    const dayName = this.getDayName(date);
+    const ds = this.availabilityData?.defaultSchedule?.[dayName];
+    if (ds) return !ds.closed;
+
+    return true;
   }
 
   selectDate(date: Date | null) {
@@ -171,7 +182,6 @@ export class CalendarSelectorComponent implements OnDestroy {
     this.showForm = false;
   }
 
-  /** Calcula horas disponibles para una fecha usando availabilityData y bookedSlotsByDate */
   private getAvailableHoursForDate(date: Date, booked: string[]): string[] {
     if (!this.availabilityData) return [];
 
@@ -183,21 +193,21 @@ export class CalendarSelectorComponent implements OnDestroy {
     if (ex) {
       if (!ex.closed && Array.isArray(ex.hours) && ex.hours.length) {
         hours = ex.hours.slice();
-      } // si está cerrado, queda hours = []
-    } else {
-      const dayName = this.getDayName(date); // 'lunes', 'martes', ...
-      const ds = this.availabilityData.defaultSchedule?.[dayName];
-      if (ds && !ds.closed) {
-        hours = this.hoursRangeFromOpenClose(ds.open, ds.close);
+      } else if (!ex.closed) {
+        const dayName = this.getDayName(date);
+        const ds = this.availabilityData.defaultSchedule?.[dayName];
+        if (ds && !ds.closed) hours = this.hoursRangeFromOpenClose(ds.open, ds.close);
       }
+    } else {
+      const dayName = this.getDayName(date);
+      const ds = this.availabilityData.defaultSchedule?.[dayName];
+      if (ds && !ds.closed) hours = this.hoursRangeFromOpenClose(ds.open, ds.close);
     }
 
-    // Filtrar las horas ya reservadas
     return hours.filter(h => !booked.includes(h));
   }
 
-  /** Crea array de horas tipo ['09:00','10:00',...] entre open y close */
-  private hoursRangeFromOpenClose(open: string, close: string): string[] {
+  private hoursRangeFromOpenClose(open: string, close: string, step = 30): string[] {
     const result: string[] = [];
     const [openH, openM] = open.split(':').map(Number);
     const [closeH, closeM] = close.split(':').map(Number);
@@ -207,7 +217,7 @@ export class CalendarSelectorComponent implements OnDestroy {
 
     while (hour < closeH || (hour === closeH && minute < closeM)) {
       result.push(`${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`);
-      minute += 60; // puedes cambiar a 30 si quieres medias horas
+      minute += step;
       if (minute >= 60) { minute = 0; hour++; }
     }
 
@@ -240,7 +250,7 @@ export class CalendarSelectorComponent implements OnDestroy {
       await this.appointmentService.addAppointment(bookingData);
       alert('Cita guardada correctamente 👌');
       this.resetAll();
-      this.loadData(); // recarga reservas y disponibilidad
+      this.loadData();
     } catch (error: any) {
       console.error('Error guardando la cita:', error);
       alert('Error al guardar la cita: ' + (error.message || JSON.stringify(error)));
