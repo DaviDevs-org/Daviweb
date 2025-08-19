@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { InfoManager } from '../../../services/admin-panel/info-management.service';
+import {ContactInfo, ScheduleDay} from '../../types/admin.types';
+import {InfoManager} from '../../../services/admin-panel/info-management.service';
+
+type DaySchedule = ScheduleDay;
+type ExceptionItem = { date: string | null; closed: boolean; hours: string[]; hoursText?: string };
 
 @Component({
   selector: 'app-info-management',
@@ -11,16 +15,31 @@ import { InfoManager } from '../../../services/admin-panel/info-management.servi
   styleUrls: ['./info-management.component.scss']
 })
 export class InfoManagementComponent implements OnInit {
-  schedule: any[] = [];
-  contactInfo: any = {};
+  schedule: DaySchedule[] = [];
+  contactInfo: ContactInfo = { phone: '', email: '', address: '' };
   isLoading = true;
+
+  // Disponibilidad avanzada
+  exceptions: ExceptionItem[] = [];
 
   constructor(private infoManager: InfoManager) {}
 
   async ngOnInit() {
     try {
+      // Carga horario semanal (su método existente)
       this.schedule = await this.infoManager.getSchedule();
+
+      // Carga contact info (su método existente)
       this.contactInfo = await this.infoManager.getContactInfo();
+
+      // Carga availability (defaultSchedule + exceptions)
+      const availability = await this.infoManager.getAvailability();
+
+      if (availability?.defaultSchedule) {
+        this.applyDefaultScheduleToLocal(availability.defaultSchedule);
+      }
+
+      this.exceptions = this.mapExceptionsToArray(availability?.exceptions || {});
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -28,6 +47,111 @@ export class InfoManagementComponent implements OnInit {
     }
   }
 
+  // Convierte el objeto defaultSchedule de Firestore a `this.schedule`
+  applyDefaultScheduleToLocal(defaultSchedule: any) {
+    const dayOrder = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+    const names = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+
+    this.schedule = dayOrder.map((key, idx) => {
+      const src = defaultSchedule[key] || {};
+      return {
+        day: key,
+        name: names[idx],
+        open: src.open || '',
+        close: src.close || '',
+        closed: !!src.closed
+      } as DaySchedule;
+    });
+  }
+
+  mapExceptionsToArray(obj: Record<string, any>): ExceptionItem[] {
+    return Object.keys(obj).sort().map(dateKey => {
+      const item = obj[dateKey];
+      return {
+        date: dateKey,
+        closed: !!item.closed,
+        hours: Array.isArray(item.hours) ? item.hours.slice() : [],
+        hoursText: Array.isArray(item.hours) ? item.hours.join(',') : ''
+      } as ExceptionItem;
+    });
+  }
+
+  // UI helpers para excepciones
+  addEmptyException() {
+    this.exceptions.push({ date: null, closed: true, hours: [], hoursText: '' });
+  }
+
+  removeException(index: number) {
+    if (!confirm('¿Seguro que desea eliminar esta excepción?')) return;
+    this.exceptions.splice(index, 1);
+  }
+
+  onExceptionToggleClosed(ex: ExceptionItem) {
+    if (ex.closed) {
+      ex.hours = [];
+      ex.hoursText = '';
+    }
+  }
+
+  syncHoursFromText(ex: ExceptionItem) {
+    if (!ex.hoursText) {
+      ex.hours = [];
+      return;
+    }
+    ex.hours = ex.hoursText.split(',')
+      .map(s => s.trim())
+      .filter(s => !!s);
+  }
+
+  onExceptionDateChange(ex: ExceptionItem) {
+    // validar formato YYYY-MM-DD básico
+    if (ex.date && !/^\d{4}-\d{2}-\d{2}$/.test(ex.date)) {
+      alert('Formato de fecha inválido. Use YYYY-MM-DD.');
+    }
+  }
+
+  /*************** Guardado ***************/
+  async saveAvailability(): Promise<void> {
+    try {
+      const payload = {
+        defaultSchedule: this.transformScheduleToDefault(),
+        exceptions: this.transformExceptionsToObject()
+      };
+
+      const validation = this.infoManager.validateAvailability(payload);
+
+      if (!validation.isValid) {
+        alert(validation.errors.join('\n'));
+        return;
+      }
+
+      await this.infoManager.saveAvailability(payload);
+      alert('Disponibilidad guardada correctamente!');
+    } catch (error) {
+      console.error('Error saving availability:', error);
+      alert('Error al guardar la disponibilidad');
+    }
+  }
+
+  transformScheduleToDefault() {
+    // Convierte this.schedule a objeto { monday: {open,close,closed}, ... }
+    const out: Record<string, any> = {};
+    for (const d of this.schedule) {
+      out[d.day] = { open: d.open || '', close: d.close || '', closed: !!d.closed };
+    }
+    return out;
+  }
+
+  transformExceptionsToObject() {
+    const out: Record<string, any> = {};
+    for (const ex of this.exceptions) {
+      if (!ex.date) continue; // ignorar entradas sin fecha
+      out[ex.date] = { closed: !!ex.closed, hours: ex.hours || [] };
+    }
+    return out;
+  }
+
+  /*************** Sus métodos ya existentes (guardado schedule/contact) ***************/
   async saveSchedule(): Promise<void> {
     try {
       const validation = this.infoManager.validateSchedule(this.schedule);

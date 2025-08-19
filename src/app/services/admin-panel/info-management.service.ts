@@ -1,10 +1,10 @@
-// src/app/services/info-management.service.ts
 import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore,
   doc,
   getDoc,
-  updateDoc
+  updateDoc,
+  setDoc
 } from '@angular/fire/firestore';
 
 export interface ScheduleDay {
@@ -36,6 +36,16 @@ export interface BusinessStatus {
   timeUntilChange?: string;
 }
 
+export interface AvailabilityException {
+  closed: boolean;
+  hours?: string[];
+}
+
+export interface AvailabilityData {
+  defaultSchedule: Record<string, { open: string; close: string; closed: boolean }>;
+  exceptions: Record<string, AvailabilityException>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -45,6 +55,7 @@ export class InfoManager {
 
   private schedulePath = '/pruebas/data/info/schedule';
   private contactInfoPath = '/pruebas/data/info/contact-info';
+  private availabilityPath = '/pruebas/data/availability/config';
 
   private defaultSchedule: ScheduleDay[] = [
     { name: 'Lunes', day: 'monday', open: '09:00', close: '19:00', closed: false },
@@ -61,6 +72,9 @@ export class InfoManager {
     email: 'info@peluqueriamoderna.com',
     address: 'Calle Principal, 123\n28001 Madrid, España'
   };
+
+  // ** NUEVA PROPIEDAD **
+  private _availabilityData: AvailabilityData | null = null;
 
   /** Obtiene el documento de schedule */
   async getSchedule(): Promise<ScheduleDay[]> {
@@ -132,7 +146,6 @@ export class InfoManager {
       };
     }
   }
-
 
   private calculateBusinessStatus(schedule: ScheduleDay[], checkDate: Date): BusinessStatus {
     const dayIndex = checkDate.getDay();
@@ -290,5 +303,152 @@ export class InfoManager {
       isValid: errors.length === 0,
       errors
     };
+  }
+
+  /* ==========================
+     NUEVAS FUNCIONES: AVAILABILITY
+     ========================== */
+
+  /** Devuelve el mapa por defecto basado en this.defaultSchedule */
+  private defaultScheduleMap(): Record<string, { open: string; close: string; closed: boolean }> {
+    const map: Record<string, { open: string; close: string; closed: boolean }> = {};
+    for (const d of this.defaultSchedule) {
+      map[d.name.toLowerCase()] = { open: d.open || '', close: d.close || '', closed: !!d.closed };
+    }
+    return map;
+  }
+
+  /** Obtiene availability (documento único) y guarda en _availabilityData */
+  async getAvailability(): Promise<AvailabilityData> {
+    if (this._availabilityData) return this._availabilityData;
+
+    try {
+      return await runInInjectionContext(this.injector, async () => {
+        const ref = doc(this.firestore, this.availabilityPath);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          this._availabilityData = { defaultSchedule: this.defaultScheduleMap(), exceptions: {} };
+          return this._availabilityData;
+        }
+        this._availabilityData = snap.data() as AvailabilityData;
+        return this._availabilityData;
+      });
+    } catch (error) {
+      console.error('Error getting availability:', error);
+      throw error;
+    }
+  }
+
+  /** Guarda availability usando setDoc con merge */
+  async saveAvailability(availability: AvailabilityData): Promise<void> {
+    try {
+      await runInInjectionContext(this.injector, async () => {
+        const ref = doc(this.firestore, this.availabilityPath);
+        await setDoc(ref, availability, { merge: true });
+        this._availabilityData = availability;
+      });
+    } catch (error) {
+      console.error('Error saving availability:', error);
+      throw error;
+    }
+  }
+
+  /** Devuelve un array de horas entre open y close */
+  hoursRangeFromOpenClose(open: string, close: string, stepMinutes = 30): string[] {
+    const hours: string[] = [];
+    const [openH, openM] = open.split(':').map(Number);
+    const [closeH, closeM] = close.split(':').map(Number);
+
+    let current = new Date();
+    current.setHours(openH, openM, 0, 0);
+    const end = new Date();
+    end.setHours(closeH, closeM, 0, 0);
+
+    while (current < end) {
+      const hh = String(current.getHours()).padStart(2,'0');
+      const mm = String(current.getMinutes()).padStart(2,'0');
+      hours.push(`${hh}:${mm}`);
+      current.setMinutes(current.getMinutes() + stepMinutes);
+    }
+    return hours;
+  }
+
+  /** Devuelve las horas disponibles para una fecha concreta, teniendo en cuenta bookedHours */
+  getAvailableHoursForDate(date: Date, bookedHours: string[]): string[] {
+    if (!this._availabilityData) return [];
+
+    const dateKey = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    const ex = this._availabilityData.exceptions?.[dateKey];
+    let hours: string[] = [];
+
+    if (ex) {
+      if (!ex.closed && Array.isArray(ex.hours) && ex.hours.length) {
+        hours = ex.hours.slice();
+      } else if (!ex.closed && (!ex.hours || !ex.hours.length)) {
+        const ds = this._availabilityData.defaultSchedule[this.getDayKey(date)];
+        if (ds && !ds.closed) hours = this.hoursRangeFromOpenClose(ds.open, ds.close);
+      }
+    } else {
+      const ds = this._availabilityData.defaultSchedule[this.getDayKey(date)];
+      if (ds && !ds.closed) hours = this.hoursRangeFromOpenClose(ds.open, ds.close);
+    }
+
+    return hours.filter(h => !bookedHours.includes(h));
+  }
+
+  private getDayKey(date: Date): string {
+    return ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][date.getDay()];
+  }
+
+  validateAvailability(data: AvailabilityData): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+    const ds = data?.defaultSchedule;
+    const days = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+
+    if (!ds) {
+      errors.push('Falta defaultSchedule.');
+    } else {
+      for (const day of days) {
+        const cfg = ds[day];
+        if (!cfg) {
+          errors.push(`Falta configuración para ${day}.`);
+          continue;
+        }
+        if (!cfg.closed) {
+          if (!cfg.open || !cfg.close) {
+            errors.push(`Horas no definidas para ${day}.`);
+          } else if (cfg.open >= cfg.close) {
+            errors.push(`Apertura >= cierre en ${day}.`);
+          } else {
+            if (!/^\d{2}:\d{2}$/.test(cfg.open)) errors.push(`Formato inválido open en ${day}: ${cfg.open}`);
+            if (!/^\d{2}:\d{2}$/.test(cfg.close)) errors.push(`Formato inválido close en ${day}: ${cfg.close}`);
+          }
+        }
+      }
+    }
+
+    const ex = data?.exceptions || {};
+    for (const key of Object.keys(ex)) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) {
+        errors.push(`Fecha de excepción inválida: ${key}`);
+      }
+      const item = ex[key];
+      if (item) {
+        if (typeof item.closed !== 'boolean') {
+          errors.push(`El campo 'closed' debe ser boolean en ${key}`);
+        }
+        if (Array.isArray(item.hours)) {
+          for (const h of item.hours) {
+            if (!/^\d{2}:\d{2}$/.test(h)) {
+              errors.push(`Hora inválida en ${key}: ${h}`);
+            }
+          }
+        } else if (item.hours !== undefined && item.hours !== null) {
+          errors.push(`'hours' debe ser un array para ${key}`);
+        }
+      }
+    }
+
+    return { isValid: errors.length === 0, errors };
   }
 }

@@ -1,74 +1,112 @@
 <section class="content-section">
-    <div class="section-header">
-        <h2>
-            <i class="bi bi-info-circle"></i>
-            Información General
-        </h2>
-        <p>Configura la información básica de la peluquería</p>
+  <div class="section-header">
+    <h2>
+      <i class="bi bi-info-circle"></i>
+      Información General
+    </h2>
+    <p>Configura la información básica de la peluquería</p>
+  </div>
+
+  <div *ngIf="!isLoading; else loading" class="info-sections">
+    <!-- Horarios -->
+    <div class="info-card">
+      <h3>
+        <i class="bi bi-clock"></i>
+        Horarios de Apertura (Horario por defecto semanal)
+      </h3>
+      <div class="schedule-grid">
+        <div class="schedule-row" *ngFor="let day of schedule">
+          <label class="day-label">{{ day.name }}</label>
+          <div class="time-inputs">
+            <input type="time" [(ngModel)]="day.open" class="time-input" [disabled]="day.closed"
+                   (blur)="validateTime(day)">
+            <span class="time-separator">-</span>
+            <input type="time" [(ngModel)]="day.close" class="time-input" [disabled]="day.closed"
+                   (blur)="validateTime(day)">
+            <label class="closed-checkbox">
+              <input type="checkbox" [(ngModel)]="day.closed" (change)="validateTime(day)">
+              Cerrado
+            </label>
+          </div>
+        </div>
+      </div>
+      <button class="save-btn" (click)="saveSchedule()">
+        <i class="bi bi-check-circle"></i>
+        Guardar Horarios
+      </button>
     </div>
 
-    <div *ngIf="!isLoading; else loading" class="info-sections">
-        <!-- Horarios -->
-        <div class="info-card">
-            <h3>
-                <i class="bi bi-clock"></i>
-                Horarios de Apertura
-            </h3>
-            <div class="schedule-grid">
-                <div class="schedule-row" *ngFor="let day of schedule">
-                    <label class="day-label">{{ day.name }}</label>
-                    <div class="time-inputs">
-                        <input type="time" [(ngModel)]="day.open" class="time-input" [disabled]="day.closed"
-                            (blur)="validateTime(day)">
-                        <span class="time-separator">-</span>
-                        <input type="time" [(ngModel)]="day.close" class="time-input" [disabled]="day.closed"
-                            (blur)="validateTime(day)">
-                        <label class="closed-checkbox">
-                            <input type="checkbox" [(ngModel)]="day.closed" (change)="validateTime(day)">
-                            Cerrado
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <button class="save-btn" (click)="saveSchedule()">
-                <i class="bi bi-check-circle"></i>
-                Guardar Horarios
-            </button>
+    <!-- Disponibilidad avanzada: excepciones -->
+    <div class="info-card">
+      <h3>
+        <i class="bi bi-calendar-event"></i>
+        Excepciones / Días especiales
+      </h3>
+
+      <div class="exceptions-list">
+        <div class="exception-row" *ngFor="let ex of exceptions; let i = index">
+          <input type="date" [(ngModel)]="ex.date" class="ex-date" (change)="onExceptionDateChange(ex)">
+
+          <label class="ex-closed">
+            <input type="checkbox" [(ngModel)]="ex.closed" (change)="onExceptionToggleClosed(ex)">
+            Cerrado todo el día
+          </label>
+
+          <div class="ex-hours" *ngIf="!ex.closed">
+            <label>Horas (lista separada por comas):</label>
+            <input type="text" [(ngModel)]="ex.hoursText" placeholder="09:00,09:30,10:00"
+                   (blur)="syncHoursFromText(ex)">
+          </div>
+
+          <button class="danger-btn" (click)="removeException(i)">Eliminar</button>
         </div>
 
-        <!-- Información de contacto -->
-        <div class="info-card">
-            <h3>
-                <i class="bi bi-telephone"></i>
-                Información de Contacto
-            </h3>
-            <div class="contact-form schedule-grid">
-                <div class="form-group schedule-row">
-                    <label>Teléfono</label>
-                    <input type="tel" [(ngModel)]="contactInfo.phone" class="form-input" placeholder="+34 123 456 789">
-                </div>
-                <div class="form-group schedule-row">
-                    <label>Email</label>
-                    <input type="email" [(ngModel)]="contactInfo.email" class="form-input"
-                        placeholder="info@peluqueriamoderna.com">
-                </div>
-                <div class="form-group schedule-row">
-                    <label>Dirección</label>
-                    <textarea [(ngModel)]="contactInfo.address" class="form-textarea"
-                        placeholder="Calle Principal, 123..."></textarea>
-                </div>
-            </div>
-            <button class="save-btn" (click)="saveContactInfo()">
-                <i class="bi bi-check-circle"></i>
-                Guardar Información
-            </button>
+        <div class="exception-add">
+          <button class="add-btn" (click)="addEmptyException()">
+            <i class="bi bi-plus-circle"></i> Añadir excepción
+          </button>
         </div>
+      </div>
+
+      <button class="save-btn" (click)="saveAvailability()">
+        <i class="bi bi-check-circle"></i>
+        Guardar Disponibilidad
+      </button>
     </div>
 
-    <ng-template #loading>
-        <div class="loading-spinner">
-            <i class="bi bi-arrow-clockwise"></i>
-            Cargando información...
+    <!-- Información de contacto -->
+    <div class="info-card">
+      <h3>
+        <i class="bi bi-telephone"></i>
+        Información de Contacto
+      </h3>
+      <div class="contact-form schedule-grid">
+        <div class="form-group schedule-row">
+          <label>Teléfono</label>
+          <input type="tel" [(ngModel)]="contactInfo.phone" class="form-input" placeholder="+34 123 456 789">
         </div>
-    </ng-template>
+        <div class="form-group schedule-row">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="contactInfo.email" class="form-input"
+                 placeholder="info@peluqueriamoderna.com">
+        </div>
+        <div class="form-group schedule-row">
+          <label>Dirección</label>
+          <textarea [(ngModel)]="contactInfo.address" class="form-textarea"
+                    placeholder="Calle Principal, 123..."></textarea>
+        </div>
+      </div>
+      <button class="save-btn" (click)="saveContactInfo()">
+        <i class="bi bi-check-circle"></i>
+        Guardar Información
+      </button>
+    </div>
+  </div>
+
+  <ng-template #loading>
+    <div class="loading-spinner">
+      <i class="bi bi-arrow-clockwise"></i>
+      Cargando información...
+    </div>
+  </ng-template>
 </section>

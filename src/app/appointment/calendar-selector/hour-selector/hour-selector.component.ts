@@ -11,6 +11,7 @@ export class HourSelectorComponent {
 
   @Input() date: Date | null = null;
   @Input() bookedHours: string[] = [];
+  @Input() availableHours: string[] = [];
   @Output() back = new EventEmitter<void>();
   @Output() hourSelected = new EventEmitter<string>();
 

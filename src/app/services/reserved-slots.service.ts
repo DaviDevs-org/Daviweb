@@ -1,5 +1,4 @@
-// src/app/services/reserved-slots.service.ts
-import { Injectable } from '@angular/core';
+import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore,
   collection,
@@ -22,33 +21,32 @@ export interface ReservedSlot {
   providedIn: 'root'
 })
 export class ReservedSlotsService {
-  constructor(private firestore: Firestore) {}
+  private firestore = inject(Firestore);
+  private injector = inject(Injector);
 
-  /**
-   * Devuelve todos los reservedSlots desde "ahora" en adelante,
-   * ordenados por datetime ascendente.
-   */
+  /** Devuelve todos los reservedSlots desde "ahora" en adelante, como Observable */
   getReservedSlotsFromNow(): Observable<ReservedSlot[]> {
-    const reservedCol = collection(this.firestore, 'pruebas', 'data', 'reservedSlots');
-
-    const now = new Date(); // momento de la consulta
-    const q = query(
-      reservedCol,
-      where('datetime', '>=', now),
-      orderBy('datetime', 'asc')
-    );
-
-    return collectionData(q, { idField: 'id' }) as Observable<ReservedSlot[]>;
+    return runInInjectionContext(this.injector, () => {
+      const reservedCol = collection(this.firestore, 'pruebas', 'data', 'reservedSlots');
+      const now = new Date();
+      const q = query(
+        reservedCol,
+        where('datetime', '>=', now),
+        orderBy('datetime', 'asc')
+      );
+      return collectionData(q, { idField: 'id' }) as Observable<ReservedSlot[]>;
+    });
   }
 
-
   getReservedSlotsFrom(startDate: Date): Observable<ReservedSlot[]> {
-    const reservedCol = collection(this.firestore, 'pruebas', 'data', 'reservedSlots');
-    const q = query(
-      reservedCol,
-      where('datetime', '>=', startDate),
-      orderBy('datetime', 'asc')
-    );
-    return collectionData(q, { idField: 'id' }) as Observable<ReservedSlot[]>;
+    return runInInjectionContext(this.injector, () => {
+      const reservedCol = collection(this.firestore, 'pruebas', 'data', 'reservedSlots');
+      const q = query(
+        reservedCol,
+        where('datetime', '>=', startDate),
+        orderBy('datetime', 'asc')
+      );
+      return collectionData(q, { idField: 'id' }) as Observable<ReservedSlot[]>;
+    });
   }
 }
