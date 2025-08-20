@@ -109,4 +109,8 @@
   min-width: 24px;
   min-height: 24px;
 }
-
+.scheduleContainer{
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}

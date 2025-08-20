@@ -63,9 +63,9 @@
                         <div class="hour-label">{{ h }}</div>
                         <div class="slot">
                             <ng-container *ngIf="findReservation(dayList, h) as res; else emptySlot">
-                                <div class="reservation" (click)="chooseAppointment(res.id)"
+                                <div class="reservation" 
                                     [class.selected]="(selectedAppointment$ | async)?.id === res.id">
-                                    <div class="reservation-content">
+                                    <div class="reservation-content" (click)="chooseAppointment(res.id)">
                                         <div class="res-header">
                                             <div class="res-time">{{ res.timeNormalized }}</div>
                                             <div class="res-duration">{{ getAppointmentDuration(res) }}</div>
@@ -76,9 +76,12 @@
                                             <span *ngIf="res.email" class="contact-item"><i class="bi bi-envelope-fill"></i> {{ res.email }}</span>
                                         </div>
                                     </div>
-                                    <div class="appointment-actions">
-                                        <button class="action-btn" title="Ver detalles"><i class="bi bi-eye"></i></button>
-                                    </div>
+                                    @if (selectedAppointment$ | async) {
+                                        <div class="appointment-actions"(click)="selectedAppointmentId$.next(null)">
+                                            <button class="action-btn" title="Ver detalles"><i class="bi bi-eye-slash"></i></button>
+                                        </div>
+                                    }
+                                    
                                 </div>
                             </ng-container>
                             <ng-template #emptySlot>
@@ -130,7 +133,7 @@
 
                 <div class="detail-actions">
                     <button class="btn action-primary">Modificar</button>
-                    <button class="btn action-secondary">Contactar</button>
+                    <button class="btn action-secondary">Eliminar</button>
                 </div>
             </div>
         </main>

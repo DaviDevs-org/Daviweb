@@ -123,7 +123,7 @@ export class GalleryManagementComponent implements OnDestroy {
     let newName: string | null = "";
     while (true) {
       newName = prompt('Introduzca un nuevo nombre para la imagen')
-      if (newName === null) continue;
+      if (newName === null) break;
       if (newName!.trim() !== '') break;
     }
     newName = newName + '.' + this.galleryPhotos()[i].name.split('.').pop()

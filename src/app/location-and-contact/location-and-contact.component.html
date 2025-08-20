@@ -5,17 +5,19 @@
 
   <div class="map-and-info_31-213">
     <div class="map_31-215">
-      <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d194348.23368637086!2d-3.8443445949355683!3d40.43783728432894!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd422997800a3c81%3A0xc436dec1618c2269!2sMadrid!5e0!3m2!1ses!2ses!4v1753365501710!5m2!1ses!2ses"
-        width="630"
-        height="450"
-        style="border:0;"
-        allowfullscreen=""
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
+      @if (coords) {
+        <iframe
+          [src]= coords
+          width="630"
+          height="450"
+          style="border:0;"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      }
+      
     </div>
-
     <div class="info_31-266">
       <div class="frame-1_34-130">
         <div class="direction_31-267">
@@ -33,15 +35,7 @@
             <span>Dirección</span>
           </div>
           <div class="paragraph_31-273">
-            <span>Calle Falsa 123</span>
-          </div>
-          <div class="paragraph_31-275">
-            <span>Ciudad, País</span>
-          </div>
-          <div class="container_31-277">
-            <div class="container_31-278">
-              <span>Cómo llegar</span>
-            </div>
+            <span>{{contactInfo?.address}}</span>
           </div>
         </div>
 
@@ -57,10 +51,10 @@
             <span>Contacto</span>
           </div>
           <div class="paragraph_31-285">
-            <span>+34 600 000 000</span>
+            <span>{{contactInfo?.phone}}</span>
           </div>
           <div class="paragraph_31-288">
-            <span>info&#64;barberiamoderna.com</span>
+            <span>{{contactInfo?.email  }}</span>
           </div>
         </div>
 
@@ -78,13 +72,10 @@
             </div>
             <span>Horario</span>
           </div>
-          <div class="container_31-297">
-            <div class="paragraph_31-298"><span>Lunes a Viernes:</span></div>
-            <div class="paragraph_31-300"><span>10:00–20:00</span></div>
-            <div class="paragraph_31-302"><span>Sábado:</span></div>
-            <div class="paragraph_31-304"><span>9:00–18:00</span></div>
-            <div class="paragraph_31-306"><span>Domingo:</span></div>
-            <div class="paragraph_31-308"><span>Cerrado</span></div>
+          <div class="scheduleContainer">
+            @for (item of scheduleText; track $index) {
+              <div class="paragraph_31-298"><span>{{item}}</span></div>
+            }
           </div>
         </div>
       </div>
