@@ -1,7 +1,7 @@
 // src/app/services/appointments.service.ts
 import { Injectable } from '@angular/core';
 import { Firestore, collection, addDoc, serverTimestamp } from '@angular/fire/firestore';
-import { Appointment } from '../models/appointment.model';
+import { Appointment } from '../admin-panel/types/admin.types';
 
 @Injectable({
   providedIn: 'root'

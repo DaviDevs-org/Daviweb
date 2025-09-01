@@ -26,6 +26,7 @@ export interface Appointment {
   dateISO?: string;
   timeNormalized?: string;
   duration?: string;
+  service?: Service;
 }
 export class Service {
   id?: string;

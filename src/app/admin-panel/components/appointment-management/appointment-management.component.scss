@@ -113,8 +113,8 @@
 
     &:hover {
         transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 12px 35px rgba(variables.$primary-gold, 0.15), 
-                    0 5px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 12px 35px rgba(variables.$primary-gold, 0.15),
+            0 5px 15px rgba(0, 0, 0, 0.1);
         border-color: rgba(variables.$primary-gold, 0.4);
 
         &::before {
@@ -130,8 +130,8 @@
     &.active {
         background: linear-gradient(135deg, rgba(variables.$primary-gold, 0.05), rgba(variables.$secondary-gold, 0.02));
         border-color: variables.$primary-gold;
-        box-shadow: 0 8px 25px rgba(variables.$primary-gold, 0.2), 
-                    inset 0 1px 0 rgba(variables.$white, 0.8);
+        box-shadow: 0 8px 25px rgba(variables.$primary-gold, 0.2),
+            inset 0 1px 0 rgba(variables.$white, 0.8);
         transform: translateY(-2px);
 
         &::before {
@@ -170,20 +170,28 @@
         gap: 0.25rem;
         align-items: flex-end;
 
-        .date, .time {
+        .date {
             background: rgba(variables.$primary-gold, 0.1);
             color: variables.$primary-gold;
-            padding: 3px 8px;
+            padding: 3px 15px;
             border-radius: 6px;
-            font-size: 0.8rem;
+            font-size: 1rem;
             font-weight: 600;
             white-space: nowrap;
         }
 
-        .time {
-            background: rgba(variables.$secondary-gold, 0.15);
-            color: variables.$dark-brown;
-            font-weight: 700;
+        .hour-time {
+            display: flex;
+            gap: 4px;
+
+            .time {
+                background: rgba(variables.$secondary-gold, 0.15);
+                color: variables.$dark-brown;
+                font-size: 0.9rem;
+                font-weight: 700;
+                padding: 3px 6px;
+                border-radius: 6px;
+            }
         }
     }
 
@@ -216,15 +224,24 @@
         font-size: 0.9rem;
         opacity: 0.8;
 
-        i   {
+        i {
             color: variables.$primary-gold
         }
     }
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 0.8; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.1); }
+
+    0%,
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
 }
 
 /* Right panel - Calendario mejorado */
@@ -334,7 +351,8 @@
         gap: 0.5rem;
 
     }
-    i   {
+
+    i {
         color: variables.$primary-gold
     }
 }
@@ -536,7 +554,8 @@
             border-radius: 6px;
             font-weight: 500;
         }
-        i   {
+
+        i {
             color: variables.$primary-gold
         }
     }
@@ -562,16 +581,25 @@
                 transform: scale(1.1);
             }
         }
-        i   {
+
+        i {
             color: variables.$dark-brown
         }
     }
 }
 
 @keyframes highlightPulse {
-    0% { box-shadow: 0 6px 20px rgba(variables.$primary-gold, 0.3); }
-    50% { box-shadow: 0 10px 30px rgba(variables.$primary-gold, 0.6), 0 0 20px rgba(variables.$primary-gold, 0.4); }
-    100% { box-shadow: 0 6px 20px rgba(variables.$primary-gold, 0.3); }
+    0% {
+        box-shadow: 0 6px 20px rgba(variables.$primary-gold, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 10px 30px rgba(variables.$primary-gold, 0.6), 0 0 20px rgba(variables.$primary-gold, 0.4);
+    }
+
+    100% {
+        box-shadow: 0 6px 20px rgba(variables.$primary-gold, 0.3);
+    }
 }
 
 .empty-slot {
@@ -587,21 +615,15 @@
     cursor: pointer;
 
     &:hover {
-        border-color: rgba(variables.$primary-gold, 0.4);
-        background: rgba(variables.$primary-gold, 0.05);
+        border-color: rgba(variables.$primary-gold, 0.6);
+        background: rgba(variables.$primary-gold, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(variables.$primary-gold, 0.2);
 
         .availability-text {
             color: variables.$primary-gold;
+            font-weight: 600;
         }
-    }
-
-    .availability-text {
-        color: variables.$text-gray;
-        font-style: italic;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: color 0.3s ease;
-
     }
 }
 
@@ -843,4 +865,351 @@
             flex: none;
         }
     }
+}
+
+// Estilos para el modo edición
+.left-panel.editing {
+    .panel-header {
+        background: linear-gradient(135deg, rgba(variables.$primary-gold, 0.1), rgba(variables.$secondary-gold, 0.05));
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+}
+
+.back-btn {
+    background: rgba(variables.$primary-gold, 0.1);
+    border: 2px solid rgba(variables.$primary-gold, 0.2);
+    color: variables.$primary-gold;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: rgba(variables.$primary-gold, 0.2);
+        transform: translateX(-3px);
+    }
+}
+
+.edit-form {
+    padding: 1rem;
+
+    .form-group {
+        margin-bottom: 1.25rem;
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: variables.$dark-brown;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid rgba(variables.$primary-gold, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+
+            &:focus {
+                outline: none;
+                border-color: variables.$primary-gold;
+                box-shadow: 0 0 0 3px rgba(variables.$primary-gold, 0.1);
+            }
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 2px solid rgba(variables.$primary-gold, 0.1);
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &.btn-primary {
+                background: linear-gradient(135deg, variables.$primary-gold, variables.$secondary-gold);
+                color: variables.$white;
+                border: none;
+
+                &:hover:not(:disabled) {
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba(variables.$primary-gold, 0.3);
+                }
+            }
+
+            &.btn-secondary {
+                background: rgba(variables.$primary-gold, 0.1);
+                color: variables.$primary-gold;
+                border: 2px solid rgba(variables.$primary-gold, 0.2);
+
+                &:hover:not(:disabled) {
+                    background: rgba(variables.$primary-gold, 0.2);
+                }
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none !important;
+            }
+        }
+    }
+}
+
+// Botones de acción en las tarjetas
+.card-actions {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+
+    .action-btn {
+        background: rgba(variables.$white, 0.9);
+        border: 1px solid rgba(variables.$primary-gold, 0.2);
+        border-radius: 6px;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.8rem;
+
+        &.edit-btn {
+            color: variables.$primary-gold;
+
+            &:hover {
+                background: variables.$primary-gold;
+                color: variables.$white;
+                transform: scale(1.1);
+            }
+        }
+    }
+}
+
+@include responsive.mobile {
+    .edit-form {
+        padding: 0.5rem;
+
+        .form-actions {
+            flex-direction: column;
+
+            .btn {
+                width: 100%;
+            }
+        }
+    }
+
+    .card-actions {
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+}
+
+.edit-form-container {
+    @include mixins.card-style;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+
+    .edit-form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(variables.$primary-gold, 0.1);
+
+        h3 {
+            margin: 0;
+            color: variables.$dark-brown;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn {
+            background: rgba(variables.$primary-gold, 0.1);
+            border: 2px solid rgba(variables.$primary-gold, 0.2);
+            color: variables.$primary-gold;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                background: rgba(variables.$primary-gold, 0.2);
+                transform: scale(1.1);
+            }
+        }
+    }
+}
+
+// Estilos del formulario
+.edit-form {
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+
+        @include responsive.mobile {
+            flex-direction: column;
+            gap: 0;
+        }
+    }
+
+    .form-group {
+        flex: 1;
+        position: relative;
+
+        &.full-width {
+            flex: 0 0 100%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: variables.$dark-brown;
+
+            &::after {
+                content: '';
+            }
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid rgba(variables.$primary-gold, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: variables.$white;
+
+            &:focus {
+                outline: none;
+                border-color: variables.$primary-gold;
+                box-shadow: 0 0 0 3px rgba(variables.$primary-gold, 0.1);
+            }
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23b8860b'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+    }
+
+    input.ng-invalid.ng-touched,
+    select.ng-invalid.ng-touched,
+    textarea.ng-invalid.ng-touched {
+        border-color: #dc3545;
+
+        &:focus {
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid rgba(variables.$primary-gold, 0.1);
+
+        @include responsive.mobile {
+            flex-direction: column;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+
+            &.btn-primary {
+                background: linear-gradient(135deg, variables.$primary-gold, variables.$secondary-gold);
+                color: variables.$white;
+                border: none;
+
+                &:hover:not(:disabled) {
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba(variables.$primary-gold, 0.3);
+                }
+            }
+
+            &.btn-secondary {
+                background: rgba(variables.$primary-gold, 0.1);
+                color: variables.$primary-gold;
+                border: 2px solid rgba(variables.$primary-gold, 0.2);
+
+                &:hover:not(:disabled) {
+                    background: rgba(variables.$primary-gold, 0.2);
+                }
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none !important;
+            }
+        }
+    }
+}
+
+// Estilo para mostrar el servicio en las reservas
+.res-service {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: variables.$primary-gold;
+    background: rgba(variables.$primary-gold, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 600;
 }

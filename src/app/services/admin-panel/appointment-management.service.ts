@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 import { Appointment } from '../../admin-panel/types/admin.types';
 
 @Injectable({ providedIn: 'root' })
-export class AppointmentService {
+export class AppointmentManagerService {
     private path = 'pruebas/data/appointments';
 
     constructor(private firestore: Firestore) { }
