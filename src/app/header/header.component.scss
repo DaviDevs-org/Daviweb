@@ -66,12 +66,54 @@
   font-size: 14px;
   font-weight: 500;
   font-family: Inter, sans-serif;
-}
-.open{
+  min-width: 80px;
+  text-align: center;
+  
+  &.open {
     background-color: rgb(32, 160, 32);
+  }
+  
+  &.closed {
+    background-color: rgb(235, 39, 39);
+  }
+  
+  &.warning {
+    background-color: rgb(255, 193, 7); // Amarillo/naranja
+    color: #000; // Texto negro para mejor contraste
+    padding: 6px 16px;
+    animation: pulse-warning 3s infinite;
+    
+    .status-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    
+    .status-text {
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    
+    .timer {
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+  }
 }
-.closed{
-  background-color: rgb(235, 39, 39);
+
+@keyframes pulse-warning {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
 }
 
 .welcome-photo {
@@ -85,5 +127,70 @@
   margin: 0 auto;
 }
 
+// Responsive adjustments
+@media (max-width: 768px) {
+  .nav {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  
+  .anchors {
+    gap: 16px;
+  }
+  
+  .status-container {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-width: 70px;
+    
+    &.warning {
+      padding: 4px 10px;
+      
+      .status-text {
+        font-size: 10px;
+      }
+      
+      .timer {
+        font-size: 14px;
+      }
+    }
+  }
+  
+  .heading-text {
+    font-size: 18px;
+  }
+  
+  .anchor-text {
+    font-size: 12px;
+  }
+}
 
-
+@media (max-width: 480px) {
+  .nav {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .anchors {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .status-container {
+    &.warning {
+      .status-content {
+        gap: 1px;
+      }
+      
+      .status-text {
+        font-size: 9px;
+      }
+      
+      .timer {
+        font-size: 12px;
+      }
+    }
+  }
+}

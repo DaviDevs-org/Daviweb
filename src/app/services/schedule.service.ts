@@ -82,8 +82,6 @@ export class ScheduleService{
         if (!scheduleText || scheduleText.trim() === '') {
             return [];
         }
-        
-        // Dividir por espacios y reagrupar los elementos que van juntos
         const parts = scheduleText.split(' ');
         const result: string[] = [];
         let currentPart = '';

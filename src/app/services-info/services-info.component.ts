@@ -72,6 +72,11 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
       icon: this.getCategoryIcon(categoryName),
       services: services
     }));
+    this.categories.sort((a, b) => {
+      if (a.name === 'Otros') return 1;   
+      if (b.name === 'Otros') return -1;
+      return a.name.localeCompare(b.name, "es", { sensitivity: "base" });
+    });
 
     // Seleccionar la primera categoría por defecto
     if (this.categories.length > 0) {

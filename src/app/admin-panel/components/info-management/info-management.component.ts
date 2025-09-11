@@ -34,14 +34,8 @@ export class InfoManagementComponent implements OnInit {
       // Carga availability (defaultSchedule + exceptions)
       const availability = await this.infoManager.getAvailability();
 
-      if (availability?.defaultSchedule) {
-        this.applyDefaultScheduleToLocal(availability.defaultSchedule);
-      }
-
       this.exceptions = this.mapExceptionsToArray(availability?.exceptions || {});
 
-      console.log('Schedule:', this.schedule);
-      console.log('Exceptions:', this.exceptions);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -155,12 +149,7 @@ export class InfoManagementComponent implements OnInit {
         return;
       }
 
-      const availabilityPayload = {
-        defaultSchedule: this.transformScheduleToDefault(),
-        exceptions: this.transformExceptionsToObject()
-      };
-
-      await this.infoManager.saveAvailability(availabilityPayload);
+      await this.infoManager.saveSchedule(this.schedule);
       alert('Horarios guardados correctamente!');
     } catch (error) {
       console.error('Error saving schedule:', error);

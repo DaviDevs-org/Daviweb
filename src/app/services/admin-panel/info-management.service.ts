@@ -34,6 +34,10 @@ export interface BusinessStatus {
   nextOpenTime?: string;
   nextOpenDay?: string;
   timeUntilChange?: string;
+  isWarning?: boolean; // Nuevo: indica si falta una hora o menos
+  warningType?: 'closing' | 'opening'; // Nuevo: tipo de advertencia
+  remainingMinutes?: number; // Nuevo: minutos exactos restantes
+  remainingSeconds?: number
 }
 
 export interface AvailabilityException {
@@ -141,7 +145,9 @@ export class InfoManager {
       console.error('Error checking business status:', error);
       return {
         isOpen: false,
-        currentDay: this.getDayName(new Date().getDay())
+        currentDay: this.getDayName(new Date().getDay()),
+        isWarning: false,
+        remainingMinutes: 0
       };
     }
   }
@@ -156,14 +162,21 @@ export class InfoManager {
     const today = schedule.find(day => day.day === currentDayKey);
 
     if (!today) {
-      return { isOpen: false, currentDay: this.getDayName(dayIndex) };
+      return { 
+        isOpen: false, 
+        currentDay: this.getDayName(dayIndex),
+        isWarning: false,
+        remainingMinutes: 0
+      };
     }
 
     const status: BusinessStatus = {
       isOpen: false,
       currentDay: today.name,
       openTime: today.open,
-      closeTime: today.close
+      closeTime: today.close,
+      isWarning: false,
+      remainingMinutes: 0
     };
 
     if (today.closed) {
@@ -171,22 +184,54 @@ export class InfoManager {
       status.nextOpenDay = nextOpen.day;
       status.nextOpenTime = nextOpen.time;
       status.timeUntilChange = this.calculateTimeUntil(checkDate, nextOpen.date);
+      
+      // Verificar si falta una hora o menos para abrir mañana
+      const diffMinutes = Math.floor((nextOpen.date.getTime() - checkDate.getTime()) / 60000);
+      if (diffMinutes <= 60 && diffMinutes > 0) {
+        status.isWarning = true;
+        status.warningType = 'opening';
+        status.remainingMinutes = diffMinutes;
+      }
     } else {
       if (currentTime >= today.open && currentTime < today.close) {
         status.isOpen = true;
         const closeDateTime = this.createDateTimeFromTime(checkDate, today.close);
         status.timeUntilChange = this.calculateTimeUntil(checkDate, closeDateTime);
+        
+        // Verificar si falta una hora o menos para cerrar
+        const diffMinutes = Math.floor((closeDateTime.getTime() - checkDate.getTime()) / 60000);
+        if (diffMinutes <= 60 && diffMinutes > 0) {
+          status.isWarning = true;
+          status.warningType = 'closing';
+          status.remainingMinutes = diffMinutes;
+        }
       } else {
         if (currentTime < today.open) {
           status.nextOpenTime = today.open;
           status.nextOpenDay = today.name;
           const openDateTime = this.createDateTimeFromTime(checkDate, today.open);
           status.timeUntilChange = this.calculateTimeUntil(checkDate, openDateTime);
+          
+          // Verificar si falta una hora o menos para abrir hoy
+          const diffMinutes = Math.floor((openDateTime.getTime() - checkDate.getTime()) / 60000);
+          if (diffMinutes <= 60 && diffMinutes > 0) {
+            status.isWarning = true;
+            status.warningType = 'opening';
+            status.remainingMinutes = diffMinutes;
+          }
         } else {
           const nextOpen = this.findNextOpenDay(schedule, dayIndex);
           status.nextOpenDay = nextOpen.day;
           status.nextOpenTime = nextOpen.time;
           status.timeUntilChange = this.calculateTimeUntil(checkDate, nextOpen.date);
+          
+          // Verificar si falta una hora o menos para abrir mañana
+          const diffMinutes = Math.floor((nextOpen.date.getTime() - checkDate.getTime()) / 60000);
+          if (diffMinutes <= 60 && diffMinutes > 0) {
+            status.isWarning = true;
+            status.warningType = 'opening';
+            status.remainingMinutes = diffMinutes;
+          }
         }
       }
     }
@@ -262,10 +307,6 @@ export class InfoManager {
     if (!contactInfo.address?.trim()) errors.push('La dirección es requerida');
     return { isValid: errors.length === 0, errors };
   }
-
-  /* ==========================
-            AVAILABILITY
-     ========================== */
 
   private defaultScheduleMap(): Record<string, { open: string; close: string; closed: boolean }> {
     const map: Record<string, { open: string; close: string; closed: boolean }> = {};
