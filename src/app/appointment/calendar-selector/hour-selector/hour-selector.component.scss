@@ -2,8 +2,6 @@
   text-align: center;
   font-family: 'Inter', sans-serif;
   color: #613523;
-
-  /* Ocupar todo el ancho y alto disponible */
   width: 100%;
   height: 100%;
   display: flex;
@@ -17,46 +15,48 @@
   list-style: none;
   padding: 0;
   margin: 20px 0;
-
-  /* Cambiado a 100% para ocupar todo el ancho disponible */
   width: 100%;
-
-  /* Altura máxima para que no se pase del contenedor */
-  max-height: calc(100vh - 250px); /* ajusta según tu layout */
-
+  max-height: calc(100vh - 250px);
   overflow-y: auto;
-
   border-radius: 12px;
   background: rgba(110, 77, 41, 0.94);
-
-  /* Ocultar scrollbar para chrome y firefox */
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
 
-.hours-list::-webkit-scrollbar {
-  display: none; /* Chrome, Safari y Opera */
-}
+.hours-list::-webkit-scrollbar { display: none; }
 
 .hours-list li {
-  padding: 12px 0;
+  padding: 14px 0;
   cursor: pointer;
-  border-bottom: 1px solid #d4b258;
-  transition: background-color 0.3s ease;
+  border-bottom: 1px solid rgba(212, 178, 88, 0.3);
+  border-radius: 8px;
+  margin: 6px 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: rgba(241, 215, 143, 0.98);
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.35);
+  transition: background-color 0.35s ease, box-shadow 0.35s ease, color 0.35s ease;
   user-select: none;
-}
-
-.hours-list li:last-child {
-  border-bottom: none;
 }
 
 .hours-list li:hover {
   background-color: #e8d69a;
+  box-shadow: 0 0 12px rgba(212, 178, 88, 0.5);
+  color: #4a351e;
 }
 
 .hours-list li.selected {
   background-color: #d4b258;
   color: white;
   font-weight: 700;
+  box-shadow: 0 0 12px 4px rgba(213, 160, 50, 0.4);
+  border-radius: 12px;
+}
+
+.hours-list li.disabled {
+  pointer-events: none;
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .buttons {
@@ -87,41 +87,4 @@
 
 .buttons button:hover:not(:disabled) {
   background-color: #b8953a;
-}
-
-.hours-list li {
-  padding: 14px 0;           /* Más alto para que se note más */
-  cursor: pointer;
-  border-bottom: 1px solid rgba(212, 178, 88, 0.3); /* línea más suave */
-  border-radius: 8px;       /* redondeamos esquinas */
-  margin: 6px 10px;          /* margen para separar un poco las casillas */
-  font-size: 1.1rem;         /* letra un poco más grande */
-  font-weight: 600;          /* un pelín más gordo */
-  background: rgba(241, 215, 143, 0.98);
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.35); /* sombra interna suave */
-  transition:
-    background-color 0.35s ease,
-    box-shadow 0.35s ease,
-    color 0.35s ease;
-  user-select: none;
-}
-
-.hours-list li:hover {
-  background-color: #e8d69a;
-  box-shadow: 0 0 12px rgba(212, 178, 88, 0.5);
-  color: #4a351e;
-}
-
-.hours-list li.selected {
-  background-color: #d4b258;
-  color: white;
-  font-weight: 700;
-  box-shadow: 0 0 12px 4px rgba(213, 160, 50, 0.4);
-  border-radius: 12px;
-}
-
-.hours-list li.disabled {
-  pointer-events: none;
-  opacity: 0.4;
-  cursor: not-allowed;
 }

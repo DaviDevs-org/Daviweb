@@ -1,139 +1,119 @@
-import { CommonModule, ViewportScroller } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, WritableSignal, signal } from "@angular/core";
+import { ViewportScroller, CommonModule } from "@angular/common";
 import { InfoManager, BusinessStatus } from "../services/admin-panel/info-management.service";
-import { BehaviorSubject, interval, switchMap, takeWhile, tap, combineLatest, map } from "rxjs";
+import { from, interval, Subscription } from "rxjs";
+import { switchMap } from "rxjs/operators";
 
 @Component({
   selector: "app-header",
   templateUrl: "./header.component.html",
   styleUrls: ["./header.component.scss"],
+  standalone: true,
+  imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule]
 })
-export class HeaderComponent implements OnInit, OnDestroy {
+export class HeaderComponent implements OnDestroy {
   private viewportScroller = inject(ViewportScroller);
   private info = inject(InfoManager);
-  
-  private businessStatus$ = new BehaviorSubject<BusinessStatus>({
+
+  // Señal editable (WritableSignal) con toda la estructura de BusinessStatus
+  safeBusinessInfo: WritableSignal<BusinessStatus> = signal({
     isOpen: false,
-    currentDay: '',
+    currentDay: '', // <--- ahora sí incluido
+    openTime: undefined,
+    closeTime: undefined,
+    nextOpenTime: undefined,
+    nextOpenDay: undefined,
+    timeUntilChange: undefined,
     isWarning: false,
-    remainingMinutes: 0
+    warningType: undefined,
+    remainingMinutes: 0,
+    remainingSeconds: 0
   });
 
-  // Observable para el contador en tiempo real
-  private countdown$ = new BehaviorSubject<number>(0);
-  
-  // Combinamos el status del negocio con el contador
-  businessInfo = combineLatest([
-    this.businessStatus$.asObservable(),
-    this.countdown$.asObservable()
-  ]).pipe(
-    map(([status, remainingSeconds]) => ({
-      ...status,
-      remainingSeconds
-    }))
-  );
-
-  private isDestroyed = false;
   private countdownInterval: any = null;
+  private subscription: Subscription | null = null;
 
-  ngOnInit() {
-    this.updateBusinessStatus();
-    this.startStatusUpdater();
+  constructor() {
+    // Inicializamos con valor real
+    from(this.info.isBusinessOpen()).subscribe(status => {
+      this.safeBusinessInfo.set({
+        ...status,
+        remainingSeconds: status.remainingMinutes ? status.remainingMinutes * 60 : 0
+      });
+      if (status.isWarning && status.remainingMinutes) {
+        this.startCountdown(status.remainingMinutes);
+      }
+    });
+
+    this.startUpdater();
   }
 
   ngOnDestroy() {
-    this.isDestroyed = true;
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-    }
-  }
-
-  private async updateBusinessStatus() {
-    try {
-      const status = await this.info.isBusinessOpen();
-      this.businessStatus$.next(status);
-      
-      // Si hay advertencia (próximo a abrir/cerrar), iniciar cuenta atrás
-      if (status.isWarning && status.remainingMinutes && status.remainingMinutes > 0) {
-        this.startCountdown(status.remainingMinutes);
-      } else {
-        this.stopCountdown();
-      }
-      
-      console.log(status);
-    } catch (error) {
-      console.error('Error updating business status:', error);
-    }
-  }
-
-  private startStatusUpdater() {
-    // Actualizar el status del negocio cada 2 minutos (para no sobrecargar)
-    interval(120000)
-      .pipe(
-        takeWhile(() => !this.isDestroyed),
-        switchMap(() => this.info.isBusinessOpen()),
-        tap(status => {
-          this.businessStatus$.next(status);
-          
-          // Solo reiniciar countdown si hay cambios significativos
-          if (status.isWarning && status.remainingMinutes && status.remainingMinutes > 0) {
-            const currentSeconds = this.countdown$.value;
-            const expectedSeconds = (status.remainingMinutes + 1) * 60;
-            
-            // Si la diferencia es mayor a 30 segundos, reiniciar
-            if (Math.abs(currentSeconds - expectedSeconds) > 30) {
-              this.startCountdown(status.remainingMinutes);
-            }
-          } else {
-            this.stopCountdown();
-          }
-        })
-      )
-      .subscribe({
-        error: (error) => console.error('Error in status updater:', error)
-      });
-  }
-
-  private startCountdown(minutes: number) {
-    this.stopCountdown(); // Limpiar cualquier countdown anterior
-    
-    let remainingSeconds = (minutes + 1) * 60;
-    this.countdown$.next(remainingSeconds);
-    
-    this.countdownInterval = setInterval(() => {
-      remainingSeconds--;
-      
-      if (remainingSeconds <= 0) {
-        this.stopCountdown();
-        // Actualizar status cuando termine la cuenta atrás
-        this.updateBusinessStatus();
-        return;
-      }
-      
-      this.countdown$.next(remainingSeconds);
-    }, 1000);
-  }
-
-  private stopCountdown() {
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-      this.countdownInterval = null;
-    }
-    this.countdown$.next(0);
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+    if (this.subscription) this.subscription.unsubscribe();
   }
 
   scrollToSection(elementId: string) {
     this.viewportScroller.scrollToAnchor(elementId);
   }
 
+  private startUpdater() {
+    this.subscription = interval(30000)
+      .pipe(switchMap(() => this.info.isBusinessOpen()))
+      .subscribe(status => {
+        this.safeBusinessInfo.set({
+          ...status,
+          remainingSeconds: status.remainingMinutes ? status.remainingMinutes * 60 : 0
+        });
+
+        if (status.isWarning && status.remainingMinutes) {
+          this.startCountdown(status.remainingMinutes);
+        } else {
+          this.stopCountdown();
+        }
+      });
+  }
+
+  private startCountdown(minutes: number) {
+    this.stopCountdown();
+    let remainingSeconds = minutes * 60;
+    this.countdownInterval = setInterval(() => {
+      remainingSeconds--;
+      const current = this.safeBusinessInfo();
+      this.safeBusinessInfo.set({
+        ...current,
+        remainingSeconds: remainingSeconds
+      });
+
+      if (remainingSeconds <= 0) {
+        this.stopCountdown();
+        this.refreshStatus();
+      }
+    }, 1000);
+  }
+
+  private stopCountdown() {
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+    this.countdownInterval = null;
+  }
+
+  private async refreshStatus() {
+    try {
+      const status = await this.info.isBusinessOpen();
+      this.safeBusinessInfo.set({
+        ...status,
+        remainingSeconds: status.remainingMinutes ? status.remainingMinutes * 60 : 0
+      });
+    } catch (err) {
+      console.error('Error refreshing business status:', err);
+    }
+  }
+
   formatRemainingTime(seconds: number): string {
-    if (seconds <= 0) return '0:00';
-    
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    if (!seconds || seconds <= 0) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 }

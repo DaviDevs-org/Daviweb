@@ -12,7 +12,7 @@
       <div class="anchor" id="location">
         <i class="bi bi-geo-alt-fill"></i>
         <a class="anchor-text" href="#"
-          (click)="scrollToSection('location-and-contact'); $event.preventDefault()">Ubicación</a>
+           (click)="scrollToSection('location-and-contact'); $event.preventDefault()">Ubicación</a>
       </div>
       <div class="anchor" id="service">
         <i class="bi bi-clock-fill"></i>
@@ -23,38 +23,32 @@
         <a class="anchor-text" href="#" (click)="scrollToSection('appointments'); $event.preventDefault()">Cita</a>
       </div>
 
-      <div class="status" *ngIf="businessInfo | async as status">
-        <!-- Estado normal: Abierto -->
-        <div *ngIf="status.isOpen && !status.isWarning" class="status-container open">
-          <span class="status-text">Abierto</span>
-        </div>
-
-        <!-- Estado normal: Cerrado -->
-        <div *ngIf="!status.isOpen && !status.isWarning" class="status-container closed">
-          <span class="status-text">Cerrado</span>
-        </div>
-
-        <!-- Estado de advertencia: Próximo a cerrar -->
-        <div *ngIf="status.isOpen && status.isWarning && status.warningType === 'closing'"
-          class="status-container warning">
-          <div class="status-content">
-            <span class="status-text">Cerrando en</span>
-            <span class="timer">{{ formatRemainingTime(status.remainingSeconds || 0) }}</span>
+      <div class="status">
+        <ng-container *ngIf="safeBusinessInfo() as status">
+          <!-- Abierto normal -->
+          <div *ngIf="status.isOpen && !status.isWarning" class="status-container open">
+            <span class="status-text">Abierto</span>
           </div>
-        </div>
 
-        <!-- Estado de advertencia: Próximo a abrir -->
-        <div *ngIf="!status.isOpen && status.isWarning && status.warningType === 'opening'"
-          class="status-container warning">
-          <div class="status-content">
-            <span class="status-text">Abriendo en</span>
-            <span class="timer">{{ formatRemainingTime(status.remainingSeconds || 0) }}</span>
+          <!-- Cerrado normal -->
+          <div *ngIf="!status.isOpen && !status.isWarning" class="status-container closed">
+            <span class="status-text">Cerrado</span>
           </div>
-        </div>
+
+          <!-- Cerrando pronto -->
+          <div *ngIf="status.isOpen && status.isWarning && status.warningType === 'closing'" class="status-container warning">
+            <span class="status-text">Cerrando en {{ formatRemainingTime(status.remainingSeconds ?? 0) }}</span>
+          </div>
+
+          <!-- Abriendo pronto -->
+          <div *ngIf="!status.isOpen && status.isWarning && status.warningType === 'opening'" class="status-container warning">
+            <span class="status-text">Abriendo en {{ formatRemainingTime(status.remainingSeconds ?? 0) }}</span>
+          </div>
+
+        </ng-container>
       </div>
     </div>
   </div>
 
-  <div class="welcome-photo">
-  </div>
+  <div class="welcome-photo"></div>
 </div>

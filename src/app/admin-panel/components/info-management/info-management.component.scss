@@ -1,150 +1,236 @@
+@use 'sass:color';
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
 @use '../../styles/responsive' as *;
 
+// ------------------------
+// Contenedores y tarjetas
+// ------------------------
 .info-sections {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    gap: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 30px;
 
-    @include mobile {
-        grid-template-columns: 1fr;
-    }
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
 }
 
 .info-card {
-    @include card-style;
+  @include card-style;
+  padding: 20px;
 
-    h3 {
-        color: $dark-brown;
-        font-size: 1.5rem;
-        margin: 0 0 20px 0;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        i {
-            color: $primary-gold;
-        }
-    }
-}
-
-.schedule-grid {
-    margin-bottom: 20px;
-}
-
-.schedule-row {
-    display: grid;
-    grid-template-columns: 120px 1fr;
-    gap: 20px;
+  h3 {
+    color: $dark-brown;
+    font-size: 1.5rem;
+    margin: 0 0 20px 0;
+    font-weight: 600;
+    display: flex;
     align-items: center;
-    margin-bottom: 15px;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba($border-color, 0.5);
+    gap: 10px;
 
-    &:last-child {
-        border-bottom: none;
+    i {
+      color: $primary-gold;
     }
+  }
+}
 
-    @include mobile {
-        grid-template-columns: 1fr;
-        gap: 10px;
+// ------------------------
+// Contenedores internos
+// ------------------------
+.schedule-container,
+.exceptions-container,
+.contact-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
-        .day-label {
-            text-align: center;
-            padding-bottom: 5px;
-        }
-    }
+// ------------------------
+// Horarios
+// ------------------------
+.schedule-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba($border-color, 0.5);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: 10px;
 
     .day-label {
-        font-weight: 600;
-        color: $dark-brown;
+      text-align: center;
+      padding-bottom: 5px;
+    }
+  }
+
+  .day-label {
+    font-weight: 600;
+    color: $dark-brown;
+  }
+
+  .intervals-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .time-inputs {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+
+    .time-input {
+      padding: 8px 12px;
+      border: 2px solid $border-color;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-gold;
+        box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+      }
+
+      &:disabled {
+        background: $light-gray;
+        opacity: 0.6;
+      }
     }
 
-    .time-inputs {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-
-        .time-input {
-            padding: 8px 12px;
-            border: 2px solid $border-color;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-
-            &:focus {
-                outline: none;
-                border-color: $primary-gold;
-                box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
-            }
-
-            &:disabled {
-                background: $light-gray;
-                opacity: 0.6;
-            }
-        }
-
-        .time-separator {
-            color: $text-gray;
-            font-weight: 600;
-        }
-
-        .closed-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: $text-gray;
-            font-size: 0.9rem;
-            cursor: pointer;
-
-            input[type="checkbox"] {
-                cursor: pointer;
-            }
-        }
+    .time-separator {
+      color: $text-gray;
+      font-weight: 600;
     }
+
+    .closed-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: $text-gray;
+      font-size: 0.9rem;
+      cursor: pointer;
+
+      input[type="checkbox"] {
+        cursor: pointer;
+      }
+    }
+
+    // Botón eliminar intervalo
+    .remove-interval-btn {
+      @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
+      font-size: 0.8rem;
+      padding: 5px 10px;
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+  }
 }
 
-// Estilos mejorados para los botones
+// ------------------------
+// Botones generales
+// ------------------------
 .save-btn {
-    @include button-style($primary-gold, $secondary-gold);
-    font-size: 1rem;
-    min-width: 160px;
-    justify-content: center;
-    margin-top: 10px;
-    
-    i {
-        font-size: 1.1rem;
-    }
-    
-    &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba($primary-gold, 0.3);
-    }
+  @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+  font-size: 1rem;
+  min-width: 160px;
+  justify-content: center;
+  margin-top: 10px;
+
+  i {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba($primary-gold, 0.3);
+  }
 }
 
-// Estilos mejorados para los inputs del formulario
+.add-btn {
+  @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+  font-size: 0.85rem;
+  padding: 5px 10px;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.danger-btn {
+  @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
+  font-size: 0.85rem;
+  padding: 5px 10px;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+// Botón eliminar excepciones
+.exception-row .danger-btn {
+  @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
+  font-size: 0.85rem;
+  padding: 5px 10px;
+  margin-top: 5px;
+  align-self: flex-start;
+}
+
+// ------------------------
+// Formularios
+// ------------------------
 .form-input, .form-textarea {
-    @include form-input-style;
-    
-    &.form-textarea {
-        min-height: 80px;
-        resize: vertical;
-        font-family: inherit;
-    }
+  @include form-input-style;
+
+  &.form-textarea {
+    min-height: 80px;
+    resize: vertical;
+    font-family: inherit;
+  }
 }
 
 .form-group {
-    label {
-        font-weight: 600;
-        color: $dark-brown;
-        margin-bottom: 8px;
-        display: block;
-    }
+  label {
+    font-weight: 600;
+    color: $dark-brown;
+    margin-bottom: 8px;
+    display: block;
+  }
 }
 
 .contact-form {
-    .form-group {
-        margin-bottom: 20px;
+  .form-group {
+    margin-bottom: 20px;
+  }
+}
+
+// ------------------------
+// Spinner
+// ------------------------
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: $text-gray;
+  font-size: 1.2rem;
+  justify-content: center;
+  margin-top: 50px;
+
+  i {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
     }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 }

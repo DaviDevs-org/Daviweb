@@ -1,4 +1,3 @@
-// src/app/admin/calendar-selector/calendar-selector.component.ts
 import { Component, EventEmitter, Output, OnDestroy } from '@angular/core';
 import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -42,7 +41,7 @@ export class CalendarSelectorComponent implements OnDestroy {
   showForm = false;
   isSubmitting = false;
 
-  availableHoursForSelectedDate: string[] = [];
+  availableHoursForSelectedDate: { value: string; disabled: boolean }[] = [];
   availableHoursByDate: Record<string, string[]> = {};
   bookedSlotsByDate: Record<string, string[]> = {};
   availabilityData: any = null;
@@ -56,11 +55,7 @@ export class CalendarSelectorComponent implements OnDestroy {
   ) {
     const startYear = this.selectedYear - 2;
     const endYear = this.selectedYear + 2;
-    this.years = [];
-    for (let y = startYear; y <= endYear; y++) {
-      this.years.push(y);
-    }
-
+    for (let y = startYear; y <= endYear; y++) this.years.push(y);
 
     this.generateCalendar();
     this.loadData();
@@ -73,20 +68,16 @@ export class CalendarSelectorComponent implements OnDestroy {
 
   private async loadData() {
     try {
-      // Cargar availability
-      const availability = await this.infoManager.getAvailability();
-      this.availabilityData = availability;
+      this.availabilityData = await this.infoManager.getAvailability();
 
-      // Cargar reservas
       const slots = await firstValueFrom(this.reservedSlotsService.getReservedSlotsFromNow());
       this.bookedSlotsByDate = {};
       (slots ?? []).forEach((slot: ReservedSlot) => {
-        const dateKey = slot.date; // Asegúrate de que slot.date es YYYY-MM-DD
+        const dateKey = slot.date;
         if (!this.bookedSlotsByDate[dateKey]) this.bookedSlotsByDate[dateKey] = [];
         this.bookedSlotsByDate[dateKey].push(slot.time);
       });
 
-      // Calcular horas disponibles ahora que tenemos datos
       this.computeAvailableHoursForCurrentMatrix();
     } catch (error) {
       console.error('Error cargando availability o reservas:', error);
@@ -94,11 +85,7 @@ export class CalendarSelectorComponent implements OnDestroy {
   }
 
   togglePicker() { this.showPicker = !this.showPicker; }
-
-  onDateChange() {
-    this.showPicker = false;
-    this.generateCalendar();
-  }
+  onDateChange() { this.showPicker = false; this.generateCalendar(); }
 
   generateCalendar() {
     this.calendarMatrix = [];
@@ -114,9 +101,7 @@ export class CalendarSelectorComponent implements OnDestroy {
       for (let i = 0; i < 7; i++) {
         if (currentDay > 0 && currentDay <= lastDayOfMonth.getDate()) {
           week.push(new Date(this.selectedYear, this.selectedMonth, currentDay));
-        } else {
-          week.push(null);
-        }
+        } else week.push(null);
         currentDay++;
       }
       this.calendarMatrix.push(week);
@@ -132,8 +117,7 @@ export class CalendarSelectorComponent implements OnDestroy {
   }
 
   isSelected(date: Date | null): boolean {
-    if (!date || !this.selectedDate) return false;
-    return date.getTime() === this.selectedDate.getTime();
+    return !!date && !!this.selectedDate && date.getTime() === this.selectedDate.getTime();
   }
 
   isDayFullyBooked(date: Date): boolean {
@@ -154,13 +138,11 @@ export class CalendarSelectorComponent implements OnDestroy {
 
     const dateKey = this.formatDate(date);
     const ex = this.availabilityData?.exceptions?.[dateKey];
-    if (ex) return !ex.closed && ((ex.hours?.length ?? 0) > 0 || ex.hours === undefined);
+    if (ex) return !ex.closed;
 
     const dayName = this.getDayName(date);
     const ds = this.availabilityData?.defaultSchedule?.[dayName];
-    if (ds) return !ds.closed;
-
-    return true;
+    return !!(ds && !ds.closed);
   }
 
   selectDate(date: Date | null) {
@@ -168,53 +150,73 @@ export class CalendarSelectorComponent implements OnDestroy {
     const dateKey = this.formatDate(date);
     const bookedHours = this.bookedSlotsByDate[dateKey] || [];
 
-    const hours = this.getAvailableHoursForDate(date, bookedHours);
+    console.log('--- Seleccionando fecha ---');
+    console.log('Fecha:', dateKey);
+    console.log('Excepciones:', this.availabilityData?.exceptions?.[dateKey]);
+    console.log('Reservas existentes:', bookedHours);
 
-    if (!hours || hours.length === 0) {
+    const hoursWithStatus = this.getAvailableHoursForDate(date, bookedHours);
+    console.log('Horas calculadas para este día:', hoursWithStatus);
+
+    if (!hoursWithStatus.length) {
       alert('No hay horas disponibles para este día');
       return;
     }
 
-    this.availableHoursForSelectedDate = hours;
+    this.availableHoursForSelectedDate = hoursWithStatus;
+
+    // Guardar solo los valores en availableHoursByDate
+    this.availableHoursByDate[dateKey] = hoursWithStatus.map(h => h.value);
+
     this.selectedDate = date;
     this.dateSelected.emit(date);
     this.showHours = true;
     this.showForm = false;
   }
 
-  private getAvailableHoursForDate(date: Date, booked: string[]): string[] {
-    if (!this.availabilityData) return [];
-
+  private getAvailableHoursForDate(date: Date, booked: string[]): { value: string; disabled: boolean }[] {
     const dateKey = this.formatDate(date);
-    const ex = this.availabilityData.exceptions?.[dateKey];
+    const ex = this.availabilityData?.exceptions?.[dateKey];
 
     let hours: string[] = [];
 
     if (ex) {
-      if (!ex.closed && Array.isArray(ex.hours) && ex.hours.length) {
-        hours = ex.hours.slice();
-      } else if (!ex.closed) {
-        const dayName = this.getDayName(date);
-        const ds = this.availabilityData.defaultSchedule?.[dayName];
-        if (ds && !ds.closed) hours = this.hoursRangeFromOpenClose(ds.open, ds.close);
+      if (!ex.closed) {
+        let intervals: { open: string; close: string }[] = [];
+        if (Array.isArray(ex.intervals)) intervals = ex.intervals;
+        else if (Array.isArray(ex.hours)) intervals = ex.hours.map((h: string) => {
+          const [open, close] = h.split('-');
+          return { open: open || '', close: close || '' };
+        });
+
+        intervals.forEach((interval: { open: string; close: string }) => {
+          hours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
+        });
       }
     } else {
       const dayName = this.getDayName(date);
-      const ds = this.availabilityData.defaultSchedule?.[dayName];
-      if (ds && !ds.closed) hours = this.hoursRangeFromOpenClose(ds.open, ds.close);
+      const ds = this.availabilityData?.defaultSchedule?.[dayName];
+      if (ds && !ds.closed && Array.isArray(ds.intervals)) {
+        ds.intervals.forEach((interval: { open: string; close: string }) => {
+          hours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
+        });
+      }
     }
 
-    return hours.filter(h => !booked.includes(h));
+    return hours.map(h => ({
+      value: h,
+      disabled: booked.includes(h)
+    }));
   }
 
   private hoursRangeFromOpenClose(open: string, close: string, step = 30): string[] {
+    if (!open || !close) return [];
     const result: string[] = [];
     const [openH, openM] = open.split(':').map(Number);
     const [closeH, closeM] = close.split(':').map(Number);
 
     let hour = openH;
     let minute = openM;
-
     while (hour < closeH || (hour === closeH && minute < closeM)) {
       result.push(`${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`);
       minute += step;
@@ -237,7 +239,6 @@ export class CalendarSelectorComponent implements OnDestroy {
   }
 
   backToCalendar() { this.showHours = false; this.showForm = false; this.selectedDate = null; this.selectedHour = null; }
-
   onHourSelected(hour: string) { this.selectedHour = hour; this.showHours = false; this.showForm = true; }
 
   async handleFormSubmit(data: { name: string; email: string; phone: string; description?: string }) {
@@ -258,20 +259,18 @@ export class CalendarSelectorComponent implements OnDestroy {
   }
 
   resetAll() { this.selectedDate = null; this.selectedHour = null; this.showForm = false; this.showHours = false; }
-
   get selectedDateString(): string { return this.selectedDate ? this.formatDate(this.selectedDate) : ''; }
 
   private computeAvailableHoursForCurrentMatrix() {
     this.availableHoursByDate = {};
     if (!this.availabilityData) return;
-
     for (const week of this.calendarMatrix) {
       for (const d of week) {
         if (!d) continue;
         const dateKey = this.formatDate(d);
         const booked = this.bookedSlotsByDate[dateKey] || [];
         const hours = this.getAvailableHoursForDate(d, booked);
-        this.availableHoursByDate[dateKey] = hours;
+        this.availableHoursByDate[dateKey] = hours.map(h => h.value);
       }
     }
   }

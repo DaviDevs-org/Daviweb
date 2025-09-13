@@ -11,61 +11,58 @@ export class HourSelectorComponent implements OnChanges {
 
   @Input() date: Date | null = null;
   @Input() bookedHours: string[] = [];
-  @Input() availableHours: string[] = [];
+  @Input() availableHours: { value: string, disabled: boolean }[] = [];
   @Output() back = new EventEmitter<void>();
   @Output() hourSelected = new EventEmitter<string>();
 
-  hours: string[] = [];
+  hours: { value: string, disabled: boolean }[] = [];
   selectedHour: string | null = null;
 
   constructor() {}
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['availableHours'] || changes['date']) {
+    if (changes['availableHours'] || changes['date'] || changes['bookedHours']) {
       this.generateHours();
     }
   }
 
   generateHours() {
-    const available = this['availableHours'] as string[]; // <-- acceso seguro
-    const booked = this['bookedHours'] as string[];
-    const date = this['date'] as Date | null;
-
-    if (!available || available.length === 0 || !date) {
+    if (!this.availableHours || !this.date) {
       this.hours = [];
       return;
     }
 
     const now = new Date();
-    this.hours = available.filter(hour => {
-      if (booked.includes(hour)) return false;
+    this.hours = this.availableHours.map(h => {
+      let disabled = h.disabled;
 
-      const [hourStr, minStr] = hour.split(':').map(Number);
-
-      if (date.toDateString() === now.toDateString()) {
-        if (hourStr < now.getHours()) return false;
-        if (hourStr === now.getHours() && minStr <= now.getMinutes()) return false;
+      if (this.date && this.date.toDateString() === now.toDateString()) {
+        const [hourStr, minStr] = h.value.split(':').map(Number);
+        if (hourStr < now.getHours() || (hourStr === now.getHours() && minStr <= now.getMinutes())) {
+          disabled = true;
+        }
       }
 
-      return true;
+
+      return { value: h.value, disabled };
     });
 
-    if (this.selectedHour && !this.hours.includes(this.selectedHour)) {
+    if (this.selectedHour && !this.hours.some(h => h.value === this.selectedHour && !h.disabled)) {
       this.selectedHour = null;
     }
   }
 
-  selectHour(hour: string) {
-    if (this.hours.includes(hour)) this.selectedHour = hour;
+  selectHour(hour: { value: string, disabled: boolean }) {
+    if (!hour.disabled) this.selectedHour = hour.value;
   }
 
   confirm() {
     if (this.selectedHour) this.hourSelected.emit(this.selectedHour);
   }
 
-  confirmDirect(hour: string) {
-    if (this.hours.includes(hour)) {
-      this.selectedHour = hour;
+  confirmDirect(hour: { value: string, disabled: boolean }) {
+    if (!hour.disabled) {
+      this.selectedHour = hour.value;
       this.hourSelected.emit(this.selectedHour);
     }
   }

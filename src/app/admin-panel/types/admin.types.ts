@@ -1,4 +1,3 @@
-// shared/types/admin.types.ts
 export class GalleryPhoto {
   name: string = "";
   url: string = "";
@@ -12,6 +11,7 @@ export class GalleryPhoto {
     this.id = id
   }
 }
+
 export interface Appointment {
   id?: string;
   createdAt?: any; // Firestore Timestamp | string
@@ -28,6 +28,7 @@ export interface Appointment {
   duration?: string;
   service?: Service;
 }
+
 export class Service {
   id?: string;
   name: string = "";
@@ -55,25 +56,53 @@ export class Service {
   }
 }
 
+export interface AvailabilityException {
+  closed: boolean;
+  hours?: string[];
+}
+
+export interface AvailabilityData {
+  defaultSchedule: Record<string, { intervals: Interval[]; closed: boolean }>;
+  exceptions: Record<string, { closed: boolean; hours: string[] }>;
+}
+
+
 export interface NewService {
   name: string;
   price: number;
   description: string;
   time: number;
 }
-export interface ScheduleDay {
-  name: string;
-  day: string;
+
+export type Interval = {
   open: string;
   close: string;
+  blocked?: boolean;
+};
+
+
+export interface ScheduleDay {
+  day: string;
+  name: string;
   closed: boolean;
+  intervals: Interval[];
 }
+
 
 export interface ContactInfo {
   phone: string;
   email: string;
   address: string;
 }
+
+export type ExceptionItem = {
+  date: string | null;
+  closed: boolean;
+  intervals: Interval[];
+  note?: string;
+};
+
+
 
 export interface Statistics {
   monthlyClients: number;
@@ -96,4 +125,4 @@ export interface StatCard {
   value: string;
   change: string;
   changeType: 'positive' | 'negative' | 'neutral';
-}   
+}

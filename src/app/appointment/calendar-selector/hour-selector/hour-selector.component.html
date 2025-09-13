@@ -5,9 +5,9 @@
     <li *ngFor="let hour of hours"
         (click)="selectHour(hour)"
         (dblclick)="confirmDirect(hour)"
-        [class.selected]="hour === selectedHour"
-        [class.disabled]="!hours.includes(hour)">
-      {{ hour }}
+        [class.selected]="hour.value === selectedHour"
+        [class.disabled]="hour.disabled">
+      {{ hour.value }}
     </li>
   </ul>
 

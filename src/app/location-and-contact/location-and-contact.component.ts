@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Injector, Input, runInInjectionContext } from "@angular/core";
 import { ScheduleService } from "../services/schedule.service";
-import { ContactInfo, InfoManager } from "../services/admin-panel/info-management.service";
 import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
+import {InfoManager} from '../services/admin-panel/info-management.service';
+import {ContactInfo} from '../admin-panel/types/admin.types';
 @Component({
   selector: "app-location-and-contact",
   templateUrl: "./location-and-contact.component.html",
