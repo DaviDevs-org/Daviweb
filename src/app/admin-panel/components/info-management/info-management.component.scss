@@ -234,3 +234,151 @@
     }
   }
 }
+
+.exception-row {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+  border: 2px solid rgba($border-color, 0.5);
+  border-radius: 12px;
+  background: rgba($light-gray, 0.3);
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: rgba($primary-gold, 0.4);
+    background: rgba($primary-gold, 0.05);
+  }
+
+  // Primera fila: fecha y checkbox cerrado
+  .exception-header {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 20px;
+    align-items: center;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .ex-date {
+      padding: 10px 15px;
+      border: 2px solid $border-color;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-gold;
+        box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+      }
+    }
+
+    .ex-closed {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: $text-gray;
+      font-weight: 500;
+      cursor: pointer;
+
+      input[type="checkbox"] {
+        cursor: pointer;
+        transform: scale(1.2);
+      }
+    }
+  }
+
+  // Sección de horarios
+  .ex-hours {
+    border-top: 1px solid rgba($border-color, 0.5);
+    padding-top: 15px;
+
+    label {
+      font-weight: 600;
+      color: $dark-brown;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .intervals-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      .time-inputs {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        padding: 8px 0;
+
+        .time-input {
+          padding: 8px 12px;
+          border: 2px solid $border-color;
+          border-radius: 6px;
+          transition: all 0.3s ease;
+          min-width: 120px;
+
+          &:focus {
+            outline: none;
+            border-color: $primary-gold;
+            box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+          }
+        }
+
+        .time-separator {
+          color: $text-gray;
+          font-weight: 600;
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+
+  // Mensaje cuando no hay intervalos
+  .no-intervals-message {
+    padding: 15px;
+    background: rgba($danger-red, 0.1);
+    border: 1px solid rgba($danger-red, 0.3);
+    border-radius: 8px;
+    color: color.scale($danger-red, $lightness: -20%);
+    text-align: center;
+    font-style: italic;
+    margin-top: 10px;
+  }
+
+  // Botón eliminar excepción
+  .remove-exception-btn {
+    @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
+    align-self: flex-end;
+    margin-top: 10px;
+    min-width: 140px;
+  }
+}
+
+// Contenedor para añadir nueva excepción
+.exception-add {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  border: 2px dashed rgba($primary-gold, 0.4);
+  border-radius: 12px;
+  background: rgba($primary-gold, 0.05);
+
+  .add-btn {
+    @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+    font-size: 1rem;
+    padding: 12px 20px;
+    min-width: 180px;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba($primary-gold, 0.3);
+    }
+  }
+}

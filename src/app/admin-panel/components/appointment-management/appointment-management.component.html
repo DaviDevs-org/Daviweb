@@ -22,10 +22,10 @@
                             <div class="hour-time">
                                 <span class="time">{{ a.timeNormalized }}</span>
                                 @if (a.service) {
-                                    <span class="time">{{ a.service.time }} min</span>
+                                <span class="time">{{ a.service.time }} min</span>
                                 }
                                 @else {
-                                    <span class="time">?? min</span>
+                                <span class="time">?? min</span>
                                 }
                             </div>
                         </div>
@@ -48,20 +48,61 @@
         <main class="right-panel">
             <!-- Header del calendario con navegación mejorada -->
             <div class="calendar-header">
-                <div class="calendar-nav">
+                <!-- Navegación por meses -->
+                <div class="calendar-nav month-nav">
+                    <button class="btn nav-btn month-btn" (click)="prevMonth()" title="Mes anterior">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </button>
+                </div>
+
+                <!-- Navegación por semanas -->
+                <div class="calendar-nav week-nav">
+                    <button class="btn nav-btn week-btn" (click)="prevWeek()" title="Semana anterior">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                </div>
+
+                <!-- Navegación por días -->
+                <div class="calendar-nav day-nav">
                     <button class="btn nav-btn" (click)="prevDay()" title="Día anterior">‹</button>
                 </div>
+
+                <!-- Título del día -->
                 <div class="calendar-title">{{ formatDateHeader(selectedDate$.value) }}</div>
-                <div class="calendar-nav">
+
+                <!-- Navegación por días -->
+                <div class="calendar-nav day-nav">
                     <button class="btn nav-btn" (click)="nextDay()" title="Día siguiente">›</button>
+                </div>
+
+                <!-- Navegación por semanas -->
+                <div class="calendar-nav week-nav">
+                    <button class="btn nav-btn week-btn" (click)="nextWeek()" title="Semana siguiente">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Navegación por meses -->
+                <div class="calendar-nav month-nav">
+                    <button class="btn nav-btn month-btn" (click)="nextMonth()" title="Mes siguiente">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </button>
+                </div>
+
+                <!-- Botón Hoy -->
+                <div class="calendar-nav today-nav">
                     <button class="btn today-btn" (click)="goToToday()" title="Hoy">Hoy</button>
                 </div>
             </div>
 
-            <!-- Formulario de edición (en lugar del calendario cuando está en modo edición) -->
-            <div class="edit-form-container" *ngIf="isEditing && editedAppointment">
+            <!-- Formulario de edición/creación (mostrar en ambos modos) -->
+            <div class="edit-form-container" *ngIf="(isEditing && editedAppointment) || isCreating">
                 <div class="edit-form-header">
-                    <h3><i class="bi bi-pencil-fill"></i> Editando cita</h3>
+                    <h3>
+                        <i class="bi bi-pencil-fill" *ngIf="isEditing"></i>
+                        <i class="bi bi-plus-circle" *ngIf="isCreating"></i>
+                        {{ isEditing ? 'Editando cita' : 'Nueva cita' }}
+                    </h3>
                     <button class="btn back-btn" (click)="cancelEdit()" title="Volver al calendario">
                         <i class="bi bi-x-lg"></i>
                     </button>
@@ -72,7 +113,8 @@
                         <div class="form-group">
                             <label for="editName">Nombre *</label>
                             <input type="text" id="editName" formControlName="name" required>
-                            <div class="error-message" *ngIf="editForm.get('name')?.invalid && editForm.get('name')?.touched">
+                            <div class="error-message"
+                                *ngIf="editForm.get('name')?.invalid && editForm.get('name')?.touched">
                                 El nombre es requerido
                             </div>
                         </div>
@@ -94,7 +136,8 @@
                         <div class="form-group">
                             <label for="editDate">Fecha *</label>
                             <input type="date" id="editDate" formControlName="date" required>
-                            <div class="error-message" *ngIf="editForm.get('date')?.invalid && editForm.get('date')?.touched">
+                            <div class="error-message"
+                                *ngIf="editForm.get('date')?.invalid && editForm.get('date')?.touched">
                                 La fecha es requerida
                             </div>
                         </div>
@@ -102,7 +145,8 @@
                         <div class="form-group">
                             <label for="editTime">Hora *</label>
                             <input type="time" id="editTime" formControlName="time" required>
-                            <div class="error-message" *ngIf="editForm.get('time')?.invalid && editForm.get('time')?.touched">
+                            <div class="error-message"
+                                *ngIf="editForm.get('time')?.invalid && editForm.get('time')?.touched">
                                 La hora es requerida
                             </div>
                         </div>
@@ -120,17 +164,27 @@
                         </div>
                     </div>
 
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="editDescription">Descripción</label>
+                            <textarea id="editDescription" formControlName="description"
+                                placeholder="Notas adicionales sobre la cita..."></textarea>
+                        </div>
+                    </div>
+
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="isSaving">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">
-                            {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+                        <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="isSaving">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || isSaving">
+                            {{ isSaving ? 'Guardando...' : (isEditing ? 'Actualizar cita' : 'Crear cita') }}
                         </button>
                     </div>
                 </form>
             </div>
 
             <!-- Calendario de horas (solo cuando NO está en modo edición) -->
-            <ng-container *ngIf="!isEditing">
+            <ng-container *ngIf="!isEditing && !isCreating">
                 <div class="calendar-body" #calendarBody *ngIf="filteredForDay$ | async as dayList">
                     <div class="day-summary" *ngIf="dayList.length > 0">
                         <i class="bi bi-bar-chart-line-fill"></i>
@@ -138,32 +192,70 @@
                     </div>
 
                     <div class="hours">
-                        <div class="hour-row" *ngFor="let h of hours" [attr.data-hour]="h"
-                            [class.has-appointment]="findReservation(dayList, h)">
+                        <div class="hour-row" *ngFor="let h of hours; let i = index" [attr.data-hour]="h"
+                            [class.has-appointment]="findReservation(dayList, h)"
+                            [class.is-continuation]="isAppointmentContinuation(dayList, h)"
+                            [class.is-start]="isAppointmentStart(dayList, h)"
+                            [class.is-end]="isAppointmentEnd(dayList, h)">
+                            
                             <div class="hour-label">{{ h }}</div>
                             <div class="slot">
                                 <ng-container *ngIf="findReservation(dayList, h) as res; else emptySlot">
-                                    <div class="reservation" 
-                                        [class.selected]="(selectedAppointment$ | async)?.id === res.id">
-                                        <div class="reservation-content" (click)="chooseAppointment(res.id)">
+                                    <!-- Solo mostrar el contenido completo en el primer slot de la cita -->
+                                    <div class="reservation"
+                                        [class.selected]="(selectedAppointment$ | async)?.id === res.id"
+                                        [class.is-main-slot]="isMainAppointmentSlot(dayList, h, res)"
+                                        [class.is-continuation-slot]="!isMainAppointmentSlot(dayList, h, res)"
+                                        [class.multi-slot]="getAppointmentSlotCount(res) > 1">
+                                        
+                                        <!-- Contenido principal solo en el primer slot -->
+                                        <div class="reservation-content" 
+                                            *ngIf="isMainAppointmentSlot(dayList, h, res)"
+                                            (click)="chooseAppointment(res.id)">
                                             <div class="res-header">
                                                 <div class="res-time">{{ res.timeNormalized }}</div>
                                                 <div class="res-duration">{{ getAppointmentDuration(res) }}</div>
                                             </div>
                                             <div class="res-name">{{ res.name }}</div>
                                             <div class="res-contact" *ngIf="res.phone || res.email">
-                                                <span *ngIf="res.phone" class="contact-item"><i class="bi bi-telephone-fill"></i> {{ res.phone }}</span>
-                                                <span *ngIf="res.email" class="contact-item"><i class="bi bi-envelope-fill"></i> {{ res.email }}</span>
+                                                <span *ngIf="res.phone" class="contact-item">
+                                                    <i class="bi bi-telephone-fill"></i> {{ res.phone }}
+                                                </span>
+                                                <span *ngIf="res.email" class="contact-item">
+                                                    <i class="bi bi-envelope-fill"></i> {{ res.email }}
+                                                </span>
                                             </div>
                                         </div>
-                                        <div class="appointment-actions" (click)="selectedAppointmentId$.next(null)">
-                                            <button class="action-btn" title="Ver detalles"><i class="bi bi-eye-slash"></i></button>
+                                        
+                                        <!-- Indicador de continuación para slots adicionales -->
+                                        <div class="continuation-indicator" 
+                                            *ngIf="!isMainAppointmentSlot(dayList, h, res)"
+                                            (click)="chooseAppointment(res.id)">
+                                            <div class="continuation-line"></div>
+                                            <div class="continuation-text">{{ res.name }}</div>
+                                        </div>
+
+                                        <!-- Acciones solo en el slot principal -->
+                                        <div class="appointment-actions" 
+                                            *ngIf="isMainAppointmentSlot(dayList, h, res)"
+                                            (click)="selectedAppointmentId$.next(null)">
+                                            <button class="action-btn" title="Ver detalles">
+                                                <i class="bi bi-eye-slash"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </ng-container>
                                 <ng-template #emptySlot>
-                                    <div class="empty-slot">
-                                        <span class="availability-text">Disponible</span>
+                                    <div class="empty-slot" [class.disabled]="!isHourAvailable(h)">
+                                        <span class="availability-text" *ngIf="!isHourAvailable(h)">No disponible</span>
+                                        <ng-container *ngIf="isHourAvailable(h)">
+                                            <span class="availability-text">Disponible</span>
+                                            <button class="btn create-appointment-btn" (click)="startCreateFromSlot(h)"
+                                                title="Crear nueva cita en {{ h }}">
+                                                <i class="bi bi-plus-circle"></i>
+                                                <span>Crear cita</span>
+                                            </button>
+                                        </ng-container>
                                     </div>
                                 </ng-template>
                             </div>
@@ -177,48 +269,48 @@
                     <h3>No hay citas programadas</h3>
                     <p>Este día no tiene citas programadas</p>
                 </div>
-
-                <!-- Detalle de la cita seleccionada -->
-                
             </ng-container>
+
+            <!-- Detalle de la cita seleccionada -->
             <div class="selected-detail" *ngIf="selectedAppointment$ | async as selected">
-                    <div class="detail-header">
-                        <h4><i class="bi bi-clipboard2-fill"></i> Detalle de la cita</h4>
-                        <button class="close-btn" (click)="selectedAppointmentId$.next(null)" title="Cerrar">×</button>
-                    </div>
+                <div class="detail-header">
+                    <h4><i class="bi bi-clipboard2-fill"></i> Detalle de la cita</h4>
+                    <button class="close-btn" (click)="selectedAppointmentId$.next(null)" title="Cerrar">×</button>
+                </div>
 
-                    <div class="detail-content">
-                        <div class="detail-item">
-                            <strong>Nombre:</strong>
-                            <span>{{ selected.name }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <strong>Fecha y hora:</strong>
-                            <span>{{ selected.dateISO }} a las {{ selected.timeNormalized }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <strong>Servicio:</strong>
-                            @if (selected.service){
-                                <span>{{ selected.service!.name + ' (' + selected.service!.time + 'm)'}}</span>
-                            } @else {
-                                <span>No especificado</span>
-                            }
-                        </div>
-                        <div class="detail-item">
-                            <strong>Email:</strong>
-                            <span>{{ selected.email || 'No especificado' }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <strong>Teléfono:</strong>
-                            <span>{{ selected.phone || 'No especificado' }}</span>
-                        </div>
+                <div class="detail-content">
+                    <div class="detail-item">
+                        <strong>Nombre:</strong>
+                        <span>{{ selected.name }}</span>
                     </div>
-
-                    <div class="detail-actions">
-                        <button class="btn action-primary" (click)="startEdit(selected)">Modificar</button>
-                        <button class="btn action-secondary" (click)="deleteAppointment(selected.id || '')">Eliminar</button>
+                    <div class="detail-item">
+                        <strong>Fecha y hora:</strong>
+                        <span>{{ selected.dateISO }} a las {{ selected.timeNormalized }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Servicio:</strong>
+                        @if (selected.service){
+                        <span>{{ selected.service!.name + ' (' + selected.service!.time + 'm)'}}</span>
+                        } @else {
+                        <span>No especificado</span>
+                        }
+                    </div>
+                    <div class="detail-item">
+                        <strong>Email:</strong>
+                        <span>{{ selected.email || 'No especificado' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Teléfono:</strong>
+                        <span>{{ selected.phone || 'No especificado' }}</span>
                     </div>
                 </div>
+
+                <div class="detail-actions">
+                    <button class="btn action-primary" (click)="startEdit(selected)">Modificar</button>
+                    <button class="btn action-secondary"
+                        (click)="deleteAppointment(selected.id || '')">Eliminar</button>
+                </div>
+            </div>
         </main>
     </div>
 </section>
