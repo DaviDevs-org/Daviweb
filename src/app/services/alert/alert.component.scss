@@ -1,0 +1,494 @@
+// alert.component.scss
+@use 'sass:color';
+@use '../../admin-panel/styles/variables' as *;
+@use '../../admin-panel/styles/mixins';
+
+// Overlay que cubre toda la pantalla
+.alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.show {
+        opacity: 1;
+        visibility: visible;
+
+        .alert-container {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    }
+}
+
+// Contenedor principal de la alerta
+.alert-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    transform: translateY(-20px) scale(0.9);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Variantes según el tipo de alerta
+    &.alert-success {
+        border-top: 4px solid #22c55e;
+
+        .alert-header {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
+
+            .alert-icon i {
+                color: #22c55e;
+            }
+        }
+    }
+
+    &.alert-error {
+        border-top: 4px solid $danger-red;
+
+        .alert-header {
+            background: linear-gradient(135deg, rgba($danger-red, 0.1) 0%, rgba($danger-red, 0.05) 100%);
+
+            .alert-icon i {
+                color: $danger-red;
+            }
+        }
+    }
+
+    &.alert-warning {
+        border-top: 4px solid #f59e0b;
+
+        .alert-header {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+
+            .alert-icon i {
+                color: #f59e0b;
+            }
+        }
+    }
+
+    &.alert-info {
+        border-top: 4px solid #3b82f6;
+
+        .alert-header {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+
+            .alert-icon i {
+                color: #3b82f6;
+            }
+        }
+    }
+
+    &.alert-confirm {
+        border-top: 4px solid $primary-gold;
+
+        .alert-header {
+            background: linear-gradient(135deg, rgba($primary-gold, 0.1) 0%, rgba($primary-gold, 0.05) 100%);
+
+            .alert-icon i {
+                color: $primary-gold;
+            }
+        }
+    }
+}
+
+// Header de la alerta
+.alert-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 20px 15px;
+    position: relative;
+
+    .alert-icon {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.8);
+
+        i {
+            font-size: 1.5rem;
+        }
+    }
+
+    .alert-title {
+        flex: 1;
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $dark-brown;
+    }
+
+    .alert-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: $text-gray;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: $dark-brown;
+        }
+
+        i {
+            font-size: 0.9rem;
+        }
+    }
+}
+
+// Contenido del mensaje
+.alert-content {
+    padding: 0 20px 20px;
+
+    .alert-message {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: $text-gray;
+    }
+}
+
+// Botones de acción
+.alert-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 15px 20px 20px;
+    background: rgba($light-gray, 0.3);
+    border-top: 1px solid rgba($border-color, 0.5);
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        min-width: 100px;
+
+        &.btn-primary {
+            background: $primary-gold;
+            color: white;
+
+            &:hover {
+                background: color.scale($primary-gold, $lightness: -10%);
+                transform: translateY(-1px);
+            }
+        }
+
+        &.btn-secondary {
+            background: #6b7280;
+            color: white;
+
+            &:hover {
+                background: #4b5563;
+                transform: translateY(-1px);
+            }
+        }
+
+        &.btn-success {
+            background: #22c55e;
+            color: white;
+
+            &:hover {
+                background: #16a34a;
+                transform: translateY(-1px);
+            }
+        }
+
+        &.btn-danger {
+            background: $danger-red;
+            color: white;
+
+            &:hover {
+                background: color.scale($danger-red, $lightness: -10%);
+                transform: translateY(-1px);
+            }
+        }
+
+        &.btn-warning {
+            background: #f59e0b;
+            color: white;
+
+            &:hover {
+                background: #d97706;
+                transform: translateY(-1px);
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .alert-container {
+        margin: 20px;
+        width: calc(100% - 40px);
+    }
+
+    .alert-actions {
+        flex-direction: column-reverse;
+
+        .btn {
+            width: 100%;
+        }
+    }
+}
+
+.toast-notification {
+    position: fixed;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 16px;
+    max-width: 400px;
+    min-width: 320px;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: all; // Permitir interacción con el toast
+    overflow: hidden;
+    position: relative;
+
+    &.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    // Posicionamiento
+    &.toast-top-right {
+        top: 20px;
+        right: 20px;
+        transform: translateX(100%);
+
+        &.show {
+            transform: translateX(0);
+        }
+    }
+
+    &.toast-top-left {
+        top: 20px;
+        left: 20px;
+        transform: translateX(-100%);
+
+        &.show {
+            transform: translateX(0);
+        }
+    }
+
+    &.toast-bottom-right {
+        bottom: 20px;
+        right: 20px;
+        transform: translateX(100%);
+
+        &.show {
+            transform: translateX(0);
+        }
+    }
+
+    &.toast-bottom-left {
+        bottom: 20px;
+        left: 20px;
+        transform: translateX(-100%);
+
+        &.show {
+            transform: translateX(0);
+        }
+    }
+
+    &.toast-top-center {
+        top: 20px;
+        left: 50%;
+        transform: translate(-50%, -100%);
+
+        &.show {
+            transform: translate(-50%, 0);
+        }
+    }
+
+    // Colores según tipo
+    &.toast-success {
+        border-left: 4px solid #22c55e;
+
+        .toast-icon i {
+            color: #22c55e;
+        }
+    }
+
+    &.toast-error {
+        border-left: 4px solid $danger-red;
+
+        .toast-icon i {
+            color: $danger-red;
+        }
+    }
+
+    &.toast-warning {
+        border-left: 4px solid #f59e0b;
+
+        .toast-icon i {
+            color: #f59e0b;
+        }
+    }
+
+    &.toast-info {
+        border-left: 4px solid #3b82f6;
+
+        .toast-icon i {
+            color: #3b82f6;
+        }
+    }
+
+    // Layout interno del toast
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    .toast-icon {
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        i {
+            font-size: 1.2rem;
+        }
+    }
+
+    .toast-content {
+        flex: 1;
+        min-width: 0;
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: $dark-brown;
+            margin-bottom: 4px;
+        }
+
+        .toast-message {
+            font-size: 0.85rem;
+            color: $text-gray;
+            line-height: 1.4;
+        }
+    }
+
+    .toast-close {
+        flex-shrink: 0;
+        background: none;
+        border: none;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: $text-gray;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: $dark-brown;
+        }
+
+        i {
+            font-size: 0.8rem;
+        }
+    }
+
+    // Barra de progreso para auto-cierre
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: currentColor;
+        opacity: 0.7;
+        width: 100%;
+        transform-origin: left;
+        animation: toast-progress linear forwards;
+    }
+}
+
+@keyframes toast-progress {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}
+
+// Responsive
+@media (max-width: 768px) {
+    .alert-container {
+        margin: 20px;
+        width: calc(100% - 40px);
+    }
+
+    .alert-actions {
+        flex-direction: column-reverse;
+
+        .btn {
+            width: 100%;
+        }
+    }
+
+    .toast-notification {
+        max-width: calc(100% - 40px);
+        min-width: calc(100% - 40px);
+
+        &.toast-top-right,
+        &.toast-bottom-right {
+            right: 20px;
+            left: 20px;
+        }
+
+        &.toast-top-left,
+        &.toast-bottom-left {
+            left: 20px;
+            right: 20px;
+        }
+
+        &.toast-top-center {
+            left: 20px;
+            right: 20px;
+            transform: translateY(-100%);
+
+            &.show {
+                transform: translateY(0);
+            }
+        }
+    }
+}

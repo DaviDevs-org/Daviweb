@@ -8,6 +8,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ServiceManager } from '../../../services/admin-panel/services-management.service';
 import { AppointmentService } from '../../../services/appointments.service';
 import { InfoManager } from '../../../services/admin-panel/info-management.service';
+import { AlertService } from '../../../services/alert/alert.service';
 
 @Component({
   selector: 'app-appointment-management',
@@ -44,7 +45,8 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     private fb: FormBuilder, 
     private sv: ServiceManager, 
     private app: AppointmentService,
-    private infoManager: InfoManager // Agregar InfoManager
+    private infoManager: InfoManager,
+    private alertService: AlertService 
   ) {
     this.editForm = this.fb.group({
       name: ['', Validators.required],
@@ -389,7 +391,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
           service: service
         });
         
-        alert('Cita actualizada correctamente');
+        this.alertService.success('Cita actualizada correctamente', 'Cita actualizada');
       } else {
         await this.app.addAppointment({
           name: formData.name,
@@ -402,7 +404,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
           datetime: this.createTimestamp(formData.date, formData.time)
         });
         
-        alert('Cita creada correctamente');
+        this.alertService.toastSuccess('Cita creada correctamente',3000, 'top-center');
       }
 
       this.isEditing = false;
