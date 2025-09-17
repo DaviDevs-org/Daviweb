@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { ServiceManager } from '../../../services/admin-panel/services-management.service';
 import { GalleryService } from '../../../services/admin-panel/gallery-management.service';
 import { Service, NewService } from '../../types/admin.types';
+import { AlertService } from '../../../services/alert/alert.service';
 
 @Component({
   selector: 'app-services-management',
@@ -23,6 +24,7 @@ export class ServicesManagementComponent implements OnDestroy {
   private injector = inject(Injector);
   private service = inject(ServiceManager);
   private galleryService = inject(GalleryService);
+  private toast = inject(AlertService)
 
   services: Service[] = [];
   selectedFile: File | null = null;
@@ -59,12 +61,12 @@ export class ServicesManagementComponent implements OnDestroy {
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
       if (!allowedTypes.includes(file.type)) {
-        alert('Por favor, selecciona una imagen JPG, PNG o WebP.');
+        this.toast.error('Por favor, selecciona una imagen JPG, PNG o WebP.');
         return;
       }
       
       if (file.size > 5 * 1024 * 1024) {
-        alert('El archivo es demasiado grande. Máximo 5MB.');
+        this.toast.error('El archivo es demasiado grande. Máximo 5MB.');
         return;
       }
       
@@ -141,21 +143,21 @@ export class ServicesManagementComponent implements OnDestroy {
 
   async addService() {
     if (!this.selectedFile){
-      alert('Por favor, escoja una imagen.')
+      this.toast.error('Por favor, escoja una imagen.')
       return
     }
     if (!this.newService.name.trim()) {
-      alert('Por favor, ingresa el nombre del servicio.');
+      this.toast.error('Por favor, ingresa el nombre del servicio.');
       return;
     }
 
     if (this.newService.price <= 0) {
-      alert('Por favor, ingresa un precio válido.');
+      this.toast.error('Por favor, ingresa un precio válido.');
       return;
     }
 
     if (this.newService.time <= 0) {
-      alert('Por favor, ingresa un tiempo válido.');
+      this.toast.error('Por favor, ingresa un tiempo válido.');
       return;
     }
 
@@ -189,11 +191,11 @@ export class ServicesManagementComponent implements OnDestroy {
 
       this.clearFileSelection();
       
-      alert('Servicio añadido correctamente!');
+      this.toast.success('Servicio añadido correctamente!');
       
     } catch (error) {
       console.error('Error al añadir servicio:', error);
-      alert('Error al añadir el servicio. Por favor, inténtalo de nuevo.');
+      this.toast.error('Error al añadir el servicio. Por favor, inténtalo de nuevo.');
     }
   }
 
@@ -208,7 +210,7 @@ export class ServicesManagementComponent implements OnDestroy {
 
     const newPrice = parseFloat(newPriceStr);
     if (isNaN(newPrice) || newPrice <= 0) {
-      alert('Por favor, ingresa un precio válido.');
+      this.toast.error('Por favor, ingresa un precio válido.');
       return;
     }
 
@@ -217,7 +219,7 @@ export class ServicesManagementComponent implements OnDestroy {
 
     const newTime = parseFloat(newTimeStr);
     if (isNaN(newTime) || newTime <= 0) {
-      alert('Por favor, ingresa un tiempo estimado válido.');
+      this.toast.error('Por favor, ingresa un tiempo estimado válido.');
       return;
     }
     
@@ -234,15 +236,15 @@ export class ServicesManagementComponent implements OnDestroy {
 
     const response = await this.service.updateService(serviceU.id!, updatedService);
 
-    alert('Servicio actualizado correctamente!');
+    this.toast.success('Servicio actualizado correctamente!');
   }
 
   async deleteService(index: number) {
     const service = this.services[index];
     
-    if (confirm(`¿Estás seguro de que quieres eliminar "${service.name}"?`)) {
+    if (await this.toast.confirm(`¿Estás seguro de que quieres eliminar "${service.name}"?`)) {
       const response = await this.service.deleteService(service.id!);
-      alert(`El servicio ${service.name} ha sido borrado con éxito`);
+      this.toast.success(`El servicio ${service.name} ha sido borrado con éxito`);
     }
   }
 

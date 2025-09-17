@@ -2,6 +2,7 @@
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../../../services/authentication.service';
+import { AlertService } from '../../../services/alert/alert.service';
 
 @Component({
   selector: 'app-admin-header',
@@ -12,9 +13,10 @@ import { AuthenticationService } from '../../../services/authentication.service'
 })
 export class AdminHeaderComponent {
   private auth = inject(AuthenticationService)
+  private toast = inject(AlertService)
 
-  onLogout(): void {
-    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+  async onLogout(){
+    if ( await this.toast.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
       this.auth.logOut()
     }
   }

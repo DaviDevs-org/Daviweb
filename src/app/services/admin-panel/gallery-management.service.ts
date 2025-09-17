@@ -13,26 +13,22 @@ import {
   updateMetadata
 } from '@angular/fire/storage';
 import { GalleryPhoto } from '../../admin-panel/types/admin.types';
+import { AlertService } from '../alert/alert.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GalleryService {
-  // Injector y Storage inyectados (no ejecutar APIs aquí)
   private injector = inject(Injector);
   private storage = inject(Storage);
+  private toast = inject(AlertService)
 
-  /**
-   * Subir imagen (envuelto para que la llamada a uploadBytesResumable
-   * ejecute dentro del injection context)
-   */
   uploadImage(file: File) {
     const id = crypto.randomUUID();
     const path = `pruebas/${id}`;
     const storageRef = ref(this.storage, path);
 
     try {
-      // uploadBytesResumable devuelve un UploadTask inmediatamente
       return runInInjectionContext(this.injector, () =>
         uploadBytesResumable(storageRef, file, {
           customMetadata: {
@@ -42,7 +38,7 @@ export class GalleryService {
         })
       );
     } catch (error) {
-      alert(error);
+      this.toast.error("Error al subir la imagen, vuelva a intentarlo o póngase en contacto con los desarrolladores.");
       return undefined;
     }
   }
@@ -62,7 +58,7 @@ export class GalleryService {
         })
       );
     } catch (error) {
-      alert(error);
+      this.toast.error("Error al subir la imagen, vuelva a intentarlo o póngase en contacto con los desarrolladores.");
       return undefined;
     }
   }

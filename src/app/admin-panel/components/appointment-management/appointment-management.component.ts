@@ -46,7 +46,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     private sv: ServiceManager, 
     private app: AppointmentService,
     private infoManager: InfoManager,
-    private alertService: AlertService 
+    private toast: AlertService,
   ) {
     this.editForm = this.fb.group({
       name: ['', Validators.required],
@@ -391,7 +391,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
           service: service
         });
         
-        this.alertService.success('Cita actualizada correctamente', 'Cita actualizada');
+        this.toast.success('Cita actualizada correctamente',0, 'top-center');
       } else {
         await this.app.addAppointment({
           name: formData.name,
@@ -404,7 +404,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
           datetime: this.createTimestamp(formData.date, formData.time)
         });
         
-        this.alertService.toastSuccess('Cita creada correctamente',3000, 'top-center');
+        this.toast.success('Cita creada correctamente',3000, 'top-center');
       }
 
       this.isEditing = false;
@@ -415,7 +415,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     } catch (error) {
       console.error('Error al guardar la cita:', error);
       const action = this.isEditing ? 'actualizar' : 'crear';
-      alert(`No se pudo ${action} la cita. Por favor, intenta nuevamente.`);
+      this.toast.error(`No se pudo ${action} la cita. Por favor, intenta nuevamente.`);
     } finally {
       this.isSaving = false;
     }
@@ -433,7 +433,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   }
 
   async deleteAppointment(id: string) {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
+    if (!this.toast.confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
       return;
     }
 
@@ -445,11 +445,11 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       }
 
       this.selectedAppointmentId$.next(null);
-      alert('Cita eliminada correctamente');
+      this.toast.success('Cita eliminada correctamente');
 
     } catch (error) {
       console.error('Error al eliminar la cita:', error);
-      alert('No se pudo eliminar la cita. Por favor, intenta nuevamente.');
+      this.toast.error('No se pudo eliminar la cita. Por favor, intenta nuevamente.');
     }
   }
 

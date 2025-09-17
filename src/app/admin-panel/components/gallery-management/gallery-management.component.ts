@@ -6,6 +6,7 @@ import { GalleryPhoto } from '../../types/admin.types';
 import { GalleryService } from '../../../services/admin-panel/gallery-management.service';
 import { Subscription } from 'rxjs';
 import { percentage } from '@angular/fire/storage';
+import { AlertService } from '../../../services/alert/alert.service';
 
 
 @Component({
@@ -18,6 +19,7 @@ import { percentage } from '@angular/fire/storage';
 export class GalleryManagementComponent implements OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   private gallery = inject(GalleryService)
+  private toast = inject(AlertService)
 
   selectedFile: File | null = null;
   imagePreviewUrl: string = '';
@@ -39,11 +41,11 @@ export class GalleryManagementComponent implements OnDestroy {
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
       if (!allowedTypes.includes(file.type)) {
-        alert('Por favor, selecciona una imagen JPG, PNG o WebP.');
+        this.toast.error('Por favor, selecciona una imagen JPG, PNG o WebP.');
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert('El archivo es demasiado grande. Máximo 5MB.');
+        this.toast.error('El archivo es demasiado grande. Máximo 5MB.');
         return;
       }
       
@@ -59,7 +61,7 @@ export class GalleryManagementComponent implements OnDestroy {
 
   uploadImage() {
     if (!this.selectedFile) {
-      alert('Por favor, selecciona una imagen primero.');
+      this.toast.error('Por favor, selecciona una imagen primero.');
       return;
     }
 
@@ -102,7 +104,7 @@ export class GalleryManagementComponent implements OnDestroy {
         }
         
         setTimeout(() => {
-          alert('Foto subida con éxito');
+          this.toast.success('Foto subida con éxito');
           this.progress.set('0%');
         }, 400);
       }
@@ -115,7 +117,7 @@ export class GalleryManagementComponent implements OnDestroy {
     this.galleryPhotos.update(photos =>
       photos.filter((_, index) => index !== i)
     );
-    alert("Foto eliminada con éxito")
+    this.toast.success("Foto eliminada con éxito")
   }
   
   async updateImage(i: number) {

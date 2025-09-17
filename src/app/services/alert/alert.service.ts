@@ -28,10 +28,9 @@ export class AlertService {
           hostElement: this.alertContainer
         });
         
-        // Configurar el componente
+        // Configurar el componente con valores por defecto
         this.alertRef.instance.config = {
-          mode: 'modal', // Por defecto modal
-          position: 'top-right', // Por defecto para toast
+          position: 'top-right',
           ...config
         };
 
@@ -96,156 +95,208 @@ export class AlertService {
     }
   }
 
-  /* ========== MÉTODOS MODALES (Intrusivos) ========== */
+  /* ========== MÉTODOS PRINCIPALES ========== */
   
-  success(title: string, message: string, duration: number = 4000): Promise<boolean> {
-    return this.showAlert({
-      type: 'success',
-      title,
-      message,
-      duration,
-      mode: 'modal',
-      confirmText: 'Entendido'
-    });
-  }
-
-  error(title: string, message: string): Promise<boolean> {
-    return this.showAlert({
-      type: 'error',
-      title,
-      message,
-      mode: 'modal',
-      confirmText: 'Cerrar'
-    });
-  }
-
-  warning(title: string, message: string): Promise<boolean> {
-    return this.showAlert({
-      type: 'warning',
-      title,
-      message,
-      mode: 'modal',
-      confirmText: 'Entendido'
-    });
-  }
-
-  info(title: string, message: string, duration: number = 4000): Promise<boolean> {
-    return this.showAlert({
-      type: 'info',
-      title,
-      message,
-      duration,
-      mode: 'modal',
-      confirmText: 'OK'
-    });
-  }
-
-  confirm(
-    title: string, 
+  success(
     message: string, 
-    confirmText: string = 'Confirmar', 
-    cancelText: string = 'Cancelar'
-  ): Promise<boolean> {
-    return this.showAlert({
-      type: 'confirm',
-      title,
-      message,
-      mode: 'modal',
-      confirmText,
-      cancelText
-    });
-  }
-
-  /* ========== MÉTODOS TOAST (No intrusivos) ========== */
-  
-  toastSuccess(
-    message: string, 
-    duration: number = 3000, 
+    duration: number | null = 3000, 
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
   ): Promise<boolean> {
     return this.showAlert({
       type: 'success',
       title: 'Éxito',
       message,
-      duration,
-      mode: 'toast',
+      duration: duration || undefined,
       position
     });
   }
 
-  toastError(
+  error(
     message: string, 
+    duration: number | null = null, // Errores persistentes por defecto
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
   ): Promise<boolean> {
     return this.showAlert({
       type: 'error',
       title: 'Error',
       message,
-      mode: 'toast',
+      duration: duration || undefined,
       position
     });
   }
 
-  toastWarning(
+  warning(
     message: string, 
-    duration: number = 4000, 
+    duration: number | null = 4000, 
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
   ): Promise<boolean> {
     return this.showAlert({
       type: 'warning',
       title: 'Advertencia',
       message,
-      duration,
-      mode: 'toast',
+      duration: duration || undefined,
       position
     });
   }
 
-  toastInfo(
+  info(
     message: string, 
-    duration: number = 3000, 
+    duration: number | null = 3000, 
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
   ): Promise<boolean> {
     return this.showAlert({
       type: 'info',
       title: 'Información',
       message,
-      duration,
-      mode: 'toast',
+      duration: duration || undefined,
       position
     });
   }
 
-  /* ========== MÉTODOS DE CONVENIENCIA ========== */
+  confirm(
+    message: string, 
+    confirmText: string = 'Confirmar',
+    cancelText: string = 'Cancelar',
+    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
+  ): Promise<boolean> {
+    return this.showAlert({
+      type: 'confirm',
+      title: 'Confirmación',
+      message,
+      confirmText,
+      cancelText,
+      position,
+      duration: undefined // Confirmaciones siempre persistentes
+    });
+  }
+
+  /* ========== MÉTODOS CON TÍTULOS PERSONALIZADOS ========== */
   
-  // Toast rápido (solo mensaje, sin título personalizado)
-  toast(
+  successWithTitle(
+    title: string,
+    message: string, 
+    duration: number | null = 3000, 
+    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
+  ): Promise<boolean> {
+    return this.showAlert({
+      type: 'success',
+      title,
+      message,
+      duration: duration || undefined,
+      position
+    });
+  }
+
+  errorWithTitle(
+    title: string,
+    message: string, 
+    duration: number | null = null, 
+    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
+  ): Promise<boolean> {
+    return this.showAlert({
+      type: 'error',
+      title,
+      message,
+      duration: duration || undefined,
+      position
+    });
+  }
+
+  warningWithTitle(
+    title: string,
+    message: string, 
+    duration: number | null = 4000, 
+    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
+  ): Promise<boolean> {
+    return this.showAlert({
+      type: 'warning',
+      title,
+      message,
+      duration: duration || undefined,
+      position
+    });
+  }
+
+  infoWithTitle(
+    title: string,
+    message: string, 
+    duration: number | null = 3000, 
+    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
+  ): Promise<boolean> {
+    return this.showAlert({
+      type: 'info',
+      title,
+      message,
+      duration: duration || undefined,
+      position
+    });
+  }
+
+  confirmWithTitle(
+    title: string,
+    message: string, 
+    confirmText: string = 'Confirmar',
+    cancelText: string = 'Cancelar',
+    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
+  ): Promise<boolean> {
+    return this.showAlert({
+      type: 'confirm',
+      title,
+      message,
+      confirmText,
+      cancelText,
+      position,
+      duration: undefined
+    });
+  }
+
+  /* ========== MÉTODO RÁPIDO ========== */
+  
+  // Notificación rápida con título automático
+  notify(
     type: 'success' | 'error' | 'warning' | 'info', 
     message: string, 
-    duration?: number
+    duration?: number | null,
+    position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center'
   ): Promise<boolean> {
+    const titles = {
+      success: 'Éxito',
+      error: 'Error',
+      warning: 'Advertencia',
+      info: 'Información'
+    };
+
     const config: AlertConfig = {
       type,
-      title: type.charAt(0).toUpperCase() + type.slice(1),
+      title: titles[type],
       message,
-      mode: 'toast',
-      position: 'top-right'
+      position: position || 'top-right'
     };
 
     if (duration !== undefined) {
-      config.duration = duration;
+      config.duration = duration || undefined;
     } else {
-      config.duration = type === 'error' ? 5000 : 3000;
+      // Duración por defecto según tipo
+      if (type === 'error') {
+        config.duration = undefined; // Errores persistentes por defecto
+      } else if (type === 'warning') {
+        config.duration = 4000;
+      } else {
+        config.duration = 3000;
+      }
     }
 
     return this.showAlert(config);
   }
 
-  // Método personalizado para configuraciones específicas
+  /* ========== MÉTODO PERSONALIZADO ========== */
+  
   custom(config: AlertConfig): Promise<boolean> {
     return this.showAlert(config);
   }
 
+  /* ========== CONTROL MANUAL ========== */
+  
   // Cerrar alerta manualmente
   close(): void {
     this.closeCurrentAlert();

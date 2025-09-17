@@ -1,45 +1,32 @@
-<div *ngIf="config.mode !== 'toast'" class="alert-overlay" [class.show]="isVisible" (click)="onOverlayClick($event)">
-    <div class="alert-container" [ngClass]="'alert-' + config.type">
-        <!-- Header con icono y título -->
-        <div class="alert-header">
-            <div class="alert-icon">
-                <i [class]="getIcon()"></i>
-            </div>
-            <h3 class="alert-title">{{ config.title }}</h3>
-            <button class="alert-close" (click)="close()" *ngIf="config.type !== 'confirm'">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-
-        <!-- Contenido del mensaje -->
-        <div class="alert-content">
-            <p class="alert-message">{{ config.message }}</p>
-        </div>
-
-        <!-- Botones de acción -->
-        <div class="alert-actions">
-            <button *ngIf="config.type === 'confirm'" class="btn btn-secondary" (click)="cancel()">
-                {{ config.cancelText || 'Cancelar' }}
-            </button>
-            <button class="btn btn-primary" [ngClass]="getButtonClass()" (click)="confirm()">
-                {{ config.confirmText || getDefaultConfirmText() }}
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Toast Mode (no intrusivo) -->
-<div *ngIf="config.mode === 'toast'" class="toast-notification" [class.show]="isVisible"
+<div class="toast-notification" [class.show]="isVisible"
     [ngClass]="['toast-' + config.type, 'toast-' + (config.position || 'top-right')]">
+
     <div class="toast-icon">
         <i [class]="getIcon()"></i>
     </div>
+
     <div class="toast-content">
         <div class="toast-title">{{ config.title }}</div>
         <div class="toast-message">{{ config.message }}</div>
+
+        <!-- Botones para confirmaciones -->
+        <div *ngIf="config.type === 'confirm'" class="toast-actions">
+            <button class="toast-btn toast-btn-secondary" (click)="cancel()">
+                {{ config.cancelText || 'Cancelar' }}
+            </button>
+            <button class="toast-btn toast-btn-primary" (click)="confirm()">
+                {{ config.confirmText || 'Confirmar' }}
+            </button>
+        </div>
     </div>
-    <button class="toast-close" (click)="close()">
+
+    <!-- Botón cerrar solo para notificaciones (no para confirmaciones) -->
+    <button *ngIf="config.type !== 'confirm'" class="toast-close" (click)="close()">
         <i class="bi bi-x"></i>
     </button>
-    <div *ngIf="config.duration" class="toast-progress" [style.animation-duration]="config.duration + 'ms'"></div>
+
+    <!-- Barra de progreso para auto-cierre -->
+    <div *ngIf="config.duration && config.type !== 'confirm'" class="toast-progress"
+        [style.animation-duration]="config.duration + 'ms'">
+    </div>
 </div>

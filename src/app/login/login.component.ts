@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthenticationService } from '../services/authentication.service';
 import { Router } from '@angular/router';
 import { Firestore} from '@angular/fire/firestore';
+import { AlertService } from '../services/alert/alert.service';
 
 @Component({
   selector: 'app-login',
@@ -15,7 +16,8 @@ import { Firestore} from '@angular/fire/firestore';
 export class LoginComponent {
   private auth = inject(AuthenticationService)
   private router = inject(Router);
-  private firestore = inject(Firestore)
+  private firestore = inject(Firestore);
+  private toast = inject(AlertService);
   loginData = {
     email: '',
     password: ''
@@ -33,7 +35,7 @@ export class LoginComponent {
       }
       else{
         console.log(response.error)
-        alert(response.error)
+        this.toast.error(response.error)
       }
       this.isLoading = false
     }

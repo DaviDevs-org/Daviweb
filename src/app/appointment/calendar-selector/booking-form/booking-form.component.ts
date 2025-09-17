@@ -176,9 +176,6 @@ export class BookingFormComponent implements OnChanges {
 
     this.submitting = true;
     this.formSubmitted.emit(appointmentData);
-
-    // no reseteamos aquí: el padre reseteará al confirmarse el guardado
-    // Pero reseteamos el flag de submitting después de un pequeño delay si quieres:
     setTimeout(() => this.submitting = false, 1000);
   }
 
