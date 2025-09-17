@@ -1,6 +1,13 @@
 import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
-import { Firestore, doc, getDoc, updateDoc, setDoc } from '@angular/fire/firestore';
-import { ContactInfo, ScheduleDay, AvailabilityData, Interval } from '../../admin-panel/types/admin.types';
+import { Firestore, doc, getDoc, updateDoc, setDoc, arrayUnion, arrayRemove } from '@angular/fire/firestore';
+import {
+  ContactInfo,
+  ScheduleDay,
+  AvailabilityData,
+  Interval,
+  Barber,
+  BarberSettings
+} from '../../admin-panel/types/admin.types';
 
 export interface BusinessStatus {
   isOpen: boolean;
@@ -26,6 +33,7 @@ export class InfoManager {
   private schedulePath = '/pruebas/data/info/schedule';
   private contactInfoPath = '/pruebas/data/info/contact-info';
   private availabilityPath = '/pruebas/data/availability/config';
+  private barberPath = '/pruebas/data/barber-settings/barbers';
 
   private defaultSchedule: ScheduleDay[] = [
     { name: 'Lunes', day: 'lunes', intervals: [{ open: '09:00', close: '19:00' }], closed: false },
@@ -46,6 +54,7 @@ export class InfoManager {
   private _availabilityData: AvailabilityData | null = null;
 
   /** ==================== SCHEDULE / CONTACT ==================== */
+
   async getSchedule(): Promise<ScheduleDay[]> {
     try {
       return await runInInjectionContext(this.injector, async () => {
@@ -57,6 +66,22 @@ export class InfoManager {
     } catch (err) {
       console.error('Error getting schedule:', err);
       return this.defaultSchedule;
+    }
+  }
+
+  async saveSchedule(schedule: ScheduleDay[]): Promise<void> {
+    try {
+      await runInInjectionContext(this.injector, async () => {
+        const ref = doc(this.firestore, this.schedulePath);
+        try {
+          await updateDoc(ref, { schedule });
+        } catch {
+          await setDoc(ref, { schedule }, { merge: true });
+        }
+      });
+    } catch (err) {
+      console.error('Error saving schedule:', err);
+      throw err;
     }
   }
 
@@ -74,23 +99,15 @@ export class InfoManager {
     }
   }
 
-  async saveSchedule(schedule: ScheduleDay[]): Promise<void> {
-    try {
-      await runInInjectionContext(this.injector, async () => {
-        const ref = doc(this.firestore, this.schedulePath);
-        await updateDoc(ref, { schedule });
-      });
-    } catch (err) {
-      console.error('Error saving schedule:', err);
-      throw err;
-    }
-  }
-
   async saveContactInfo(contactInfo: ContactInfo): Promise<void> {
     try {
       await runInInjectionContext(this.injector, async () => {
         const ref = doc(this.firestore, this.contactInfoPath);
-        await updateDoc(ref, { contactInfo });
+        try {
+          await updateDoc(ref, { contactInfo });
+        } catch {
+          await setDoc(ref, { contactInfo }, { merge: true });
+        }
       });
     } catch (err) {
       console.error('Error saving contact info:', err);
@@ -134,7 +151,6 @@ export class InfoManager {
       return status;
     }
 
-    // Revisamos cada intervalo de hoy
     for (const interval of today.intervals) {
       if (currentTime >= interval.open && currentTime < interval.close) {
         status.isOpen = true;
@@ -153,7 +169,6 @@ export class InfoManager {
       }
     }
 
-    // Antes de abrir hoy
     const nextInterval = today.intervals.find(i => currentTime < i.open);
     if (nextInterval) {
       const openDt = this.createDateTimeFromTime(checkDate, nextInterval.open);
@@ -170,7 +185,6 @@ export class InfoManager {
       return status;
     }
 
-    // Pasado cierre, buscar siguiente
     const next = this.findNextOpenDay(schedule, dayIndex);
     status.nextOpenDay = next.day;
     status.nextOpenTime = next.time;
@@ -246,7 +260,19 @@ export class InfoManager {
     try{
       await runInInjectionContext(this.injector, async ()=>{
         const ref = doc(this.firestore, this.availabilityPath);
-        await setDoc(ref, data, {merge:true});
+
+        try {
+          await updateDoc(ref, {
+            defaultSchedule: data.defaultSchedule,
+            exceptions: data.exceptions
+          });
+        } catch (updateErr) {
+          await setDoc(ref, {
+            defaultSchedule: data.defaultSchedule,
+            exceptions: data.exceptions
+          }, { merge: true });
+        }
+
         this._availabilityData = data;
       });
     }catch(err){
@@ -264,5 +290,83 @@ export class InfoManager {
       };
     }
     return map;
+  }
+
+  /** ==================== BARBERS ==================== */
+
+  // Devuelve BarberSettings en forma anidada: { settings: { barberSelection, staff } }
+  async getBarberSettings(): Promise<BarberSettings> {
+    try {
+      const ref = doc(this.firestore, this.barberPath);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        const defaultSettings: BarberSettings = { settings: { barberSelection: false, staff: [] } } as any;
+        await setDoc(ref, defaultSettings);
+        return defaultSettings;
+      }
+      const data = snap.data() as any;
+
+      // Si doc está en forma plana (legacy) adaptamos a la nueva forma en memoria
+      if (data && (data.barberSelection !== undefined || data.staff !== undefined)) {
+        return { settings: { barberSelection: !!data.barberSelection, staff: data.staff ?? [] } } as any;
+      }
+
+      return data as BarberSettings;
+    } catch (err) {
+      console.error('Error getting barber settings:', err);
+      return { settings: { barberSelection: false, staff: [] } } as any;
+    }
+  }
+
+  // Guardar todo settings (útil si quiere un botón "Guardar configuración")
+  async saveBarberSettings(settings: { barberSelection: boolean; staff: Barber[] }): Promise<void> {
+    try {
+      const ref = doc(this.firestore, this.barberPath);
+      try {
+        await updateDoc(ref, { settings });
+      } catch {
+        await setDoc(ref, { settings }, { merge: true });
+      }
+    } catch (err) {
+      console.error('Error saving barber settings:', err);
+      throw err;
+    }
+  }
+
+  async updateBarberSelection(value: boolean): Promise<void> {
+    try {
+      const ref = doc(this.firestore, this.barberPath);
+      await updateDoc(ref, { 'settings.barberSelection': value });
+    } catch (err) {
+      console.error('Error updating barber selection:', err);
+    }
+  }
+
+  async addBarber(barber: Barber): Promise<void> {
+    try {
+      const ref = doc(this.firestore, this.barberPath);
+      await updateDoc(ref, { 'settings.staff': arrayUnion(barber) });
+    } catch (err) {
+      console.error('Error adding barber:', err);
+    }
+  }
+
+  async removeBarber(barber: Barber): Promise<void> {
+    try {
+      const ref = doc(this.firestore, this.barberPath);
+      await updateDoc(ref, { 'settings.staff': arrayRemove(barber) });
+    } catch (err) {
+      console.error('Error removing barber:', err);
+    }
+  }
+
+  async editBarber(oldBarber: Barber, newBarber: Barber): Promise<void> {
+    try {
+      const ref = doc(this.firestore, this.barberPath);
+      await updateDoc(ref, { 'settings.staff': arrayRemove(oldBarber) });
+      await updateDoc(ref, { 'settings.staff': arrayUnion(newBarber) });
+    } catch (err) {
+      console.error('Error editing barber:', err);
+    }
   }
 }

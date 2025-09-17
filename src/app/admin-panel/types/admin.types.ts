@@ -126,3 +126,17 @@ export interface StatCard {
   change: string;
   changeType: 'positive' | 'negative' | 'neutral';
 }
+
+export interface BarberSettings {
+  settings: {
+    barberSelection: boolean;
+    staff: Barber[];
+  }
+}
+
+export interface Barber {
+  id:string;
+  name: string;
+  visible?: boolean;
+}
+

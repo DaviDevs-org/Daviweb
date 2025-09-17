@@ -8,12 +8,9 @@
 // ------------------------
 .info-sections {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
   gap: 30px;
-
-  @include mobile {
-    grid-template-columns: 1fr;
-  }
 }
 
 .info-card {
@@ -126,12 +123,139 @@
     }
 
     // Botón eliminar intervalo
-    .remove-interval-btn {
+    .danger-btn {
       @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       padding: 5px 10px;
       min-width: 80px;
       flex-shrink: 0;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+
+      i {
+        font-size: 1rem;
+      }
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba($danger-red, 0.25);
+      }
+    }
+  }
+}
+
+// ------------------------
+// Peluqueros
+// ------------------------
+.barber-set {
+
+  .barber-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 10px;
+    background: rgba($light-gray, 0.15);
+    transition: all 0.3s ease;
+    gap: 10px;
+
+    &:hover {
+      background: rgba($primary-gold, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .barber-name-input {
+      flex: 1;
+      padding: 6px 10px;
+      border: 2px solid $border-color;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-gold;
+        box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+      }
+
+      &:disabled {
+        background: $light-gray;
+        opacity: 0.7;
+      }
+    }
+
+    .barber-actions {
+      display: flex;
+      gap: 8px;
+
+      .toggle-visible {
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        color: $primary-gold;
+
+        &.hidden {
+          color: $text-gray;
+        }
+
+        &:hover {
+          background: rgba($primary-gold, 0.1);
+        }
+      }
+
+      .danger-btn {
+        @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
+        font-size: 0.85rem;
+        padding: 5px 10px;
+        min-width: 80px;
+        flex-shrink: 0;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: center;
+
+        i {
+          font-size: 1rem;
+        }
+
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba($danger-red, 0.25);
+        }
+      }
+    }
+  }
+
+  .add-barber {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+
+    input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 2px solid $border-color;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-gold;
+        box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+      }
+    }
+
+    .add-btn {
+      @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+      font-size: 0.9rem;
+      padding: 6px 14px;
     }
   }
 }
@@ -170,15 +294,20 @@
   padding: 5px 10px;
   min-width: 80px;
   flex-shrink: 0;
-}
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
 
-// Botón eliminar excepciones
-.exception-row .danger-btn {
-  @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
-  font-size: 0.85rem;
-  padding: 5px 10px;
-  margin-top: 5px;
-  align-self: flex-start;
+  i {
+    font-size: 1rem;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($danger-red, 0.25);
+  }
 }
 
 // ------------------------
@@ -226,15 +355,14 @@
   }
 
   @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 }
 
+// ------------------------
+// Excepciones
+// ------------------------
 .exception-row {
   display: flex;
   flex-direction: column;
@@ -251,49 +379,6 @@
     background: rgba($primary-gold, 0.05);
   }
 
-  // Primera fila: fecha y checkbox cerrado
-  .exception-header {
-    display: grid;
-    grid-template-columns: 200px 1fr auto;
-    gap: 20px;
-    align-items: center;
-
-    @include mobile {
-      grid-template-columns: 1fr;
-      gap: 10px;
-      text-align: center;
-    }
-
-    .ex-date {
-      padding: 10px 15px;
-      border: 2px solid $border-color;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-
-      &:focus {
-        outline: none;
-        border-color: $primary-gold;
-        box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
-      }
-    }
-
-    .ex-closed {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: $text-gray;
-      font-weight: 500;
-      cursor: pointer;
-
-      input[type="checkbox"] {
-        cursor: pointer;
-        transform: scale(1.2);
-      }
-    }
-  }
-
-  // Sección de horarios
   .ex-hours {
     border-top: 1px solid rgba($border-color, 0.5);
     padding-top: 15px;
@@ -336,11 +421,30 @@
           font-weight: 600;
           font-size: 1.1rem;
         }
+
+        .danger-btn {
+          @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
+          font-size: 0.85rem;
+          padding: 5px 10px;
+          min-width: 80px;
+          flex-shrink: 0;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          justify-content: center;
+
+          i { font-size: 1rem; }
+
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba($danger-red, 0.25);
+          }
+        }
       }
     }
   }
 
-  // Mensaje cuando no hay intervalos
   .no-intervals-message {
     padding: 15px;
     background: rgba($danger-red, 0.1);
@@ -352,16 +456,13 @@
     margin-top: 10px;
   }
 
-  // Botón eliminar excepción
-  .remove-exception-btn {
-    @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
+  .danger-btn {
     align-self: flex-end;
     margin-top: 10px;
     min-width: 140px;
   }
 }
 
-// Contenedor para añadir nueva excepción
 .exception-add {
   display: flex;
   justify-content: center;
