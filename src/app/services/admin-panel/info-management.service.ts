@@ -294,7 +294,6 @@ export class InfoManager {
 
   /** ==================== BARBERS ==================== */
 
-  // Devuelve BarberSettings en forma anidada: { settings: { barberSelection, staff } }
   async getBarberSettings(): Promise<BarberSettings> {
     try {
       const ref = doc(this.firestore, this.barberPath);
@@ -306,7 +305,6 @@ export class InfoManager {
       }
       const data = snap.data() as any;
 
-      // Si doc está en forma plana (legacy) adaptamos a la nueva forma en memoria
       if (data && (data.barberSelection !== undefined || data.staff !== undefined)) {
         return { settings: { barberSelection: !!data.barberSelection, staff: data.staff ?? [] } } as any;
       }
@@ -318,7 +316,6 @@ export class InfoManager {
     }
   }
 
-  // Guardar todo settings (útil si quiere un botón "Guardar configuración")
   async saveBarberSettings(settings: { barberSelection: boolean; staff: Barber[] }): Promise<void> {
     try {
       const ref = doc(this.firestore, this.barberPath);

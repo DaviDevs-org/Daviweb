@@ -7,7 +7,8 @@ import { ReservedSlotsService, ReservedSlot } from '../../services/reserved-slot
 import { AppointmentService } from '../../services/appointments.service';
 import { Subject, firstValueFrom } from 'rxjs';
 import { InfoManager } from '../../services/admin-panel/info-management.service';
-import { AlertService } from '../../services/alert/alert.service';
+import { Barber } from '../../admin-panel/types/admin.types';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-calendar-selector',
@@ -47,13 +48,16 @@ export class CalendarSelectorComponent implements OnDestroy {
   bookedSlotsByDate: Record<string, string[]> = {};
   availabilityData: any = null;
 
+  barbers: Barber[] = [];
+  allowBarberSelection = false;
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private reservedSlotsService: ReservedSlotsService,
     private appointmentService: AppointmentService,
     private infoManager: InfoManager,
-    private toast: AlertService
+    private cdr: ChangeDetectorRef
   ) {
     const startYear = this.selectedYear - 2;
     const endYear = this.selectedYear + 2;
@@ -80,9 +84,26 @@ export class CalendarSelectorComponent implements OnDestroy {
         this.bookedSlotsByDate[dateKey].push(slot.time);
       });
 
+      await this.loadBarbers();
       this.computeAvailableHoursForCurrentMatrix();
     } catch (error) {
       console.error('Error cargando availability o reservas:', error);
+    }
+  }
+
+
+  private async loadBarbers() {
+    try {
+      const settings = await this.infoManager.getBarberSettings();
+      this.barbers = settings.settings.staff.filter(b => b.visible);
+      this.allowBarberSelection = settings.settings.barberSelection;
+      console.log('allowBarberSelection:', this.allowBarberSelection);
+      console.log('[CalendarSelector] Barberos cargados:', this.barbers);
+
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Error cargando barberos:', err);
+      this.barbers = [];
     }
   }
 
@@ -161,7 +182,7 @@ export class CalendarSelectorComponent implements OnDestroy {
     console.log('Horas calculadas para este día:', hoursWithStatus);
 
     if (!hoursWithStatus.length) {
-      this.toast.error('No hay horas disponibles para este día');
+      alert('No hay horas disponibles para este día');
       return;
     }
 
@@ -244,19 +265,19 @@ export class CalendarSelectorComponent implements OnDestroy {
   onHourSelected(hour: string) { this.selectedHour = hour; this.showHours = false; this.showForm = true; }
 
   async handleFormSubmit(data: { name: string; email: string; phone: string; description?: string }) {
-    if (!this.selectedDate || !this.selectedHour) { this.toast.error('Fecha u hora no seleccionada'); return; }
+    if (!this.selectedDate || !this.selectedHour) { alert('Error: Fecha u hora no seleccionada'); return; }
     if (this.isSubmitting) return;
 
     const bookingData = { date: this.selectedDateString, time: this.selectedHour, ...data };
     this.isSubmitting = true;
     try {
       await this.appointmentService.addAppointment(bookingData);
-      this.toast.success('Cita guardada correctamente 👌');
+      alert('Cita guardada correctamente 👌');
       this.resetAll();
       this.loadData();
     } catch (error: any) {
       console.error('Error guardando la cita:', error);
-      this.toast.error('Error al guardar la cita: ' + (error.message || JSON.stringify(error)));
+      alert('Error al guardar la cita: ' + (error.message || JSON.stringify(error)));
     } finally { this.isSubmitting = false; }
   }
 

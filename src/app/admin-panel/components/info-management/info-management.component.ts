@@ -1,16 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import {
-  ContactInfo,
-  ScheduleDay,
-  Interval,
-  AvailabilityData,
-  ExceptionItem,
-  BarberSettings,
-  Barber
-} from '../../types/admin.types';
-import { InfoManager } from '../../../services/admin-panel/info-management.service';
+import {Component, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {AvailabilityData, Barber, ContactInfo, ExceptionItem, Interval, ScheduleDay} from '../../types/admin.types';
+import {InfoManager} from '../../../services/admin-panel/info-management.service';
 
 @Component({
   selector: 'app-info-management',
@@ -24,8 +16,6 @@ export class InfoManagementComponent implements OnInit {
   contactInfo: ContactInfo = { phone: '', email: '', address: '' };
   exceptions: ExceptionItem[] = [];
 
-  // Mantengo compatibilidad: barberSettings contiene tanto la forma anidada en .settings
-  // como propiedades top-level barberSelection/staff para que la plantilla actual funcione.
   barberSettings: any = { settings: { barberSelection: false, staff: [] }, barberSelection: false, staff: [] };
 
   isBarberLoading = true;
@@ -176,15 +166,11 @@ export class InfoManagementComponent implements OnInit {
     try {
       const settings = await this.infoManager.getBarberSettings();
 
-      // settings puede venir en forma anidada o legacy plano; unificamos en this.barberSettings
       if ((settings as any).settings) {
-        // anidado
         this.barberSettings.settings = settings.settings;
-        // también mantenemos propiedades top-level para compatibilidad con la plantilla actual
         this.barberSettings.barberSelection = settings.settings.barberSelection;
         this.barberSettings.staff = settings.settings.staff;
       } else {
-        // legacy plano
         const legacy = settings as any;
         this.barberSettings.settings = { barberSelection: !!legacy.barberSelection, staff: legacy.staff ?? [] };
         this.barberSettings.barberSelection = this.barberSettings.settings.barberSelection;
@@ -219,7 +205,6 @@ export class InfoManagementComponent implements OnInit {
     }
   }
 
-  // Toggle inmediato (opcional). También actualiza la forma plana para la plantilla.
   async toggleBarberSelection() {
     try {
       const newVal = !!this.barberSettings.settings.barberSelection;

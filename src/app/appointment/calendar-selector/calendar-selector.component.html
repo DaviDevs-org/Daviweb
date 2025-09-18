@@ -66,6 +66,8 @@
       *ngIf="selectedDate && selectedHour"
       [date]="selectedDateString"
       [time]="selectedHour"
+      [barbers]="barbers"
+      [allowBarberSelection]="allowBarberSelection"
       (formSubmitted)="handleFormSubmit($event)"
     ></app-booking-form>
 

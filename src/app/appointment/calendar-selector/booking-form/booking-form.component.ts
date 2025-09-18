@@ -1,11 +1,13 @@
 import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AppointmentService } from '../../../services/appointments.service';
+import {NgForOf, NgIf} from '@angular/common';
+import {Barber} from '../../../admin-panel/types/admin.types';
 
 @Component({
   selector: 'app-booking-form',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, NgIf, NgForOf],
   template: `
     <p><strong>DEBUG - fecha:</strong> {{ date }}</p>
     <p><strong>DEBUG - hora:</strong> {{ time }}</p>
@@ -43,6 +45,16 @@ import { AppointmentService } from '../../../services/appointments.service';
       <div class="form-group">
         <label for="description">Descripción (opcional)</label>
         <textarea id="description" name="description" ngModel rows="3"></textarea>
+      </div>
+
+      <div class="form-group" *ngIf="allowBarberSelection && barbers.length > 0">
+        <label for="barber">Selecciona peluquero</label>
+        <select id="barber" name="barber" ngModel required>
+          <option value="">-- Cualquiera --</option>
+          <option *ngFor="let b of barbers" [value]="b.id" [disabled]="!b.visible">
+            {{ b.name }}
+          </option>
+        </select>
       </div>
 
       <button type="submit" class="submit-btn" [disabled]="!date || !time || submitting">Enviar Reserva</button>
@@ -126,6 +138,51 @@ import { AppointmentService } from '../../../services/appointments.service';
       background-color: #ccc;
       cursor: not-allowed;
     }
+
+    /* Contenedor del select */
+    .form-group select {
+      -webkit-appearance: none; /* quitar estilo nativo en Safari/Chrome */
+      -moz-appearance: none;    /* quitar estilo nativo en Firefox */
+      appearance: none;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1.8px solid #d4b258;
+      background-color: #f3e1b0;
+      color: #613523;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    /* Hover y focus */
+    .form-group select:hover,
+    .form-group select:focus {
+      border-color: #b8953a;
+      box-shadow: 0 0 6px #d4b258aa;
+      outline: none;
+    }
+
+    /* Flecha personalizada */
+    .form-group select {
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%23613523" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px 16px;
+    }
+
+    /* Opciones */
+    .form-group select option {
+      color: #613523;
+      background-color: #f3e1b0;
+    }
+
+    /* Disabled */
+    .form-group select option:disabled {
+      color: #999;
+    }
   `]
 })
 export class BookingFormComponent implements OnChanges {
@@ -133,7 +190,17 @@ export class BookingFormComponent implements OnChanges {
   @Input() date?: string | null = null;
   @Input() time?: string | null = null;
 
-  @Output() formSubmitted = new EventEmitter<{ name: string; email: string; phone: string; description?: string }>();
+  @Input() barbers: Barber[] = [];
+  @Input() allowBarberSelection: boolean = false;
+
+
+  @Output() formSubmitted = new EventEmitter<{
+    name: string;
+    email: string;
+    phone: string;
+    description?: string;
+    barber?: string
+  }>();
 
   submitted = false;
   formRef?: NgForm;
@@ -146,10 +213,12 @@ export class BookingFormComponent implements OnChanges {
     if (changes['time']) {
       console.log('BookingFormComponent recibió time:', this.time);
     }
+    if (changes['barbers']) {
+      console.log('BookingFormComponent recibió barbers:', this.barbers);
+    }
   }
 
   onSubmit(form: NgForm) {
-    console.log('[BookingForm] onSubmit - form value:', form.value);
     this.submitted = true;
     this.formRef = form;
 
@@ -157,27 +226,29 @@ export class BookingFormComponent implements OnChanges {
 
     const email = form.value.email?.trim();
     const phone = form.value.phone?.trim();
-
     const hasEmail = !!email;
     const hasPhone = !!phone;
-
     const emailValid = hasEmail ? this.isEmailValid(email) : true;
     const phoneValid = hasPhone ? this.isPhoneValid(phone) : true;
     const hasContact = hasEmail || hasPhone;
 
+    // Validaciones
     if (form.controls['name']?.invalid || !hasContact || !emailValid || !phoneValid) return;
+    if (this.allowBarberSelection && this.barbers.length > 0 && !form.value.barber) return;
 
     const appointmentData = {
       name: form.value.name.trim(),
       email: email || '',
       phone: phone || '',
-      description: form.value.description?.trim() || ''
+      description: form.value.description?.trim() || '',
+      barber: form.value.barber || ''
     };
 
     this.submitting = true;
     this.formSubmitted.emit(appointmentData);
-    setTimeout(() => this.submitting = false, 1000);
+
   }
+
 
   resetAll() {
     if (this.formRef) {
