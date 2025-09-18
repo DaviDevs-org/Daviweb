@@ -100,7 +100,7 @@ export class AlertService {
   success(
     message: string, 
     duration: number | null = 3000, 
-    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
+    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
   ): Promise<boolean> {
     return this.showAlert({
       type: 'success',
@@ -114,7 +114,7 @@ export class AlertService {
   error(
     message: string, 
     duration: number | null = null, // Errores persistentes por defecto
-    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
+    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
   ): Promise<boolean> {
     return this.showAlert({
       type: 'error',
@@ -128,7 +128,7 @@ export class AlertService {
   warning(
     message: string, 
     duration: number | null = 4000, 
-    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
+    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
   ): Promise<boolean> {
     return this.showAlert({
       type: 'warning',
@@ -142,7 +142,7 @@ export class AlertService {
   info(
     message: string, 
     duration: number | null = 3000, 
-    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
+    position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
   ): Promise<boolean> {
     return this.showAlert({
       type: 'info',

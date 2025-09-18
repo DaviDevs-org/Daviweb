@@ -7,7 +7,7 @@ import { ReservedSlotsService, ReservedSlot } from '../../services/reserved-slot
 import { AppointmentService } from '../../services/appointments.service';
 import { Subject, firstValueFrom } from 'rxjs';
 import { InfoManager } from '../../services/admin-panel/info-management.service';
-import { Barber } from '../../admin-panel/types/admin.types';
+import { Barber, Service } from '../../admin-panel/types/admin.types';
 import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
@@ -264,7 +264,7 @@ export class CalendarSelectorComponent implements OnDestroy {
   backToCalendar() { this.showHours = false; this.showForm = false; this.selectedDate = null; this.selectedHour = null; }
   onHourSelected(hour: string) { this.selectedHour = hour; this.showHours = false; this.showForm = true; }
 
-  async handleFormSubmit(data: { name: string; email: string; phone: string; description?: string }) {
+  async handleFormSubmit(data: { name: string; email: string; phone: string; description?: string; barber?:string, service:Service}) {
     if (!this.selectedDate || !this.selectedHour) { alert('Error: Fecha u hora no seleccionada'); return; }
     if (this.isSubmitting) return;
 

@@ -4,7 +4,7 @@ import { ServiceManager } from "../services/admin-panel/services-management.serv
 import { Service } from "../admin-panel/types/admin.types";
 import { Subscription } from "rxjs";
 import { Auth } from '@angular/fire/auth';
-import { CommonModule } from '@angular/common';
+import { CommonModule, ViewportScroller } from '@angular/common';
 
 interface ServiceCategory {
   id: string;
@@ -26,6 +26,7 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
   private auth = inject(Auth);
   private cdr = inject(ChangeDetectorRef);
   private injector = inject(Injector);
+  private viewportScroller = inject(ViewportScroller)
 
   private subscriptions: Subscription[] = [];
 
@@ -84,6 +85,9 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
     }
   }
 
+  scrollToSection(elementId: string) {
+    this.viewportScroller.scrollToAnchor(elementId);
+  }
   private getCategoryFromService(service: Service): string {
     // Lógica para determinar la categoría basada en el nombre del servicio
     const name = service.name.toLowerCase();
