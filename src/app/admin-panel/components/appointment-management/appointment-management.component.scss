@@ -1421,3 +1421,21 @@
         }
     }
 }
+.barber-info {
+    background: rgba(variables.$secondary-gold, 0.15) !important;
+    color: variables.$secondary-gold !important;
+    font-weight: 600;
+    
+    i {
+        color: variables.$secondary-gold !important;
+    }
+}
+.res-contact {
+    .contact-item {
+        &.barber-info {
+            margin-top: 0.25rem;
+            display: block;
+            width: fit-content;
+        }
+    }
+}

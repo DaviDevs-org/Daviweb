@@ -33,6 +33,7 @@
                     <div class="card-body">
                         <div><strong>Email:</strong> {{ a.email || '—' }}</div>
                         <div><strong>Teléfono:</strong> {{ a.phone || '—' }}</div>
+                        <div><strong>Peluquero:</strong> {{ a.barber }}</div>
                         <div *ngIf="a.description"><strong>Nota:</strong> {{ a.description }}</div>
                     </div>
                     <!-- Indicador visual si es del día actual -->
@@ -163,6 +164,15 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label for="editBarber">Peluquero</label>
+                        <select id="editBarber" formControlName="barberId">
+                            <option value="Cualquiera">Sin peluquero específico</option>
+                            <option *ngFor="let barber of barbers" [value]="barber.name">
+                                {{ barber.name }}
+                            </option>
+                        </select>
+                    </div>
 
                     <div class="form-row">
                         <div class="form-group full-width">
@@ -197,7 +207,7 @@
                             [class.is-continuation]="isAppointmentContinuation(dayList, h)"
                             [class.is-start]="isAppointmentStart(dayList, h)"
                             [class.is-end]="isAppointmentEnd(dayList, h)">
-                            
+
                             <div class="hour-label">{{ h }}</div>
                             <div class="slot">
                                 <ng-container *ngIf="findReservation(dayList, h) as res; else emptySlot">
@@ -207,10 +217,9 @@
                                         [class.is-main-slot]="isMainAppointmentSlot(dayList, h, res)"
                                         [class.is-continuation-slot]="!isMainAppointmentSlot(dayList, h, res)"
                                         [class.multi-slot]="getAppointmentSlotCount(res) > 1">
-                                        
+
                                         <!-- Contenido principal solo en el primer slot -->
-                                        <div class="reservation-content" 
-                                            *ngIf="isMainAppointmentSlot(dayList, h, res)"
+                                        <div class="reservation-content" *ngIf="isMainAppointmentSlot(dayList, h, res)"
                                             (click)="chooseAppointment(res.id)">
                                             <div class="res-header">
                                                 <div class="res-time">{{ res.timeNormalized }}</div>
@@ -224,11 +233,14 @@
                                                 <span *ngIf="res.email" class="contact-item">
                                                     <i class="bi bi-envelope-fill"></i> {{ res.email }}
                                                 </span>
+                                                <span *ngIf="res.barber" class="contact-item barber-info">
+                                                    <i class="bi bi-person-fill"></i> {{ res.barber }}
+                                                </span>
                                             </div>
                                         </div>
-                                        
+
                                         <!-- Indicador de continuación para slots adicionales -->
-                                        <div class="continuation-indicator" 
+                                        <div class="continuation-indicator"
                                             *ngIf="!isMainAppointmentSlot(dayList, h, res)"
                                             (click)="chooseAppointment(res.id)">
                                             <div class="continuation-line"></div>
@@ -236,8 +248,7 @@
                                         </div>
 
                                         <!-- Acciones solo en el slot principal -->
-                                        <div class="appointment-actions" 
-                                            *ngIf="isMainAppointmentSlot(dayList, h, res)"
+                                        <div class="appointment-actions" *ngIf="isMainAppointmentSlot(dayList, h, res)"
                                             (click)="selectedAppointmentId$.next(null)">
                                             <button class="action-btn" title="Ver detalles">
                                                 <i class="bi bi-eye-slash"></i>
@@ -293,6 +304,14 @@
                         <span>{{ selected.service!.name + ' (' + selected.service!.time + 'm)'}}</span>
                         } @else {
                         <span>No especificado</span>
+                        }
+                    </div>
+                    <div class="detail-item">
+                        <strong>Peluquero:</strong>
+                        @if (selected.barber) {
+                        <span>{{ selected.barber }}</span>
+                        } @else {
+                        <span>Sin asignar</span>
                         }
                     </div>
                     <div class="detail-item">

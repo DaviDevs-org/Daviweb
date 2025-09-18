@@ -1,0 +1,87 @@
+<!-- barbers-info.component.html -->
+<div class="barbers-section" id="barbers">
+    <div class="barbers-header">
+        <h2 class="section-title">Nuestro Equipo</h2>
+        <p class="section-subtitle">
+            Conoce a nuestros profesionales expertos en barbería, cada uno con su estilo único y años de experiencia.
+        </p>
+    </div>
+
+    @if (loading) {
+    <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Cargando equipo...</p>
+    </div>
+    } @else {
+    <div class="barbers-content">
+        @if (barbers.length > 0) {
+        <div class="barbers-grid">
+            @for (barber of barbers; track barber.id) {
+            <div class="barber-card" [class.featured]="barber.featured">
+                <!-- Imagen del peluquero -->
+                <div class="barber-image">
+                    <img [src]="barber.imageUrl || '/assets/images/default-barber.jpg'" [alt]="barber.name"
+                        class="barber-photo">
+
+                    <div class="image-overlay">
+                        @if (barber.featured) {
+                        <div class="featured-badge">
+                            <i class="bi bi-star-fill"></i>
+                            Destacado
+                        </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Contenido del peluquero -->
+                <div class="barber-content">
+                    <div class="barber-header">
+                        <h3 class="barber-name">{{ barber.name }}</h3>
+                        @if (barber.specialty) {
+                        <p class="barber-specialty">{{ barber.specialty }}</p>
+                        }
+                    </div>
+
+                    @if (barber.experience || barber.description) {
+                    <div class="barber-info">
+                        @if (barber.experience) {
+                        <div class="barber-experience">
+                            <i class="bi bi-award"></i>
+                            <span>{{ barber.experience }} años de experiencia</span>
+                        </div>
+                        }
+
+                        @if (barber.description) {
+                        <p class="barber-description">{{ barber.description }}</p>
+                        }
+                    </div>
+                    }
+
+                    <div class="barber-actions">
+                        <button class="btn-primary" (click)="scrollToSection('appointments'); $event.preventDefault()">
+                            <i class="bi bi-calendar-check"></i>
+                            Reservar con {{ barber.name.split(' ')[0] }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        } @else {
+        <div class="no-barbers">
+            <div class="placeholder-icon">
+                <i class="bi bi-person-x"></i>
+            </div>
+            <h3>No hay peluqueros disponibles</h3>
+            <p>Actualmente no hay información del equipo disponible.</p>
+        </div>
+        }
+
+        <div class="barbers-note">
+            <i class="bi bi-info-circle"></i>
+            <p>* Puedes elegir tu peluquero preferido al hacer la reserva. Si no tienes preferencia, asignaremos el
+                mejor disponible.</p>
+        </div>
+    </div>
+    }
+</div>

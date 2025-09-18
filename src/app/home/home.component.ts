@@ -8,12 +8,13 @@ import { FaqComponent } from '../faq/faq.component';
 import { FooterComponent } from '../footer/footer.component';
 import { PhotoOfTheDayComponent } from '../photo-of-the-day/photo-of-the-day.component';
 import { ServicesInfoComponent } from '../services-info/services-info.component';
+import { BarbersInfoComponent } from '../barbers-info/barbers-info.component';
 
 @Component({
   selector: 'app-home',
   imports: [HeaderComponent, AboutUsComponent, LocationAndContactComponent,
   OpinionsComponent, FaqComponent, FooterComponent, PhotoOfTheDayComponent,
-  ServicesInfoComponent, AppointmentComponent],
+  ServicesInfoComponent, AppointmentComponent, BarbersInfoComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })

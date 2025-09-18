@@ -1,8 +1,13 @@
-import {Component, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {AvailabilityData, Barber, ContactInfo, ExceptionItem, Interval, ScheduleDay} from '../../types/admin.types';
-import {InfoManager} from '../../../services/admin-panel/info-management.service';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { AvailabilityData, Barber, ContactInfo, ExceptionItem, Interval, ScheduleDay } from '../../types/admin.types';
+import { InfoManager } from '../../../services/admin-panel/info-management.service';
+import { ElementRef, ViewChild, inject, signal } from '@angular/core';
+import { percentage } from '@angular/fire/storage';
+import { Subscription } from 'rxjs';
+import { GalleryService } from '../../../services/admin-panel/gallery-management.service';
+import { AlertService } from '../../../services/alert/alert.service';
 
 @Component({
   selector: 'app-info-management',
@@ -17,11 +22,21 @@ export class InfoManagementComponent implements OnInit {
   exceptions: ExceptionItem[] = [];
 
   barberSettings: any = { settings: { barberSelection: false, staff: [] }, barberSelection: false, staff: [] };
+  @ViewChild('barberFileInput') barberFileInput!: ElementRef<HTMLInputElement>;
+
+  private galleryService = inject(GalleryService);
+  private toast = inject(AlertService);
+
+  selectedBarberFile: File | null = null;
+  barberImagePreviewUrl: string = '';
+  barberUploadProgress = signal('0%');
+  isBarberUploading: boolean = false;
+  barberUploadSubscription: Subscription | undefined = undefined;
 
   isBarberLoading = true;
   isLoading = true;
 
-  constructor(private infoManager: InfoManager) {}
+  constructor(private infoManager: InfoManager) { }
 
   async ngOnInit() {
     try {
@@ -41,8 +56,8 @@ export class InfoManagementComponent implements OnInit {
 
   // ===== HORARIOS SEMANALES =====
   applyDefaultScheduleToLocal(defaultSchedule: Record<string, any>) {
-    const dayOrder = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
-    const names = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+    const dayOrder = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+    const names = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
     this.schedule = dayOrder.map((key, idx) => {
       const src = defaultSchedule[key] || {};
@@ -53,11 +68,11 @@ export class InfoManagementComponent implements OnInit {
   }
 
   addInterval(day: ScheduleDay) { day.intervals.push({ open: '', close: '' }); }
-  removeInterval(day: ScheduleDay, i: number) { day.intervals.splice(i,1); }
+  removeInterval(day: ScheduleDay, i: number) { day.intervals.splice(i, 1); }
   validateInterval(day: ScheduleDay, interval: Interval) {
     if (!day.closed && interval.open && interval.close && interval.open >= interval.close) interval.close = '';
   }
-  onToggleDayClosed(day: ScheduleDay) { if(day.closed) day.intervals=[]; else if(!day.intervals.length) day.intervals.push({open:'',close:''}); }
+  onToggleDayClosed(day: ScheduleDay) { if (day.closed) day.intervals = []; else if (!day.intervals.length) day.intervals.push({ open: '', close: '' }); }
   transformScheduleToDefault(): Record<string, any> {
     const out: Record<string, any> = {};
     for (const d of this.schedule) out[d.day] = { closed: !!d.closed, intervals: d.intervals.map(i => ({ open: i.open, close: i.close })) };
@@ -79,13 +94,13 @@ export class InfoManagementComponent implements OnInit {
     });
   }
 
-  addEmptyException() { this.exceptions.push({ date: null, closed: false, intervals: [{ open:'', close:'' }] }); }
+  addEmptyException() { this.exceptions.push({ date: null, closed: false, intervals: [{ open: '', close: '' }] }); }
 
   async removeException(i: number) {
-    if(!confirm('¿Seguro que desea eliminar esta excepción?')) return;
+    if (!confirm('¿Seguro que desea eliminar esta excepción?')) return;
 
     const backup = [...this.exceptions];
-    this.exceptions.splice(i,1);
+    this.exceptions.splice(i, 1);
 
     try {
       await this.saveAvailability(false);
@@ -97,28 +112,28 @@ export class InfoManagementComponent implements OnInit {
   }
 
   onExceptionToggleClosed(ex: ExceptionItem) {
-    if(ex.closed) ex.intervals=[];
-    else if(!ex.intervals.length) ex.intervals.push({open:'',close:''});
+    if (ex.closed) ex.intervals = [];
+    else if (!ex.intervals.length) ex.intervals.push({ open: '', close: '' });
     void this.saveAvailability(false);
   }
 
   addExInterval(ex: ExceptionItem) {
-    ex.intervals.push({open:'',close:''});
+    ex.intervals.push({ open: '', close: '' });
     void this.saveAvailability(false);
   }
 
   removeExInterval(ex: ExceptionItem, i: number) {
-    ex.intervals.splice(i,1);
+    ex.intervals.splice(i, 1);
     void this.saveAvailability(false);
   }
 
   validateExInterval(ex: ExceptionItem, interval: Interval) {
-    if(!ex.closed && interval.open && interval.close && interval.open >= interval.close) interval.close='';
+    if (!ex.closed && interval.open && interval.close && interval.open >= interval.close) interval.close = '';
     void this.saveAvailability(false);
   }
 
   onExceptionDateChange(ex: ExceptionItem) {
-    if(ex.date && !/^\d{4}-\d{2}-\d{2}$/.test(ex.date)) {
+    if (ex.date && !/^\d{4}-\d{2}-\d{2}$/.test(ex.date)) {
       alert('Formato de fecha inválido. Use YYYY-MM-DD.');
       return;
     }
@@ -128,8 +143,8 @@ export class InfoManagementComponent implements OnInit {
   transformExceptionsToObject(): Record<string, any> {
     const out: Record<string, any> = {};
     for (const ex of this.exceptions) {
-      if(!ex.date) continue;
-      out[ex.date] = ex.closed ? { closed:true, hours: [] } : { closed:false, hours: ex.intervals.map(i => `${i.open}-${i.close}`) };
+      if (!ex.date) continue;
+      out[ex.date] = ex.closed ? { closed: true, hours: [] } : { closed: false, hours: ex.intervals.map(i => `${i.open}-${i.close}`) };
     }
     return out;
   }
@@ -154,10 +169,10 @@ export class InfoManagementComponent implements OnInit {
     try {
       await this.infoManager.saveContactInfo(this.contactInfo);
       alert('Información de contacto guardada correctamente!');
-    } catch(err){ console.error(err); alert('Error al guardar la información de contacto'); }
+    } catch (err) { console.error(err); alert('Error al guardar la información de contacto'); }
   }
 
-  getDayStatus(day: ScheduleDay): string { if(day.closed) return 'Cerrado'; return day.intervals.map(i=>`${i.open}-${i.close}`).join(', '); }
+  getDayStatus(day: ScheduleDay): string { if (day.closed) return 'Cerrado'; return day.intervals.map(i => `${i.open}-${i.close}`).join(', '); }
 
   // ===== BARBER SETTINGS =====
 
@@ -218,12 +233,27 @@ export class InfoManagementComponent implements OnInit {
   async addBarber(name: string) {
     const n = name?.trim();
     if (!n) return;
-    const newBarber: Barber = { id: crypto.randomUUID(), name: n, visible: true };
+
+    if (!this.selectedBarberFile) {
+      this.toast.error('Por favor, selecciona una imagen para el peluquero.');
+      return;
+    }
+
     try {
+      const imageUrl = await this.uploadBarberImageIfSelected();
+      const newBarber: Barber = {
+        id: crypto.randomUUID(),
+        name: n,
+        visible: true,
+        imageUrl: imageUrl || undefined
+      };
+
       await this.infoManager.addBarber(newBarber);
       this.barberSettings.settings.staff.push(newBarber);
+      this.toast.success('Peluquero añadido correctamente!');
     } catch (err) {
       console.error(err);
+      this.toast.error('Error al añadir el peluquero.');
     }
   }
 
@@ -254,6 +284,95 @@ export class InfoManagementComponent implements OnInit {
     } catch (err) {
       console.error('Error toggling barber visible', err);
       alert('❌ Error al cambiar visibilidad del peluquero');
+    }
+  }
+  onBarberFileSelected(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+      const file = target.files[0];
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+      if (!allowedTypes.includes(file.type)) {
+        this.toast.error('Por favor, selecciona una imagen JPG, PNG o WebP.');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        this.toast.error('El archivo es demasiado grande. Máximo 5MB.');
+        return;
+      }
+
+      if (this.barberImagePreviewUrl) {
+        URL.revokeObjectURL(this.barberImagePreviewUrl);
+      }
+
+      this.selectedBarberFile = file;
+      this.barberImagePreviewUrl = URL.createObjectURL(file);
+    }
+  }
+  private async uploadBarberImageIfSelected(): Promise<string | null> {
+    if (!this.selectedBarberFile) {
+      return null;
+    }
+
+    return new Promise((resolve, reject) => {
+      const task = this.galleryService.uploadBarberImage(this.selectedBarberFile!);
+      if (!task) {
+        reject('Error al iniciar la subida');
+        return;
+      }
+
+      if (this.barberUploadSubscription) {
+        this.barberUploadSubscription.unsubscribe();
+        this.barberUploadSubscription = undefined;
+      }
+
+      this.isBarberUploading = true;
+      this.barberUploadSubscription = percentage(task).subscribe(({ progress }) => {
+        this.barberUploadProgress.set(`${progress}%`);
+      });
+
+      task.on('state_changed',
+        null,
+        (error) => {
+          console.error('Error al subir:', error);
+          this.isBarberUploading = false;
+          reject(error);
+        },
+        async () => {
+          try {
+            const downloadURL = await this.galleryService.getUrl(task.snapshot.ref);
+            this.isBarberUploading = false;
+            this.barberUploadProgress.set('0%');
+            this.clearBarberFileSelection();
+            resolve(downloadURL);
+          } catch (error) {
+            this.isBarberUploading = false;
+            reject(error);
+          }
+        }
+      );
+    });
+  }
+  private clearBarberFileSelection(): void {
+    this.selectedBarberFile = null;
+
+    if (this.barberImagePreviewUrl) {
+      URL.revokeObjectURL(this.barberImagePreviewUrl);
+      this.barberImagePreviewUrl = '';
+    }
+
+    if (this.barberFileInput) {
+      this.barberFileInput.nativeElement.value = '';
+    }
+  }
+  ngOnDestroy() {
+    if (this.barberImagePreviewUrl) {
+      URL.revokeObjectURL(this.barberImagePreviewUrl);
+    }
+
+    if (this.barberUploadSubscription) {
+      this.barberUploadSubscription.unsubscribe();
     }
   }
 }

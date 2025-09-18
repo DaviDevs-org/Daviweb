@@ -9,6 +9,7 @@ import { ServiceManager } from '../../../services/admin-panel/services-managemen
 import { AppointmentService } from '../../../services/appointments.service';
 import { InfoManager } from '../../../services/admin-panel/info-management.service';
 import { AlertService } from '../../../services/alert/alert.service';
+import { Barber } from '../../types/admin.types';
 
 @Component({
   selector: 'app-appointment-management',
@@ -32,18 +33,19 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   isSaving = false;
   editForm: FormGroup;
   services: Service[] = [];
+  barbers: Barber[] = [];
 
   // Cambios principales: usar datos de disponibilidad dinámicos
   hours: string[] = [];
   availabilityData: any = null;
   bookedSlotsByDate: Record<string, string[]> = {};
-  
+
   private scrollTimeout: any;
 
   constructor(
-    private apptSvc: AppointmentManagerService, 
-    private fb: FormBuilder, 
-    private sv: ServiceManager, 
+    private apptSvc: AppointmentManagerService,
+    private fb: FormBuilder,
+    private sv: ServiceManager,
     private app: AppointmentService,
     private infoManager: InfoManager,
     private toast: AlertService,
@@ -55,6 +57,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       date: ['', Validators.required],
       time: ['', Validators.required],
       serviceId: [''],
+      barberId: [''],
       description: ['']
     });
 
@@ -68,10 +71,10 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
         const dayAppointments = appointments
           .filter(a => a.dateISO === iso)
           .sort((x, y) => (x.timeNormalized || '').localeCompare(y.timeNormalized || ''));
-        
+
         // Actualizar bookedSlots para este día
         this.updateBookedSlotsForDay(iso, dayAppointments);
-        
+
         return dayAppointments;
       })
     );
@@ -92,13 +95,13 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   // Método para actualizar slots ocupados de un día específico
   private updateBookedSlotsForDay(dateKey: string, appointments: Appointment[]) {
     const bookedSlots: string[] = [];
-    
+
     appointments.forEach(appointment => {
       if (!appointment.timeNormalized || appointment.timeNormalized === '—') return;
-      
+
       const startMinutes = this.timeToMinutes(appointment.timeNormalized);
       const duration = appointment.service?.time || 30;
-      
+
       // Generar todos los slots de 30 minutos que ocupa esta cita
       for (let minutes = startMinutes; minutes < startMinutes + duration; minutes += 30) {
         const hours = Math.floor(minutes / 60);
@@ -107,7 +110,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
         bookedSlots.push(timeSlot);
       }
     });
-    
+
     this.bookedSlotsByDate[dateKey] = bookedSlots;
   }
 
@@ -127,7 +130,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const selectedDate = this.selectedDate$.value;
     const dateKey = this.toISODate(selectedDate);
     const bookedHours = this.bookedSlotsByDate[dateKey] || [];
-    
+
     const availableHours = this.getAvailableHoursForDate(selectedDate, bookedHours);
     this.hours = availableHours;
   }
@@ -173,7 +176,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   }
 
   private getDayName(date: Date): string {
-    const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
     return dias[date.getDay()];
   }
 
@@ -186,11 +189,11 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     let hour = openH;
     let minute = openM;
     while (hour < closeH || (hour === closeH && minute < closeM)) {
-      result.push(`${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`);
+      result.push(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`);
       minute += step;
-      if (minute >= 60) { 
-        minute = 0; 
-        hour++; 
+      if (minute >= 60) {
+        minute = 0;
+        hour++;
       }
     }
 
@@ -212,6 +215,8 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     try {
       this.availabilityData = await this.infoManager.getAvailability();
       this.generateHoursForSelectedDate(); // Regenerar horas con los datos cargados
+
+      await this.loadBarbers();
     } catch (error) {
       console.error('Error cargando availability:', error);
       this.hours = this.generateDefaultHours(); // Fallback
@@ -236,13 +241,27 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     }
   }
 
+  private async loadBarbers() {
+    try {
+      const barberSettings = await this.infoManager.getBarberSettings();
+
+      if (barberSettings?.settings?.staff) {
+        this.barbers = barberSettings.settings.staff.filter((barber: Barber) => barber.visible);
+      } else if (Array.isArray(barberSettings?.settings.staff)) {
+        this.barbers = barberSettings.settings.staff.filter((barber: Barber) => barber.visible);
+      }
+    } catch (error) {
+      console.error('Error cargando peluqueros:', error);
+      this.barbers = [];
+    }
+  }
   // Método mejorado para determinar si una hora está disponible
   isHourAvailable(hour: string): boolean {
     if (!this.availabilityData) return true; // Si no hay datos, asumir disponible
 
     const selectedDate = this.selectedDate$.value;
     const dateKey = this.toISODate(selectedDate);
-    
+
     // Verificar si el slot ya está ocupado por una cita
     const bookedSlots = this.bookedSlotsByDate[dateKey] || [];
     if (bookedSlots.includes(hour)) return false;
@@ -254,7 +273,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     if (ex) {
       if (ex.closed) return false;
-      
+
       let intervals: { open: string; close: string }[] = [];
       if (Array.isArray(ex.intervals)) {
         intervals = ex.intervals;
@@ -287,10 +306,10 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   // Verifica si es el slot principal (primer slot) de una cita
   isMainAppointmentSlot(dayList: Appointment[], hour: string, appointment: Appointment): boolean {
     if (!appointment.timeNormalized) return false;
-    
+
     const appointmentStartTime = appointment.timeNormalized;
     const currentSlotTime = hour.substring(0, 5);
-    
+
     return appointmentStartTime === currentSlotTime;
   }
 
@@ -310,12 +329,12 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   isAppointmentEnd(dayList: Appointment[], hour: string): boolean {
     const appointment = this.findReservation(dayList, hour);
     if (!appointment || !appointment.timeNormalized) return false;
-    
+
     const serviceDuration = appointment.service?.time || 30;
     const appointmentStartMinutes = this.timeToMinutes(appointment.timeNormalized);
     const currentSlotMinutes = this.timeToMinutes(hour.substring(0, 5));
     const appointmentEndMinutes = appointmentStartMinutes + serviceDuration;
-    
+
     // Es el último slot si el siguiente slot ya no pertenece a la cita
     const nextSlotMinutes = currentSlotMinutes + 30;
     return nextSlotMinutes >= appointmentEndMinutes;
@@ -359,6 +378,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       date: appointment.date || '',
       time: appointment.time || '',
       serviceId: appointment.service?.name || '',
+      barberId: appointment.barber || '',
       description: appointment.description || ''
     });
   }
@@ -379,7 +399,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     try {
       const formData = this.editForm.value;
       const service = this.services.find(s => s.name === formData.serviceId);
-      
+
       if (this.isEditing && this.editedAppointment && this.editedAppointment.id) {
         await this.apptSvc.updateAppointment(this.editedAppointment.id, {
           name: formData.name,
@@ -388,10 +408,11 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
           description: formData.description,
           date: formData.date,
           time: formData.time,
-          service: service
+          service: service,
+          barber: formData.barberId
         });
-        
-        this.toast.success('Cita actualizada correctamente',0, 'top-center');
+
+        this.toast.success('Cita actualizada correctamente', 0, 'top-center');
       } else {
         await this.app.addAppointment({
           name: formData.name,
@@ -401,10 +422,11 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
           date: formData.date,
           time: formData.time,
           service: service,
+          barber: formData.barberId,
           datetime: this.createTimestamp(formData.date, formData.time)
         });
-        
-        this.toast.success('Cita creada correctamente',3000, 'top-center');
+
+        this.toast.success('Cita creada correctamente', 3000, 'top-center');
       }
 
       this.isEditing = false;
@@ -424,7 +446,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   private createTimestamp(dateStr: string, timeStr: string): any {
     const [year, month, day] = dateStr.split('-').map(Number);
     const [hours, minutes] = timeStr.split(':').map(Number);
-    
+
     const date = new Date(year, month - 1, day, hours, minutes);
     return {
       seconds: Math.floor(date.getTime() / 1000),
@@ -706,17 +728,17 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
       const appointmentTime = a.timeNormalized;
       const slotHour = hour.substring(0, 5);
-      
+
       // Obtener duración del servicio (por defecto 30 min)
       const serviceDuration = a.service?.time || 30;
-      
+
       // Convertir tiempos a minutos desde medianoche para facilitar cálculos
       const appointmentMinutes = this.timeToMinutes(appointmentTime);
       const slotMinutes = this.timeToMinutes(slotHour);
-      
+
       // Verificar si este slot está dentro del rango de duración de la cita
-      return slotMinutes >= appointmentMinutes && 
-             slotMinutes < (appointmentMinutes + serviceDuration);
+      return slotMinutes >= appointmentMinutes &&
+        slotMinutes < (appointmentMinutes + serviceDuration);
     });
   }
 

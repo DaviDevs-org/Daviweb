@@ -62,6 +62,26 @@ export class GalleryService {
       return undefined;
     }
   }
+  uploadBarberImage(file: File) {
+    const id = crypto.randomUUID();
+    const path = `pruebas/barbers/${id}`;
+    const storageRef = ref(this.storage, path);
+
+    try {
+      // uploadBytesResumable devuelve un UploadTask inmediatamente
+      return runInInjectionContext(this.injector, () =>
+        uploadBytesResumable(storageRef, file, {
+          customMetadata: {
+            originalName: file.name,
+            date: file.lastModified.toString()
+          }
+        })
+      );
+    } catch (error) {
+      this.toast.error("Error al subir la imagen, vuelva a intentarlo o póngase en contacto con los desarrolladores.");
+      return undefined;
+    }
+  }
   /**
    * Obtener URL (si se usa fuera de runInInjectionContext, la envolvemos)
    */

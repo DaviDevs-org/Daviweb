@@ -154,80 +154,98 @@
 
   .barber-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 15px;
+    padding: 15px;
     border-radius: 10px;
     background: rgba($light-gray, 0.15);
     transition: all 0.3s ease;
-    gap: 10px;
+    gap: 15px;
 
     &:hover {
       background: rgba($primary-gold, 0.08);
       transform: translateY(-1px);
     }
 
-    .barber-name-input {
-      flex: 1;
-      padding: 6px 10px;
-      border: 2px solid $border-color;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      transition: all 0.3s ease;
+    .barber-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-      &:focus {
-        outline: none;
-        border-color: $primary-gold;
-        box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
-      &:disabled {
-        background: $light-gray;
-        opacity: 0.7;
+      &.no-image {
+        background: rgba($text-gray, 0.1);
+        border: 2px solid rgba($text-gray, 0.2);
+
+        i {
+          font-size: 2rem;
+          color: $text-gray;
+        }
       }
     }
 
-    .barber-actions {
+    .barber-info {
+      flex: 1;
       display: flex;
+      flex-direction: column;
       gap: 8px;
 
-      .toggle-visible {
-        font-size: 1.1rem;
-        cursor: pointer;
-        padding: 4px 6px;
+      .barber-name-input {
+        padding: 6px 10px;
+        border: 2px solid $border-color;
         border-radius: 6px;
-        transition: all 0.2s ease;
-        color: $primary-gold;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
 
-        &.hidden {
-          color: $text-gray;
-        }
-
-        &:hover {
-          background: rgba($primary-gold, 0.1);
+        &:focus {
+          outline: none;
+          border-color: $primary-gold;
+          box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
         }
       }
 
-      .danger-btn {
-        @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
-        font-size: 0.85rem;
-        padding: 5px 10px;
-        min-width: 80px;
-        flex-shrink: 0;
-        border-radius: 6px;
+      .barber-visible {
         display: flex;
         align-items: center;
         gap: 6px;
-        justify-content: center;
+        color: $text-gray;
+        font-size: 0.85rem;
+        cursor: pointer;
 
-        i {
-          font-size: 1rem;
+        input[type="checkbox"] {
+          cursor: pointer;
         }
+      }
+    }
 
-        &:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba($danger-red, 0.25);
-        }
+    .danger-btn {
+      @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      min-width: 90px;
+      flex-shrink: 0;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+
+      i {
+        font-size: 1rem;
+      }
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba($danger-red, 0.25);
       }
     }
   }
@@ -256,6 +274,148 @@
       @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
       font-size: 0.9rem;
       padding: 6px 14px;
+    }
+  }
+
+  .add-barber {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 12px;
+
+    .barber-image-upload {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      label {
+        font-weight: 600;
+        color: $dark-brown;
+        font-size: 0.9rem;
+      }
+
+      .barber-upload-area {
+        width: 120px;
+        height: 120px;
+        border: 2px dashed rgba($primary-gold, 0.4);
+        border-radius: 50%;
+        background: rgba($primary-gold, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        overflow: hidden;
+
+        &:hover {
+          border-color: $primary-gold;
+          background-color: rgba($primary-gold, 0.1);
+        }
+
+        &.has-image {
+          border-style: solid;
+          border-color: $primary-gold;
+
+          .barber-upload-content {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+
+            p,
+            small {
+              color: white;
+            }
+          }
+
+          &:hover .barber-upload-content {
+            opacity: 1;
+          }
+        }
+
+        .barber-upload-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 10px;
+
+          i {
+            font-size: 2.5rem;
+            color: $primary-gold;
+            margin-bottom: 8px;
+          }
+
+          p {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: $dark-brown;
+            margin: 0 0 4px 0;
+          }
+
+          small {
+            font-size: 0.7rem;
+            color: $text-gray;
+            line-height: 1.2;
+          }
+        }
+      }
+
+      .barber-progress {
+        width: 120px;
+        height: 4px;
+        background: rgba($primary-gold, 0.2);
+        border-radius: 2px;
+        overflow: hidden;
+
+        .barber-progress-bar {
+          height: 100%;
+          background: $primary-gold;
+          transition: width 0.3s ease;
+          border-radius: 2px;
+        }
+      }
+    }
+
+    .barber-name-section {
+      display: flex;
+      gap: 10px;
+
+      input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 2px solid $border-color;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+
+        &:focus {
+          outline: none;
+          border-color: $primary-gold;
+          box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+        }
+      }
+
+      .add-btn {
+        @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+        font-size: 0.9rem;
+        padding: 6px 14px;
+        min-width: 140px;
+
+        &:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+      }
     }
   }
 }
@@ -313,7 +473,8 @@
 // ------------------------
 // Formularios
 // ------------------------
-.form-input, .form-textarea {
+.form-input,
+.form-textarea {
   @include form-input-style;
 
   &.form-textarea {
@@ -355,8 +516,13 @@
   }
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
   }
 }
 
@@ -434,7 +600,9 @@
           gap: 6px;
           justify-content: center;
 
-          i { font-size: 1rem; }
+          i {
+            font-size: 1rem;
+          }
 
           &:hover {
             transform: translateY(-1px);

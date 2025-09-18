@@ -27,6 +27,7 @@ export interface Appointment {
   timeNormalized?: string;
   duration?: string;
   service?: Service;
+  barber?: string;
 }
 
 export class Service {
@@ -138,5 +139,6 @@ export interface Barber {
   id:string;
   name: string;
   visible?: boolean;
+  imageUrl?: string;
 }
 

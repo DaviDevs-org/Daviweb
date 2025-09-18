@@ -19,10 +19,10 @@
           <div class="intervals-container">
             <div class="time-inputs" *ngFor="let interval of day.intervals; let i=index">
               <input type="time" [(ngModel)]="interval.open" class="time-input" [disabled]="day.closed"
-                     (blur)="validateInterval(day, interval)">
+                (blur)="validateInterval(day, interval)">
               <span class="time-separator">-</span>
               <input type="time" [(ngModel)]="interval.close" class="time-input" [disabled]="day.closed"
-                     (blur)="validateInterval(day, interval)">
+                (blur)="validateInterval(day, interval)">
               <button type="button" class="danger-btn" (click)="removeInterval(day,i)">
                 <i class="bi bi-trash"></i> Eliminar
               </button>
@@ -62,10 +62,10 @@
             <div class="intervals-container">
               <div class="time-inputs" *ngFor="let interval of ex.intervals; let j=index">
                 <input type="time" [(ngModel)]="interval.open" class="time-input"
-                       (blur)="validateExInterval(ex, interval)">
+                  (blur)="validateExInterval(ex, interval)">
                 <span class="time-separator">-</span>
                 <input type="time" [(ngModel)]="interval.close" class="time-input"
-                       (blur)="validateExInterval(ex, interval)">
+                  (blur)="validateExInterval(ex, interval)">
                 <button type="button" class="danger-btn" (click)="removeExInterval(ex,j)">
                   <i class="bi bi-trash"></i> Eliminar
                 </button>
@@ -108,12 +108,12 @@
         <div class="form-group">
           <label>Email</label>
           <input type="email" [(ngModel)]="contactInfo.email" class="form-input"
-                 placeholder="info@peluqueriamoderna.com">
+            placeholder="info@peluqueriamoderna.com">
         </div>
         <div class="form-group">
           <label>Dirección</label>
           <textarea [(ngModel)]="contactInfo.address" class="form-textarea"
-                    placeholder="Calle Principal, 123..."></textarea>
+            placeholder="Calle Principal, 123..."></textarea>
         </div>
       </div>
       <button type="button" class="save-btn" (click)="saveContactInfo()">
@@ -127,30 +127,66 @@
       <div class="barbers-container" *ngIf="!isBarberLoading; else loadingBarbers">
 
         <label class="barber-selection-toggle">
-          <input type="checkbox"
-                 [(ngModel)]="barberSettings.settings.barberSelection"
-                 (change)="toggleBarberSelection()">
+          <input type="checkbox" [(ngModel)]="barberSettings.settings.barberSelection"
+            (change)="toggleBarberSelection()">
           Permitir elección de peluquero en el formulario
         </label>
 
         <div class="staff-list" *ngIf="barberSettings.settings.barberSelection">
           <div class="barber-item" *ngFor="let barber of barberSettings.settings.staff">
-            <input type="text" [(ngModel)]="barber.name" class="barber-name-input">
-            <label class="barber-visible">
-              <input type="checkbox" [ngModel]="barber.visible" (ngModelChange)="onToggleBarberVisible(barber, $event)">
-              Visible
-            </label>
+            <!-- Imagen del peluquero -->
+            <div class="barber-avatar" *ngIf="barber.imageUrl">
+              <img [src]="barber.imageUrl" [alt]="barber.name">
+            </div>
+            <div class="barber-avatar no-image" *ngIf="!barber.imageUrl">
+              <i class="bi bi-person-circle"></i>
+            </div>
+
+            <!-- Resto del contenido -->
+            <div class="barber-info">
+              <input type="text" [(ngModel)]="barber.name" class="barber-name-input">
+              <label class="barber-visible">
+                <input type="checkbox" [ngModel]="barber.visible"
+                  (ngModelChange)="onToggleBarberVisible(barber, $event)">
+                Visible
+              </label>
+            </div>
+
             <button type="button" class="danger-btn" (click)="removeBarber(barber)">
               <i class="bi bi-trash"></i> Eliminar
             </button>
           </div>
 
           <div class="add-barber">
-            <input type="text" placeholder="Nombre del nuevo peluquero" #newBarberInput>
-            <button type="button" class="add-btn"
-                    (click)="addBarber(newBarberInput.value); newBarberInput.value=''">
-              <i class="bi bi-plus-circle"></i> Añadir peluquero
-            </button>
+            <!-- Sección de imagen -->
+            <div class="barber-image-upload">
+              <label>Imagen del Peluquero</label>
+              <div class="barber-upload-area" (click)="barberFileInput.click()" [class.has-image]="selectedBarberFile"
+                [style.background-image]="barberImagePreviewUrl ? 'url(' + barberImagePreviewUrl + ')' : null">
+                <div class="barber-upload-content">
+                  <i class="bi bi-person-circle"></i>
+                  <p>{{ selectedBarberFile ? 'Cambiar imagen' : 'Añadir imagen' }}</p>
+                  <small>{{ selectedBarberFile ? selectedBarberFile.name : 'JPG, PNG, WebP (máx. 5MB)' }}</small>
+                </div>
+                <input #barberFileInput type="file" accept="image/*" (change)="onBarberFileSelected($event)"
+                  style="display: none;">
+              </div>
+              <!-- Progress bar -->
+              <div class="barber-progress" *ngIf="barberUploadProgress() !== '0%'">
+                <div class="barber-progress-bar" [style.width]="barberUploadProgress()"></div>
+              </div>
+            </div>
+
+            <!-- Input de nombre y botón -->
+            <div class="barber-name-section">
+              <input type="text" placeholder="Nombre del nuevo peluquero" #newBarberInput>
+              <button type="button" class="add-btn" [disabled]="isBarberUploading"
+                (click)="addBarber(newBarberInput.value); newBarberInput.value=''">
+                <i class="bi bi-plus-circle" *ngIf="!isBarberUploading"></i>
+                <i class="bi bi-hourglass-split" *ngIf="isBarberUploading"></i>
+                {{ isBarberUploading ? 'Subiendo...' : 'Añadir peluquero' }}
+              </button>
+            </div>
           </div>
 
           <button type="button" class="save-btn" (click)="saveBarberSettings()">

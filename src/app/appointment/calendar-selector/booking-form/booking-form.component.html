@@ -39,8 +39,8 @@
     <div class="form-group" *ngIf="allowBarberSelection && barbers.length > 0">
         <label for="barber">Selecciona peluquero</label>
         <select id="barber" name="barber" ngModel required>
-            <option value="">-- Cualquiera --</option>
-            <option *ngFor="let b of barbers" [value]="b.id" [disabled]="!b.visible">
+            <option value="Cualquiera">-- Cualquiera --</option>
+            <option *ngFor="let b of barbers" [value]="b.name" [disabled]="!b.visible">
                 {{ b.name }}
             </option>
         </select>

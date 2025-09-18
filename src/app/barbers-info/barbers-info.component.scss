@@ -1,0 +1,470 @@
+@use "sass:color";
+@use "../admin-panel/styles/variables";
+@use "../admin-panel/styles/mixins";
+@use "../admin-panel/styles/responsive";
+
+.barbers-section {
+    padding: 48px 24px;
+    max-width: 1180px;
+    margin: 0 auto;
+    background: #885B34;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 64px;
+    box-sizing: border-box;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    color: variables.$dark-brown;
+
+    @include responsive.mobile {
+        padding: 36px 16px;
+        gap: 48px;
+    }
+}
+
+.barbers-header {
+    text-align: center;
+    width: 100%;
+
+    .section-title {
+        color: variables.$black;
+        font-size: 36px;
+        font-family: Inter;
+        line-height: 1.3;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 20px;
+
+        @include responsive.mobile {
+            font-size: 28px;
+        }
+    }
+
+    .section-subtitle {
+        color: variables.$black;
+        font-size: 16px;
+        font-family: Inter;
+        line-height: 1.6;
+        font-weight: 400;
+        text-align: center;
+        margin: 0 auto;
+        max-width: 600px;
+
+        @include responsive.mobile {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    }
+}
+
+.loading-container {
+    @include mixins.card-style;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 32px;
+    color: variables.$dark-brown;
+    font-family: Inter;
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(variables.$primary-gold, 0.2);
+        border-left: 4px solid variables.$primary-gold;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 24px;
+    }
+
+    p {
+        color: variables.$black;
+        font-size: 16px;
+        font-family: Inter;
+        font-weight: 500;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.barbers-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.barbers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
+    width: 100%;
+    max-width: 1180px;
+
+    @include responsive.mobile {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
+
+.barber-card {
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+        .barber-image .barber-photo {
+            transform: scale(1.05);
+        }
+    }
+
+    &.featured {
+        border: 2px solid variables.$primary-gold;
+        box-shadow: 0 4px 20px rgba(variables.$primary-gold, 0.2);
+
+        &:hover {
+            box-shadow: 0 8px 30px rgba(variables.$primary-gold, 0.3);
+        }
+    }
+
+    .barber-image {
+        position: relative;
+        height: 280px;
+        overflow: hidden;
+
+        .barber-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4));
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding: 16px;
+
+            .featured-badge {
+                background: rgba(variables.$primary-gold, 0.95);
+                color: variables.$white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                font-family: Inter, sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                display: flex;
+                align-items: center;
+                gap: 6px;
+
+                i {
+                    font-size: 12px;
+                }
+            }
+        }
+
+        @include responsive.mobile {
+            height: 240px;
+        }
+    }
+
+    .barber-content {
+        padding: 24px;
+
+        .barber-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid variables.$dark-brown;
+
+            .barber-name {
+                font-size: 22px;
+                font-weight: 700;
+                color: variables.$light-gold;
+                font-family: Inter, sans-serif;
+                line-height: 1.3;
+                margin: 0 0 8px 0;
+            }
+
+            .barber-specialty {
+                font-size: 14px;
+                color: variables.$primary-gold;
+                font-family: Inter, sans-serif;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin: 0;
+                background: rgba(variables.$primary-gold, 0.15);
+                padding: 4px 12px;
+                border-radius: 12px;
+                display: inline-block;
+            }
+
+            @include responsive.mobile {
+                .barber-name {
+                    font-size: 20px;
+                }
+
+                .barber-specialty {
+                    font-size: 12px;
+                    padding: 3px 10px;
+                }
+            }
+        }
+
+        .barber-info {
+            margin-bottom: 20px;
+
+            .barber-experience {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                background: rgba(variables.$white, 0.8);
+                padding: 10px 16px;
+                border-radius: 8px;
+                margin-bottom: 12px;
+
+                i {
+                    font-size: 16px;
+                    color: variables.$primary-gold;
+                }
+
+                span {
+                    font-size: 14px;
+                    color: variables.$dark-brown;
+                    font-weight: 600;
+                    font-family: Inter, sans-serif;
+                }
+
+                @include responsive.mobile {
+                    padding: 8px 14px;
+
+                    i {
+                        font-size: 14px;
+                    }
+
+                    span {
+                        font-size: 13px;
+                    }
+                }
+            }
+
+            .barber-description {
+                font-size: 15px;
+                color: variables.$text-gray;
+                margin: 0;
+                padding: 12px 16px;
+                line-height: 1.6;
+                border-radius: 8px;
+                border-left: 3px solid variables.$primary-gold;
+                font-style: italic;
+                text-align: center;
+                font-family: Inter, sans-serif;
+                background: rgba(variables.$white, 0.8);
+                font-weight: 500;
+
+                @include responsive.mobile {
+                    font-size: 14px;
+                    padding: 10px 14px;
+                }
+            }
+        }
+
+        .barber-actions {
+            display: flex;
+            justify-content: center;
+            padding-top: 16px;
+            border-top: 2px solid variables.$dark-brown;
+
+            .btn-primary {
+                background: variables.$primary-gold;
+                color: variables.$white;
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-family: Inter, sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                min-width: 200px;
+
+                &:hover {
+                    background: variables.$secondary-gold;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(variables.$primary-gold, 0.3);
+                }
+
+                i {
+                    font-size: 14px;
+                }
+
+                @include responsive.mobile {
+                    padding: 10px 20px;
+                    font-size: 13px;
+                    min-width: 180px;
+
+                    i {
+                        font-size: 13px;
+                    }
+                }
+            }
+        }
+
+        @include responsive.mobile {
+            padding: 20px;
+        }
+    }
+}
+
+.no-barbers {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 32px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+
+    .placeholder-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(variables.$primary-gold, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+
+        i {
+            font-size: 24px;
+            color: variables.$primary-gold;
+        }
+    }
+
+    h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: variables.$dark-brown;
+        font-family: Inter, sans-serif;
+        margin: 0 0 12px 0;
+    }
+
+    p {
+        font-size: 15px;
+        color: variables.$text-gray;
+        font-family: Inter, sans-serif;
+        max-width: 300px;
+        line-height: 1.5;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    @include responsive.mobile {
+        padding: 36px 24px;
+
+        .placeholder-icon {
+            width: 50px;
+            height: 50px;
+
+            i {
+                font-size: 20px;
+            }
+        }
+
+        h3 {
+            font-size: 16px;
+        }
+
+        p {
+            font-size: 14px;
+            max-width: 250px;
+        }
+    }
+}
+
+.barbers-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 1180px;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+
+    i {
+        color: variables.$light-gold;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    p {
+        color: variables.$light-gold;
+        font-size: 15px;
+        font-family: Inter;
+        line-height: 1.5;
+        font-weight: 500;
+        text-align: center;
+        margin: 0;
+        font-style: italic;
+    }
+
+    @include responsive.mobile {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 8px;
+
+        i {
+            font-size: 16px;
+        }
+
+        p {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+    }
+}
