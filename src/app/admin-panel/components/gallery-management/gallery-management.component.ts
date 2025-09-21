@@ -122,12 +122,15 @@ export class GalleryManagementComponent implements OnDestroy {
   
   async updateImage(i: number) {
     const id = this.galleryPhotos()[i].id!;
-    let newName: string | null = "";
-    while (true) {
-      newName = prompt('Introduzca un nuevo nombre para la imagen')
-      if (newName === null) break;
-      if (newName!.trim() !== '') break;
+    let newName: string | false | null = "";
+    
+    newName = await this.toast.prompt('Introduzca un nuevo nombre para la imagen')
+    if (newName === null)  {
+      this.toast.error('Por favor, ingrese un nombre para la imagen');
+      return;
     }
+    if (newName == false) return;
+
     newName = newName + '.' + this.galleryPhotos()[i].name.split('.').pop()
     const response = await this.gallery.updateImage(id, newName)
     this.galleryPhotos.update(photos => {

@@ -97,7 +97,7 @@ export class InfoManagementComponent implements OnInit {
   addEmptyException() { this.exceptions.push({ date: null, closed: false, intervals: [{ open: '', close: '' }] }); }
 
   async removeException(i: number) {
-    if (!confirm('¿Seguro que desea eliminar esta excepción?')) return;
+    if (await !this.toast.confirm('¿Seguro que desea eliminar esta excepción?')) return;
 
     const backup = [...this.exceptions];
     this.exceptions.splice(i, 1);
@@ -105,9 +105,8 @@ export class InfoManagementComponent implements OnInit {
     try {
       await this.saveAvailability(false);
     } catch (err) {
-      console.error('Error eliminando excepción en servidor', err);
       this.exceptions = backup;
-      alert('❌ Error al eliminar la excepción en el servidor. Se ha restaurado el estado anterior.');
+      this.toast.error('Error al eliminar la excepción en el servidor. Se ha restaurado el estado anterior.');
     }
   }
 
@@ -134,7 +133,7 @@ export class InfoManagementComponent implements OnInit {
 
   onExceptionDateChange(ex: ExceptionItem) {
     if (ex.date && !/^\d{4}-\d{2}-\d{2}$/.test(ex.date)) {
-      alert('Formato de fecha inválido. Use YYYY-MM-DD.');
+      this.toast.error('Formato de fecha inválido. Use YYYY-MM-DD.');
       return;
     }
     if (ex.date) void this.saveAvailability(false);
@@ -157,10 +156,10 @@ export class InfoManagementComponent implements OnInit {
         exceptions: this.transformExceptionsToObject()
       };
       await this.infoManager.saveAvailability(payload);
-      if (showAlert) alert('✅ Disponibilidad guardada correctamente!');
+      if (showAlert) this.toast.success('Disponibilidad guardada correctamente!');
     } catch (err) {
       console.error(err);
-      if (showAlert) alert('❌ Error al guardar la disponibilidad');
+      if (showAlert) this.toast.success('❌ Error al guardar la disponibilidad');
       else throw err;
     }
   }
@@ -168,8 +167,8 @@ export class InfoManagementComponent implements OnInit {
   async saveContactInfo(): Promise<void> {
     try {
       await this.infoManager.saveContactInfo(this.contactInfo);
-      alert('Información de contacto guardada correctamente!');
-    } catch (err) { console.error(err); alert('Error al guardar la información de contacto'); }
+      this.toast.success('Información de contacto guardada correctamente!');
+    } catch (err) { console.error(err); this.toast.error('Error al guardar la información de contacto'); }
   }
 
   getDayStatus(day: ScheduleDay): string { if (day.closed) return 'Cerrado'; return day.intervals.map(i => `${i.open}-${i.close}`).join(', '); }
@@ -193,6 +192,7 @@ export class InfoManagementComponent implements OnInit {
       }
     } catch (err) {
       console.error('Error cargando peluqueros', err);
+      this.toast.error('Error cargando los peluqueros')
       this.barberSettings = { settings: { barberSelection: false, staff: [] }, barberSelection: false, staff: [] };
     } finally {
       this.isBarberLoading = false;
@@ -213,10 +213,10 @@ export class InfoManagementComponent implements OnInit {
       this.barberSettings.barberSelection = settingsPayload.barberSelection;
       this.barberSettings.staff = settingsPayload.staff;
 
-      alert('✅ Configuración de peluqueros guardada correctamente!');
+      this.toast.success('Configuración de peluqueros guardada correctamente!');
     } catch (err) {
       console.error(err);
-      alert('❌ Error al guardar la configuración de peluqueros');
+      this.toast.error('Error al guardar la configuración de peluqueros');
     }
   }
 
@@ -260,7 +260,7 @@ export class InfoManagementComponent implements OnInit {
 
 
   async removeBarber(barber: Barber) {
-    if (!confirm(`¿Seguro que quieres eliminar a ${barber.name}?`)) return;
+    if (await !this.toast.confirm(`¿Seguro que quieres eliminar a ${barber.name}?`)) return;
     try {
       await this.infoManager.removeBarber(barber);
       this.barberSettings.settings.staff = this.barberSettings.settings.staff.filter((b: Barber) => b.id !== barber.id);
@@ -283,7 +283,7 @@ export class InfoManagementComponent implements OnInit {
       if (idx2 !== -1) this.barberSettings.staff[idx2] = updatedBarber;
     } catch (err) {
       console.error('Error toggling barber visible', err);
-      alert('❌ Error al cambiar visibilidad del peluquero');
+      this.toast.error('Error al cambiar visibilidad del peluquero');
     }
   }
   onBarberFileSelected(event: Event): void {

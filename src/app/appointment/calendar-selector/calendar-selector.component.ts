@@ -9,6 +9,7 @@ import { Subject, firstValueFrom } from 'rxjs';
 import { InfoManager } from '../../services/admin-panel/info-management.service';
 import { Barber, Service } from '../../admin-panel/types/admin.types';
 import { ChangeDetectorRef } from '@angular/core';
+import { AlertService } from '../../services/alert/alert.service';
 
 @Component({
   selector: 'app-calendar-selector',
@@ -57,7 +58,8 @@ export class CalendarSelectorComponent implements OnDestroy {
     private reservedSlotsService: ReservedSlotsService,
     private appointmentService: AppointmentService,
     private infoManager: InfoManager,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toast: AlertService
   ) {
     const startYear = this.selectedYear - 2;
     const endYear = this.selectedYear + 2;
@@ -182,7 +184,7 @@ export class CalendarSelectorComponent implements OnDestroy {
     console.log('Horas calculadas para este día:', hoursWithStatus);
 
     if (!hoursWithStatus.length) {
-      alert('No hay horas disponibles para este día');
+      this.toast.error('No hay horas disponibles para este día');
       return;
     }
 
@@ -265,19 +267,19 @@ export class CalendarSelectorComponent implements OnDestroy {
   onHourSelected(hour: string) { this.selectedHour = hour; this.showHours = false; this.showForm = true; }
 
   async handleFormSubmit(data: { name: string; email: string; phone: string; description?: string; barber?:string, service:Service}) {
-    if (!this.selectedDate || !this.selectedHour) { alert('Error: Fecha u hora no seleccionada'); return; }
+    if (!this.selectedDate || !this.selectedHour) { this.toast.error('Error: Fecha u hora no seleccionada'); return; }
     if (this.isSubmitting) return;
 
     const bookingData = { date: this.selectedDateString, time: this.selectedHour, ...data };
     this.isSubmitting = true;
     try {
       await this.appointmentService.addAppointment(bookingData);
-      alert('Cita guardada correctamente 👌');
+      this.toast.success('Cita guardada correctamente 👌');
       this.resetAll();
       this.loadData();
     } catch (error: any) {
       console.error('Error guardando la cita:', error);
-      alert('Error al guardar la cita: ' + (error.message || JSON.stringify(error)));
+      this.toast.error('Error al guardar la cita: ' + (error.message || JSON.stringify(error)));
     } finally { this.isSubmitting = false; }
   }
 

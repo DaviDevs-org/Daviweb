@@ -1,9 +1,9 @@
 // alert.component.ts
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface AlertConfig {
-  type: 'success' | 'error' | 'warning' | 'info' | 'confirm';
+  type: 'success' | 'error' | 'warning' | 'info' | 'confirm'| 'prompt';
   title: string;
   message: string;
   confirmText?: string;
@@ -11,6 +11,9 @@ export interface AlertConfig {
   duration?: number; // Para auto-cierre (en ms)
   mode?: 'modal' | 'toast'; // Nuevo: modo de visualización
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center'; // Para toasts
+  placeholder?: string;
+  defaultValue?: string;
+  inputType?: 'text' | 'email' | 'password' | 'number';
 }
 
 @Component({
@@ -25,27 +28,48 @@ export class CustomAlertComponent implements OnInit {
     type: 'info',
     title: '',
     message: '',
-    mode: 'modal',
     position: 'top-right'
   };
   
   @Output() confirmed = new EventEmitter<boolean>();
   @Output() closed = new EventEmitter<void>();
+  @Output() promptResult = new EventEmitter<string | null | false>(); // Ahora puede ser false
+  
+  @ViewChild('promptInput') promptInput?: ElementRef<HTMLInputElement>;
   
   isVisible = false;
   private autoCloseTimer?: number;
 
   ngOnInit() {
-    // Para toasts, aparición más rápida
-    const delay = this.config.mode === 'toast' ? 10 : 50;
-    setTimeout(() => this.isVisible = true, delay);
+    // Aparición rápida para toast
+    setTimeout(() => {
+      this.isVisible = true;
+      
+      // Para prompts, asegurar que el input mantenga el foco
+      if (this.config.type === 'prompt') {
+        this.focusInput();
+      }
+    }, 10);
     
-    // Auto-cierre para notificaciones (no para confirmaciones)
-    if (this.config.duration && this.config.type !== 'confirm') {
+    // Auto-cierre solo si hay duración y no es confirmación ni prompt
+    if (this.config.duration && this.config.type !== 'confirm' && this.config.type !== 'prompt') {
       this.autoCloseTimer = window.setTimeout(() => {
         this.close();
       }, this.config.duration);
     }
+  }
+
+  private focusInput() {
+    setTimeout(() => {
+      const input = document.querySelector('.toast-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+        // Si hay un valor por defecto, seleccionarlo
+        if (this.config.defaultValue) {
+          input.select();
+        }
+      }
+    }, 100);
   }
 
   getIcon(): string {
@@ -54,37 +78,10 @@ export class CustomAlertComponent implements OnInit {
       error: 'bi bi-x-circle-fill',
       warning: 'bi bi-exclamation-triangle-fill',
       info: 'bi bi-info-circle-fill',
-      confirm: 'bi bi-question-circle-fill'
+      confirm: 'bi bi-question-circle-fill',
+      prompt: 'bi bi-pencil-square'
     };
     return icons[this.config.type];
-  }
-
-  getButtonClass(): string {
-    const classes = {
-      success: 'btn-success',
-      error: 'btn-danger',
-      warning: 'btn-warning',
-      info: 'btn-primary',
-      confirm: 'btn-primary'
-    };
-    return classes[this.config.type];
-  }
-
-  getDefaultConfirmText(): string {
-    const texts = {
-      success: 'Entendido',
-      error: 'Cerrar',
-      warning: 'Entendido',
-      info: 'OK',
-      confirm: 'Confirmar'
-    };
-    return texts[this.config.type];
-  }
-
-  onOverlayClick(event: Event) {
-    if (event.target === event.currentTarget && this.config.type !== 'confirm') {
-      this.close();
-    }
   }
 
   confirm() {
@@ -95,15 +92,44 @@ export class CustomAlertComponent implements OnInit {
 
   cancel() {
     this.clearAutoClose();
-    this.confirmed.emit(false);
+    if (this.config.type === 'prompt') {
+      // Para prompts, cancelar devuelve false
+      this.promptResult.emit(false);
+    } else {
+      // Para confirmaciones, cancelar devuelve false
+      this.confirmed.emit(false);
+    }
     this.close();
+  }
+
+  confirmPrompt() {
+    this.clearAutoClose();
+    const inputValue = this.promptInput?.nativeElement.value || '';
+    
+    // Si el input está vacío (sin contar espacios), devolver null
+    if (inputValue.trim() === '') {
+      this.promptResult.emit(null);
+    } else {
+      this.promptResult.emit(inputValue);
+    }
+    this.close();
+  }
+
+  onInputBlur(event: Event) {
+    // Prevenir que se cierre al perder el foco accidentalmente
+    // Solo durante los primeros segundos después de aparecer
+    setTimeout(() => {
+      const input = event.target as HTMLInputElement;
+      if (input && document.activeElement !== input) {
+        input.focus();
+      }
+    }, 10);
   }
 
   close() {
     this.clearAutoClose();
     this.isVisible = false;
-    const delay = this.config.mode === 'toast' ? 200 : 300;
-    setTimeout(() => this.closed.emit(), delay);
+    setTimeout(() => this.closed.emit(), 200);
   }
 
   private clearAutoClose() {

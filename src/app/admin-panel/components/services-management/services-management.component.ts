@@ -19,7 +19,7 @@ import { AlertService } from '../../../services/alert/alert.service';
 })
 export class ServicesManagementComponent implements OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
-  
+
   private auth = inject(Auth);
   private injector = inject(Injector);
   private service = inject(ServiceManager);
@@ -64,17 +64,17 @@ export class ServicesManagementComponent implements OnDestroy {
         this.toast.error('Por favor, selecciona una imagen JPG, PNG o WebP.');
         return;
       }
-      
+
       if (file.size > 5 * 1024 * 1024) {
         this.toast.error('El archivo es demasiado grande. Máximo 5MB.');
         return;
       }
-      
+
       // Limpiar URL anterior si existe
       if (this.imagePreviewUrl) {
         URL.revokeObjectURL(this.imagePreviewUrl);
       }
-      
+
       this.selectedFile = file;
       this.imagePreviewUrl = URL.createObjectURL(file);
     }
@@ -114,10 +114,10 @@ export class ServicesManagementComponent implements OnDestroy {
             const downloadURL = await this.galleryService.getUrl(task.snapshot.ref);
             this.isUploading = false;
             this.uploadProgress.set('0%');
-            
+
             // Limpiar la selección de archivo
             this.clearFileSelection();
-            
+
             resolve(downloadURL);
           } catch (error) {
             this.isUploading = false;
@@ -130,19 +130,19 @@ export class ServicesManagementComponent implements OnDestroy {
 
   private clearFileSelection(): void {
     this.selectedFile = null;
-    
+
     if (this.imagePreviewUrl) {
       URL.revokeObjectURL(this.imagePreviewUrl);
       this.imagePreviewUrl = '';
     }
-    
+
     if (this.fileInput) {
       this.fileInput.nativeElement.value = '';
     }
   }
 
   async addService() {
-    if (!this.selectedFile){
+    if (!this.selectedFile) {
       this.toast.error('Por favor, escoja una imagen.')
       return
     }
@@ -164,16 +164,16 @@ export class ServicesManagementComponent implements OnDestroy {
     try {
       // Subir imagen si está seleccionada
       let imageUrl: string | undefined = undefined;
-      
+
       if (this.selectedFile) {
         imageUrl = await this.uploadImageIfSelected() || undefined;
       }
 
       // Crear el servicio con la URL de la imagen si existe
       const serviceNew = new Service(
-        this.newService.name, 
-        this.newService.description, 
-        this.newService.time, 
+        this.newService.name,
+        this.newService.description,
+        this.newService.time,
         this.newService.price,
         imageUrl!
       );
@@ -190,9 +190,9 @@ export class ServicesManagementComponent implements OnDestroy {
       };
 
       this.clearFileSelection();
-      
+
       this.toast.success('Servicio añadido correctamente!');
-      
+
     } catch (error) {
       console.error('Error al añadir servicio:', error);
       this.toast.error('Error al añadir el servicio. Por favor, inténtalo de nuevo.');
@@ -201,47 +201,74 @@ export class ServicesManagementComponent implements OnDestroy {
 
   async editService(index: number) {
     const serviceU = this.services[index];
-    
-    const newName = prompt('Nuevo nombre del servicio:', serviceU.name);
-    if (newName === null) return;
 
-    const newPriceStr = prompt('Nuevo precio (€):', serviceU.price.toString());
-    if (newPriceStr === null) return;
+    const newName = await this.toast.prompt(
+      'Nuevo nombre del servicio:',
+      'Nombre del servicio...'
+    );
+    if (newName === null) {
+      this.toast.error('Por favor, introduzca un nombre')
+      return
+    };
+    if (newName == false) return;
 
-    const newPrice = parseFloat(newPriceStr);
+    const newPriceStr = await this.toast.promptNumber(
+      'Nuevo precio (€):',
+      'Ej: 25.50'
+    );
+    if (newPriceStr === null){
+      this.toast.error('Por favor, introduzca un precio válido');
+      return;
+    }
+    if (newPriceStr === false) return;
+
+    const newPrice = parseFloat(newPriceStr!);
     if (isNaN(newPrice) || newPrice <= 0) {
       this.toast.error('Por favor, ingresa un precio válido.');
       return;
     }
 
-    const newTimeStr = prompt('Nuevo tiempo (min):', serviceU.time.toString());
-    if (newTimeStr === null) return;
+    const newTimeStr = await this.toast.promptNumber(
+      'Nuevo tiempo (min):',
+      'Ej: 30'
+    );
+    if (newTimeStr === null){
+      this.toast.error('Por favor, introduzca un precio válido');
+      return;
+    }
+    if (newTimeStr == false) return;
 
     const newTime = parseFloat(newTimeStr);
     if (isNaN(newTime) || newTime <= 0) {
       this.toast.error('Por favor, ingresa un tiempo estimado válido.');
       return;
     }
-    
-    const newDescription = prompt('Nueva descripción:', serviceU.description);
-    if (newDescription === null) return;
+
+    const newDescription = await this.toast.prompt(
+      'Nueva descripción:',
+      'Descripción del servicio...'
+    );
+    if (newDescription === null){
+      this.toast.error('Por favor, introduzca un precio válido');
+      return;
+    }
+    if (newDescription == false) return;
 
     const updatedService = new Service(
-      newName, 
-      newDescription, 
-      newTime, 
+      newName,
+      newDescription,
+      newTime,
       newPrice,
-      serviceU.imageUrl! // Mantener la imagen actual
+      serviceU.imageUrl!
     );
 
     const response = await this.service.updateService(serviceU.id!, updatedService);
-
     this.toast.success('Servicio actualizado correctamente!');
   }
 
   async deleteService(index: number) {
     const service = this.services[index];
-    
+
     if (await this.toast.confirm(`¿Estás seguro de que quieres eliminar "${service.name}"?`)) {
       const response = await this.service.deleteService(service.id!);
       this.toast.success(`El servicio ${service.name} ha sido borrado con éxito`);
@@ -253,7 +280,7 @@ export class ServicesManagementComponent implements OnDestroy {
     if (this.imagePreviewUrl) {
       URL.revokeObjectURL(this.imagePreviewUrl);
     }
-    
+
     // Limpiar suscripción si existe
     if (this.uploadSubscription) {
       this.uploadSubscription.unsubscribe();

@@ -9,24 +9,32 @@
         <div class="toast-title">{{ config.title }}</div>
         <div class="toast-message">{{ config.message }}</div>
 
-        <!-- Botones para confirmaciones -->
-        <div *ngIf="config.type === 'confirm'" class="toast-actions">
+        <!-- Input para prompts -->
+        <div *ngIf="config.type === 'prompt'" class="toast-input-container">
+            <input #promptInput class="toast-input" [type]="config.inputType || 'text'"
+                [placeholder]="config.placeholder || ''" [value]="config.defaultValue || ''"
+                (keyup.enter)="confirmPrompt()" (keyup.escape)="cancel()" (blur)="onInputBlur($event)" autofocus>
+        </div>
+
+        <!-- Botones para confirmaciones y prompts -->
+        <div *ngIf="config.type === 'confirm' || config.type === 'prompt'" class="toast-actions">
             <button class="toast-btn toast-btn-secondary" (click)="cancel()">
                 {{ config.cancelText || 'Cancelar' }}
             </button>
-            <button class="toast-btn toast-btn-primary" (click)="confirm()">
-                {{ config.confirmText || 'Confirmar' }}
+            <button class="toast-btn toast-btn-primary"
+                (click)="config.type === 'prompt' ? confirmPrompt() : confirm()">
+                {{ config.confirmText || (config.type === 'prompt' ? 'Aceptar' : 'Confirmar') }}
             </button>
         </div>
     </div>
 
-    <!-- Botón cerrar solo para notificaciones (no para confirmaciones) -->
-    <button *ngIf="config.type !== 'confirm'" class="toast-close" (click)="close()">
+    <!-- Botón cerrar solo para notificaciones (no para confirmaciones ni prompts) -->
+    <button *ngIf="config.type !== 'confirm' && config.type !== 'prompt'" class="toast-close" (click)="close()">
         <i class="bi bi-x"></i>
     </button>
 
     <!-- Barra de progreso para auto-cierre -->
-    <div *ngIf="config.duration && config.type !== 'confirm'" class="toast-progress"
+    <div *ngIf="config.duration && config.type !== 'confirm' && config.type !== 'prompt'" class="toast-progress"
         [style.animation-duration]="config.duration + 'ms'">
     </div>
 </div>

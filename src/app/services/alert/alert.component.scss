@@ -1,7 +1,9 @@
+// alert.component.scss
 @use 'sass:color';
 // @use '../../admin-panel/styles/variables' as *;
 // @use '../../admin-panel/styles/mixins';
 
+// Variables temporales (reemplazar con las tuyas)
 $primary-gold: #d4af37;
 $danger-red: #dc3545;
 $dark-brown: #3e2723;
@@ -24,7 +26,6 @@ $border-color: #dee2e6;
     pointer-events: all;
     overflow: hidden;
     position: relative;
-    padding-bottom: 2px;
 
     &.show {
         opacity: 1;
@@ -123,6 +124,14 @@ $border-color: #dee2e6;
         }
     }
 
+    &.toast-prompt {
+        border-left: 4px solid #8b5cf6;
+
+        .toast-icon i {
+            color: #8b5cf6;
+        }
+    }
+
     // Layout interno del toast
     display: flex;
     align-items: flex-start;
@@ -157,14 +166,35 @@ $border-color: #dee2e6;
             color: $text-gray;
             line-height: 1.4;
             margin-bottom: 8px;
-            margin-top: 10px;
+        }
+
+        .toast-input-container {
+            margin: 12px 0;
+
+            .toast-input {
+                width: 90%;
+                padding: 8px 12px;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
+                font-size: 0.9rem;
+                outline: none;
+                transition: border-color 0.2s ease;
+
+                &:focus {
+                    border-color: #3b82f6;
+                    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+                }
+
+                &::placeholder {
+                    color: #9ca3af;
+                }
+            }
         }
 
         .toast-actions {
             display: flex;
             gap: 8px;
             margin-top: 12px;
-            margin-bottom: 14px;
 
             .toast-btn {
                 padding: 6px 12px;
