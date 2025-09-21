@@ -4,21 +4,51 @@
 @use "../../styles/mixins";
 @use "../../styles/responsive";
 
+.content-section {
+    width: 100%; // Cambiado de 100dvw a 100%
+    height: 100dvh;
+    max-width: 100%;
+    overflow-x: hidden; // Prevenir desbordamiento horizontal
+}
+
 .appointment-grid {
     display: grid;
     grid-template-columns: 40% 1fr;
     gap: 2rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 1rem; // Añadir padding para no tocar bordes
 
     @include responsive.mobile {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
+        gap: 1rem;
+        padding: 0 0.5rem; // Reducir padding en móvil
+        
+        // En mobile, mostrar el panel derecho primero (calendario)
+        .left-panel {
+            order: 2;
+            margin: 0;
+            width: 100%;
+        }
+        .right-panel {
+            order: 1;
+            margin: 0;
+            width: 100%;
+        }
     }
 }
-
 /* Left panel - Lista de citas mejorada */
 .left-panel {
     @include mixins.card-style;
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
+
+    @include responsive.mobile {
+        max-height: none;
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+    }
 
     .panel-header {
         display: flex;
@@ -28,11 +58,21 @@
         padding-bottom: 0.75rem;
         border-bottom: 2px solid rgba(variables.$primary-gold, 0.1);
 
+        @include responsive.mobile {
+            flex-direction: column;
+            gap: 0.5rem;
+            text-align: center;
+        }
+
         h3 {
             margin: 0;
             color: variables.$dark-brown;
             font-weight: 600;
             font-size: 1.2rem;
+
+            @include responsive.mobile {
+                font-size: 1.1rem;
+            }
         }
 
         .muted {
@@ -43,6 +83,11 @@
             font-size: 0.85rem;
             font-weight: 600;
             border: 1px solid rgba(variables.$primary-gold, 0.2);
+
+            @include responsive.mobile {
+                padding: 4px 10px;
+                font-size: 0.8rem;
+            }
         }
     }
 }
@@ -51,10 +96,20 @@
     overflow-y: auto;
     padding-right: .5rem;
     padding-top: 5px;
+    max-height: 60vh;
+
+    @include responsive.mobile {
+        max-height: none;
+        padding-right: 0;
+        overflow-y: visible;
+    }
 
     /* Estilo del scrollbar mejorado */
     &::-webkit-scrollbar {
         width: 8px;
+        @include responsive.mobile {
+            display: none; // Ocultar scrollbar en mobile
+        }
     }
 
     &::-webkit-scrollbar-track {
@@ -85,6 +140,19 @@
     background: variables.$white;
     position: relative;
     overflow: hidden;
+
+    @include responsive.mobile {
+        border-radius: 12px;
+        padding: 1rem;
+        margin-left: 0;
+        margin-bottom: 0.75rem;
+        
+        // Reducir efectos en mobile para mejor performance
+        &:hover {
+            transform: none;
+            box-shadow: 0 4px 12px rgba(variables.$primary-gold, 0.1);
+        }
+    }
 
     &::before {
         content: '';
@@ -134,6 +202,11 @@
             inset 0 1px 0 rgba(variables.$white, 0.8);
         transform: translateY(-2px);
 
+        @include responsive.mobile {
+            transform: none;
+            box-shadow: 0 4px 15px rgba(variables.$primary-gold, 0.15);
+        }
+
         &::before {
             transform: scaleY(1);
         }
@@ -154,6 +227,12 @@
         align-items: flex-start;
         margin-bottom: 1rem;
         gap: 1rem;
+
+        @include responsive.mobile {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: stretch;
+        }
     }
 
     .card-title {
@@ -162,6 +241,11 @@
         color: variables.$dark-brown;
         transition: all 0.3s ease;
         line-height: 1.3;
+
+        @include responsive.mobile {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
     }
 
     .card-meta {
@@ -169,6 +253,14 @@
         flex-direction: column;
         gap: 0.25rem;
         align-items: flex-end;
+
+        @include responsive.mobile {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
 
         .date {
             background: rgba(variables.$primary-gold, 0.1);
@@ -178,11 +270,21 @@
             font-size: 1rem;
             font-weight: 600;
             white-space: nowrap;
+
+            @include responsive.mobile {
+                padding: 2px 8px;
+                font-size: 0.85rem;
+            }
         }
 
         .hour-time {
             display: flex;
             gap: 4px;
+
+            @include responsive.mobile {
+                flex-wrap: wrap;
+                gap: 3px;
+            }
 
             .time {
                 background: rgba(variables.$secondary-gold, 0.15);
@@ -191,6 +293,11 @@
                 font-weight: 700;
                 padding: 3px 6px;
                 border-radius: 6px;
+
+                @include responsive.mobile {
+                    font-size: 0.8rem;
+                    padding: 2px 5px;
+                }
             }
         }
     }
@@ -200,10 +307,23 @@
         font-size: 0.9rem;
         line-height: 1.6;
 
+        @include responsive.mobile {
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
         div {
             margin-bottom: 0.4rem;
             padding-left: 0.5rem;
             border-left: 2px solid rgba(variables.$primary-gold, 0.1);
+
+            @include responsive.mobile {
+                margin-bottom: 0.3rem;
+                padding-left: 0.4rem;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.25rem;
+            }
 
             &:last-child {
                 margin-bottom: 0;
@@ -214,6 +334,11 @@
             color: variables.$dark-brown;
             font-weight: 600;
             margin-right: 0.5rem;
+
+            @include responsive.mobile {
+                min-width: fit-content;
+                margin-right: 0.3rem;
+            }
         }
     }
 
@@ -224,23 +349,15 @@
         font-size: 0.9rem;
         opacity: 0.8;
 
+        @include responsive.mobile {
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.8rem;
+        }
+
         i {
             color: variables.$primary-gold
         }
-    }
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 0.8;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.1);
     }
 }
 
@@ -249,6 +366,13 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
+
+    @include responsive.mobile {
+        gap: 1rem;
+        padding: 0;
+    }
 }
 
 .calendar-header {
@@ -256,10 +380,17 @@
     padding: 1rem 1.5rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     background: linear-gradient(135deg, variables.$primary-gold, variables.$secondary-gold);
     position: relative;
     overflow: hidden;
+
+    @include responsive.mobile {
+        padding: 1rem;
+        flex-direction: row;
+        gap: 1rem;
+        justify-content: center;
+    }
 
     .calendar-nav {
         display: flex;
@@ -267,6 +398,10 @@
         gap: 0.5rem;
         position: relative;
         z-index: 1;
+
+        @include responsive.mobile {
+            gap: 0.25rem;
+        }
     }
 
     .btn.nav-btn {
@@ -286,11 +421,22 @@
         height: 44px;
         backdrop-filter: blur(10px);
 
+        @include responsive.mobile {
+            min-width: 36px;
+            height: 36px;
+            padding: 8px 10px;
+            font-size: 1rem;
+        }
+
         &:hover {
             background: rgba(variables.$white, 0.3);
             border-color: rgba(variables.$white, 0.6);
             transform: scale(1.1) translateY(-1px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+            @include responsive.mobile {
+                transform: scale(1.05);
+            }
         }
 
         &:active {
@@ -311,10 +457,23 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
 
+        @include responsive.mobile {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+            order: -1;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+
         &:hover {
             background: variables.$white;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+            @include responsive.mobile {
+                transform: none;
+            }
         }
     }
 
@@ -329,6 +488,50 @@
         margin: 0 1rem;
         position: relative;
         z-index: 1;
+
+        @include responsive.mobile {
+            font-size: 1.2rem;
+            margin: 0;
+            width: 100%;
+            order: -2;
+        }
+    }
+
+    // Contenedor de navegación principal para mobile
+    @include responsive.mobile {
+        .navigation-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            order: 2;
+            
+            .nav-group {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            
+            .nav-group.left {
+                order: 1;
+            }
+            
+            .nav-group.center {
+                order: 2;
+                flex: 1;
+                justify-content: center;
+            }
+            
+            .nav-group.right {
+                order: 3;
+            }
+        }
+        
+        .btn.today-btn {
+            order: 3;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
     }
 }
 
@@ -342,6 +545,11 @@
     align-items: end;
     gap: 10px;
 
+    @include responsive.mobile {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
     .summary-text {
         color: variables.$primary-gold;
         font-weight: 600;
@@ -349,7 +557,6 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
-
     }
 
     i {
@@ -363,8 +570,16 @@
     overflow-y: auto;
     position: relative;
 
+    @include responsive.mobile {
+        max-height: none;
+        overflow-y: visible;
+    }
+
     &::-webkit-scrollbar {
         width: 8px;
+        @include responsive.mobile {
+            display: none;
+        }
     }
 
     &::-webkit-scrollbar-track {
@@ -382,6 +597,17 @@
     }
 
     .empty-day {
+        @include responsive.mobile {
+            padding: 2rem 1rem;
+            
+            .empty-icon {
+                font-size: 2.5rem;
+            }
+            
+            h3 {
+                font-size: 1.2rem;
+            }
+        }
 
         &.day-closed {
             background: linear-gradient(135deg,
@@ -426,6 +652,10 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+
+    @include responsive.mobile {
+        gap: 0.5rem;
+    }
 }
 
 .hour-row {
@@ -438,6 +668,19 @@
     min-height: 60px;
     position: relative;
 
+    @include responsive.mobile {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
+        min-height: auto;
+        // Remover bordes problemáticos
+        border: none;
+        margin-bottom: 0.75rem;
+        background: rgba(variables.$white, 0.8);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(variables.$primary-gold, 0.05);
+    }
+
     &:hover {
         background: rgba(variables.$primary-gold, 0.02);
     }
@@ -445,13 +688,17 @@
     &.has-appointment {
         background: rgba(variables.$primary-gold, 0.03);
 
+        @include responsive.mobile {
+            background: rgba(variables.$primary-gold, 0.08);
+            box-shadow: 0 3px 12px rgba(variables.$primary-gold, 0.15);
+        }
+
         .hour-label {
             background: rgba(variables.$primary-gold, 0.15);
             color: variables.$primary-gold;
             font-weight: 700;
         }
     }
-
 }
 
 .hour-label {
@@ -468,6 +715,13 @@
     justify-content: center;
     transition: all 0.3s ease;
     border: 1px solid rgba(variables.$primary-gold, 0.1);
+
+    @include responsive.mobile {
+        width: 100%;
+        padding: 8px;
+        font-size: 0.85rem;
+        border-radius: 8px;
+    }
 }
 
 .slot {
@@ -477,6 +731,13 @@
     border-left: 3px solid rgba(variables.$primary-gold, 0.1);
     padding-left: 1rem;
     position: relative;
+
+    @include responsive.mobile {
+        border-left: none;
+        border-top: 2px solid rgba(variables.$primary-gold, 0.1);
+        padding-left: 0;
+        padding-top: 0.5rem;
+    }
 }
 
 .reservation {
@@ -495,6 +756,19 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
+
+    @include responsive.mobile {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.75rem;
+        border-radius: 12px;
+        gap: 0.5rem;
+
+        &:hover {
+            transform: none;
+            box-shadow: 0 4px 12px rgba(variables.$primary-gold, 0.2);
+        }
+    }
 
     &::before {
         content: '';
@@ -530,6 +804,10 @@
         border-color: variables.$primary-gold;
         box-shadow: 0 6px 20px rgba(variables.$primary-gold, 0.3);
 
+        @include responsive.mobile {
+            box-shadow: 0 4px 15px rgba(variables.$primary-gold, 0.25);
+        }
+
         &::before {
             transform: scaleX(1);
         }
@@ -551,6 +829,11 @@
         align-items: center;
         gap: 1rem;
         margin-bottom: 0.25rem;
+
+        @include responsive.mobile {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
     }
 
     .res-time {
@@ -563,6 +846,12 @@
         min-width: 70px;
         text-align: center;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        @include responsive.mobile {
+            font-size: 1rem;
+            padding: 4px 8px;
+            min-width: 60px;
+        }
     }
 
     .res-duration {
@@ -572,6 +861,11 @@
         padding: 2px 8px;
         border-radius: 12px;
         font-weight: 600;
+
+        @include responsive.mobile {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+        }
     }
 
     .res-name {
@@ -579,12 +873,21 @@
         font-size: 1.1rem;
         font-weight: 700;
         line-height: 1.3;
+
+        @include responsive.mobile {
+            font-size: 1rem;
+        }
     }
 
     .res-contact {
         display: flex;
         gap: 1rem;
         margin-top: 0.25rem;
+
+        @include responsive.mobile {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
 
         .contact-item {
             font-size: 0.85rem;
@@ -593,6 +896,28 @@
             padding: 3px 8px;
             border-radius: 6px;
             font-weight: 500;
+
+            @include responsive.mobile {
+                font-size: 0.8rem;
+                padding: 3px 6px;
+                display: flex;
+                align-items: center;
+                gap: 0.25rem;
+            }
+
+            &.barber-info {
+                background: rgba(variables.$secondary-gold, 0.15) !important;
+                color: variables.$secondary-gold !important;
+                font-weight: 600;
+                
+                @include responsive.mobile {
+                    margin-top: 0.25rem;
+                }
+                
+                i {
+                    color: variables.$secondary-gold !important;
+                }
+            }
         }
 
         i {
@@ -607,6 +932,13 @@
         flex-direction: column;
         gap: 0.5rem;
 
+        @include responsive.mobile {
+            opacity: 1;
+            flex-direction: row;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+
         .action-btn {
             background: rgba(variables.$primary-gold, 0.2);
             border: none;
@@ -616,29 +948,24 @@
             transition: all 0.3s ease;
             font-size: 1rem;
 
+            @include responsive.mobile {
+                padding: 6px 8px;
+                font-size: 0.9rem;
+            }
+
             &:hover {
                 background: rgba(variables.$primary-gold, 0.3);
                 transform: scale(1.1);
+
+                @include responsive.mobile {
+                    transform: scale(1.05);
+                }
             }
         }
 
         i {
             color: variables.$dark-brown
         }
-    }
-}
-
-@keyframes highlightPulse {
-    0% {
-        box-shadow: 0 6px 20px rgba(variables.$primary-gold, 0.3);
-    }
-
-    50% {
-        box-shadow: 0 10px 30px rgba(variables.$primary-gold, 0.6), 0 0 20px rgba(variables.$primary-gold, 0.4);
-    }
-
-    100% {
-        box-shadow: 0 6px 20px rgba(variables.$primary-gold, 0.3);
     }
 }
 
@@ -657,11 +984,26 @@
     gap: 0.5rem;
     min-height: 80px;
 
+    @include responsive.mobile {
+        padding: 0.75rem;
+        min-height: 60px;
+        border-radius: 8px;
+        // Centrar mejor en mobile
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+    }
+
     &:hover:not(.disabled) {
         border-color: rgba(variables.$primary-gold, 0.6);
         background: rgba(variables.$primary-gold, 0.1);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(variables.$primary-gold, 0.2);
+
+        @include responsive.mobile {
+            transform: none;
+            box-shadow: 0 2px 8px rgba(variables.$primary-gold, 0.15);
+        }
 
         .availability-text {
             color: variables.$primary-gold;
@@ -692,6 +1034,10 @@
         font-weight: 500;
         transition: all 0.3s ease;
         text-align: center;
+
+        @include responsive.mobile {
+            font-size: 0.85rem;
+        }
     }
 
     .create-appointment-btn {
@@ -712,12 +1058,27 @@
         min-width: 100px;
         justify-content: center;
 
+        @include responsive.mobile {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+            min-width: 90px;
+            opacity: 1;
+            transform: none;
+            // Asegurar centrado
+            margin: 0 auto;
+        }
+
         &:hover {
             background: linear-gradient(135deg, 
                 color.adjust(variables.$primary-gold, $lightness: -5%), 
                 color.adjust(variables.$secondary-gold, $lightness: -5%));
             transform: translateY(-1px);
             box-shadow: 0 5px 15px rgba(variables.$primary-gold, 0.4);
+
+            @include responsive.mobile {
+                transform: none;
+                box-shadow: 0 3px 10px rgba(variables.$primary-gold, 0.3);
+            }
         }
 
         &:active {
@@ -726,6 +1087,10 @@
 
         i {
             font-size: 1rem;
+
+            @include responsive.mobile {
+                font-size: 0.9rem;
+            }
         }
 
         span {
@@ -733,7 +1098,6 @@
         }
     }
 }
-
 
 .empty-day {
     @include mixins.card-style;
@@ -745,10 +1109,18 @@
     text-align: center;
     background: linear-gradient(135deg, rgba(variables.$primary-gold, 0.03), rgba(variables.$white, 0.8));
 
+    @include responsive.mobile {
+        padding: 2rem 1rem;
+    }
+
     .empty-icon {
         font-size: 3rem;
         margin-bottom: 1rem;
         opacity: 0.6;
+
+        @include responsive.mobile {
+            font-size: 2.5rem;
+        }
     }
 
     h3 {
@@ -756,12 +1128,20 @@
         margin: 0 0 0.5rem 0;
         font-weight: 600;
         font-size: 1.3rem;
+
+        @include responsive.mobile {
+            font-size: 1.2rem;
+        }
     }
 
     p {
         color: variables.$text-gray;
         margin: 0;
         font-size: 1rem;
+
+        @include responsive.mobile {
+            font-size: 0.9rem;
+        }
     }
 }
 
@@ -771,6 +1151,11 @@
     background: linear-gradient(135deg, rgba(variables.$primary-gold, 0.05), rgba(variables.$white, 0.95));
     position: relative;
     overflow: hidden;
+
+    @include responsive.mobile {
+        margin-top: 1rem;
+        border-radius: 12px;
+    }
 
     &::before {
         content: '';
@@ -789,6 +1174,12 @@
         margin-bottom: 1.5rem;
         padding-top: 0.5rem;
 
+        @include responsive.mobile {
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
         h4 {
             margin: 0;
             color: variables.$dark-brown;
@@ -797,6 +1188,11 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
+
+            @include responsive.mobile {
+                font-size: 1.2rem;
+                gap: 0.5rem;
+            }
         }
 
         .close-btn {
@@ -814,15 +1210,29 @@
             justify-content: center;
             transition: all 0.3s ease;
 
+            @include responsive.mobile {
+                width: 32px;
+                height: 32px;
+                font-size: 1.3rem;
+            }
+
             &:hover {
                 background: rgba(variables.$primary-gold, 0.2);
                 transform: scale(1.1) rotate(90deg);
+
+                @include responsive.mobile {
+                    transform: scale(1.05) rotate(90deg);
+                }
             }
         }
     }
 
     .detail-content {
         margin-bottom: 2rem;
+
+        @include responsive.mobile {
+            margin-bottom: 1.5rem;
+        }
     }
 
     .detail-item {
@@ -834,6 +1244,16 @@
         font-size: 1rem;
         line-height: 1.5;
         transition: all 0.3s ease;
+
+        @include responsive.mobile {
+            padding: 0.5rem;
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
 
         &:hover {
             background: rgba(variables.$primary-gold, 0.05);
@@ -853,6 +1273,13 @@
             font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+
+            @include responsive.mobile {
+                min-width: auto;
+                margin-right: 0;
+                font-size: 0.8rem;
+                margin-bottom: 0.25rem;
+            }
         }
 
         span {
@@ -867,6 +1294,11 @@
         padding-top: 1rem;
         border-top: 2px solid rgba(variables.$primary-gold, 0.1);
 
+        @include responsive.mobile {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
         .btn {
             flex: 1;
             padding: 0.75rem 1.5rem;
@@ -878,6 +1310,12 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
 
+            @include responsive.mobile {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+                border-radius: 8px;
+            }
+
             &.action-primary {
                 background: linear-gradient(135deg, variables.$primary-gold, variables.$secondary-gold);
                 color: variables.$white;
@@ -886,6 +1324,11 @@
                 &:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 8px 25px rgba(variables.$primary-gold, 0.3);
+
+                    @include responsive.mobile {
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 15px rgba(variables.$primary-gold, 0.25);
+                    }
                 }
             }
 
@@ -898,305 +1341,28 @@
                     background: rgba(variables.$primary-gold, 0.2);
                     transform: translateY(-2px);
                     box-shadow: 0 5px 15px rgba(variables.$primary-gold, 0.2);
-                }
-            }
-        }
-    }
-}
 
-/* Responsive improvements */
-@include responsive.mobile {
-    .appointment-grid {
-        .left-panel {
-            order: 2;
-        }
-
-        .right-panel {
-            order: 1;
-        }
-    }
-
-    .calendar-header {
-        padding: 1rem;
-        gap: 0.5rem;
-
-        .calendar-nav {
-            display: flex;
-            align-items: center;
-            position: relative;
-            z-index: 1;
-
-            // Diferentes tipos de navegación
-            &.month-nav {
-                .month-btn {
-                    background: rgba(variables.$white, 0.15);
-                    border: 2px solid rgba(variables.$white, 0.25);
-
-                    &:hover {
-                        background: rgba(variables.$white, 0.25);
-                        border-color: rgba(variables.$white, 0.5);
-                    }
-
-                    i {
-                        font-size: 1rem;
-                        font-weight: bold;
+                    @include responsive.mobile {
+                        transform: translateY(-1px);
+                        box-shadow: 0 3px 10px rgba(variables.$primary-gold, 0.15);
                     }
                 }
             }
-
-            &.week-nav {
-                .week-btn {
-                    background: rgba(variables.$white, 0.1);
-                    border: 2px solid rgba(variables.$white, 0.2);
-
-                    &:hover {
-                        background: rgba(variables.$white, 0.2);
-                        border-color: rgba(variables.$white, 0.4);
-                    }
-
-                    i {
-                        font-size: 0.9rem;
-                    }
-                }
-            }
-
-            &.today-nav {
-                margin-left: 0.5rem;
-            }
-        }
-
-        // Hacer el título más compacto para acomodar más botones
-        .calendar-title {
-            font-size: 1.2rem;
-            margin: 0 0.75rem;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-
-            &.changing {
-                opacity: 0.7;
-                transform: scale(0.98);
-            }
-
-            @include responsive.mobile {
-                font-size: 1rem;
-                margin: 0 0.5rem;
-            }
-        }
-
-        .btn.nav-btn {
-            min-width: 40px;
-            height: 40px;
-            font-size: 1rem;
-        }
-    }
-
-    .hour-row {
-        flex-direction: column;
-        gap: 0.5rem;
-        align-items: stretch;
-
-        .hour-label {
-            width: 100%;
-            text-align: left;
-            padding: 8px 12px;
-        }
-
-        .slot {
-            border-left: none;
-            border-top: 2px solid rgba(variables.$primary-gold, 0.1);
-            padding-left: 0;
-            padding-top: 0.5rem;
-        }
-    }
-
-    .reservation {
-        .res-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-
-        .res-contact {
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .appointment-actions {
-            display: none;
-        }
-    }
-
-    .detail-actions {
-        flex-direction: column;
-
-        .btn {
-            flex: none;
         }
     }
 }
 
-// Estilos para el modo edición
-.left-panel.editing {
-    .panel-header {
-        background: linear-gradient(135deg, rgba(variables.$primary-gold, 0.1), rgba(variables.$secondary-gold, 0.05));
-        padding: 1rem;
-        border-radius: 12px;
-        margin-bottom: 1rem;
-    }
-}
-
-.back-btn {
-    background: rgba(variables.$primary-gold, 0.1);
-    border: 2px solid rgba(variables.$primary-gold, 0.2);
-    color: variables.$primary-gold;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-
-    &:hover {
-        background: rgba(variables.$primary-gold, 0.2);
-        transform: translateX(-3px);
-    }
-}
-
-.edit-form {
-    padding: 1rem;
-
-    .form-group {
-        margin-bottom: 1.25rem;
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: variables.$dark-brown;
-        }
-
-        input,
-        textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid rgba(variables.$primary-gold, 0.2);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-
-            &:focus {
-                outline: none;
-                border-color: variables.$primary-gold;
-                box-shadow: 0 0 0 3px rgba(variables.$primary-gold, 0.1);
-            }
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-    }
-
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
-        margin-top: 1.5rem;
-        padding-top: 1rem;
-        border-top: 2px solid rgba(variables.$primary-gold, 0.1);
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-
-            &.btn-primary {
-                background: linear-gradient(135deg, variables.$primary-gold, variables.$secondary-gold);
-                color: variables.$white;
-                border: none;
-
-                &:hover:not(:disabled) {
-                    transform: translateY(-2px);
-                    box-shadow: 0 5px 15px rgba(variables.$primary-gold, 0.3);
-                }
-            }
-
-            &.btn-secondary {
-                background: rgba(variables.$primary-gold, 0.1);
-                color: variables.$primary-gold;
-                border: 2px solid rgba(variables.$primary-gold, 0.2);
-
-                &:hover:not(:disabled) {
-                    background: rgba(variables.$primary-gold, 0.2);
-                }
-            }
-
-            &:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-                transform: none !important;
-            }
-        }
-    }
-}
-
-// Botones de acción en las tarjetas
-.card-actions {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    display: flex;
-    gap: 0.5rem;
-
-    .action-btn {
-        background: rgba(variables.$white, 0.9);
-        border: 1px solid rgba(variables.$primary-gold, 0.2);
-        border-radius: 6px;
-        width: 28px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 0.8rem;
-
-        &.edit-btn {
-            color: variables.$primary-gold;
-
-            &:hover {
-                background: variables.$primary-gold;
-                color: variables.$white;
-                transform: scale(1.1);
-            }
-        }
-    }
-}
-
-@include responsive.mobile {
-    .edit-form {
-        padding: 0.5rem;
-
-        .form-actions {
-            flex-direction: column;
-
-            .btn {
-                width: 100%;
-            }
-        }
-    }
-
-    .card-actions {
-        top: 0.5rem;
-        right: 0.5rem;
-    }
-}
-
+/* Formulario de edición responsive */
 .edit-form-container {
     @include mixins.card-style;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
+
+    @include responsive.mobile {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+    }
 
     .edit-form-header {
         display: flex;
@@ -1206,6 +1372,13 @@
         padding-bottom: 1rem;
         border-bottom: 2px solid rgba(variables.$primary-gold, 0.1);
 
+        @include responsive.mobile {
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
         h3 {
             margin: 0;
             color: variables.$dark-brown;
@@ -1213,6 +1386,10 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+
+            @include responsive.mobile {
+                font-size: 1.1rem;
+            }
         }
 
         .back-btn {
@@ -1228,15 +1405,23 @@
             cursor: pointer;
             transition: all 0.3s ease;
 
+            @include responsive.mobile {
+                width: 32px;
+                height: 32px;
+            }
+
             &:hover {
                 background: rgba(variables.$primary-gold, 0.2);
                 transform: scale(1.1);
+
+                @include responsive.mobile {
+                    transform: scale(1.05);
+                }
             }
         }
     }
 }
 
-// Estilos del formulario
 .edit-form {
     .form-row {
         display: flex;
@@ -1245,7 +1430,8 @@
 
         @include responsive.mobile {
             flex-direction: column;
-            gap: 0;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
     }
 
@@ -1263,8 +1449,9 @@
             font-weight: 600;
             color: variables.$dark-brown;
 
-            &::after {
-                content: '';
+            @include responsive.mobile {
+                font-size: 0.9rem;
+                margin-bottom: 0.4rem;
             }
         }
 
@@ -1278,6 +1465,12 @@
             font-size: 1rem;
             transition: all 0.3s ease;
             background: variables.$white;
+
+            @include responsive.mobile {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+                border-radius: 6px;
+            }
 
             &:focus {
                 outline: none;
@@ -1293,27 +1486,30 @@
             background-repeat: no-repeat;
             background-position: right 0.75rem center;
             background-size: 16px;
+
+            @include responsive.mobile {
+                background-position: right 0.6rem center;
+                background-size: 14px;
+            }
         }
 
         textarea {
             resize: vertical;
             min-height: 80px;
+
+            @include responsive.mobile {
+                min-height: 60px;
+            }
         }
 
         .error-message {
             color: #dc3545;
             font-size: 0.8rem;
             margin-top: 0.25rem;
-        }
-    }
 
-    input.ng-invalid.ng-touched,
-    select.ng-invalid.ng-touched,
-    textarea.ng-invalid.ng-touched {
-        border-color: #dc3545;
-
-        &:focus {
-            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+            @include responsive.mobile {
+                font-size: 0.75rem;
+            }
         }
     }
 
@@ -1327,6 +1523,9 @@
 
         @include responsive.mobile {
             flex-direction: column;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            gap: 0.75rem;
         }
 
         .btn {
@@ -1337,6 +1536,13 @@
             transition: all 0.3s ease;
             min-width: 120px;
 
+            @include responsive.mobile {
+                min-width: auto;
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+                border-radius: 6px;
+            }
+
             &.btn-primary {
                 background: linear-gradient(135deg, variables.$primary-gold, variables.$secondary-gold);
                 color: variables.$white;
@@ -1345,6 +1551,11 @@
                 &:hover:not(:disabled) {
                     transform: translateY(-2px);
                     box-shadow: 0 5px 15px rgba(variables.$primary-gold, 0.3);
+
+                    @include responsive.mobile {
+                        transform: translateY(-1px);
+                        box-shadow: 0 3px 10px rgba(variables.$primary-gold, 0.25);
+                    }
                 }
             }
 
@@ -1355,6 +1566,10 @@
 
                 &:hover:not(:disabled) {
                     background: rgba(variables.$primary-gold, 0.2);
+
+                    @include responsive.mobile {
+                        transform: none;
+                    }
                 }
             }
 
@@ -1367,75 +1582,491 @@
     }
 }
 
-// Estilo para mostrar el servicio en las reservas
-.res-service {
-    margin-top: 0.5rem;
-    font-size: 0.85rem;
-    color: variables.$primary-gold;
-    background: rgba(variables.$primary-gold, 0.1);
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-weight: 600;
+/* Animaciones optimizadas para mobile */
+@keyframes highlightPulse {
+    0% {
+        box-shadow: 0 6px 20px rgba(variables.$primary-gold, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 10px 30px rgba(variables.$primary-gold, 0.6), 0 0 20px rgba(variables.$primary-gold, 0.4);
+    }
+
+    100% {
+        box-shadow: 0 6px 20px rgba(variables.$primary-gold, 0.3);
+    }
 }
 
 @include responsive.mobile {
+    @keyframes highlightPulse {
+        0% {
+            box-shadow: 0 4px 15px rgba(variables.$primary-gold, 0.25);
+        }
+
+        50% {
+            box-shadow: 0 6px 20px rgba(variables.$primary-gold, 0.4), 0 0 15px rgba(variables.$primary-gold, 0.3);
+        }
+
+        100% {
+            box-shadow: 0 4px 15px rgba(variables.$primary-gold, 0.25);
+        }
+    }
+}
+
+/* Mejoras adicionales para muy pequeñas pantallas */
+@media (max-width: 360px) {
+    .appointment-grid {
+        gap: 0.5rem;
+    }
+    
+    .appointment-card {
+        padding: 0.75rem;
+        
+        .card-title {
+            font-size: 1rem;
+        }
+        
+        .card-meta .date,
+        .card-meta .time {
+            padding: 2px 6px;
+            font-size: 0.8rem;
+        }
+        
+        .card-body {
+            font-size: 0.8rem;
+        }
+    }
+    
     .calendar-header {
+        padding: 0.5rem;
+        
+        .calendar-title {
+            font-size: 1rem;
+        }
+        
+        .btn.nav-btn {
+            min-width: 32px;
+            height: 32px;
+            font-size: 0.9rem;
+        }
+        
+        .btn.today-btn {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+        }
+    }
+    
+    .hour-row {
+        padding: 0.5rem;
+    }
+    
+    .reservation {
+        padding: 0.5rem;
+        
+        .res-time {
+            font-size: 0.9rem;
+            padding: 3px 6px;
+        }
+        
+        .res-name {
+            font-size: 0.95rem;
+        }
+        
+        .res-contact .contact-item {
+            font-size: 0.75rem;
+        }
+    }
+    
+    .edit-form-container {
+        padding: 0.75rem;
+    }
+    
+    .edit-form {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .form-actions .btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+        }
+    }
+}
+
+@include responsive.mobile {
+    // Asegurar que todos los elementos usen box-sizing border-box
+    * {
+        box-sizing: border-box;
+    }
+    
+    // Prevenir overflow horizontal en todos los elementos
+    .appointment-grid,
+    .left-panel,
+    .right-panel,
+    .calendar-header,
+    .calendar-body,
+    .appointment-card,
+    .reservation,
+    .empty-slot,
+    .selected-detail,
+    .edit-form-container {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    // Ajustar elementos específicos que podrían causar overflow
+    .card-meta {
         flex-wrap: wrap;
-        gap: 0.25rem;
-        padding: 0.75rem 1rem;
+        justify-content: flex-start !important;
+        
+        .date, .hour-time {
+            width: 100%;
+            justify-content: flex-start !important;
+            margin-top: 0.25rem;
+        }
+    }
+    
+    .res-contact {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        
+        .contact-item {
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+    
+    .hour-row {
+        flex-direction: column;
+        padding: 0.75rem;
+        
+        .hour-label {
+            width: 100% !important;
+            margin-bottom: 0.5rem;
+        }
+    }
+    
+    // Ajustar botones y elementos interactivos
+    .btn, .action-btn, .create-appointment-btn {
+        touch-action: manipulation; // Mejorar respuesta táctil
+    }
+    
+    // Asegurar que los textos largos no causen overflow
+    .card-title, .res-name, .res-time {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+}
 
-        .calendar-nav {
-
-            &.month-nav,
-            &.week-nav {
-                .btn {
+// Estructura mejorada para el header del calendario en móvil
+.calendar-header {
+    @include responsive.mobile {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
+        
+        .navigation-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            order: 1;
+            
+            .nav-group {
+                display: flex;
+                align-items: center;
+                
+                &.left, &.right {
+                    flex: 0 0 auto;
+                }
+                
+                &.center {
+                    flex: 1;
+                    text-align: center;
+                    justify-content: center;
+                }
+            }
+            
+            .calendar-title {
+                margin: 0;
+                font-size: 1.2rem;
+                order: 2;
+            }
+        }
+        
+        .day-navigation-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            order: 2;
+            
+            .nav-group {
+                display: flex;
+                
+                .nav-btn {
                     min-width: 36px;
                     height: 36px;
-                    padding: 8px;
+                    padding: 0;
+                    font-size: 1rem;
+                }
+            }
+            
+            .nav-spacer {
+                width: 10px;
+            }
+        }
+        
+        .today-button-container {
+            width: 100%;
+            order: 3;
+            margin-top: 0.5rem;
+            
+            .today-btn {
+                width: 100%;
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+        }
+    }
+}
 
-                    i {
-                        font-size: 0.8rem;
+// Prevenir doble scroll en móvil
+@include responsive.mobile {
+    .content-section {
+        height: auto;
+        min-height: 100dvh;
+        overflow-y: auto;
+    }
+    
+    .appointment-grid {
+        height: auto;
+        overflow: visible;
+    }
+    
+    .left-panel, .right-panel {
+        overflow: visible;
+        max-height: none;
+    }
+    
+    .list, .calendar-body {
+        overflow-y: visible;
+        max-height: none;
+    }
+}
+
+// Ajustes adicionales para pantallas muy pequeñas
+@media (max-width: 360px) {
+    .calendar-header {
+        padding: 0.75rem !important;
+        
+        .navigation-container {
+            .calendar-title {
+                font-size: 1.1rem;
+            }
+            
+            .nav-btn {
+                min-width: 32px !important;
+                height: 32px !important;
+                font-size: 0.9rem !important;
+            }
+        }
+        
+        .day-navigation-container {
+            gap: 0.25rem;
+            
+            .nav-btn {
+                min-width: 30px !important;
+                height: 30px !important;
+            }
+        }
+    }
+}
+
+// Clases de utilidad para mostrar/ocultar elementos
+.desktop-only {
+    @include responsive.mobile {
+        display: none !important;
+    }
+}
+
+.mobile-only {
+    display: none !important;
+    
+    @include responsive.mobile {
+        display: block !important;
+    }
+}
+
+// Estructura mejorada para el header del calendario en móvil
+.calendar-header {
+    @include responsive.mobile {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
+        
+        .mobile-nav-container {
+            width: 100%;
+        }
+        
+        .navigation-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 0.75rem;
+            
+            .nav-group {
+                display: flex;
+                align-items: center;
+                
+                &.left, &.right {
+                    flex: 0 0 auto;
+                }
+                
+                &.center {
+                    flex: 1;
+                    text-align: center;
+                    justify-content: center;
+                }
+            }
+            
+            .calendar-title-mobile {
+                color: variables.$white;
+                font-weight: 700;
+                font-size: 1.2rem;
+                text-transform: capitalize;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            }
+        }
+        
+        .day-navigation-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            margin-bottom: 0.75rem;
+            
+            .nav-group {
+                display: flex;
+                
+                .nav-btn {
+                    min-width: 36px;
+                    height: 36px;
+                    padding: 0;
+                    font-size: 1rem;
+                    background: rgba(variables.$white, 0.2);
+                    border: 2px solid rgba(variables.$white, 0.3);
+                    color: variables.$white;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    backdrop-filter: blur(10px);
+
+                    &:hover {
+                        background: rgba(variables.$white, 0.3);
+                        border-color: rgba(variables.$white, 0.6);
                     }
                 }
             }
+            
+            .nav-spacer {
+                width: 10px;
+            }
         }
-
-        .calendar-title {
-            order: -1;
+        
+        .today-button-container {
             width: 100%;
-            text-align: center;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .today-nav {
-            margin-left: auto;
-
+            
             .today-btn {
-                padding: 6px 12px;
-                font-size: 0.8rem;
+                width: 100%;
+                padding: 0.5rem;
+                font-size: 0.9rem;
+                background: rgba(variables.$white, 0.9);
+                border: 2px solid rgba(variables.$white, 0.3);
+                color: variables.$primary-gold;
+                border-radius: 20px;
+                cursor: pointer;
+                font-weight: 700;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+
+                &:hover {
+                    background: variables.$white;
+                }
             }
         }
     }
 }
-.barber-info {
-    background: rgba(variables.$secondary-gold, 0.15) !important;
-    color: variables.$secondary-gold !important;
-    font-weight: 600;
+
+// Prevenir doble scroll en móvil
+@include responsive.mobile {
+    .content-section {
+        height: auto;
+        min-height: 100dvh;
+        overflow-y: auto;
+    }
     
-    i {
-        color: variables.$secondary-gold !important;
+    .appointment-grid {
+        height: auto;
+        overflow: visible;
+    }
+    
+    .left-panel, .right-panel {
+        overflow: visible;
+        max-height: none;
+    }
+    
+    .list, .calendar-body {
+        overflow-y: visible;
+        max-height: none;
     }
 }
-.res-contact {
-    .contact-item {
-        &.barber-info {
-            margin-top: 0.25rem;
-            display: block;
-            width: fit-content;
+
+// Ajustes adicionales para pantallas muy pequeñas
+@media (max-width: 360px) {
+    .calendar-header {
+        padding: 0.75rem !important;
+        
+        .navigation-container {
+            .calendar-title-mobile {
+                font-size: 1.1rem;
+            }
+            
+            .nav-btn {
+                min-width: 32px !important;
+                height: 32px !important;
+                font-size: 0.9rem !important;
+            }
         }
+        
+        .day-navigation-container {
+            gap: 0.25rem;
+            
+            .nav-btn {
+                min-width: 30px !important;
+                height: 30px !important;
+            }
+        }
+    }
+}
+
+// Mantener el diseño original de desktop
+.calendar-header {
+    // Estilos originales de desktop se mantienen aquí
+    // ...
+    
+    @include responsive.mobile {
+        // Los estilos móviles ya están definidos arriba
     }
 }

@@ -11,11 +11,20 @@
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;
   gap: 30px;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 }
 
 .info-card {
   @include card-style;
   padding: 20px;
+
+  @include mobile {
+    padding: 15px;
+  }
 
   h3 {
     color: $dark-brown;
@@ -25,6 +34,11 @@
     display: flex;
     align-items: center;
     gap: 10px;
+
+    @include mobile {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+    }
 
     i {
       color: $primary-gold;
@@ -41,6 +55,10 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
+
+  @include mobile {
+    gap: 12px;
+  }
 }
 
 // ------------------------
@@ -48,11 +66,11 @@
 // ------------------------
 .schedule-row {
   display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 20px;
-  align-items: center;
+  grid-template-columns: 120px 1fr 100px;
+  gap: 15px;
+  align-items: flex-start;
   margin-bottom: 15px;
-  padding: 10px 0;
+  padding: 15px 0;
   border-bottom: 1px solid rgba($border-color, 0.5);
 
   &:last-child {
@@ -62,16 +80,30 @@
   @include mobile {
     grid-template-columns: 1fr;
     gap: 10px;
+    padding: 12px 0;
+    margin-bottom: 12px;
 
     .day-label {
-      text-align: center;
-      padding-bottom: 5px;
+      text-align: left;
+      font-size: 1.1rem;
+      padding: 8px 12px;
+      background: rgba($primary-gold, 0.1);
+      border-radius: 8px;
+      margin-bottom: 5px;
+    }
+
+    .closed-checkbox {
+      order: 2;
+      justify-self: start;
+      margin-top: 10px;
     }
   }
 
   .day-label {
     font-weight: 600;
     color: $dark-brown;
+    display: flex;
+    align-items: center;
   }
 
   .intervals-container {
@@ -83,14 +115,26 @@
   .time-inputs {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     flex-wrap: wrap;
+
+    @include mobile {
+      gap: 8px;
+      margin-bottom: 8px;
+    }
 
     .time-input {
       padding: 8px 12px;
       border: 2px solid $border-color;
       border-radius: 6px;
       transition: all 0.3s ease;
+      min-width: 100px;
+
+      @include mobile {
+        min-width: 80px;
+        padding: 6px 8px;
+        font-size: 0.9rem;
+      }
 
       &:focus {
         outline: none;
@@ -107,36 +151,40 @@
     .time-separator {
       color: $text-gray;
       font-weight: 600;
-    }
-
-    .closed-checkbox {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: $text-gray;
-      font-size: 0.9rem;
-      cursor: pointer;
-
-      input[type="checkbox"] {
-        cursor: pointer;
+      
+      @include mobile {
+        font-size: 0.9rem;
       }
     }
 
-    // Botón eliminar intervalo
     .danger-btn {
       @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
       font-size: 0.85rem;
-      padding: 5px 10px;
-      min-width: 80px;
+      padding: 5px 8px;
+      min-width: 70px;
       flex-shrink: 0;
       border-radius: 6px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       justify-content: center;
+
+      @include mobile {
+        font-size: 0.75rem;
+        padding: 4px 6px;
+        min-width: 60px;
+        
+        span {
+          display: none;
+        }
+      }
 
       i {
         font-size: 1rem;
+
+        @include mobile {
+          font-size: 0.9rem;
+        }
       }
 
       &:hover {
@@ -145,12 +193,82 @@
       }
     }
   }
+
+  .closed-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: $text-gray;
+    font-size: 0.9rem;
+    cursor: pointer;
+    justify-self: center;
+
+    @include mobile {
+      justify-self: start;
+      font-size: 0.85rem;
+    }
+
+    input[type="checkbox"] {
+      cursor: pointer;
+    }
+  }
+
+  .add-btn {
+    @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    min-width: 100px;
+    flex-shrink: 0;
+
+    @include mobile {
+      font-size: 0.75rem;
+      padding: 6px 10px;
+      width: 100%;
+      margin-top: 5px;
+    }
+  }
+}
+
+.schedule-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+
+  @include mobile {
+    margin-top: 15px;
+  }
 }
 
 // ------------------------
 // Peluqueros
 // ------------------------
 .barber-set {
+
+  .barber-selection-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: rgba($primary-gold, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+
+    @include mobile {
+      padding: 10px;
+      font-size: 0.9rem;
+    }
+  }
+
+  .staff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    @include mobile {
+      gap: 12px;
+    }
+  }
 
   .barber-item {
     display: flex;
@@ -160,6 +278,12 @@
     background: rgba($light-gray, 0.15);
     transition: all 0.3s ease;
     gap: 15px;
+
+    @include mobile {
+      padding: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
     &:hover {
       background: rgba($primary-gold, 0.08);
@@ -176,6 +300,11 @@
       align-items: center;
       justify-content: center;
 
+      @include mobile {
+        width: 50px;
+        height: 50px;
+      }
+
       img {
         width: 100%;
         height: 100%;
@@ -189,6 +318,10 @@
         i {
           font-size: 2rem;
           color: $text-gray;
+
+          @include mobile {
+            font-size: 1.5rem;
+          }
         }
       }
     }
@@ -198,6 +331,12 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      min-width: 0;
+
+      @include mobile {
+        width: 100%;
+        order: 2;
+      }
 
       .barber-name-input {
         padding: 6px 10px;
@@ -205,6 +344,11 @@
         border-radius: 6px;
         font-size: 0.95rem;
         transition: all 0.3s ease;
+
+        @include mobile {
+          font-size: 0.9rem;
+          width: 100%;
+        }
 
         &:focus {
           outline: none;
@@ -239,6 +383,12 @@
       gap: 6px;
       justify-content: center;
 
+      @include mobile {
+        order: 3;
+        width: 100%;
+        margin-top: 10px;
+      }
+
       i {
         font-size: 1rem;
       }
@@ -252,46 +402,39 @@
 
   .add-barber {
     display: flex;
-    gap: 10px;
-    margin-top: 12px;
-
-    input {
-      flex: 1;
-      padding: 8px 12px;
-      border: 2px solid $border-color;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      font-size: 0.95rem;
-
-      &:focus {
-        outline: none;
-        border-color: $primary-gold;
-        box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
-      }
-    }
-
-    .add-btn {
-      @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
-      font-size: 0.9rem;
-      padding: 6px 14px;
-    }
-  }
-
-  .add-barber {
-    display: flex;
     flex-direction: column;
     gap: 15px;
-    margin-top: 12px;
+    margin-top: 20px;
+    padding: 20px;
+    border: 2px dashed rgba($primary-gold, 0.3);
+    border-radius: 12px;
+    background: rgba($primary-gold, 0.05);
+
+    @include mobile {
+      padding: 15px;
+      gap: 12px;
+      margin-top: 15px;
+    }
 
     .barber-image-upload {
       display: flex;
       flex-direction: column;
       gap: 8px;
+      align-items: center;
+
+      @include mobile {
+        align-items: stretch;
+      }
 
       label {
         font-weight: 600;
         color: $dark-brown;
         font-size: 0.9rem;
+        text-align: center;
+
+        @include mobile {
+          text-align: left;
+        }
       }
 
       .barber-upload-area {
@@ -309,6 +452,12 @@
         background-position: center;
         position: relative;
         overflow: hidden;
+
+        @include mobile {
+          width: 100px;
+          height: 100px;
+          align-self: center;
+        }
 
         &:hover {
           border-color: $primary-gold;
@@ -350,22 +499,35 @@
           padding: 10px;
 
           i {
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: $primary-gold;
             margin-bottom: 8px;
+
+            @include mobile {
+              font-size: 1.5rem;
+              margin-bottom: 6px;
+            }
           }
 
           p {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: 600;
             color: $dark-brown;
             margin: 0 0 4px 0;
+
+            @include mobile {
+              font-size: 0.65rem;
+            }
           }
 
           small {
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             color: $text-gray;
             line-height: 1.2;
+
+            @include mobile {
+              font-size: 0.55rem;
+            }
           }
         }
       }
@@ -376,6 +538,11 @@
         background: rgba($primary-gold, 0.2);
         border-radius: 2px;
         overflow: hidden;
+
+        @include mobile {
+          width: 100px;
+          align-self: center;
+        }
 
         .barber-progress-bar {
           height: 100%;
@@ -390,6 +557,11 @@
       display: flex;
       gap: 10px;
 
+      @include mobile {
+        flex-direction: column;
+        gap: 8px;
+      }
+
       input {
         flex: 1;
         padding: 8px 12px;
@@ -397,6 +569,11 @@
         border-radius: 8px;
         transition: all 0.3s ease;
         font-size: 0.95rem;
+
+        @include mobile {
+          font-size: 0.9rem;
+          padding: 10px;
+        }
 
         &:focus {
           outline: none;
@@ -408,8 +585,14 @@
       .add-btn {
         @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
         font-size: 0.9rem;
-        padding: 6px 14px;
+        padding: 8px 14px;
         min-width: 140px;
+
+        @include mobile {
+          width: 100%;
+          padding: 10px;
+          min-width: auto;
+        }
 
         &:disabled {
           opacity: 0.7;
@@ -429,6 +612,12 @@
   min-width: 160px;
   justify-content: center;
   margin-top: 10px;
+
+  @include mobile {
+    width: 100%;
+    min-width: auto;
+    padding: 12px;
+  }
 
   i {
     font-size: 1.1rem;
@@ -477,10 +666,18 @@
 .form-textarea {
   @include form-input-style;
 
+  @include mobile {
+    font-size: 0.9rem;
+  }
+
   &.form-textarea {
     min-height: 80px;
     resize: vertical;
     font-family: inherit;
+
+    @include mobile {
+      min-height: 60px;
+    }
   }
 }
 
@@ -490,12 +687,20 @@
     color: $dark-brown;
     margin-bottom: 8px;
     display: block;
+
+    @include mobile {
+      font-size: 0.9rem;
+    }
   }
 }
 
-.contact-form {
+.contact-container {
   .form-group {
     margin-bottom: 20px;
+
+    @include mobile {
+      margin-bottom: 15px;
+    }
   }
 }
 
@@ -510,6 +715,11 @@
   font-size: 1.2rem;
   justify-content: center;
   margin-top: 50px;
+
+  @include mobile {
+    font-size: 1rem;
+    margin-top: 30px;
+  }
 
   i {
     animation: spin 1s linear infinite;
@@ -540,20 +750,71 @@
   margin-bottom: 15px;
   transition: all 0.3s ease;
 
+  @include mobile {
+    padding: 15px;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
   &:hover {
     border-color: rgba($primary-gold, 0.4);
     background: rgba($primary-gold, 0.05);
+  }
+
+  .ex-date {
+    padding: 8px 12px;
+    border: 2px solid $border-color;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+
+    @include mobile {
+      width: 100%;
+      padding: 10px;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $primary-gold;
+      box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+    }
+  }
+
+  .ex-closed {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: $text-gray;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-top: 10px;
+
+    @include mobile {
+      font-size: 0.85rem;
+    }
+
+    input[type="checkbox"] {
+      cursor: pointer;
+    }
   }
 
   .ex-hours {
     border-top: 1px solid rgba($border-color, 0.5);
     padding-top: 15px;
 
+    @include mobile {
+      padding-top: 12px;
+    }
+
     label {
       font-weight: 600;
       color: $dark-brown;
       margin-bottom: 12px;
       display: block;
+
+      @include mobile {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+      }
     }
 
     .intervals-container {
@@ -568,12 +829,23 @@
         flex-wrap: wrap;
         padding: 8px 0;
 
+        @include mobile {
+          gap: 8px;
+          padding: 6px 0;
+        }
+
         .time-input {
           padding: 8px 12px;
           border: 2px solid $border-color;
           border-radius: 6px;
           transition: all 0.3s ease;
           min-width: 120px;
+
+          @include mobile {
+            min-width: 100px;
+            padding: 8px 10px;
+            font-size: 0.9rem;
+          }
 
           &:focus {
             outline: none;
@@ -586,28 +858,53 @@
           color: $text-gray;
           font-weight: 600;
           font-size: 1.1rem;
+
+          @include mobile {
+            font-size: 1rem;
+          }
         }
 
         .danger-btn {
           @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
-          font-size: 0.85rem;
-          padding: 5px 10px;
-          min-width: 80px;
+          font-size: 0.8rem;
+          padding: 5px 8px;
+          min-width: 70px;
           flex-shrink: 0;
           border-radius: 6px;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 4px;
           justify-content: center;
 
+          @include mobile {
+            font-size: 0.75rem;
+            padding: 4px 6px;
+            min-width: 60px;
+            width: 100%;
+            margin-top: 8px;
+          }
+
           i {
-            font-size: 1rem;
+            font-size: 0.9rem;
           }
 
           &:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba($danger-red, 0.25);
           }
+        }
+      }
+
+      .add-btn {
+        @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        align-self: flex-start;
+
+        @include mobile {
+          width: 100%;
+          align-self: stretch;
+          padding: 10px;
         }
       }
     }
@@ -622,12 +919,23 @@
     text-align: center;
     font-style: italic;
     margin-top: 10px;
+
+    @include mobile {
+      padding: 12px;
+      font-size: 0.9rem;
+    }
   }
 
   .danger-btn {
     align-self: flex-end;
     margin-top: 10px;
     min-width: 140px;
+
+    @include mobile {
+      width: 100%;
+      align-self: stretch;
+      margin-top: 15px;
+    }
   }
 }
 
@@ -639,11 +947,22 @@
   border-radius: 12px;
   background: rgba($primary-gold, 0.05);
 
+  @include mobile {
+    padding: 15px;
+  }
+
   .add-btn {
     @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
     font-size: 1rem;
     padding: 12px 20px;
     min-width: 180px;
+
+    @include mobile {
+      width: 100%;
+      min-width: auto;
+      padding: 12px 16px;
+      font-size: 0.9rem;
+    }
 
     &:hover {
       transform: translateY(-2px);
