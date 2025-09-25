@@ -1,7 +1,7 @@
 import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppointmentManagerService } from '../../../services/admin-panel/appointment-management.service';
-import { Appointment, Service } from '../../types/admin.types';
+import { Appointment, Service, ScheduleDay, ExceptionItem } from '../../types/admin.types';
 import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -35,9 +35,10 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   services: Service[] = [];
   barbers: Barber[] = [];
 
-  // Cambios principales: usar datos de disponibilidad dinámicos
+  // Nuevos datos desde InfoManager (igual que en calendar-selector)
+  schedule: ScheduleDay[] = [];
+  exceptions: ExceptionItem[] = [];
   hours: string[] = [];
-  availabilityData: any = null;
   bookedSlotsByDate: Record<string, string[]> = {};
 
   private scrollTimeout: any;
@@ -120,9 +121,9 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     return hours * 60 + (minutes || 0);
   }
 
-  // Nuevo método para generar horas basado en availabilityData
+  // Nuevo método para generar horas basado en schedule y exceptions
   private generateHoursForSelectedDate() {
-    if (!this.availabilityData) {
+    if (!this.schedule || this.schedule.length === 0) {
       this.hours = this.generateDefaultHours(); // Fallback al método anterior
       return;
     }
@@ -137,40 +138,32 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
   private getAvailableHoursForDate(date: Date, booked: string[]): string[] {
     const dateKey = this.toISODate(date);
-    const ex = this.availabilityData?.exceptions?.[dateKey];
-
+    
+    // Verificar si hay una excepción para esta fecha (PRIORIDAD)
+    const exception = this.exceptions.find(ex => ex.date === dateKey);
+    
     let hours: string[] = [];
 
-    if (ex) {
-      // Si hay una excepción para este día específico
-      if (!ex.closed) {
-        let intervals: { open: string; close: string }[] = [];
-        if (Array.isArray(ex.intervals)) {
-          intervals = ex.intervals;
-        } else if (Array.isArray(ex.hours)) {
-          intervals = ex.hours.map((h: string) => {
-            const [open, close] = h.split('-');
-            return { open: open || '', close: close || '' };
-          });
-        }
-
-        intervals.forEach((interval: { open: string; close: string }) => {
+    if (exception) {
+      // Usar horarios de la excepción
+      if (!exception.closed && exception.intervals) {
+        exception.intervals.forEach(interval => {
           hours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
         });
       }
     } else {
-      // Usar horario por defecto según el día de la semana
+      // Usar horario semanal normal
       const dayName = this.getDayName(date);
-      const ds = this.availabilityData?.defaultSchedule?.[dayName];
-      if (ds && !ds.closed && Array.isArray(ds.intervals)) {
-        ds.intervals.forEach((interval: { open: string; close: string }) => {
+      const daySchedule = this.schedule.find(day => day.day === dayName);
+      
+      if (daySchedule && !daySchedule.closed && daySchedule.intervals) {
+        daySchedule.intervals.forEach(interval => {
           hours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
         });
       }
     }
 
     // Incluir tanto las horas disponibles como las ocupadas para mostrar en el calendario
-    // pero mantener la lógica existente de findReservation
     const allPossibleHours = [...new Set([...hours, ...booked])];
     return allPossibleHours.sort();
   }
@@ -211,14 +204,20 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   }
 
   async ngAfterViewInit() {
-    // Cargar datos de disponibilidad
+    // Cargar datos de horario y excepciones desde InfoManager
     try {
-      this.availabilityData = await this.infoManager.getAvailability();
+      this.schedule = await this.infoManager.getSchedule();
+      this.exceptions = await this.infoManager.getExceptions();
       this.generateHoursForSelectedDate(); // Regenerar horas con los datos cargados
 
       await this.loadBarbers();
+      
+      console.log('Datos cargados en appointment-management:', {
+        schedule: this.schedule,
+        exceptions: this.exceptions
+      });
     } catch (error) {
-      console.error('Error cargando availability:', error);
+      console.error('Error cargando datos de horario:', error);
       this.hours = this.generateDefaultHours(); // Fallback
     }
 
@@ -255,9 +254,10 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       this.barbers = [];
     }
   }
+
   // Método mejorado para determinar si una hora está disponible
   isHourAvailable(hour: string): boolean {
-    if (!this.availabilityData) return true; // Si no hay datos, asumir disponible
+    if (!this.schedule || this.schedule.length === 0) return true; // Si no hay datos, asumir disponible
 
     const selectedDate = this.selectedDate$.value;
     const dateKey = this.toISODate(selectedDate);
@@ -266,34 +266,29 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const bookedSlots = this.bookedSlotsByDate[dateKey] || [];
     if (bookedSlots.includes(hour)) return false;
 
-    // Resto de la lógica de disponibilidad existente...
-    const ex = this.availabilityData?.exceptions?.[dateKey];
-
+    // Verificar si hay una excepción para esta fecha (PRIORIDAD)
+    const exception = this.exceptions.find(ex => ex.date === dateKey);
+    
     let availableHours: string[] = [];
 
-    if (ex) {
-      if (ex.closed) return false;
+    if (exception) {
+      // Si hay excepción, verificar si está cerrada o tiene horarios
+      if (exception.closed) return false;
 
-      let intervals: { open: string; close: string }[] = [];
-      if (Array.isArray(ex.intervals)) {
-        intervals = ex.intervals;
-      } else if (Array.isArray(ex.hours)) {
-        intervals = ex.hours.map((h: string) => {
-          const [open, close] = h.split('-');
-          return { open: open || '', close: close || '' };
+      if (exception.intervals) {
+        exception.intervals.forEach(interval => {
+          availableHours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
         });
       }
-
-      intervals.forEach((interval: { open: string; close: string }) => {
-        availableHours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
-      });
     } else {
+      // Si no hay excepción, usar horario semanal normal
       const dayName = this.getDayName(selectedDate);
-      const ds = this.availabilityData?.defaultSchedule?.[dayName];
-      if (!ds || ds.closed) return false;
+      const daySchedule = this.schedule.find(day => day.day === dayName);
+      
+      if (!daySchedule || daySchedule.closed) return false;
 
-      if (Array.isArray(ds.intervals)) {
-        ds.intervals.forEach((interval: { open: string; close: string }) => {
+      if (daySchedule.intervals) {
+        daySchedule.intervals.forEach(interval => {
           availableHours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
         });
       }
@@ -594,19 +589,21 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   }
 
   private isDayAvailable(date: Date): boolean {
-    if (!this.availabilityData) return true; // Si no hay datos, asumir disponible
+    if (!this.schedule || this.schedule.length === 0) return true; // Si no hay datos, asumir disponible
 
     const dateKey = this.toISODate(date);
-    const ex = this.availabilityData?.exceptions?.[dateKey];
+    
+    // Verificar si hay una excepción para esta fecha (PRIORIDAD)
+    const exception = this.exceptions.find(ex => ex.date === dateKey);
 
-    if (ex) {
+    if (exception) {
       // Si hay excepción específica para este día
-      return !ex.closed && ex.intervals && ex.intervals.length > 0;
+      return !exception.closed && exception.intervals && exception.intervals.length > 0;
     } else {
       // Usar horario por defecto según el día de la semana
       const dayName = this.getDayName(date);
-      const ds = this.availabilityData?.defaultSchedule?.[dayName];
-      return !!(ds && !ds.closed && ds.intervals && ds.intervals.length > 0);
+      const daySchedule = this.schedule.find(day => day.day === dayName);
+      return !!(daySchedule && !daySchedule.closed && daySchedule.intervals && daySchedule.intervals.length > 0);
     }
   }
 

@@ -3,10 +3,10 @@ import { Firestore, doc, getDoc, updateDoc, setDoc, arrayUnion, arrayRemove } fr
 import {
   ContactInfo,
   ScheduleDay,
-  AvailabilityData,
   Interval,
   Barber,
-  BarberSettings
+  BarberSettings,
+  ExceptionItem
 } from '../../admin-panel/types/admin.types';
 
 export interface BusinessStatus {
@@ -51,7 +51,6 @@ export class InfoManager {
     address: 'Calle Principal, 123\n28001 Madrid, España'
   };
 
-  private _availabilityData: AvailabilityData | null = null;
 
   /** ==================== SCHEDULE / CONTACT ==================== */
 
@@ -123,9 +122,9 @@ export class InfoManager {
   }
 
   private calculateBusinessStatus(schedule: ScheduleDay[], checkDate: Date): BusinessStatus {
-    const dayMap = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    const dayMap = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
     const dayIndex = checkDate.getDay();
-    const currentTime = `${String(checkDate.getHours()).padStart(2,'0')}:${String(checkDate.getMinutes()).padStart(2,'0')}`;
+    const currentTime = `${String(checkDate.getHours()).padStart(2, '0')}:${String(checkDate.getMinutes()).padStart(2, '0')}`;
     const today = schedule.find(d => d.day === dayMap[dayIndex]);
 
     const status: BusinessStatus = {
@@ -201,14 +200,14 @@ export class InfoManager {
   }
 
   private findNextOpenDay(schedule: ScheduleDay[], currentDayIndex: number) {
-    const dayMap = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    const dayMap = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
     const now = new Date();
 
-    for (let i=1;i<=7;i++) {
+    for (let i = 1; i <= 7; i++) {
       const idx = (currentDayIndex + i) % 7;
       const dayKey = dayMap[idx];
-      const day = schedule.find(d=>d.day===dayKey);
-      if(day && !day.closed && day.intervals.length>0){
+      const day = schedule.find(d => d.day === dayKey);
+      if (day && !day.closed && day.intervals.length > 0) {
         const nextDate = new Date(now);
         nextDate.setDate(nextDate.getDate() + i);
         const openDate = this.createDateTimeFromTime(nextDate, day.intervals[0].open);
@@ -220,76 +219,53 @@ export class InfoManager {
   }
 
   private createDateTimeFromTime(date: Date, time: string): Date {
-    const [h,m] = time.split(':').map(Number);
+    const [h, m] = time.split(':').map(Number);
     const dt = new Date(date);
-    dt.setHours(h,m,0,0);
+    dt.setHours(h, m, 0, 0);
     return dt;
   }
 
   private diffTimeString(from: Date, to: Date): string {
     const diff = to.getTime() - from.getTime();
-    const mins = Math.floor(diff/60000);
-    if(mins<60) return `${mins} minutos`;
-    const h = Math.floor(mins/60);
-    const m = mins%60;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins} minutos`;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
     return `${h}h ${m}m`;
   }
 
-  /** ==================== AVAILABILITY ==================== */
-  async getAvailability(): Promise<AvailabilityData> {
-    if (this._availabilityData) return this._availabilityData;
 
+
+  async getExceptions(): Promise<ExceptionItem[]> {
     try {
-      return await runInInjectionContext(this.injector, async ()=>{
+      return await runInInjectionContext(this.injector, async () => {
         const ref = doc(this.firestore, this.availabilityPath);
         const snap = await getDoc(ref);
-        if(!snap.exists()){
-          this._availabilityData = { defaultSchedule: this.defaultScheduleMap(), exceptions:{} };
-          return this._availabilityData;
+
+        if (!snap.exists()) {
+          return []; // Array vacío por defecto
         }
-        this._availabilityData = snap.data() as AvailabilityData;
-        return this._availabilityData;
+
+        const data = snap.data() as any;
+
+        return data.exceptions || [];
       });
-    } catch(err){
-      console.error('Error getting availability:', err);
-      return { defaultSchedule: this.defaultScheduleMap(), exceptions:{} };
+    } catch (err) {
+      console.error('Error getting exceptions:', err);
+      return [];
     }
   }
 
-  async saveAvailability(data: AvailabilityData): Promise<void> {
-    try{
-      await runInInjectionContext(this.injector, async ()=>{
+  async saveExceptions(exceptions: ExceptionItem[]): Promise<void> {
+    try {
+      await runInInjectionContext(this.injector, async () => {
         const ref = doc(this.firestore, this.availabilityPath);
-
-        try {
-          await updateDoc(ref, {
-            defaultSchedule: data.defaultSchedule,
-            exceptions: data.exceptions
-          });
-        } catch (updateErr) {
-          await setDoc(ref, {
-            defaultSchedule: data.defaultSchedule,
-            exceptions: data.exceptions
-          }, { merge: true });
-        }
-
-        this._availabilityData = data;
+        await setDoc(ref, { exceptions }); // Guardar array directo
       });
-    }catch(err){
-      console.error('Error saving availability:', err);
+    } catch (err) {
+      console.error('Error saving exceptions:', err);
       throw err;
     }
-  }
-
-  private defaultScheduleMap(): Record<string, { intervals: Interval[]; closed: boolean }> {
-    const map: Record<string,{ intervals: Interval[]; closed: boolean }> = {};
-    for(const d of this.defaultSchedule) {
-      map[d.day.toLowerCase()] = {
-        intervals: d.intervals,
-        closed: d.closed
-      };
-    }
-    return map;
   }
 
   /** ==================== BARBERS ==================== */

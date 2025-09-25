@@ -57,14 +57,12 @@ export class Service {
   }
 }
 
-export interface AvailabilityException {
+export interface ExceptionItem {
+  date: string;
   closed: boolean;
-  hours?: string[];
-}
-
-export interface AvailabilityData {
-  defaultSchedule: Record<string, { intervals: Interval[]; closed: boolean }>;
-  exceptions: Record<string, { closed: boolean; hours: string[] }>;
+  intervals: Interval[];
+  exceptionType: 'closed' | 'custom';
+  isEditing?: boolean;
 }
 
 
@@ -96,12 +94,6 @@ export interface ContactInfo {
   address: string;
 }
 
-export type ExceptionItem = {
-  date: string | null;
-  closed: boolean;
-  intervals: Interval[];
-  note?: string;
-};
 
 
 

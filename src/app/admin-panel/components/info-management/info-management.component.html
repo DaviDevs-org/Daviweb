@@ -39,7 +39,7 @@
         </div>
       </div>
       <div class="schedule-actions">
-        <button type="button" class="save-btn" (click)="saveAvailability()">
+        <button type="button" class="save-btn" (click)="saveSchedule()">
           <i class="bi bi-check-circle"></i> Guardar Horario
         </button>
       </div>
@@ -47,54 +47,141 @@
 
     <!-- Excepciones por fecha -->
     <div class="info-card">
-      <h3><i class="bi bi-calendar-event"></i> Excepciones / Días especiales</h3>
-      <div class="exceptions-container">
-        <div class="exception-row" *ngFor="let ex of exceptions; let i=index">
-          <input type="date" [(ngModel)]="ex.date" class="ex-date" (change)="onExceptionDateChange(ex)">
+      <h3><i class="bi bi-calendar-event"></i> Días especiales / Excepciones</h3>
 
-          <label class="ex-closed">
-            <input type="checkbox" [(ngModel)]="ex.closed" (change)="onExceptionToggleClosed(ex)">
-            Cerrado todo el día
-          </label>
+      <!-- Flujo de creación -->
+      <div class="exception-creation-flow" *ngIf="tempException">
+        <div class="creation-steps">
+          <div class="step" [class.active]="currentExceptionStep === 'date'"
+            [class.completed]="currentExceptionStep !== 'date'">
+            <span class="step-number">1</span>
+            <span class="step-label">Fecha</span>
+          </div>
+          <div class="step" [class.active]="currentExceptionStep === 'type'"
+            [class.completed]="currentExceptionStep === 'hours'">
+            <span class="step-number">2</span>
+            <span class="step-label">Tipo</span>
+          </div>
+          <div class="step" [class.active]="currentExceptionStep === 'hours'"
+            [class.completed]="currentExceptionStep === 'complete'">
+            <span class="step-number">3</span>
+            <span class="step-label">Horario</span>
+          </div>
+        </div>
 
-          <div class="ex-hours" *ngIf="!ex.closed && ex.intervals.length > 0">
-            <label>Intervalos horarios (abre y cierra):</label>
-            <div class="intervals-container">
-              <div class="time-inputs" *ngFor="let interval of ex.intervals; let j=index">
+        <!-- Paso 1: Fecha -->
+        <div class="creation-step" *ngIf="currentExceptionStep === 'date'">
+          <div class="step-content">
+            <h4>Selecciona la fecha</h4>
+            <input type="date" [(ngModel)]="tempException.date" class="form-input">
+            <div class="step-actions">
+              <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
+              <button type="button" class="next-btn" (click)="nextStep()"
+                [disabled]="!tempException.date">Siguiente</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 2: Tipo -->
+        <div class="creation-step" *ngIf="currentExceptionStep === 'type'">
+          <div class="step-content">
+            <h4>¿Qué quieres hacer en esta fecha?</h4>
+            <div class="exception-type-options">
+              <div class="type-option" *ngFor="let type of exceptionTypes"
+                [class.selected]="tempException.exceptionType === type.value" (click)="selectExceptionType(type.value)">
+                <i [class]="type.icon"></i>
+                <span>{{type.label}}</span>
+              </div>
+            </div>
+            <div class="step-actions">
+              <button type="button" class="cancel-btn" (click)="prevStep()">Atrás</button>
+              <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 3: Horarios -->
+        <div class="creation-step" *ngIf="currentExceptionStep === 'hours'">
+          <div class="step-content">
+            <h4>Configura los horarios especiales</h4>
+
+            <div class="intervals-container" *ngIf="tempException.exceptionType === 'custom'">
+              <div class="time-inputs" *ngFor="let interval of tempException.intervals; let i=index">
+                <label>Intervalo {{i + 1}}:</label>
                 <input type="time" [(ngModel)]="interval.open" class="time-input"
-                  (blur)="validateExInterval(ex, interval)">
+                  (blur)="validateExInterval(interval, i)" required>
                 <span class="time-separator">-</span>
                 <input type="time" [(ngModel)]="interval.close" class="time-input"
-                  (blur)="validateExInterval(ex, interval)">
-                <button type="button" class="danger-btn" (click)="removeExInterval(ex,j)">
-                  <i class="bi bi-trash"></i> Eliminar
+                  (blur)="validateExInterval(interval, i)" required>
+                <button type="button" class="danger-btn" (click)="removeExInterval(i)"
+                  [disabled]="tempException.intervals!.length <= 1">
+                  <i class="bi bi-trash"></i>
                 </button>
               </div>
-              <button type="button" class="add-btn" (click)="addExInterval(ex)">
+
+              <button type="button" class="add-btn" (click)="addExInterval()">
                 <i class="bi bi-plus-circle"></i> Añadir intervalo
               </button>
             </div>
+
+            <div *ngIf="tempException.exceptionType === 'closed'" class="closed-message">
+              <i class="bi bi-x-circle"></i>
+              <p>La peluquería estará cerrada todo el día</p>
+              <small>No se permitirán reservas para esta fecha</small>
+            </div>
+
+            <div class="step-actions">
+              <button type="button" class="cancel-btn" (click)="prevStep()">Atrás</button>
+              <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
+              <button type="button" class="save-btn" (click)="finishException()">Guardar Excepción</button>
+            </div>
           </div>
-
-          <div class="no-intervals-message" *ngIf="!ex.closed && ex.intervals.length === 0">
-            No hay horarios disponibles
-          </div>
-
-          <button type="button" class="danger-btn" (click)="removeException(i)">
-            <i class="bi bi-trash"></i> Eliminar excepción
-          </button>
-        </div>
-
-        <div class="exception-add">
-          <button type="button" class="add-btn" (click)="addEmptyException()">
-            <i class="bi bi-plus-circle"></i> Añadir excepción
-          </button>
         </div>
       </div>
 
-      <button type="button" class="save-btn" (click)="saveAvailability()">
-        <i class="bi bi-check-circle"></i> Guardar Disponibilidad
-      </button>
+      <!-- Lista de excepciones existentes -->
+      <div class="exceptions-list" *ngIf="!tempException">
+        <div class="exceptions-container">
+          <div class="exception-item" *ngFor="let ex of exceptions; let i=index">
+            <div class="exception-header">
+              <div class="exception-info">
+                <strong>{{ex.date | date:'fullDate'}}</strong>
+                <span class="exception-type" [class.closed]="ex.closed">
+                  {{ex.closed ? '❌ Cerrado todo el día' : '🕒 Horario especial'}}
+                </span>
+              </div>
+              <div class="exception-actions">
+                <button type="button" class="edit-btn" (click)="editException(i)">
+                  <i class="bi bi-pencil"></i> Editar
+                </button>
+                <button type="button" class="danger-btn" (click)="removeException(i)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="exception-details" *ngIf="!ex.closed && ex.intervals.length > 0">
+              <span>Horarios:</span>
+              <div class="interval-tags">
+                <span class="interval-tag" *ngFor="let interval of ex.intervals">
+                  {{interval.open}} - {{interval.close}}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="no-exceptions" *ngIf="exceptions.length === 0">
+            <i class="bi bi-calendar-x"></i>
+            <p>No hay excepciones configuradas</p>
+          </div>
+        </div>
+
+        <div class="exception-add">
+          <button type="button" class="add-btn large" (click)="startNewException()">
+            <i class="bi bi-plus-circle"></i> Nueva Excepción
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Información de contacto -->

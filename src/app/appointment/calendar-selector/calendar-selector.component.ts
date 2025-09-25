@@ -7,7 +7,7 @@ import { ReservedSlotsService, ReservedSlot } from '../../services/reserved-slot
 import { AppointmentService } from '../../services/appointments.service';
 import { Subject, firstValueFrom } from 'rxjs';
 import { InfoManager } from '../../services/admin-panel/info-management.service';
-import { Barber, Service } from '../../admin-panel/types/admin.types';
+import { Barber, Service, ScheduleDay, ExceptionItem } from '../../admin-panel/types/admin.types';
 import { ChangeDetectorRef } from '@angular/core';
 import { AlertService } from '../../services/alert/alert.service';
 
@@ -47,8 +47,10 @@ export class CalendarSelectorComponent implements OnDestroy {
   availableHoursForSelectedDate: { value: string; disabled: boolean }[] = [];
   availableHoursByDate: Record<string, string[]> = {};
   bookedSlotsByDate: Record<string, string[]> = {};
-  availabilityData: any = null;
 
+  // Nuevos datos desde InfoManager
+  schedule: ScheduleDay[] = [];
+  exceptions: ExceptionItem[] = [];
   barbers: Barber[] = [];
   allowBarberSelection = false;
 
@@ -76,8 +78,11 @@ export class CalendarSelectorComponent implements OnDestroy {
 
   private async loadData() {
     try {
-      this.availabilityData = await this.infoManager.getAvailability();
+      // Cargar horario semanal y excepciones desde InfoManager
+      this.schedule = await this.infoManager.getSchedule();
+      this.exceptions = await this.infoManager.getExceptions();
 
+      // Cargar slots reservados
       const slots = await firstValueFrom(this.reservedSlotsService.getReservedSlotsFromNow());
       this.bookedSlotsByDate = {};
       (slots ?? []).forEach((slot: ReservedSlot) => {
@@ -88,11 +93,17 @@ export class CalendarSelectorComponent implements OnDestroy {
 
       await this.loadBarbers();
       this.computeAvailableHoursForCurrentMatrix();
+      
+      console.log('Datos cargados:', {
+        schedule: this.schedule,
+        exceptions: this.exceptions,
+        bookedSlots: this.bookedSlotsByDate
+      });
     } catch (error) {
-      console.error('Error cargando availability o reservas:', error);
+      console.error('Error cargando datos del calendario:', error);
+      this.toast.error('Error al cargar los datos del calendario');
     }
   }
-
 
   private async loadBarbers() {
     try {
@@ -110,7 +121,11 @@ export class CalendarSelectorComponent implements OnDestroy {
   }
 
   togglePicker() { this.showPicker = !this.showPicker; }
-  onDateChange() { this.showPicker = false; this.generateCalendar(); }
+  onDateChange() { 
+    this.showPicker = false; 
+    this.generateCalendar();
+    this.computeAvailableHoursForCurrentMatrix();
+  }
 
   generateCalendar() {
     this.calendarMatrix = [];
@@ -145,12 +160,6 @@ export class CalendarSelectorComponent implements OnDestroy {
     return !!date && !!this.selectedDate && date.getTime() === this.selectedDate.getTime();
   }
 
-  isDayFullyBooked(date: Date): boolean {
-    const dateKey = this.formatDate(date);
-    const available = this.availableHoursByDate[dateKey];
-    return available ? available.length === 0 : false;
-  }
-
   private getDayName(date: Date): string {
     const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
     return dias[date.getDay()];
@@ -158,26 +167,43 @@ export class CalendarSelectorComponent implements OnDestroy {
 
   isAvailable(date: Date | null): boolean {
     if (!date) return false;
-    const today = new Date(); today.setHours(0,0,0,0);
+    
+    // No permitir fechas pasadas
+    const today = new Date(); 
+    today.setHours(0,0,0,0);
     if (date < today) return false;
 
     const dateKey = this.formatDate(date);
-    const ex = this.availabilityData?.exceptions?.[dateKey];
-    if (ex) return !ex.closed;
+    
+    // Verificar si hay una excepción para esta fecha (PRIORIDAD)
+    const exception = this.exceptions.find(ex => ex.date === dateKey);
+    if (exception) {
+      // Si hay excepción, verificar si está cerrada o tiene horarios
+      return !exception.closed && exception.intervals.length > 0;
+    }
 
+    // Si no hay excepción, usar horario semanal normal
     const dayName = this.getDayName(date);
-    const ds = this.availabilityData?.defaultSchedule?.[dayName];
-    return !!(ds && !ds.closed);
+    const daySchedule = this.schedule.find(day => day.day === dayName);
+    
+    if (!daySchedule) return false;
+    
+    return !daySchedule.closed && daySchedule.intervals.length > 0;
   }
 
   selectDate(date: Date | null) {
     if (!date) return;
+    
+    if (!this.isAvailable(date)) {
+      this.toast.error('No hay horas disponibles para este día');
+      return;
+    }
+
     const dateKey = this.formatDate(date);
     const bookedHours = this.bookedSlotsByDate[dateKey] || [];
 
     console.log('--- Seleccionando fecha ---');
     console.log('Fecha:', dateKey);
-    console.log('Excepciones:', this.availabilityData?.exceptions?.[dateKey]);
     console.log('Reservas existentes:', bookedHours);
 
     const hoursWithStatus = this.getAvailableHoursForDate(date, bookedHours);
@@ -201,28 +227,26 @@ export class CalendarSelectorComponent implements OnDestroy {
 
   private getAvailableHoursForDate(date: Date, booked: string[]): { value: string; disabled: boolean }[] {
     const dateKey = this.formatDate(date);
-    const ex = this.availabilityData?.exceptions?.[dateKey];
-
+    
+    // Verificar si hay una excepción para esta fecha (PRIORIDAD)
+    const exception = this.exceptions.find(ex => ex.date === dateKey);
+    
     let hours: string[] = [];
 
-    if (ex) {
-      if (!ex.closed) {
-        let intervals: { open: string; close: string }[] = [];
-        if (Array.isArray(ex.intervals)) intervals = ex.intervals;
-        else if (Array.isArray(ex.hours)) intervals = ex.hours.map((h: string) => {
-          const [open, close] = h.split('-');
-          return { open: open || '', close: close || '' };
-        });
-
-        intervals.forEach((interval: { open: string; close: string }) => {
+    if (exception) {
+      // Usar horarios de la excepción
+      if (!exception.closed && exception.intervals) {
+        exception.intervals.forEach(interval => {
           hours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
         });
       }
     } else {
+      // Usar horario semanal normal
       const dayName = this.getDayName(date);
-      const ds = this.availabilityData?.defaultSchedule?.[dayName];
-      if (ds && !ds.closed && Array.isArray(ds.intervals)) {
-        ds.intervals.forEach((interval: { open: string; close: string }) => {
+      const daySchedule = this.schedule.find(day => day.day === dayName);
+      
+      if (daySchedule && !daySchedule.closed && daySchedule.intervals) {
+        daySchedule.intervals.forEach(interval => {
           hours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
         });
       }
@@ -252,43 +276,73 @@ export class CalendarSelectorComponent implements OnDestroy {
   }
 
   prevMonth() {
-    if (this.selectedMonth === 0) { this.selectedMonth = 11; this.selectedYear--; }
-    else this.selectedMonth--;
+    if (this.selectedMonth === 0) { 
+      this.selectedMonth = 11; 
+      this.selectedYear--; 
+    } else {
+      this.selectedMonth--;
+    }
     this.onDateChange();
   }
 
   nextMonth() {
-    if (this.selectedMonth === 11) { this.selectedMonth = 0; this.selectedYear++; }
-    else this.selectedMonth++;
+    if (this.selectedMonth === 11) { 
+      this.selectedMonth = 0; 
+      this.selectedYear++; 
+    } else {
+      this.selectedMonth++;
+    }
     this.onDateChange();
   }
 
-  backToCalendar() { this.showHours = false; this.showForm = false; this.selectedDate = null; this.selectedHour = null; }
-  onHourSelected(hour: string) { this.selectedHour = hour; this.showHours = false; this.showForm = true; }
+  backToCalendar() { 
+    this.showHours = false; 
+    this.showForm = false; 
+    this.selectedDate = null; 
+    this.selectedHour = null; 
+  }
+
+  onHourSelected(hour: string) { 
+    this.selectedHour = hour; 
+    this.showHours = false; 
+    this.showForm = true; 
+  }
 
   async handleFormSubmit(data: { name: string; email: string; phone: string; description?: string; barber?:string, service:Service}) {
-    if (!this.selectedDate || !this.selectedHour) { this.toast.error('Error: Fecha u hora no seleccionada'); return; }
+    if (!this.selectedDate || !this.selectedHour) { 
+      this.toast.error('Error: Fecha u hora no seleccionada'); 
+      return; 
+    }
     if (this.isSubmitting) return;
 
     const bookingData = { date: this.selectedDateString, time: this.selectedHour, ...data };
     this.isSubmitting = true;
     try {
       await this.appointmentService.addAppointment(bookingData);
-      this.toast.success('Cita guardada correctamente 👌');
+      this.toast.success('Cita guardada correctamente 💌');
       this.resetAll();
       this.loadData();
     } catch (error: any) {
       console.error('Error guardando la cita:', error);
       this.toast.error('Error al guardar la cita: ' + (error.message || JSON.stringify(error)));
-    } finally { this.isSubmitting = false; }
+    } finally { 
+      this.isSubmitting = false; 
+    }
   }
 
-  resetAll() { this.selectedDate = null; this.selectedHour = null; this.showForm = false; this.showHours = false; }
-  get selectedDateString(): string { return this.selectedDate ? this.formatDate(this.selectedDate) : ''; }
+  resetAll() { 
+    this.selectedDate = null; 
+    this.selectedHour = null; 
+    this.showForm = false; 
+    this.showHours = false; 
+  }
+
+  get selectedDateString(): string { 
+    return this.selectedDate ? this.formatDate(this.selectedDate) : ''; 
+  }
 
   private computeAvailableHoursForCurrentMatrix() {
     this.availableHoursByDate = {};
-    if (!this.availabilityData) return;
     for (const week of this.calendarMatrix) {
       for (const d of week) {
         if (!d) continue;

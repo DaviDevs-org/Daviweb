@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AvailabilityData, Barber, ContactInfo, ExceptionItem, Interval, ScheduleDay } from '../../types/admin.types';
+import { Barber, ContactInfo, ExceptionItem, Interval, ScheduleDay } from '../../types/admin.types';
 import { InfoManager } from '../../../services/admin-panel/info-management.service';
 import { ElementRef, ViewChild, inject, signal } from '@angular/core';
 import { percentage } from '@angular/fire/storage';
@@ -20,6 +20,12 @@ export class InfoManagementComponent implements OnInit {
   schedule: ScheduleDay[] = [];
   contactInfo: ContactInfo = { phone: '', email: '', address: '' };
   exceptions: ExceptionItem[] = [];
+  currentExceptionStep: 'date' | 'type' | 'hours' | 'complete' = 'complete';
+  tempException: Partial<ExceptionItem> | null = null;
+  exceptionTypes = [
+    { value: 'closed', label: 'Cerrar todo el día', icon: 'bi bi-x-circle' },
+    { value: 'custom', label: 'Horario especial', icon: 'bi bi-clock' }
+  ];
 
   barberSettings: any = { settings: { barberSelection: false, staff: [] }, barberSelection: false, staff: [] };
   @ViewChild('barberFileInput') barberFileInput!: ElementRef<HTMLInputElement>;
@@ -41,17 +47,16 @@ export class InfoManagementComponent implements OnInit {
   async ngOnInit() {
     try {
       this.contactInfo = await this.infoManager.getContactInfo();
-      const availability = await this.infoManager.getAvailability();
+      this.schedule = await this.infoManager.getSchedule();
+      this.exceptions = await this.infoManager.getExceptions();
+      await this.loadBarberSettings();
 
-      if (availability?.defaultSchedule) this.applyDefaultScheduleToLocal(availability.defaultSchedule);
-      this.exceptions = this.mapExceptionsToArray(availability?.exceptions || {});
     } catch (error) {
       console.error('Error loading data:', error);
+      this.toast.error('Error al cargar la información');
     } finally {
       this.isLoading = false;
     }
-
-    await this.loadBarberSettings();
   }
 
   // ===== HORARIOS SEMANALES =====
@@ -79,90 +84,248 @@ export class InfoManagementComponent implements OnInit {
     return out;
   }
 
-  // ===== EXCEPCIONES POR FECHA =====
-  mapExceptionsToArray(obj: Record<string, any>): ExceptionItem[] {
-    return Object.keys(obj).sort().map(dateKey => {
-      const item = obj[dateKey];
-      let intervals: Interval[] = [];
-      if (!item.closed && Array.isArray(item.hours) && item.hours.length) {
-        intervals = item.hours.map((h: string) => {
-          const [open, close] = h.split('-');
-          return { open: open || '', close: close || '' };
-        });
+  // ===== EXCEPCIONES =====
+  startNewException() {
+    this.tempException = {
+      closed: false,
+      intervals: [{ open: '09:00', close: '14:00' }],
+      exceptionType: undefined
+    };
+    this.currentExceptionStep = 'date';
+  }
+
+  validateExceptionDate(): boolean {
+    if (!this.tempException?.date) {
+      this.toast.error('Por favor, selecciona una fecha');
+      return false;
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(this.tempException.date)) {
+      this.toast.error('Formato de fecha inválido. Use YYYY-MM-DD.');
+      return false;
+    }
+
+    // Verificar duplicados
+    const existing = this.exceptions.find(ex => ex.date === this.tempException!.date);
+    if (existing) {
+      this.toast.error('Ya existe una excepción para esta fecha');
+      return false;
+    }
+
+    return true;
+  }
+
+  selectExceptionType(type: string) {
+    if (!this.tempException) return;
+
+    // Validar tipo
+    if (type !== 'closed' && type !== 'custom') {
+      console.error('Tipo de excepción no válido:', type);
+      return;
+    }
+
+    const validType = type as 'closed' | 'custom';
+
+    this.tempException.exceptionType = validType;
+    this.tempException.closed = validType === 'closed';
+
+    if (validType === 'closed') {
+      this.tempException.intervals = [];
+      // No llamar finishException automáticamente, dejar que el usuario confirme
+      this.currentExceptionStep = 'hours'; // Ir al paso final para confirmar
+    } else {
+      this.currentExceptionStep = 'hours';
+      // Asegurar que hay al menos un intervalo
+      if (!this.tempException.intervals || this.tempException.intervals.length === 0) {
+        this.tempException.intervals = [{ open: '09:00', close: '14:00' }];
       }
-      return { date: dateKey, closed: !!item.closed, intervals } as ExceptionItem;
+    }
+  }
+
+  addExInterval() {
+    if (!this.tempException?.intervals) return;
+
+    const newInterval = { open: '09:00', close: '14:00' };
+    this.tempException.intervals.push(newInterval);
+
+    // Validar automáticamente el nuevo intervalo
+    setTimeout(() => {
+      this.validateExInterval(newInterval, this.tempException!.intervals!.length - 1);
     });
   }
 
-  addEmptyException() { this.exceptions.push({ date: null, closed: false, intervals: [{ open: '', close: '' }] }); }
-
-  async removeException(i: number) {
-    if (await !this.toast.confirm('¿Seguro que desea eliminar esta excepción?')) return;
-
-    const backup = [...this.exceptions];
-    this.exceptions.splice(i, 1);
-
-    try {
-      await this.saveAvailability(false);
-    } catch (err) {
-      this.exceptions = backup;
-      this.toast.error('Error al eliminar la excepción en el servidor. Se ha restaurado el estado anterior.');
-    }
-  }
-
-  onExceptionToggleClosed(ex: ExceptionItem) {
-    if (ex.closed) ex.intervals = [];
-    else if (!ex.intervals.length) ex.intervals.push({ open: '', close: '' });
-    void this.saveAvailability(false);
-  }
-
-  addExInterval(ex: ExceptionItem) {
-    ex.intervals.push({ open: '', close: '' });
-    void this.saveAvailability(false);
-  }
-
-  removeExInterval(ex: ExceptionItem, i: number) {
-    ex.intervals.splice(i, 1);
-    void this.saveAvailability(false);
-  }
-
-  validateExInterval(ex: ExceptionItem, interval: Interval) {
-    if (!ex.closed && interval.open && interval.close && interval.open >= interval.close) interval.close = '';
-    void this.saveAvailability(false);
-  }
-
-  onExceptionDateChange(ex: ExceptionItem) {
-    if (ex.date && !/^\d{4}-\d{2}-\d{2}$/.test(ex.date)) {
-      this.toast.error('Formato de fecha inválido. Use YYYY-MM-DD.');
+  removeExInterval(index: number) {
+    if (!this.tempException?.intervals || this.tempException.intervals.length <= 1) {
+      this.toast.error('Debe haber al menos un intervalo de horario');
       return;
     }
-    if (ex.date) void this.saveAvailability(false);
+
+    this.tempException.intervals.splice(index, 1);
   }
 
-  transformExceptionsToObject(): Record<string, any> {
-    const out: Record<string, any> = {};
-    for (const ex of this.exceptions) {
-      if (!ex.date) continue;
-      out[ex.date] = ex.closed ? { closed: true, hours: [] } : { closed: false, hours: ex.intervals.map(i => `${i.open}-${i.close}`) };
+  validateExInterval(interval: Interval, index?: number) {
+    // Validar que la hora de cierre sea posterior
+    if (interval.open && interval.close && interval.open >= interval.close) {
+      this.toast.error('La hora de cierre debe ser posterior a la de apertura');
+      interval.close = '';
+      return false;
     }
-    return out;
+
+    // Validar superposición solo si tenemos todos los datos y hay más de un intervalo
+    if (this.tempException?.intervals && this.tempException.intervals.length > 1 &&
+      interval.open && interval.close) {
+      const hasOverlap = this.checkIntervalOverlap(interval, index);
+      if (hasOverlap) {
+        this.toast.error('Los horarios no pueden superponerse');
+        return false;
+      }
+    }
+
+    return true;
   }
+  private checkIntervalOverlap(interval: Interval, currentIndex?: number): boolean {
+    if (!this.tempException?.intervals) return false;
+
+    for (let i = 0; i < this.tempException.intervals.length; i++) {
+      // Saltar el intervalo actual si estamos editando
+      if (currentIndex !== undefined && i === currentIndex) continue;
+
+      const otherInterval = this.tempException.intervals[i];
+
+      // Solo validar si ambos intervalos tienen horas válidas
+      if (otherInterval.open && otherInterval.close && interval.open && interval.close) {
+        // Verificar superposición
+        const startsDuringOther = interval.open >= otherInterval.open && interval.open < otherInterval.close;
+        const endsDuringOther = interval.close > otherInterval.open && interval.close <= otherInterval.close;
+        const coversOther = interval.open <= otherInterval.open && interval.close >= otherInterval.close;
+
+        if (startsDuringOther || endsDuringOther || coversOther) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  async finishException() {
+    if (!this.tempException?.date || !this.tempException.exceptionType) {
+      this.toast.error('Completa todos los campos obligatorios');
+      return;
+    }
+
+    // Validaciones para tipo custom
+    if (this.tempException.exceptionType === 'custom') {
+      // Verificar que hay al menos un intervalo
+      if (!this.tempException.intervals || this.tempException.intervals.length === 0) {
+        this.toast.error('Debe añadir al menos un intervalo horario');
+        return;
+      }
+
+      // Verificar que todos los intervalos sean válidos
+      const invalidInterval = this.tempException.intervals.find(i => !i.open || !i.close || i.open >= i.close);
+      if (invalidInterval) {
+        this.toast.error('Revisa los horarios: todos deben tener apertura y cierre válidos');
+        return;
+      }
+
+      // Verificar superposiciones entre intervalos
+      for (let i = 0; i < this.tempException.intervals.length; i++) {
+        if (this.checkIntervalOverlap(this.tempException.intervals[i], i)) {
+          this.toast.error('Hay horarios que se superponen. Corrígelos antes de guardar.');
+          return;
+        }
+      }
+    }
+
+    const finalException: ExceptionItem = {
+      date: this.tempException.date,
+      closed: !!this.tempException.closed,
+      intervals: this.tempException.intervals ? [...this.tempException.intervals] : [],
+      exceptionType: this.tempException.exceptionType
+    };
+
+    this.exceptions.push(finalException);
+    this.exceptions.sort((a, b) => a.date.localeCompare(b.date));
+
+    try {
+      await this.infoManager.saveExceptions(this.exceptions);
+      this.cancelException();
+      this.toast.success('Excepción guardada correctamente');
+    } catch (error) {
+      // Revertir en caso de error
+      this.exceptions = this.exceptions.filter(ex => ex.date !== finalException.date);
+      this.toast.error('Error al guardar la excepción');
+    }
+  }
+
+  cancelException() {
+    // Si estábamos editando una excepción (tempException tiene fecha pero no está en la lista), restaurarla
+    if (this.tempException?.date) {
+      const exists = this.exceptions.find(ex => ex.date === this.tempException!.date);
+      if (!exists) {
+        // Restaurar la excepción original
+        const exceptionToRestore: ExceptionItem = {
+          date: this.tempException.date,
+          closed: !!this.tempException.closed,
+          intervals: this.tempException.intervals || [],
+          exceptionType: this.tempException.exceptionType!
+        };
+        this.exceptions.push(exceptionToRestore);
+        this.exceptions.sort((a, b) => a.date.localeCompare(b.date));
+      }
+    }
+
+    this.tempException = null;
+    this.currentExceptionStep = 'complete';
+  }
+
+  async editException(index: number) {
+    // Guardar la excepción original para poder restaurarla si se cancela
+    const originalException = { ...this.exceptions[index] };
+
+    this.tempException = {
+      ...originalException
+    };
+
+    // Remover temporalmente de la lista
+    this.exceptions.splice(index, 1);
+    this.currentExceptionStep = 'hours';
+  }
+
+  async removeException(index: number) {
+    if (!await this.toast.confirm('¿Seguro que desea eliminar esta excepción?')) return;
+
+    const backup = [...this.exceptions];
+    this.exceptions.splice(index, 1);
+
+    try {
+      await this.infoManager.saveExceptions(this.exceptions);
+      this.toast.success('Excepción eliminada correctamente');
+    } catch (err) {
+      this.exceptions = backup;
+      this.toast.error('Error al eliminar la excepción');
+    }
+  }
+
+  // Navegación entre pasos
+  nextStep() {
+    if (this.currentExceptionStep === 'date' && this.validateExceptionDate()) {
+      this.currentExceptionStep = 'type';
+    }
+  }
+
+  prevStep() {
+    if (this.currentExceptionStep === 'type') {
+      this.currentExceptionStep = 'date';
+    } else if (this.currentExceptionStep === 'hours') {
+      this.currentExceptionStep = 'type';
+    }
+  }
+
 
   // ===== GUARDADO =====
-  async saveAvailability(showAlert: boolean = true): Promise<void> {
-    try {
-      const payload: AvailabilityData = {
-        defaultSchedule: this.transformScheduleToDefault(),
-        exceptions: this.transformExceptionsToObject()
-      };
-      await this.infoManager.saveAvailability(payload);
-      if (showAlert) this.toast.success('Disponibilidad guardada correctamente!');
-    } catch (err) {
-      console.error(err);
-      if (showAlert) this.toast.success('❌ Error al guardar la disponibilidad');
-      else throw err;
-    }
-  }
+
 
   async saveContactInfo(): Promise<void> {
     try {
@@ -171,6 +334,12 @@ export class InfoManagementComponent implements OnInit {
     } catch (err) { console.error(err); this.toast.error('Error al guardar la información de contacto'); }
   }
 
+  async saveSchedule(): Promise<void> {
+    try {
+      await this.infoManager.saveSchedule(this.schedule);
+      this.toast.success('Horario semanal guardado correctamente!');
+    } catch (err) { console.error(err); this.toast.error('Error al guardar el horario semanal'); }
+  }
   getDayStatus(day: ScheduleDay): string { if (day.closed) return 'Cerrado'; return day.intervals.map(i => `${i.open}-${i.close}`).join(', '); }
 
   // ===== BARBER SETTINGS =====
