@@ -3,28 +3,61 @@
 @use "styles/variables.scss";
 
 .admin-container {
-  min-height: 100vh;
+  height: 100vh; // Cambiar de min-height a height fijo
   background: linear-gradient(135deg, variables.$background-gold 0%, variables.$light-gold 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; // Prevenir scroll global
 }
 
 .admin-content {
+  flex: 1; // Ocupar el espacio restante
   max-width: 1200px;
   margin: 0 auto;
   padding: 30px 20px;
+  overflow-y: auto; // Solo el contenido principal hace scroll
+  overflow-x: hidden;
 
   @include responsive.mobile {
     padding: 20px 15px;
+  }
+
+  // Ocultar scrollbar pero mantener funcionalidad
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(variables.$primary-gold, 0.1);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(variables.$primary-gold, 0.3);
+    border-radius: 4px;
+
+    &:hover {
+      background: rgba(variables.$primary-gold, 0.5);
+    }
   }
 }
 
 .content-section {
   animation: fadeIn 0.5s ease-in-out;
+  min-height: 100%; // Asegurar que ocupe todo el espacio disponible
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .section-header {

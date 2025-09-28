@@ -7,7 +7,7 @@ import { percentage } from '@angular/fire/storage';
 import { Subscription } from 'rxjs';
 import { ServiceManager } from '../../../services/admin-panel/services-management.service';
 import { GalleryService } from '../../../services/admin-panel/gallery-management.service';
-import { Service, NewService } from '../../types/admin.types';
+import { Service, NewService, TimeSegment } from '../../types/admin.types';
 import { AlertService } from '../../../services/alert/alert.service';
 
 @Component({
@@ -32,12 +32,13 @@ export class ServicesManagementComponent implements OnDestroy {
   uploadProgress = signal('0%');
   isUploading: boolean = false;
   uploadSubscription: Subscription | undefined = undefined;
+  hasBreaks: boolean = false;
 
   newService: NewService = {
     name: '',
     price: 0,
     description: '',
-    time: 0
+    timeSegments: [{ duration: 30, breakAfter: 0 }] // Inicializar con un segmento
   };
 
   ngOnInit() {
@@ -155,9 +156,9 @@ export class ServicesManagementComponent implements OnDestroy {
       this.toast.error('Por favor, ingresa un precio válido.');
       return;
     }
-
-    if (this.newService.time <= 0) {
-      this.toast.error('Por favor, ingresa un tiempo válido.');
+    const hasValidSegment = this.newService.timeSegments.some(segment => segment.duration > 0);
+    if (!hasValidSegment) {
+      this.toast.error('Por favor, ingresa al menos un segmento de tiempo válido.');
       return;
     }
 
@@ -173,7 +174,7 @@ export class ServicesManagementComponent implements OnDestroy {
       const serviceNew = new Service(
         this.newService.name,
         this.newService.description,
-        this.newService.time,
+        this.newService.timeSegments,
         this.newService.price,
         imageUrl!
       );
@@ -186,7 +187,7 @@ export class ServicesManagementComponent implements OnDestroy {
         name: '',
         price: 0,
         description: '',
-        time: 0
+        timeSegments: [{ duration: 0, breakAfter: 0 }]
       };
 
       this.clearFileSelection();
@@ -216,7 +217,7 @@ export class ServicesManagementComponent implements OnDestroy {
       'Nuevo precio (€):',
       'Ej: 25.50'
     );
-    if (newPriceStr === null){
+    if (newPriceStr === null) {
       this.toast.error('Por favor, introduzca un precio válido');
       return;
     }
@@ -228,27 +229,43 @@ export class ServicesManagementComponent implements OnDestroy {
       return;
     }
 
-    const newTimeStr = await this.toast.promptNumber(
-      'Nuevo tiempo (min):',
-      'Ej: 30'
-    );
-    if (newTimeStr === null){
-      this.toast.error('Por favor, introduzca un precio válido');
-      return;
-    }
-    if (newTimeStr == false) return;
+    const timeSegments: TimeSegment[] = [];
+    let addMoreSegments = true;
+    while (addMoreSegments) {
+      const durationStr = await this.toast.promptNumber(
+        `Duración del segmento ${timeSegments.length + 1} (min):`,
+        'Ej: 30'
+      );
+      if (durationStr === null || durationStr === false) break;
+      const duration = parseInt(durationStr);
+      if (isNaN(duration) || duration <= 0) {
+        this.toast.error('Por favor, ingresa una duración válida.');
+        break;
+      }
 
-    const newTime = parseFloat(newTimeStr);
-    if (isNaN(newTime) || newTime <= 0) {
-      this.toast.error('Por favor, ingresa un tiempo estimado válido.');
+      const breakAfterStr = await this.toast.promptNumber(
+        `Tiempo de pausa después de este segmento (min, 0 si no hay pausa):`,
+        'Ej: 15'
+      );
+      if (breakAfterStr === null || breakAfterStr === false) break;
+
+      const breakAfter = parseInt(breakAfterStr) || 0;
+
+      timeSegments.push({ duration, breakAfter });
+
+      addMoreSegments = await this.toast.confirm('¿Quieres añadir otro segmento de tiempo?');
+    }
+    if (timeSegments.length === 0) {
+      this.toast.error('El servicio debe tener al menos un segmento de tiempo.');
       return;
     }
+
 
     const newDescription = await this.toast.prompt(
       'Nueva descripción:',
       'Descripción del servicio...'
     );
-    if (newDescription === null){
+    if (newDescription === null) {
       this.toast.error('Por favor, introduzca un precio válido');
       return;
     }
@@ -257,7 +274,7 @@ export class ServicesManagementComponent implements OnDestroy {
     const updatedService = new Service(
       newName,
       newDescription,
-      newTime,
+      timeSegments,
       newPrice,
       serviceU.imageUrl!
     );
@@ -275,6 +292,30 @@ export class ServicesManagementComponent implements OnDestroy {
     }
   }
 
+
+  addTimeSegment() {
+    if (this.hasBreaks) {
+      this.newService.timeSegments.push({ duration: 30, breakAfter: 0 });
+    } else {
+      // Si no tiene breaks, simplemente aumentar la duración del único segmento
+      this.newService.timeSegments[0].duration += 30;
+    }
+  }
+
+  // Modificar removeTimeSegment
+  removeTimeSegment(index: number) {
+    if (this.hasBreaks) {
+      if (this.newService.timeSegments.length > 1) {
+        this.newService.timeSegments.splice(index, 1);
+      }
+    } else {
+      // Si no tiene breaks, reducir la duración pero mantener mínimo 15min
+      if (this.newService.timeSegments[0].duration > 15) {
+        this.newService.timeSegments[0].duration -= 15;
+      }
+    }
+  }
+
   ngOnDestroy() {
     // Limpiar la URL de previsualización al destruir el componente
     if (this.imagePreviewUrl) {
@@ -284,6 +325,32 @@ export class ServicesManagementComponent implements OnDestroy {
     // Limpiar suscripción si existe
     if (this.uploadSubscription) {
       this.uploadSubscription.unsubscribe();
+    }
+  }
+  getTotalTime(segments: TimeSegment[]): number {
+    return segments.reduce((total, segment) =>
+      total + segment.duration + (segment.breakAfter || 0), 0);
+  }
+
+  getActiveTime(segments: TimeSegment[]): number {
+    return segments.reduce((total, segment) => total + segment.duration, 0);
+  }
+
+  getBreakTime(segments: TimeSegment[]): number {
+    return segments.reduce((total, segment) => total + (segment.breakAfter || 0), 0);
+  }
+
+  toggleBreaks() {
+    this.hasBreaks = !this.hasBreaks;
+    
+    if (this.hasBreaks) {
+      // Si activa breaks, asegurar que hay al menos 2 segmentos
+      if (this.newService.timeSegments.length === 1) {
+        this.newService.timeSegments.push({ duration: 30, breakAfter: 0 });
+      }
+    } else {
+      // Si desactiva breaks, eliminar todos los breaks y dejar solo un segmento
+      this.newService.timeSegments = [{ duration: this.newService.timeSegments[0].duration, breakAfter: 0 }];
     }
   }
 }

@@ -93,23 +93,27 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     });
   }
 
-  // Método para actualizar slots ocupados de un día específico
   private updateBookedSlotsForDay(dateKey: string, appointments: Appointment[]) {
     const bookedSlots: string[] = [];
 
     appointments.forEach(appointment => {
       if (!appointment.timeNormalized || appointment.timeNormalized === '—') return;
 
-      const startMinutes = this.timeToMinutes(appointment.timeNormalized);
-      const duration = appointment.service?.time || 30;
+      const timeSegments = this.getAppointmentTimeSegments(appointment);
 
-      // Generar todos los slots de 30 minutos que ocupa esta cita
-      for (let minutes = startMinutes; minutes < startMinutes + duration; minutes += 30) {
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        const timeSlot = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-        bookedSlots.push(timeSlot);
-      }
+      timeSegments.forEach(segment => {
+        // Generar todos los slots de 30 minutos que ocupa este segmento
+        for (let minutes = segment.start; minutes < segment.start + segment.duration; minutes += 30) {
+          const hours = Math.floor(minutes / 60);
+          const mins = minutes % 60;
+          const timeSlot = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+
+          // Solo marcar como ocupados los slots activos (no los breaks)
+          if (segment.type === 'active') {
+            bookedSlots.push(timeSlot);
+          }
+        }
+      });
     });
 
     this.bookedSlotsByDate[dateKey] = bookedSlots;
@@ -138,10 +142,10 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
   private getAvailableHoursForDate(date: Date, booked: string[]): string[] {
     const dateKey = this.toISODate(date);
-    
+
     // Verificar si hay una excepción para esta fecha (PRIORIDAD)
     const exception = this.exceptions.find(ex => ex.date === dateKey);
-    
+
     let hours: string[] = [];
 
     if (exception) {
@@ -155,7 +159,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       // Usar horario semanal normal
       const dayName = this.getDayName(date);
       const daySchedule = this.schedule.find(day => day.day === dayName);
-      
+
       if (daySchedule && !daySchedule.closed && daySchedule.intervals) {
         daySchedule.intervals.forEach(interval => {
           hours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
@@ -211,7 +215,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       this.generateHoursForSelectedDate(); // Regenerar horas con los datos cargados
 
       await this.loadBarbers();
-      
+
       console.log('Datos cargados en appointment-management:', {
         schedule: this.schedule,
         exceptions: this.exceptions
@@ -255,38 +259,128 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     }
   }
 
+  // NUEVA LÓGICA: Verificar si un servicio puede ser programado en un horario específico
+  canScheduleService(date: Date, time: string, service: Service | null, excludeAppointmentId?: string): boolean {
+    if (!service || !service.timeSegments) return true;
+
+    const dateKey = this.toISODate(date);
+    const startMinutes = this.timeToMinutes(time);
+    
+    // Calcular todos los slots que ocupará el servicio
+    const serviceSlots: number[] = [];
+    let currentTime = startMinutes;
+    
+    service.timeSegments.forEach((segment, index) => {
+      // Slots del servicio activo
+      for (let i = 0; i < segment.duration; i += 30) {
+        serviceSlots.push(currentTime + i);
+      }
+      currentTime += segment.duration;
+      
+      // Slots del break (si existe y no es el último segmento)
+      if (segment.breakAfter && segment.breakAfter > 0 && index < service.timeSegments.length - 1) {
+        for (let i = 0; i < segment.breakAfter; i += 30) {
+          serviceSlots.push(currentTime + i);
+        }
+        currentTime += segment.breakAfter;
+      }
+    });
+
+    // Verificar que no se sobreponga con horarios de cierre
+    const endTime = Math.max(...serviceSlots) + 30; // +30 porque cada slot es de 30 min
+    if (!this.isTimeWithinSchedule(date, endTime)) {
+      return false;
+    }
+
+    // Verificar que no se sobreponga con otras citas
+    const dayAppointments = this.getAppointmentsForDate(dateKey, excludeAppointmentId);
+    
+    for (const appointment of dayAppointments) {
+      if (!appointment.timeNormalized) continue;
+      
+      const appointmentSegments = this.getAppointmentTimeSegments(appointment);
+      const occupiedSlots: number[] = [];
+      
+      appointmentSegments.forEach(segment => {
+        for (let i = 0; i < segment.duration; i += 30) {
+          occupiedSlots.push(segment.start + i);
+        }
+      });
+      
+      // Verificar solapamiento
+      const hasOverlap = serviceSlots.some(slot => occupiedSlots.includes(slot));
+      if (hasOverlap) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private isTimeWithinSchedule(date: Date, endTimeMinutes: number): boolean {
+    const dateKey = this.toISODate(date);
+    const exception = this.exceptions.find(ex => ex.date === dateKey);
+    
+    let intervals: {open: string, close: string}[] = [];
+    
+    if (exception) {
+      if (exception.closed) return false;
+      intervals = exception.intervals || [];
+    } else {
+      const dayName = this.getDayName(date);
+      const daySchedule = this.schedule.find(day => day.day === dayName);
+      if (!daySchedule || daySchedule.closed) return false;
+      intervals = daySchedule.intervals || [];
+    }
+    
+    // Verificar que el tiempo final esté dentro de algún intervalo
+    return intervals.some(interval => {
+      const closeMinutes = this.timeToMinutes(interval.close);
+      return endTimeMinutes <= closeMinutes;
+    });
+  }
+
+  private getAppointmentsForDate(dateKey: string, excludeId?: string): Appointment[] {
+    let appointments: Appointment[] = [];
+    this.appointments$.pipe(take(1)).subscribe(appts => {
+      appointments = appts.filter(a => 
+        a.dateISO === dateKey && 
+        (excludeId ? a.id !== excludeId : true)
+      );
+    });
+    return appointments;
+  }
+
   // Método mejorado para determinar si una hora está disponible
   isHourAvailable(hour: string): boolean {
-    if (!this.schedule || this.schedule.length === 0) return true; // Si no hay datos, asumir disponible
+    if (!this.schedule || this.schedule.length === 0) return true;
 
     const selectedDate = this.selectedDate$.value;
     const dateKey = this.toISODate(selectedDate);
 
-    // Verificar si el slot ya está ocupado por una cita
+    // Verificar si el slot ya está ocupado por una cita activa
     const bookedSlots = this.bookedSlotsByDate[dateKey] || [];
-    if (bookedSlots.includes(hour)) return false;
+    if (bookedSlots.includes(hour)) {
+      return false;
+    }
 
     // Verificar si hay una excepción para esta fecha (PRIORIDAD)
     const exception = this.exceptions.find(ex => ex.date === dateKey);
-    
+
     let availableHours: string[] = [];
 
     if (exception) {
-      // Si hay excepción, verificar si está cerrada o tiene horarios
       if (exception.closed) return false;
-
       if (exception.intervals) {
         exception.intervals.forEach(interval => {
           availableHours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
         });
       }
     } else {
-      // Si no hay excepción, usar horario semanal normal
       const dayName = this.getDayName(selectedDate);
       const daySchedule = this.schedule.find(day => day.day === dayName);
-      
-      if (!daySchedule || daySchedule.closed) return false;
 
+      if (!daySchedule || daySchedule.closed) return false;
       if (daySchedule.intervals) {
         daySchedule.intervals.forEach(interval => {
           availableHours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
@@ -297,48 +391,38 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     return availableHours.includes(hour);
   }
 
-  // Métodos helper para multi-slot
-  // Verifica si es el slot principal (primer slot) de una cita
-  isMainAppointmentSlot(dayList: Appointment[], hour: string, appointment: Appointment): boolean {
-    if (!appointment.timeNormalized) return false;
-
-    const appointmentStartTime = appointment.timeNormalized;
-    const currentSlotTime = hour.substring(0, 5);
-
-    return appointmentStartTime === currentSlotTime;
-  }
-
   // Verifica si es un slot de continuación de una cita
   isAppointmentContinuation(dayList: Appointment[], hour: string): boolean {
     const appointment = this.findReservation(dayList, hour);
     return appointment ? !this.isMainAppointmentSlot(dayList, hour, appointment) : false;
   }
 
-  // Verifica si es el primer slot de una cita
+  // Método para verificar si es el inicio de un segmento activo
   isAppointmentStart(dayList: Appointment[], hour: string): boolean {
     const appointment = this.findReservation(dayList, hour);
-    return appointment ? this.isMainAppointmentSlot(dayList, hour, appointment) : false;
+    return appointment ? this.getSlotType(dayList, hour, appointment) === 'start' : false;
   }
 
-  // Verifica si es el último slot de una cita
+  // Método para verificar si es el final de la cita
   isAppointmentEnd(dayList: Appointment[], hour: string): boolean {
     const appointment = this.findReservation(dayList, hour);
-    if (!appointment || !appointment.timeNormalized) return false;
-
-    const serviceDuration = appointment.service?.time || 30;
-    const appointmentStartMinutes = this.timeToMinutes(appointment.timeNormalized);
-    const currentSlotMinutes = this.timeToMinutes(hour.substring(0, 5));
-    const appointmentEndMinutes = appointmentStartMinutes + serviceDuration;
-
-    // Es el último slot si el siguiente slot ya no pertenece a la cita
-    const nextSlotMinutes = currentSlotMinutes + 30;
-    return nextSlotMinutes >= appointmentEndMinutes;
+    return appointment ? this.getSlotType(dayList, hour, appointment) === 'end' : false;
+  }
+  
+  isBreakSlot(dayList: Appointment[], hour: string): boolean {
+    return this.findBreakSlot(dayList, hour) !== undefined;
   }
 
   // Obtiene el número de slots que ocupa una cita
   getAppointmentSlotCount(appointment: Appointment): number {
-    const duration = appointment.service?.time || 30;
-    return Math.ceil(duration / 30);
+    const timeSegments = this.getAppointmentTimeSegments(appointment);
+    let totalSlots = 0;
+
+    timeSegments.forEach(segment => {
+      totalSlots += Math.ceil(segment.duration / 30);
+    });
+
+    return totalSlots;
   }
 
   // Verifica si una cita es de múltiples slots
@@ -384,9 +468,30 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     this.editedAppointment = null;
   }
 
+  // Validar servicio antes de guardar
+  validateServiceScheduling(): boolean {
+    const formData = this.editForm.value;
+    if (!formData.serviceId || !formData.date || !formData.time) return true;
+
+    const service = this.services.find(s => s.name === formData.serviceId);
+    const date = new Date(formData.date);
+    const excludeId = this.isEditing && this.editedAppointment ? this.editedAppointment.id : undefined;
+
+    if (!this.canScheduleService(date, formData.time, service ?? null, excludeId)) {
+      this.toast.error('El servicio seleccionado no se puede programar en este horario. Verifique disponibilidad y horarios de cierre.');
+      return false;
+    }
+
+    return true;
+  }
+
   async saveEdit() {
     if (this.editForm.invalid) {
       this.editForm.markAllAsTouched();
+      return;
+    }
+
+    if (!this.validateServiceScheduling()) {
       return;
     }
 
@@ -592,7 +697,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     if (!this.schedule || this.schedule.length === 0) return true; // Si no hay datos, asumir disponible
 
     const dateKey = this.toISODate(date);
-    
+
     // Verificar si hay una excepción para esta fecha (PRIORIDAD)
     const exception = this.exceptions.find(ex => ex.date === dateKey);
 
@@ -622,27 +727,16 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   private scrollToAppointment(timeNormalized: string) {
     if (!this.calendarBody || !this.calendarBody.nativeElement) return;
 
-    if (this.scrollTimeout) {
-      clearTimeout(this.scrollTimeout);
-    }
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
 
     this.scrollTimeout = setTimeout(() => {
-      if (!this.calendarBody || !this.calendarBody.nativeElement) {
-        return;
-      }
+      if (!this.calendarBody?.nativeElement) return;
 
       const hourToFind = this.extractHourFromTime(timeNormalized);
-      const hourElement = this.calendarBody.nativeElement.querySelector(
-        `[data-hour="${hourToFind}"]`
-      ) as HTMLElement;
+      const hourElement = this.calendarBody.nativeElement.querySelector(`[data-hour="${hourToFind}"]`) as HTMLElement;
 
       if (hourElement) {
-        hourElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'nearest'
-        });
-
+        hourElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
         this.highlightAppointment(hourElement);
       }
     }, 100);
@@ -652,9 +746,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const reservation = element.querySelector('.reservation') as HTMLElement;
     if (reservation) {
       reservation.classList.add('highlighted');
-      setTimeout(() => {
-        reservation.classList.remove('highlighted');
-      }, 2000);
+      setTimeout(() => reservation.classList.remove('highlighted'), 2000);
     }
   }
 
@@ -662,26 +754,18 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const [hour, minute] = time.split(':');
     const hourNum = parseInt(hour);
     const minNum = parseInt(minute) || 0;
-
-    if (minNum >= 30) {
-      return `${this.pad(hourNum)}:30`;
-    } else {
-      return `${this.pad(hourNum)}:00`;
-    }
+    return `${this.pad(hourNum)}:${minNum >= 30 ? '30' : '00'}`;
   }
 
   private parseISODate(isoDate: string): Date | null {
     const parts = isoDate.split('-');
-    if (parts.length === 3) {
-      return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-    }
-    return null;
+    return parts.length === 3 ? new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])) : null;
   }
 
   private isSameDay(date1: Date, date2: Date): boolean {
     return date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate();
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
   }
 
   private normalize(a: Appointment): Appointment {
@@ -689,19 +773,15 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     if (typeof a.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(a.date)) {
       out.dateISO = a.date;
-    } else if (a.datetime && a.datetime.seconds) {
-      const d = new Date(a.datetime.seconds * 1000);
-      out.dateISO = this.toISODate(d);
-    } else if (a.createdAt && a.createdAt.seconds) {
-      const d = new Date(a.createdAt.seconds * 1000);
-      out.dateISO = this.toISODate(d);
-    } else {
-      out.dateISO = undefined;
+    } else if (a.datetime?.seconds) {
+      out.dateISO = this.toISODate(new Date(a.datetime.seconds * 1000));
+    } else if (a.createdAt?.seconds) {
+      out.dateISO = this.toISODate(new Date(a.createdAt.seconds * 1000));
     }
 
     if (a.time) {
       out.timeNormalized = a.time;
-    } else if (a.datetime && a.datetime.seconds) {
+    } else if (a.datetime?.seconds) {
       const d = new Date(a.datetime.seconds * 1000);
       out.timeNormalized = this.pad(d.getHours()) + ':' + this.pad(d.getMinutes());
     } else {
@@ -722,35 +802,25 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   findReservation(list: Appointment[], hour: string): Appointment | undefined {
     return list.find(a => {
       if (!a.timeNormalized) return false;
-
-      const appointmentTime = a.timeNormalized;
-      const slotHour = hour.substring(0, 5);
-
-      // Obtener duración del servicio (por defecto 30 min)
-      const serviceDuration = a.service?.time || 30;
-
-      // Convertir tiempos a minutos desde medianoche para facilitar cálculos
-      const appointmentMinutes = this.timeToMinutes(appointmentTime);
-      const slotMinutes = this.timeToMinutes(slotHour);
-
-      // Verificar si este slot está dentro del rango de duración de la cita
-      return slotMinutes >= appointmentMinutes &&
-        slotMinutes < (appointmentMinutes + serviceDuration);
+      const slotMinutes = this.timeToMinutes(hour.substring(0, 5));
+      const activeSegments = this.getActiveTimeSegments(a);
+      return activeSegments.some(segment => 
+        slotMinutes >= segment.start && slotMinutes < (segment.start + segment.duration)
+      );
     });
   }
 
   formatDateHeader(d: Date) {
     return d.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
   }
 
   getAppointmentDuration(appointment: Appointment): string {
-    if (appointment.service && appointment.service.time) {
-      return `${appointment.service.time}min`;
+    if (appointment.service?.timeSegments) {
+      const totalTime = appointment.service.timeSegments.reduce((total, segment) =>
+        total + segment.duration + (segment.breakAfter || 0), 0);
+      return `${totalTime}min`;
     }
     return '30min';
   }
@@ -758,5 +828,125 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   goToToday() {
     this.selectedDate$.next(new Date());
     this.selectedAppointmentId$.next(null);
+  }
+
+  getAppointmentTimeSegments(appointment: Appointment): { start: number, duration: number, type: 'active' | 'break' }[] {
+    if (!appointment.timeNormalized) return [];
+
+    const startMinutes = this.timeToMinutes(appointment.timeNormalized);
+    const segments: { start: number, duration: number, type: 'active' | 'break' }[] = [];
+
+    if (appointment.service?.timeSegments) {
+      let currentTime = startMinutes;
+
+      appointment.service.timeSegments.forEach((segment, index) => {
+        segments.push({ start: currentTime, duration: segment.duration, type: 'active' });
+        currentTime += segment.duration;
+
+        if (segment.breakAfter && segment.breakAfter > 0 && index < appointment.service!.timeSegments.length - 1) {
+          segments.push({ start: currentTime, duration: segment.breakAfter, type: 'break' });
+          currentTime += segment.breakAfter;
+        }
+      });
+    }
+    return segments;
+  }
+
+  getSlotType(dayList: Appointment[], hour: string, appointment: Appointment): 'start' | 'active' | 'break' | 'end' {
+    if (!appointment.timeNormalized) return 'active';
+
+    const slotMinutes = this.timeToMinutes(hour.substring(0, 5));
+    const timeSegments = this.getAppointmentTimeSegments(appointment);
+
+    for (let i = 0; i < timeSegments.length; i++) {
+      const segment = timeSegments[i];
+      const segmentEnd = segment.start + segment.duration;
+
+      if (slotMinutes >= segment.start && slotMinutes < segmentEnd) {
+        if (i === 0 && slotMinutes === segment.start) return 'start';
+        if (i === timeSegments.length - 1 && slotMinutes === segmentEnd - 1) return 'end';
+        if (segment.type === 'break') return 'break';
+        return 'active';
+      }
+    }
+    return 'active';
+  }
+
+  isMainAppointmentSlot(dayList: Appointment[], hour: string, appointment: Appointment): boolean {
+    return appointment.timeNormalized === hour.substring(0, 5);
+  }
+
+  getServiceDuration(service: Service) {
+    return service.timeSegments.reduce((total, segment) =>
+      total + segment.duration + (segment.breakAfter || 0), 0);
+  }
+
+  getActiveTimeSegments(appointment: Appointment): { start: number, duration: number }[] {
+    if (!appointment.timeNormalized || !appointment.service?.timeSegments) return [];
+
+    const startMinutes = this.timeToMinutes(appointment.timeNormalized);
+    const segments: { start: number, duration: number }[] = [];
+    let currentTime = startMinutes;
+
+    appointment.service.timeSegments.forEach(segment => {
+      segments.push({ start: currentTime, duration: segment.duration });
+      currentTime += segment.duration + (segment.breakAfter || 0);
+    });
+
+    return segments;
+  }
+
+  getBreakSegments(appointment: Appointment): { start: number, duration: number, belongsTo: Appointment }[] {
+    if (!appointment.timeNormalized || !appointment.service?.timeSegments) return [];
+
+    const breaks: { start: number, duration: number, belongsTo: Appointment }[] = [];
+    let currentTime = this.timeToMinutes(appointment.timeNormalized);
+
+    appointment.service.timeSegments.forEach((segment, index) => {
+      currentTime += segment.duration;
+      if (segment.breakAfter && segment.breakAfter > 0 && index < appointment.service!.timeSegments.length - 1) {
+        breaks.push({ start: currentTime, duration: segment.breakAfter, belongsTo: appointment });
+        currentTime += segment.breakAfter;
+      }
+    });
+
+    return breaks;
+  }
+
+  getBreakInfo(dayList: Appointment[], hour: string): { appointment: Appointment, breakInfo: any } | undefined {
+    return this.findBreakSlot(dayList, hour);
+  }
+
+  findBreakSlot(list: Appointment[], hour: string): { appointment: Appointment, breakInfo: any } | undefined {
+    const slotMinutes = this.timeToMinutes(hour.substring(0, 5));
+
+    for (const appointment of list) {
+      const breakSegments = this.getBreakSegments(appointment);
+      const breakSegment = breakSegments.find(brk =>
+        slotMinutes >= brk.start && slotMinutes < (brk.start + brk.duration)
+      );
+
+      if (breakSegment) {
+        return { appointment, breakInfo: breakSegment };
+      }
+    }
+    return undefined;
+  }
+
+  isConnectedToPrevious(appointment: Appointment, hour: string): boolean {
+    const slotMinutes = this.timeToMinutes(hour.substring(0, 5));
+    const activeSegments = this.getActiveTimeSegments(appointment);
+    return activeSegments.some(segment => (segment.start + segment.duration) === slotMinutes);
+  }
+
+  isConnectedToNext(appointment: Appointment, hour: string): boolean {
+    const slotMinutes = this.timeToMinutes(hour.substring(0, 5));
+    const breakInfo = this.getBreakInfo([appointment], hour);
+
+    if (!breakInfo) return false;
+
+    const nextSegmentStart = breakInfo.breakInfo.start + breakInfo.breakInfo.duration;
+    const activeSegments = this.getActiveTimeSegments(appointment);
+    return activeSegments.some(segment => segment.start === nextSegmentStart);
   }
 }

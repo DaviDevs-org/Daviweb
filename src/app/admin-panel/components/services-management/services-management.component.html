@@ -46,11 +46,118 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Tiempo estimado</label>
-                    <div class="price-input-group">
-                        <input type="number" [(ngModel)]="newService.time" name="serviceTime" placeholder="40"
-                            class="form-input price-input">
-                        <span class="currency">min</span>
+                    <label class="checkbox-label">
+                        <input type="checkbox" [(ngModel)]="hasBreaks" (click)="toggleBreaks()" name="hasBreaks">
+                        <span class="checkmark">Segmentos de Tiempo (avanzado)</span>
+                    </label>
+                </div>
+
+                <div class="form-group time-configuration">
+                    <label>Tiempo del Servicio</label>
+
+                    <!-- Modo simple (sin breaks) -->
+                    <div class="simple-time" *ngIf="!hasBreaks">
+                        <div class="time-input-simple">
+                            <div class="input-with-buttons">
+                                <label>Duración total del servicio</label>
+                                <div class="number-controls">
+                                    <button type="button" class="btn-decrease" (click)="removeTimeSegment(0)"
+                                        [disabled]="newService.timeSegments[0].duration <= 15">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <input type="number" [(ngModel)]="newService.timeSegments[0].duration"
+                                        name="totalDuration" min="15" step="15" class="form-input duration-input">
+                                    <button type="button" class="btn-increase" (click)="addTimeSegment()">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                                <span class="input-suffix">minutos</span>
+                            </div>
+                        </div>
+                        <small class="help-text">Tiempo total que ocupará la cita en el calendario</small>
+                    </div>
+
+                    <!-- Modo avanzado (con breaks) -->
+                    <div class="advanced-time" *ngIf="hasBreaks">
+                        <div class="segments-header">
+                            <h4>Segmentos del servicio</h4>
+                            <button type="button" class="btn-add-segment" (click)="addTimeSegment()">
+                                <i class="bi bi-plus-circle"></i> Añadir segmento
+                            </button>
+                        </div>
+
+                        <div class="time-segments">
+                            <div class="time-segment-card"
+                                *ngFor="let segment of newService.timeSegments; let i = index; let last = last">
+                                <div class="segment-header">
+                                    <div class="segment-number">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Segmento {{ i + 1 }}</span>
+                                    </div>
+                                    <button type="button" class="btn-remove-segment" (click)="removeTimeSegment(i)"
+                                        *ngIf="newService.timeSegments.length > 1" title="Eliminar segmento">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+
+                                <div class="segment-fields">
+                                    <div class="form-group compact">
+                                        <label>Duración</label>
+                                        <div class="number-input">
+                                            <input type="number" [(ngModel)]="segment.duration"
+                                                [name]="'segmentDuration' + i" min="15" step="5"
+                                                class="form-input small">
+                                            <span class="suffix">min</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group compact" *ngIf="!last">
+                                        <label>Pausa después</label>
+                                        <div class="number-input">
+                                            <input type="number" [(ngModel)]="segment.breakAfter"
+                                                [name]="'segmentBreak' + i" min="0" step="5" class="form-input small">
+                                            <span class="suffix">min</span>
+                                        </div>
+                                        <small>Tiempo de espera para otros clientes</small>
+                                    </div>
+
+                                    <div class="form-group compact" *ngIf="last">
+                                        <label>Pausa final</label>
+                                        <div class="number-input disabled">
+                                            <input type="number" value="0" disabled class="form-input small">
+                                            <span class="suffix">min</span>
+                                        </div>
+                                        <small>No hay pausa después del último segmento</small>
+                                    </div>
+                                </div>
+
+                                <div class="segment-visual" *ngIf="!last">
+                                    <div class="active-time">{{ segment.duration }}min activo</div>
+                                    <div class="break-arrow" *ngIf="segment.breakAfter! > 0">
+                                        <i class="bi bi-arrow-right"></i>
+                                        <span class="break-time">{{ segment.breakAfter }}min pausa</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen del tiempo -->
+                    <div class="time-summary" *ngIf="getTotalTime(newService.timeSegments) > 0">
+                        <div class="summary-card">
+                            <div class="summary-item">
+                                <span class="label">Tiempo total:</span>
+                                <span class="value">{{ getTotalTime(newService.timeSegments) }} min</span>
+                            </div>
+                            <div class="summary-item" *ngIf="hasBreaks">
+                                <span class="label">Tiempo activo:</span>
+                                <span class="value">{{ getActiveTime(newService.timeSegments) }} min</span>
+                            </div>
+                            <div class="summary-item" *ngIf="hasBreaks">
+                                <span class="label">Tiempo de pausas:</span>
+                                <span class="value">{{ getBreakTime(newService.timeSegments) }} min</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -82,9 +189,19 @@
                         <h4>{{ service.name }}</h4>
                         <div class="service-header-data">
                             <div class="service-price">{{ service.price }}€</div>
-                            <div class="service-time"> {{service.time}}m</div>
+                            <div class="service-time">{{ this.getTotalTime(service.timeSegments)}}m</div>
                         </div>
                     </div>
+                    <div class="time-segments-display" *ngIf="service.timeSegments && service.timeSegments.length > 0">
+                        <div class="time-segment-item"
+                            *ngFor="let segment of service.timeSegments; let segIndex = index">
+                            <span class="segment-duration">{{ segment.duration }}min</span>
+                            <span *ngIf="segment.breakAfter! > 0" class="segment-break">+ {{ segment.breakAfter }}min
+                                pausa</span>
+                            <span *ngIf="segIndex < service.timeSegments.length - 1" class="segment-separator">→</span>
+                        </div>
+                    </div>
+
                     <p class="service-description">{{ service.description }}</p>
                     <div class="service-actions">
                         <button class="action-btn edit-btn" (click)="editService(i)">

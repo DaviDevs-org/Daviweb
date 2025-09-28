@@ -3,6 +3,7 @@ export class GalleryPhoto {
   url: string = "";
   lastModified: string = "";
   id?:string
+  public imageLoaded?: boolean = false;
 
   constructor(name: string, url: string, lastModified: string, id:string){
     this.name = name;
@@ -31,30 +32,47 @@ export interface Appointment {
 }
 
 export class Service {
-  id?: string;
-  name: string = "";
-  price: number = 0;
-  description: string = "";
-  time: number = 0;
-  imageUrl?: string;
+  constructor(
+    public name: string,
+    public description: string,
+    public timeSegments: TimeSegment[], // Cambiar time por timeSegments
+    public price: number,
+    public imageUrl?: string,
+    public id?: string
+  ) {}
 
-  constructor(name:string, description:string, time:number, price:number, imageUrl: string){
-      this.name = name;
-      this.description = description;
-      this.time = time;
-      this.price = price;
-      this.imageUrl = imageUrl
-    }
-  toJson(){
-    return {
-      ...(this.id && {id:this.id}),
-      name: this.name,
-      price: this.price,
-      description: this.description,
-      time: this.time,
-      imageUrl: this.imageUrl
-    }
+  // Calcular el tiempo total sumando todos los segmentos
+  get totalTime(): number {
+    return this.timeSegments.reduce((total, segment) => 
+      total + segment.duration + (segment.breakAfter || 0), 0);
   }
+
+  // Calcular solo el tiempo activo (sin breaks)
+  get activeTime(): number {
+    return this.timeSegments.reduce((total, segment) => total + segment.duration, 0);
+  }
+
+  toJson() {
+    return {
+      name: this.name,
+      description: this.description,
+      timeSegments: this.timeSegments,
+      price: this.price,
+      imageUrl: this.imageUrl
+    };
+  }
+}
+
+export interface TimeSegment {
+  duration: number; // Duración en minutos del segmento activo
+  breakAfter?: number; // Tiempo de descanso/pausa después de este segmento (opcional)
+}
+
+export interface NewService {
+  name: string;
+  price: number;
+  description: string;
+  timeSegments: TimeSegment[]; // Cambiar time por timeSegments
 }
 
 export interface ExceptionItem {
@@ -63,14 +81,6 @@ export interface ExceptionItem {
   intervals: Interval[];
   exceptionType: 'closed' | 'custom';
   isEditing?: boolean;
-}
-
-
-export interface NewService {
-  name: string;
-  price: number;
-  description: string;
-  time: number;
 }
 
 export type Interval = {

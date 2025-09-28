@@ -1,5 +1,5 @@
 // gallery-management.component.ts
-import { Component, ElementRef, inject, signal, ViewChild, OnDestroy } from '@angular/core';
+import { Component, ElementRef, inject, signal, ViewChild, OnDestroy, Injector, runInInjectionContext, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GalleryPhoto } from '../../types/admin.types';
@@ -20,20 +20,25 @@ export class GalleryManagementComponent implements OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   private gallery = inject(GalleryService)
   private toast = inject(AlertService)
+  private injector = inject(Injector)
+  private cdr = inject(ChangeDetectorRef)
 
   selectedFile: File | null = null;
   imagePreviewUrl: string = '';
   progress = signal('0%');
   susbscription: Subscription | undefined = undefined;
   galleryPhotos = signal<GalleryPhoto[]>([])
+  isLoading = signal(true);
 
-  async ngOnInit() {
-    const images = await this.gallery.getImages()
-
-    const gallery = await this.gallery.getImageInfo(images)
-    this.galleryPhotos.set(gallery)
+  ngOnInit() {
+    runInInjectionContext(this.injector, async () => {
+      const images = await this.gallery.getImages()
+      const gallery = await this.gallery.getImageInfo(images)
+      this.galleryPhotos.set(gallery)
+      this.isLoading.set(false)
+    });
   }
-
+  
   onFileSelected(event: Event): void {
     const target = event.target as HTMLInputElement;
     if (target.files && target.files.length > 0) {
@@ -48,12 +53,12 @@ export class GalleryManagementComponent implements OnDestroy {
         this.toast.error('El archivo es demasiado grande. Máximo 5MB.');
         return;
       }
-      
+
       // Limpiar URL anterior si existe
       if (this.imagePreviewUrl) {
         URL.revokeObjectURL(this.imagePreviewUrl);
       }
-      
+
       this.selectedFile = file;
       this.imagePreviewUrl = URL.createObjectURL(file);
     }
@@ -96,13 +101,13 @@ export class GalleryManagementComponent implements OnDestroy {
         ]);
 
         this.selectedFile = null;
-        
+
         // Limpiar la URL de previsualización
         if (this.imagePreviewUrl) {
           URL.revokeObjectURL(this.imagePreviewUrl);
           this.imagePreviewUrl = '';
         }
-        
+
         setTimeout(() => {
           this.toast.success('Foto subida con éxito');
           this.progress.set('0%');
@@ -119,13 +124,13 @@ export class GalleryManagementComponent implements OnDestroy {
     );
     this.toast.success("Foto eliminada con éxito")
   }
-  
+
   async updateImage(i: number) {
     const id = this.galleryPhotos()[i].id!;
     let newName: string | false | null = "";
-    
+
     newName = await this.toast.prompt('Introduzca un nuevo nombre para la imagen')
-    if (newName === null)  {
+    if (newName === null) {
       this.toast.error('Por favor, ingrese un nombre para la imagen');
       return;
     }
@@ -148,7 +153,7 @@ export class GalleryManagementComponent implements OnDestroy {
     if (this.imagePreviewUrl) {
       URL.revokeObjectURL(this.imagePreviewUrl);
     }
-    
+
     // Limpiar suscripción si existe
     if (this.susbscription) {
       this.susbscription.unsubscribe();

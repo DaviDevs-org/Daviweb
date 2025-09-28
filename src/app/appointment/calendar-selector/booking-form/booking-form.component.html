@@ -51,7 +51,7 @@
         <select name="service" id="service" ngModel required>
             <option value="" disabled selected>-- Selecciona un servicio --</option>
             <option *ngFor="let s of services" [value]="s.name">
-                {{s.name}}, {{s.time}} min. {{s.price}}€
+                {{s.name}}, {{s.totalTime}} min. {{s.price}}€
             </option>
         </select>
     </div>
