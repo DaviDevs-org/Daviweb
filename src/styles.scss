@@ -5,6 +5,8 @@ html {
 
 body {
   height: 100%;
+  overflow-x: hidden;
+  width: 100%;
   margin: 0;
   padding: 0;
   overflow-y: auto; /* scroll vertical si hace falta */
@@ -18,4 +20,7 @@ app-root {
   min-height: 100vh;
   background-color: rgba(189, 139, 63, 0.35);
   overflow-y: auto;
+}
+*{
+  box-sizing: border-box;
 }

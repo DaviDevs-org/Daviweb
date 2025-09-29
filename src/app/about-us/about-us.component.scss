@@ -14,52 +14,95 @@
   font-size: 17px;
   font-family: 'Inter', sans-serif;
   color: #000000;
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: 32px 16px;
+    gap: 40px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 24px 12px;
+    gap: 32px;
+  }
 }
 
 .heading_37-133 {
   font-weight: bolder;
   font-size: 30px;
+
+  @media (max-width: 768px) {
+    font-size: 26px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 24px;
+  }
 }
 
 .info_37-135 {
-  /* Igual que antes, para que imagen y texto sigan igual */
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   gap: 32px;
   box-sizing: border-box;
   width: 100%;
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+    gap: 24px;
+  }
 }
 
 .paragraph_37-136 {
-  /* Aquí dejamos el tamaño y anchos igual */
   flex: 1 1 auto;
   min-width: 280px;
   max-width: 550px;
   padding: 0 24px;
   box-sizing: border-box;
   margin-left: 4%;
-
-  font-weight: 500;       /* Más gordo, bold tocho */
-  line-height: 27px;      /* Más espacio entre líneas, que respire */
-  font-size: 17px;        /* Mismo tamaño que antes */
+  font-weight: 500;
+  line-height: 27px;
+  font-size: 17px;
   text-align: justify;
   color: #000000;
   font-family: 'Inter', sans-serif;
+
+  @media (max-width: 900px) {
+    max-width: 100%;
+    margin-left: 0;
+    padding: 0 12px;
+    text-align: left;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 15px;
+    line-height: 24px;
+    padding: 0 8px;
+    min-width: auto;
+  }
 }
 
 .text-block {
   font-size: 17px;
-  font-weight: 700;       /* Bolder que antes */
-  line-height: 32px;      /* Más espacio */
+  font-weight: 700;
+  line-height: 32px;
   margin: 0;
   text-align: justify;
   color: #000000;
   font-family: 'Inter', sans-serif;
+
+  @media (max-width: 900px) {
+    text-align: left;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 15px;
+    line-height: 26px;
+  }
 }
 
 .image_37-152 {
-  /* Exactamente igual para que la imagen no se mueva */
   flex: 0 0 40%;
   width: 400px;
   max-width: 100%;
@@ -70,6 +113,17 @@
   overflow: hidden;
   border-radius: 8px;
   margin-right: 4%;
+
+  @media (max-width: 900px) {
+    flex: none;
+    width: 100%;
+    margin-right: 0;
+    order: -1; // Coloca la imagen arriba del texto en móvil
+  }
+
+  @media (max-width: 480px) {
+    border-radius: 6px;
+  }
 }
 
 .image_37-152 svg,
@@ -78,4 +132,8 @@
   height: auto;
   display: block;
   border-radius: 8px;
+
+  @media (max-width: 480px) {
+    border-radius: 6px;
+  }
 }
