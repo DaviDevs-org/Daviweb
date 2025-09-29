@@ -9,6 +9,8 @@
   align-items: center;
   padding: 0 20px;
   box-sizing: border-box;
+  border-top: 2px solid rgba(243, 225, 176, 0.3);
+  flex: 1;
 }
 
 .hours-list {
@@ -16,11 +18,12 @@
   padding: 0;
   margin: 20px 0;
   width: 100%;
-  max-height: calc(100vh - 250px);
+  flex: 1;
   overflow-y: auto;
   border-radius: 12px;
   background: rgba(110, 77, 41, 0.94);
   scrollbar-width: none;
+  min-height: 350px;
 }
 
 .hours-list::-webkit-scrollbar { display: none; }

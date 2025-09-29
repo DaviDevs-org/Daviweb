@@ -1,54 +1,124 @@
 .booking-form-container {
-  max-width: 400px;
+  max-width: 800px;
   margin: 0 auto;
-  background: rgba(97, 53, 35, 0.6);
-  padding: 20px;
-  border-radius: 12px;
+  background: rgba(97, 53, 35, 0.85);
+  padding: 30px;
+  border-radius: 16px;
   font-family: 'Inter', sans-serif;
   color: #f3e1b0;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(212, 178, 88, 0.3);
+
+  @media (max-width: 768px) {
+    padding: 24px;
+    margin: 0 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 20px 16px;
+    margin: 0 12px;
+  }
+}
+
+.form-title {
+  text-align: center;
+  color: #f3e1b0;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
+}
+
+.form-subtitle {
+  text-align: center;
+  color: #d4b258;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 30px;
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 0;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
+  }
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 label {
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   color: #f3e1b0;
+  font-size: 14px;
 }
 
 input,
-textarea {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1.8px solid #d4b258;
-  font-size: 14px;
+textarea,
+select {
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid #d4b258;
+  font-size: 16px;
   color: #613523;
   font-weight: 600;
   background: #f3e1b0;
-  outline-offset: 2px;
-  outline-color: transparent;
-  transition: outline-color 0.3s ease;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8a7352;
+  opacity: 0.7;
 }
 
 input:focus,
-textarea:focus {
-  outline-color: #d4b258;
-  box-shadow: 0 0 6px #d4b258aa;
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #b8953a;
+  box-shadow: 0 0 0 3px rgba(212, 178, 88, 0.3);
+  transform: translateY(-1px);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: 'Inter', sans-serif;
 }
 
 .error {
-  color: #ff4d4d;
+  color: #ff6b6b;
   font-size: 13px;
-  margin-top: 4px;
+  margin-top: 6px;
   font-weight: 600;
   max-height: 0;
   opacity: 0;
-  transition: max-height 0.6s ease, opacity 0.5s ease;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
   overflow: hidden;
 }
 
@@ -57,70 +127,116 @@ textarea:focus {
   opacity: 1;
 }
 
-.submit-btn {
-  background-color: #d4b258;
-  border: none;
-  color: #613523;
-  font-weight: 700;
+.contact-error {
+  background: rgba(255, 107, 107, 0.1);
   padding: 12px;
-  border-radius: 12px;
-  width: 100%;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  margin-bottom: 20px;
+
+  &.visible {
+    max-height: 100px;
+  }
 }
 
-.submit-btn:hover:not(:disabled) {
-  background-color: #b8953a;
-}
-
-.submit-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-/* Contenedor del select */
+/* Estilos mejorados para select */
 .form-group select {
-  -webkit-appearance: none;
-  /* quitar estilo nativo en Safari/Chrome */
-  -moz-appearance: none;
-  /* quitar estilo nativo en Firefox */
   appearance: none;
   width: 100%;
-  padding: 10px 12px;
+  padding: 14px 16px;
   border-radius: 12px;
-  border: 1.8px solid #d4b258;
+  border: 2px solid #d4b258;
   background-color: #f3e1b0;
   color: #613523;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  position: relative;
-}
-
-/* Hover y focus */
-.form-group select:hover,
-.form-group select:focus {
-  border-color: #b8953a;
-  box-shadow: 0 0 6px #d4b258aa;
-  outline: none;
-}
-
-/* Flecha personalizada */
-.form-group select {
   background-image: url('data:image/svg+xml;utf8,<svg fill="%23613523" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px 16px;
+  background-position: right 16px center;
+  background-size: 18px 18px;
+
+  @media (max-width: 768px) {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
 }
 
-/* Opciones */
+.form-group select:hover {
+  border-color: #b8953a;
+  transform: translateY(-1px);
+}
+
 .form-group select option {
   color: #613523;
   background-color: #f3e1b0;
+  padding: 12px;
+  font-size: 15px;
 }
 
-/* Disabled */
 .form-group select option:disabled {
   color: #999;
+  background-color: #e8e8e8;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #d4b258, #b8953a);
+  border: none;
+  color: #613523;
+  font-weight: 700;
+  padding: 16px 24px;
+  border-radius: 12px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 18px;
+  margin-top: 10px;
+  box-shadow: 0 4px 15px rgba(212, 178, 88, 0.3);
+
+  @media (max-width: 768px) {
+    padding: 14px 20px;
+    font-size: 16px;
+  }
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 178, 88, 0.4);
+  background: linear-gradient(135deg, #b8953a, #a8842a);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-btn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  color: #666666;
+}
+
+/* Mejoras específicas para móviles */
+@media (max-width: 480px) {
+  .booking-form-container {
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+
+  .form-title {
+    font-size: 22px;
+  }
+
+  .form-subtitle {
+    font-size: 14px;
+  }
+
+  input,
+  textarea,
+  select {
+    padding: 12px;
+    font-size: 15px;
+  }
 }

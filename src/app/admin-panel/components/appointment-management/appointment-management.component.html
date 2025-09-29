@@ -170,29 +170,39 @@
                 </div>
 
                 <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form">
+                    <!-- Nombre completo -->
+                    <div class="form-group full-width" id="name-group">
+                        <label for="editName">Nombre completo *</label>
+                        <input type="text" id="editName" formControlName="name" required
+                            placeholder="Nombre del cliente">
+                        <div class="error-message"
+                            *ngIf="editForm.get('name')?.invalid && editForm.get('name')?.touched">
+                            El nombre es requerido (mínimo 2 caracteres)
+                        </div>
+                    </div>
+
+                    <!-- Contacto - Email y Teléfono -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="editName">Nombre *</label>
-                            <input type="text" id="editName" formControlName="name" required>
+                            <label for="editEmail">Email</label>
+                            <input type="email" id="editEmail" formControlName="email" placeholder="cliente@email.com">
                             <div class="error-message"
-                                *ngIf="editForm.get('name')?.invalid && editForm.get('name')?.touched">
-                                El nombre es requerido
+                                *ngIf="editForm.get('email')?.invalid && editForm.get('email')?.touched">
+                                Formato de email inválido
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="editPhone">Teléfono</label>
-                            <input type="tel" id="editPhone" formControlName="phone">
+                            <input type="tel" id="editPhone" formControlName="phone" placeholder="+34 123 456 789">
+                            <div class="error-message"
+                                *ngIf="editForm.get('phone')?.invalid && editForm.get('phone')?.touched">
+                                Formato de teléfono inválido
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editEmail">Email</label>
-                            <input type="email" id="editEmail" formControlName="email">
-                        </div>
-                    </div>
-
+                    <!-- Fecha y Hora -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="editDate">Fecha *</label>
@@ -213,36 +223,42 @@
                         </div>
                     </div>
 
+                    <!-- Servicio y Peluquero -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="editService">Servicio</label>
-                            <select id="editService" formControlName="serviceId">
+                            <label for="editService">Servicio *</label>
+                            <select id="editService" formControlName="serviceId" required>
                                 <option value="">Seleccionar servicio</option>
                                 <option *ngFor="let service of services" [value]="service.name">
                                     {{ service.name }} ({{ this.getServiceDuration(service) }} min) - {{ service.price
                                     }}€
                                 </option>
                             </select>
+                            <div class="error-message"
+                                *ngIf="editForm.get('serviceId')?.invalid && editForm.get('serviceId')?.touched">
+                                El servicio es requerido
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="editBarber">Peluquero</label>
-                        <select id="editBarber" formControlName="barberId">
-                            <option value="Cualquiera">Sin peluquero específico</option>
-                            <option *ngFor="let barber of barbers" [value]="barber.name">
-                                {{ barber.name }}
-                            </option>
-                        </select>
-                    </div>
 
-                    <div class="form-row">
-                        <div class="form-group full-width">
-                            <label for="editDescription">Descripción</label>
-                            <textarea id="editDescription" formControlName="description"
-                                placeholder="Notas adicionales sobre la cita..."></textarea>
+                        <div class="form-group">
+                            <label for="editBarber">Peluquero</label>
+                            <select id="editBarber" formControlName="barberId">
+                                <option value="Cualquiera">Sin peluquero específico</option>
+                                <option *ngFor="let barber of barbers" [value]="barber.name">
+                                    {{ barber.name }}
+                                </option>
+                            </select>
                         </div>
                     </div>
 
+                    <!-- Descripción -->
+                    <div class="form-group full-width">
+                        <label for="editDescription">Descripción (opcional)</label>
+                        <textarea id="editDescription" formControlName="description"
+                            placeholder="Notas adicionales sobre la cita..." rows="3"></textarea>
+                    </div>
+
+                    <!-- Acciones -->
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="isSaving">
                             Cancelar

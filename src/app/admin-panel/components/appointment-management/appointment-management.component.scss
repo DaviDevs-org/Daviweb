@@ -13,7 +13,7 @@
     flex-direction: column;
 }
 
-.section-header{
+.section-header {
     margin-left: 20px;
     margin-top: -20px
 }
@@ -34,18 +34,21 @@
         height: auto; // En móvil permitir altura automática
     }
 }
+
 .panel-header {
     margin-top: -20px;
     margin-bottom: 10px;
-    
+
     h3 {
         margin-bottom: 5px;
     }
+
     small {
         margin-left: 3px;
         margin-top: -10px;
     }
 }
+
 /* Left panel - Lista de citas mejorada */
 .left-panel {
     @include mixins.card-style;
@@ -1328,6 +1331,8 @@
     @include mixins.card-style;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
+    background: rgba(variables.$white, 0.95);
+    border: 2px solid rgba(variables.$primary-gold, 0.2);
 
     @include responsive.mobile {
         padding: 1rem;
@@ -1357,9 +1362,14 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-weight: 700;
 
             @include responsive.mobile {
                 font-size: 1.1rem;
+            }
+
+            i {
+                color: variables.$primary-gold;
             }
         }
 
@@ -1375,6 +1385,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            flex-shrink: 0;
 
             @include responsive.mobile {
                 width: 32px;
@@ -1393,25 +1404,42 @@
     }
 }
 
+
 .edit-form {
     .form-row {
         display: flex;
         gap: 1rem;
         margin-bottom: 1.25rem;
+        width: 100%;
 
         @include responsive.mobile {
             flex-direction: column;
             gap: 0.75rem;
             margin-bottom: 1rem;
         }
+
+        // Asegurar que los campos en fila tengan el mismo tamaño
+        .form-group {
+            flex: 1;
+            min-width: 0; // Previene que los campos se salgan del contenedor
+
+            // Campos de fecha y hora más compactos
+            &:has(input[type="date"]),
+            &:has(input[type="time"]) {
+                flex: 0.6; // Menor tamaño para campos de fecha/hora
+            }
+        }
+    }
+    #name-group {
+        margin-bottom: 20px;
     }
 
     .form-group {
-        flex: 1;
         position: relative;
+        margin-bottom: 0;
 
         &.full-width {
-            flex: 0 0 100%;
+            flex: 0 0 100% !important;
         }
 
         label {
@@ -1419,9 +1447,10 @@
             margin-bottom: 0.5rem;
             font-weight: 600;
             color: variables.$dark-brown;
+            font-size: 0.9rem;
 
             @include responsive.mobile {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
                 margin-bottom: 0.4rem;
             }
         }
@@ -1430,56 +1459,96 @@
         select,
         textarea {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.75rem 1rem;
             border: 2px solid rgba(variables.$primary-gold, 0.2);
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
             background: variables.$white;
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
 
             @include responsive.mobile {
-                padding: 0.6rem;
+                padding: 0.6rem 0.8rem;
                 font-size: 0.9rem;
-                border-radius: 6px;
+                border-radius: 8px;
             }
 
             &:focus {
                 outline: none;
                 border-color: variables.$primary-gold;
-                box-shadow: 0 0 0 3px rgba(variables.$primary-gold, 0.1);
+                box-shadow: 0 0 0 3px rgba(variables.$primary-gold, 0.15);
+                transform: translateY(-1px);
+            }
+
+            &:hover {
+                border-color: rgba(variables.$primary-gold, 0.4);
+            }
+
+            // Placeholder styling
+            &::placeholder {
+                color: rgba(variables.$text-gray, 0.6);
+                font-weight: 400;
             }
         }
 
+        // Estilos específicos para selects
         select {
             cursor: pointer;
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23b8860b'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 0.75rem center;
+            background-position: right 1rem center;
             background-size: 16px;
+            padding-right: 2.5rem;
 
             @include responsive.mobile {
-                background-position: right 0.6rem center;
+                background-position: right 0.8rem center;
                 background-size: 14px;
+                padding-right: 2.2rem;
             }
         }
 
+        // Estilos específicos para textarea
         textarea {
             resize: vertical;
             min-height: 80px;
+            line-height: 1.4;
 
             @include responsive.mobile {
-                min-height: 60px;
+                min-height: 70px;
+            }
+        }
+
+        // Campos de fecha y hora más compactos
+        input[type="date"],
+        input[type="time"] {
+            padding: 0.7rem 0.8rem;
+            font-size: 0.9rem;
+
+            @include responsive.mobile {
+                padding: 0.6rem 0.7rem;
+                font-size: 0.85rem;
             }
         }
 
         .error-message {
             color: #dc3545;
-            font-size: 0.8rem;
-            margin-top: 0.25rem;
+            font-size: 0.75rem;
+            margin-top: 0.4rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
 
             @include responsive.mobile {
-                font-size: 0.75rem;
+                font-size: 0.7rem;
+                margin-top: 0.3rem;
+            }
+
+            &::before {
+                content: '⚠';
+                font-size: 0.7rem;
             }
         }
     }
@@ -1501,45 +1570,55 @@
 
         .btn {
             padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 120px;
+            min-width: 140px;
+            font-size: 0.95rem;
+            border: none;
+            text-transform: none;
+            letter-spacing: normal;
 
             @include responsive.mobile {
                 min-width: auto;
-                padding: 0.6rem 1rem;
+                padding: 0.7rem 1rem;
                 font-size: 0.9rem;
-                border-radius: 6px;
+                border-radius: 8px;
+                width: 100%;
             }
 
             &.btn-primary {
                 background: linear-gradient(135deg, variables.$primary-gold, variables.$secondary-gold);
                 color: variables.$white;
-                border: none;
 
                 &:hover:not(:disabled) {
                     transform: translateY(-2px);
-                    box-shadow: 0 5px 15px rgba(variables.$primary-gold, 0.3);
+                    box-shadow: 0 6px 20px rgba(variables.$primary-gold, 0.35);
 
                     @include responsive.mobile {
                         transform: translateY(-1px);
-                        box-shadow: 0 3px 10px rgba(variables.$primary-gold, 0.25);
+                        box-shadow: 0 4px 12px rgba(variables.$primary-gold, 0.3);
                     }
+                }
+
+                &:active:not(:disabled) {
+                    transform: translateY(0);
                 }
             }
 
             &.btn-secondary {
-                background: rgba(variables.$primary-gold, 0.1);
+                background: rgba(variables.$primary-gold, 0.08);
                 color: variables.$primary-gold;
-                border: 2px solid rgba(variables.$primary-gold, 0.2);
+                border: 2px solid rgba(variables.$primary-gold, 0.3);
 
                 &:hover:not(:disabled) {
-                    background: rgba(variables.$primary-gold, 0.2);
+                    background: rgba(variables.$primary-gold, 0.15);
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(variables.$primary-gold, 0.2);
 
                     @include responsive.mobile {
-                        transform: none;
+                        transform: translateY(-1px);
                     }
                 }
             }
@@ -1548,8 +1627,30 @@
                 opacity: 0.6;
                 cursor: not-allowed;
                 transform: none !important;
+                box-shadow: none !important;
             }
         }
+    }
+}
+
+@media (max-width: 480px) {
+    .edit-form {
+        .form-row {
+            .form-group {
+                // En móvil, todos los campos ocupan el 100%
+                flex: 0 0 100% !important;
+            }
+        }
+    }
+}
+
+// Ajustes para campos requeridos
+.form-group:has(input:required),
+.form-group:has(select:required) {
+    label::after {
+        content: ' *';
+        color: #dc3545;
+        font-weight: 700;
     }
 }
 
@@ -2273,6 +2374,6 @@
     }
 }
 
-.extra-space{
+.extra-space {
     height: 100px;
 }

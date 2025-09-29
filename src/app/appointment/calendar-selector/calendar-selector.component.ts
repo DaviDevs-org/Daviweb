@@ -5,11 +5,14 @@ import { HourSelectorComponent } from './hour-selector/hour-selector.component';
 import { BookingFormComponent } from './booking-form/booking-form.component';
 import { ReservedSlotsService, ReservedSlot } from '../../services/reserved-slots.service';
 import { AppointmentService } from '../../services/appointments.service';
-import { Subject, firstValueFrom } from 'rxjs';
+import { Subject, firstValueFrom, combineLatest } from 'rxjs';
 import { InfoManager } from '../../services/admin-panel/info-management.service';
 import { Barber, Service, ScheduleDay, ExceptionItem } from '../../admin-panel/types/admin.types';
 import { ChangeDetectorRef } from '@angular/core';
 import { AlertService } from '../../services/alert/alert.service';
+import { AppointmentManagerService } from '../../services/admin-panel/appointment-management.service';
+import { Appointment } from '../../admin-panel/types/admin.types';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-calendar-selector',
@@ -61,7 +64,8 @@ export class CalendarSelectorComponent implements OnDestroy {
     private appointmentService: AppointmentService,
     private infoManager: InfoManager,
     private cdr: ChangeDetectorRef,
-    private toast: AlertService
+    private toast: AlertService,
+    private apptSvc: AppointmentManagerService
   ) {
     const startYear = this.selectedYear - 2;
     const endYear = this.selectedYear + 2;
@@ -82,14 +86,8 @@ export class CalendarSelectorComponent implements OnDestroy {
       this.schedule = await this.infoManager.getSchedule();
       this.exceptions = await this.infoManager.getExceptions();
 
-      // Cargar slots reservados
-      const slots = await firstValueFrom(this.reservedSlotsService.getReservedSlotsFromNow());
-      this.bookedSlotsByDate = {};
-      (slots ?? []).forEach((slot: ReservedSlot) => {
-        const dateKey = slot.date;
-        if (!this.bookedSlotsByDate[dateKey]) this.bookedSlotsByDate[dateKey] = [];
-        this.bookedSlotsByDate[dateKey].push(slot.time);
-      });
+      // Cargar slots reservados desde citas existentes
+      await this.loadBookedSlotsFromAppointments();
 
       await this.loadBarbers();
       this.computeAvailableHoursForCurrentMatrix();
@@ -103,6 +101,121 @@ export class CalendarSelectorComponent implements OnDestroy {
       console.error('Error cargando datos del calendario:', error);
       this.toast.error('Error al cargar los datos del calendario');
     }
+  }
+
+  private async loadBookedSlotsFromAppointments() {
+    try {
+      const appointments$ = this.apptSvc.getAppointments().pipe(
+        map(list => list.map(a => this.normalizeAppointment(a)))
+      );
+
+      const appointments = await firstValueFrom(appointments$);
+      this.bookedSlotsByDate = {};
+
+      appointments.forEach(appointment => {
+        if (!appointment.dateISO || !appointment.timeNormalized || appointment.timeNormalized === '—') return;
+
+        const dateKey = appointment.dateISO;
+        if (!this.bookedSlotsByDate[dateKey]) {
+          this.bookedSlotsByDate[dateKey] = [];
+        }
+
+        // Obtener todos los segmentos de tiempo que ocupa la cita (incluyendo breaks)
+        const timeSegments = this.getAppointmentTimeSegments(appointment);
+        
+        timeSegments.forEach(segment => {
+          // Solo marcar como ocupados los slots ACTIVOS, no los breaks
+          if (segment.type === 'active') {
+            for (let minutes = segment.start; minutes < segment.start + segment.duration; minutes += 30) {
+              const hours = Math.floor(minutes / 60);
+              const mins = minutes % 60;
+              const timeSlot = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+              
+              if (!this.bookedSlotsByDate[dateKey].includes(timeSlot)) {
+                this.bookedSlotsByDate[dateKey].push(timeSlot);
+              }
+            }
+          }
+        });
+      });
+
+      console.log('Slots ocupados cargados desde citas:', this.bookedSlotsByDate);
+    } catch (error) {
+      console.error('Error cargando slots ocupados:', error);
+      // Fallback al método anterior si falla
+      const slots = await firstValueFrom(this.reservedSlotsService.getReservedSlotsFromNow());
+      this.bookedSlotsByDate = {};
+      (slots ?? []).forEach((slot: ReservedSlot) => {
+        const dateKey = slot.date;
+        if (!this.bookedSlotsByDate[dateKey]) this.bookedSlotsByDate[dateKey] = [];
+        this.bookedSlotsByDate[dateKey].push(slot.time);
+      });
+    }
+  }
+
+  // Método helper para convertir tiempo a minutos
+  private timeToMinutes(timeStr: string): number {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + (minutes || 0);
+  }
+
+  // Normalizar cita (copiado de appointment-management)
+  private normalizeAppointment(a: Appointment): Appointment {
+    const out: Appointment = { ...a };
+
+    if (typeof a.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(a.date)) {
+      out.dateISO = a.date;
+    } else if (a.datetime?.seconds) {
+      out.dateISO = this.toISODate(new Date(a.datetime.seconds * 1000));
+    } else if (a.createdAt?.seconds) {
+      out.dateISO = this.toISODate(new Date(a.createdAt.seconds * 1000));
+    }
+
+    if (a.time) {
+      out.timeNormalized = a.time;
+    } else if (a.datetime?.seconds) {
+      const d = new Date(a.datetime.seconds * 1000);
+      out.timeNormalized = this.pad(d.getHours()) + ':' + this.pad(d.getMinutes());
+    } else {
+      out.timeNormalized = '—';
+    }
+
+    return out;
+  }
+
+  // Obtener segmentos de tiempo de una cita (copiado de appointment-management)
+  private getAppointmentTimeSegments(appointment: Appointment): { start: number, duration: number, type: 'active' | 'break' }[] {
+    if (!appointment.timeNormalized || appointment.timeNormalized === '—') return [];
+
+    const startMinutes = this.timeToMinutes(appointment.timeNormalized);
+    const segments: { start: number, duration: number, type: 'active' | 'break' }[] = [];
+
+    if (appointment.service?.timeSegments) {
+      let currentTime = startMinutes;
+
+      appointment.service.timeSegments.forEach((segment, index) => {
+        segments.push({ start: currentTime, duration: segment.duration, type: 'active' });
+        currentTime += segment.duration;
+
+        if (segment.breakAfter && segment.breakAfter > 0 && index < appointment.service!.timeSegments.length - 1) {
+          segments.push({ start: currentTime, duration: segment.breakAfter, type: 'break' });
+          currentTime += segment.breakAfter;
+        }
+      });
+    } else {
+      // Servicio sin timeSegments, asumir 30 minutos por defecto
+      segments.push({ start: startMinutes, duration: 30, type: 'active' });
+    }
+
+    return segments;
+  }
+
+  private toISODate(d: Date): string {
+    return d.getFullYear() + '-' + this.pad(d.getMonth() + 1) + '-' + this.pad(d.getDate());
+  }
+
+  private pad(n: number): string {
+    return n < 10 ? '0' + n : '' + n;
   }
 
   private async loadBarbers() {
@@ -204,7 +317,7 @@ export class CalendarSelectorComponent implements OnDestroy {
 
     console.log('--- Seleccionando fecha ---');
     console.log('Fecha:', dateKey);
-    console.log('Reservas existentes:', bookedHours);
+    console.log('Reservas existentes (solo slots activos):', bookedHours);
 
     const hoursWithStatus = this.getAvailableHoursForDate(date, bookedHours);
     console.log('Horas calculadas para este día:', hoursWithStatus);
@@ -252,6 +365,8 @@ export class CalendarSelectorComponent implements OnDestroy {
       }
     }
 
+    // Ahora solo marcar como disabled los slots que están realmente ocupados por servicios ACTIVOS
+    // Los breaks ya no cuentan como ocupados porque no se incluyen en bookedSlotsByDate
     return hours.map(h => ({
       value: h,
       disabled: booked.includes(h)
