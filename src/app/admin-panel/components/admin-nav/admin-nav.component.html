@@ -1,9 +1,32 @@
+<!-- admin-nav.component.html (ACTUALIZADO) -->
 <nav class="admin-nav">
-    <div class="nav-tabs">
+    <!-- Versión Desktop -->
+    <div class="nav-desktop">
         <button *ngFor="let tab of tabs" class="nav-tab" [class.active]="activeTab === tab.id"
             (click)="onTabChange(tab.id)">
             <i [class]="tab.icon"></i>
             {{ tab.label }}
         </button>
+    </div>
+
+    <!-- Versión Móvil -->
+    <div class="nav-mobile">
+        <div class="white"></div>
+        <button class="menu-toggle" (click)="toggleMobileMenu()">
+            Navegación
+            <div class="menu-icon" [class.open]="isMobileMenuOpen">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </button>
+
+        <div class="mobile-menu" [class.open]="isMobileMenuOpen">
+            <button *ngFor="let tab of tabs" class="nav-tab" [class.active]="activeTab === tab.id"
+                (click)="onMobileTabChange(tab.id)">
+                <i [class]="tab.icon"></i>
+                {{ tab.label }}
+            </button>
+        </div>
     </div>
 </nav>

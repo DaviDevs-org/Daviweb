@@ -14,7 +14,16 @@
 
   @include mobile {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 15px;
+    overflow: hidden
+  }
+}
+
+.content-section {
+  overflow-x: hidden;
+  
+  @include mobile {
+    overflow-x: hidden;
   }
 }
 
@@ -23,17 +32,18 @@
   padding: 20px;
 
   @include mobile {
-    padding: 15px;
+    padding: 12px;
   }
 
   h3 {
     color: $dark-brown;
-    font-size: 1.5rem;
-    margin: 0 0 20px 0;
+    font-size: 1.2rem;
+    margin: 0 0 15px 0;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 10px;
+
 
     @include mobile {
       font-size: 1.3rem;
@@ -61,81 +71,102 @@
   }
 }
 
+.schedule-container {
+  gap: 8px;
+
+  @include mobile {
+    gap: 6px;
+  }
+}
+
 // ------------------------
 // Horarios
 // ------------------------
 .schedule-row {
   display: grid;
-  grid-template-columns: 120px 1fr 100px;
-  gap: 15px;
-  align-items: flex-start;
-  margin-bottom: 15px;
-  padding: 15px 0;
-  border-bottom: 1px solid rgba($border-color, 0.5);
+  grid-template-columns: 120px 1fr auto;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 10px;
+  padding: 12px 15px;
+  border: 1px solid rgba($border-color, 0.3);
+  border-radius: 10px;
+  background: white;
+  transition: all 0.3s ease;
 
-  &:last-child {
-    border-bottom: none;
-  }
-
+  // CORRECCIÓN RESPONSIVE - EVITAR OVERFLOW
   @include mobile {
     grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 12px 0;
-    margin-bottom: 12px;
+    gap: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    overflow: hidden; // Prevenir overflow
+  }
 
-    .day-label {
-      text-align: left;
-      font-size: 1.1rem;
-      padding: 8px 12px;
-      background: rgba($primary-gold, 0.1);
-      border-radius: 8px;
-      margin-bottom: 5px;
-    }
-
-    .closed-checkbox {
-      order: 2;
-      justify-self: start;
-      margin-top: 10px;
-    }
+  &:hover {
+    border-color: rgba($primary-gold, 0.4);
+    box-shadow: 0 2px 8px rgba($primary-gold, 0.1);
   }
 
   .day-label {
     font-weight: 600;
     color: $dark-brown;
+    font-size: 0.95rem;
     display: flex;
     align-items: center;
+    min-height: 40px; // Altura consistente
+
+    @include mobile {
+      background: rgba($primary-gold, 0.08);
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 0;
+      text-align: center;
+      font-size: 1rem;
+      justify-content: center;
+      min-height: auto;
+    }
   }
 
   .intervals-container {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-width: 0; // Prevenir overflow
+
+    @include mobile {
+      gap: 6px;
+      width: 100%;
+    }
   }
 
   .time-inputs {
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-wrap: nowrap;
+    padding: 6px 8px;
+    background: rgba($light-gray, 0.2);
+    border-radius: 6px;
 
     @include mobile {
-      gap: 8px;
-      margin-bottom: 8px;
+      gap: 6px;
+      padding: 8px;
+      flex-wrap: wrap; // Permitir wrap en móvil
+      justify-content: space-between;
     }
 
     .time-input {
-      padding: 8px 12px;
+      padding: 8px 10px;
       border: 2px solid $border-color;
       border-radius: 6px;
       transition: all 0.3s ease;
-      min-width: 100px;
+      min-width: 90px;
+      font-size: 0.9rem;
+      background: white;
+      font-family: inherit;
 
-      @include mobile {
-        min-width: 80px;
-        padding: 6px 8px;
-        font-size: 0.9rem;
-      }
-
+      // ESTÉTICA MEJORADA - COHERENTE CON EL RESTO
       &:focus {
         outline: none;
         border-color: $primary-gold;
@@ -145,51 +176,57 @@
       &:disabled {
         background: $light-gray;
         opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      @include mobile {
+        min-width: calc(50% - 25px); // Ajuste responsive
+        flex: 1;
+        padding: 10px;
       }
     }
 
     .time-separator {
       color: $text-gray;
       font-weight: 600;
+      font-size: 0.9rem;
+      margin: 0 2px;
 
       @include mobile {
-        font-size: 0.9rem;
+        margin: 0 4px;
       }
     }
 
     .danger-btn {
       @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
-      font-size: 0.85rem;
-      padding: 5px 8px;
-      min-width: 70px;
-      flex-shrink: 0;
-      border-radius: 6px;
+      font-size: 0.75rem;
+      padding: 6px 8px;
+      min-width: 35px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
-      gap: 4px;
       justify-content: center;
+      flex-shrink: 0;
 
       @include mobile {
-        font-size: 0.75rem;
-        padding: 4px 6px;
-        min-width: 60px;
+        min-width: 40px;
+        padding: 8px;
+        order: 3; // Mover al final en móvil
+        width: 100%;
+        margin-top: 5px;
+      }
 
-        span {
-          display: none;
-        }
+      span {
+        display: none;
       }
 
       i {
-        font-size: 1rem;
-
-        @include mobile {
-          font-size: 0.9rem;
-        }
+        font-size: 0.8rem;
+        margin: 0;
       }
 
       &:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba($danger-red, 0.25);
       }
     }
   }
@@ -197,45 +234,100 @@
   .closed-checkbox {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 2px;
     color: $text-gray;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
-    justify-self: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: rgba($text-gray, 0.05);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    align-self: start;
+    margin-top: 10px;
 
     @include mobile {
-      justify-self: start;
+      order: 3;
+      justify-self: stretch;
+      margin-top: 8px;
       font-size: 0.85rem;
+      padding: 10px 12px;
+      justify-content: center;
+    }
+
+    &:hover {
+      background: rgba($text-gray, 0.1);
     }
 
     input[type="checkbox"] {
       cursor: pointer;
+      transform: scale(1);
     }
   }
 
   .add-btn {
     @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
     font-size: 0.8rem;
-    padding: 4px 8px;
-    min-width: 100px;
-    flex-shrink: 0;
+    padding: 8px 12px;
+    min-width: 140px;
+    align-self: flex-start;
+    margin-top: 5px;
 
     @include mobile {
-      font-size: 0.75rem;
-      padding: 6px 10px;
       width: 100%;
-      margin-top: 5px;
+      margin-top: 8px;
+      padding: 10px;
+      font-size: 0.85rem;
+    }
+
+    i {
+      font-size: 0.8rem;
+      margin-right: 4px;
     }
   }
 }
 
+.schedule-row:has(.closed-checkbox input[type="checkbox"]:checked) {
+  background: rgba($danger-red, 0.03);
+  border-color: rgba($danger-red, 0.2);
+
+  .day-label {
+    color: $danger-red;
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+}
+
+.schedule-row.closed-day {
+  background: rgba($danger-red, 0.03);
+  border-color: rgba($danger-red, 0.2);
+
+  .day-label {
+    color: $danger-red;
+    opacity: 0.8;
+  }
+
+  .closed-checkbox {
+    background: rgba($danger-red, 0.1);
+    color: $danger-red;
+    font-weight: 600;
+  }
+}
+
+.closed-checkbox input[type="checkbox"]:checked {
+  &+span {
+    color: $danger-red;
+    font-weight: 600;
+  }
+}
+
 .schedule-actions {
-  margin-top: 20px;
+  margin-top: 15px;
   display: flex;
   justify-content: center;
 
   @include mobile {
-    margin-top: 15px;
+    margin-top: 12px;
   }
 }
 
@@ -696,10 +788,10 @@
 
 .contact-container {
   .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 
     @include mobile {
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
   }
 }
@@ -828,6 +920,8 @@
         gap: 15px;
         flex-wrap: wrap;
         padding: 8px 0;
+        border: 2px solid $border-color;
+        border-radius: 6px;
 
         @include mobile {
           gap: 8px;
@@ -1113,6 +1207,23 @@
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 15px;
+
+  @include mobile {
+    padding: 12px;
+
+    .exception-header {
+      flex-direction: column;
+      gap: 10px;
+
+      .exception-actions {
+        width: 100%;
+
+        button {
+          flex: 1;
+        }
+      }
+    }
+  }
 
   .exception-header {
     display: flex;
@@ -1678,4 +1789,23 @@
   @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
   font-size: 1rem;
   padding: 10px 20px;
+}
+
+.compact-intervals {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .interval-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: rgba($light-gray, 0.3);
+    border-radius: 6px;
+
+    @include mobile {
+      padding: 6px;
+    }
+  }
 }

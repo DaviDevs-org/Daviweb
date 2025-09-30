@@ -1,3 +1,4 @@
+// admin-header.component.scss (ACTUALIZADO)
 @use "../../styles/variables";
 @use "../../styles/mixins";
 @use "../../styles/responsive";
@@ -5,8 +6,11 @@
 .admin-header {
     background: linear-gradient(135deg, variables.$primary-gold, variables.$secondary-gold);
     color: variables.$white;
-    padding: 20px 0;
+    padding: 15px 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 
     .header-content {
         max-width: 1200px;
@@ -17,63 +21,91 @@
         align-items: center;
 
         @include responsive.mobile {
-            flex-direction: column;
-            gap: 15px;
-            text-align: center;
+            padding: 0 15px;
         }
     }
 
     .brand-section {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 12px;
 
         @include responsive.mobile {
-            flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .scissors-icon {
-            font-size: 2rem;
+            font-size: 1.8rem;
+
+            @include responsive.mobile {
+                font-size: 1.5rem;
+            }
         }
 
         h1 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 700;
             margin: 0;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+
+            @include responsive.mobile {
+                font-size: 1.2rem;
+                letter-spacing: 0.3px;
+            }
         }
 
         .admin-badge {
             background: rgba(variables.$white, 0.2);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.75rem;
             font-weight: 500;
+
+            @include responsive.mobile {
+                display: none; // Ocultar badge en móvil para ahorrar espacio
+            }
         }
     }
 
     .user-section {
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 15px;
+
+        @include responsive.mobile {
+            gap: 10px;
+        }
 
         .welcome-text {
             font-weight: 500;
+
+            @include responsive.mobile {
+                display: none; // Ocultar texto de bienvenida en móvil
+            }
         }
 
         .logout-btn {
             background: rgba(variables.$white, 0.1);
             border: 2px solid rgba(variables.$white, 0.3);
             color: variables.$white;
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            font-size: 0.9rem;
+
+            @include responsive.mobile {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+
+                span {
+                    display: none; // Ocultar texto, solo mostrar icono
+                }
+            }
 
             &:hover {
                 background: rgba(variables.$white, 0.2);

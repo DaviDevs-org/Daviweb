@@ -1,3 +1,4 @@
+// admin-nav.component.scss (COMPLETAMENTE REDISEÑADO)
 @use '../../styles/variables';
 @use '../../styles/responsive';
 
@@ -5,20 +6,24 @@
     background: variables.$white;
     border-bottom: 1px solid variables.$border-color;
     position: sticky;
-    top: 0;
-    z-index: 100;
+    top: 73px; // Ajustar según la altura del header
+    z-index: 999;
 
-    .nav-tabs {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-        display: flex;
-        gap: 0;
+    @include responsive.mobile {
+        top: 61px; // Altura reducida del header en móvil
+    }
+}
 
-        @include responsive.mobile {
-            flex-wrap: wrap;
-            justify-content: center;
-        }
+// Versión desktop (se mantiene igual)
+.nav-desktop {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    gap: 0;
+
+    @include responsive.mobile {
+        display: none;
     }
 
     .nav-tab {
@@ -34,11 +39,6 @@
         align-items: center;
         gap: 8px;
 
-        @include responsive.mobile {
-            padding: 12px 20px;
-            font-size: 0.9rem;
-        }
-
         i {
             font-size: 1.1rem;
         }
@@ -52,6 +52,138 @@
             color: variables.$primary-gold;
             border-bottom-color: variables.$primary-gold;
             background: rgba(variables.$primary-gold, 0.05);
+        }
+    }
+}
+
+// Versión móvil - Menú hamburguesa
+.nav-mobile {
+    display: none;
+    padding: 0 15px;
+    background: variables.$white;
+
+    @include responsive.mobile {
+        display: block;
+    }
+    .white{
+        color: white;
+        background-color: variables.$white;
+        height: 10px;
+    }
+
+    .menu-toggle {
+        width: 100%;
+        background: variables.$primary-gold;
+        color: variables.$white;
+        border: none;
+        padding: 12px 16px;
+        margin-top: 3px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background: variables.$secondary-gold;
+        }
+
+        .menu-icon {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            width: 20px;
+
+            span {
+                height: 2px;
+                background: variables.$white;
+                border-radius: 2px;
+                transition: all 0.3s ease;
+
+                &:nth-child(1) {
+                    width: 100%;
+                }
+
+                &:nth-child(2) {
+                    width: 80%;
+                }
+
+                &:nth-child(3) {
+                    width: 60%;
+                }
+            }
+
+            &.open {
+                span {
+                    &:nth-child(1) {
+                        transform: rotate(45deg) translate(6px, 6px);
+                        width: 100%;
+                    }
+
+                    &:nth-child(2) {
+                        opacity: 0;
+                    }
+
+                    &:nth-child(3) {
+                        transform: rotate(-45deg) translate(6px, -6px);
+                        width: 100%;
+                    }
+                }
+            }
+        }
+    }
+
+    .mobile-menu {
+        background: variables.$white;
+        border: 1px solid variables.$border-color;
+        border-radius: 8px;
+        margin-top: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.3s ease;
+
+        &.open {
+            max-height: 400px;
+        }
+
+        .nav-tab {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 14px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            color: variables.$text-gray;
+            border-bottom: 1px solid variables.$border-color;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            i {
+                font-size: 1.2rem;
+                width: 20px;
+                text-align: center;
+            }
+
+            &:hover {
+                color: variables.$primary-gold;
+                background: rgba(variables.$primary-gold, 0.05);
+            }
+
+            &.active {
+                color: variables.$primary-gold;
+                background: rgba(variables.$primary-gold, 0.08);
+                border-left: 4px solid variables.$primary-gold;
+            }
         }
     }
 }

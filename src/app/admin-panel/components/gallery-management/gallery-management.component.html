@@ -33,7 +33,8 @@
         <h3>Fotos Actuales</h3>
         <div class="gallery-grid">
             <div class="gallery-item" *ngFor="let photo of galleryPhotos(); let i = index">
-                <img [src]="photo.url" [alt]="photo.name">
+                <img [src]="photo.url" [alt]="photo.name" (load)="onImageLoad(i)" [class.loaded]="imageLoadStates[i]">
+                <div class="skeleton-loader" *ngIf="!imageLoadStates[i]"></div>
                 <div class="photo-overlay">
                     <div class="photo-actions">
                         <button class="action-btn edit-btn" (click)="updateImage(i)">
@@ -50,8 +51,8 @@
     </div>
 </section>
 <ng-template #loading>
-        <div class="loading-spinner">
-            <i class="bi bi-arrow-clockwise"></i>
-            Cargando información...
-        </div>
+    <div class="loading-spinner">
+        <i class="bi bi-arrow-clockwise"></i>
+        Cargando información...
+    </div>
 </ng-template>

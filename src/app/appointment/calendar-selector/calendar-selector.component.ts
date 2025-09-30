@@ -434,7 +434,7 @@ export class CalendarSelectorComponent implements OnDestroy {
     this.isSubmitting = true;
     try {
       await this.appointmentService.addAppointment(bookingData);
-      this.toast.success('Cita guardada correctamente 💌');
+      this.toast.success('Cita guardada correctamente');
       this.resetAll();
       this.loadData();
     } catch (error: any) {

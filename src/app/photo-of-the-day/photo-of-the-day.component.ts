@@ -114,7 +114,7 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
 
     this.intervalId = window.setInterval(() => {
       this.nextSlide();
-    }, 5000);
+    }, 8000);
   }
 
   private stopAutoPlay() {
@@ -142,6 +142,12 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
     const current = this.currentSlide();
     const total = this.totalSlides();
     this.currentSlide.set((current + 1) % total);
+    this.stopAutoPlay();
+
+    // Reiniciar autoplay solo si hay múltiples imágenes
+    if (this.totalSlides() > 1) {
+      this.startAutoPlay();
+    }
   }
 
   prevSlide() {
@@ -150,6 +156,12 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
     const current = this.currentSlide();
     const total = this.totalSlides();
     this.currentSlide.set(current === 0 ? total - 1 : current - 1);
+    this.stopAutoPlay();
+
+    // Reiniciar autoplay solo si hay múltiples imágenes
+    if (this.totalSlides() > 1) {
+      this.startAutoPlay();
+    }
   }
 
   pauseAutoPlay() {

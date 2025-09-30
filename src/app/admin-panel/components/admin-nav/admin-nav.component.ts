@@ -1,4 +1,4 @@
-// admin-nav.component.ts
+// admin-nav.component.ts (ACTUALIZADO)
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -21,6 +21,8 @@ export class AdminNavComponent {
   @Input() activeTab: AdminTab = 'gallery';
   @Output() tabChange = new EventEmitter<AdminTab>();
 
+  isMobileMenuOpen = false;
+
   tabs: NavTab[] = [
     { id: 'gallery', icon: 'bi bi-images', label: 'Galería de Fotos' },
     { id: 'services', icon: 'bi bi-scissors', label: 'Servicios y Precios' },
@@ -30,5 +32,14 @@ export class AdminNavComponent {
 
   onTabChange(tab: AdminTab): void {
     this.tabChange.emit(tab);
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  onMobileTabChange(tab: AdminTab): void {
+    this.onTabChange(tab);
+    this.isMobileMenuOpen = false; // Cerrar menú después de seleccionar
   }
 }

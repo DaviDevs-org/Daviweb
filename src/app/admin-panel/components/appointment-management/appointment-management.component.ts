@@ -555,7 +555,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   }
 
   async deleteAppointment(id: string) {
-    if (!this.toast.confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
+    if (! await this.toast.confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
       return;
     }
 

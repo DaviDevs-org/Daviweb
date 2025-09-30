@@ -13,7 +13,7 @@
     <div class="info-card">
       <h3><i class="bi bi-clock"></i> Horarios de Apertura</h3>
       <div class="schedule-container">
-        <div class="schedule-row" *ngFor="let day of schedule">
+        <div [class]="getScheduleRowClass(day)" *ngFor="let day of schedule">
           <label class="day-label">{{ day.name }}</label>
 
           <div class="intervals-container">
@@ -23,8 +23,9 @@
               <span class="time-separator">-</span>
               <input type="time" [(ngModel)]="interval.close" class="time-input" [disabled]="day.closed"
                 (blur)="validateInterval(day, interval)">
-              <button type="button" class="danger-btn" (click)="removeInterval(day,i)">
-                <i class="bi bi-trash"></i> Eliminar
+              <button type="button" class="danger-btn" (click)="removeInterval(day,i)"
+                [disabled]="day.intervals.length <= 1 || day.closed" title="Eliminar intervalo">
+                <i class="bi bi-trash"></i>
               </button>
             </div>
             <button type="button" class="add-btn" (click)="addInterval(day)" [disabled]="day.closed">

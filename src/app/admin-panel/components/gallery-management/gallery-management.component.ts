@@ -29,16 +29,22 @@ export class GalleryManagementComponent implements OnDestroy {
   susbscription: Subscription | undefined = undefined;
   galleryPhotos = signal<GalleryPhoto[]>([])
   isLoading = signal(true);
+  imageLoadStates: boolean[] = [];
 
   ngOnInit() {
     runInInjectionContext(this.injector, async () => {
       const images = await this.gallery.getImages()
       const gallery = await this.gallery.getImageInfo(images)
       this.galleryPhotos.set(gallery)
+      this.imageLoadStates = new Array(gallery.length).fill(false);
       this.isLoading.set(false)
     });
   }
-  
+  onImageLoad(index: number) {
+    this.imageLoadStates[index] = true;
+    this.cdr.detectChanges();
+  }
+
   onFileSelected(event: Event): void {
     const target = event.target as HTMLInputElement;
     if (target.files && target.files.length > 0) {
@@ -122,6 +128,9 @@ export class GalleryManagementComponent implements OnDestroy {
     this.galleryPhotos.update(photos =>
       photos.filter((_, index) => index !== i)
     );
+    if (! await this.toast.confirm('¿Estás seguro de que deseas eliminar esta imagen?')) {
+      return;
+    }
     this.toast.success("Foto eliminada con éxito")
   }
 

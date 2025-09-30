@@ -72,12 +72,37 @@ export class InfoManagementComponent implements OnInit {
     });
   }
 
-  addInterval(day: ScheduleDay) { day.intervals.push({ open: '', close: '' }); }
+  addInterval(day: ScheduleDay) {
+    // Si el día está cerrado, no permitir añadir intervalos
+    if (day.closed) return;
+
+    day.intervals.push({ open: '09:00', close: '14:00' });
+  }
   removeInterval(day: ScheduleDay, i: number) { day.intervals.splice(i, 1); }
   validateInterval(day: ScheduleDay, interval: Interval) {
     if (!day.closed && interval.open && interval.close && interval.open >= interval.close) interval.close = '';
   }
-  onToggleDayClosed(day: ScheduleDay) { if (day.closed) day.intervals = []; else if (!day.intervals.length) day.intervals.push({ open: '', close: '' }); }
+  onToggleDayClosed(day: ScheduleDay) {
+    if (day.closed) {
+      // GUARDAR los intervalos actuales antes de limpiar
+      if (!day.hasOwnProperty('backupIntervals')) {
+        (day as any).backupIntervals = [...day.intervals];
+      }
+      day.intervals = [];
+    } else {
+      // RESTAURAR los intervalos guardados, o usar uno por defecto si no hay backup
+      if ((day as any).backupIntervals && (day as any).backupIntervals.length > 0) {
+        day.intervals = [...(day as any).backupIntervals];
+      } else if (!day.intervals.length) {
+        day.intervals.push({ open: '09:00', close: '14:00' });
+      }
+      // Limpiar el backup después de restaurar
+      delete (day as any).backupIntervals;
+    }
+  }
+  getScheduleRowClass(day: ScheduleDay): string {
+    return day.closed ? 'schedule-row closed-day' : 'schedule-row';
+  }
   transformScheduleToDefault(): Record<string, any> {
     const out: Record<string, any> = {};
     for (const d of this.schedule) out[d.day] = { closed: !!d.closed, intervals: d.intervals.map(i => ({ open: i.open, close: i.close })) };
