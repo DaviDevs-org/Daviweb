@@ -1,21 +1,21 @@
 @use "sass:color";
 
-@use "../../styles/variables";
-@use "../../styles/mixins";
-@use "../../styles/responsive";
+@use "../../../../styles/variables" as *;
+@use "../../../../styles/mixins" as *;
+
 
 .upload-section {
-    @include mixins.card-style;
+    @include card-style;
     margin-bottom: 30px;
 
     .upload-area {
-        border: 2px dashed variables.$primary-gold;
+        border: 2px dashed $primary-gold;
         border-radius: 12px;
         padding: 40px;
         text-align: center;
         cursor: pointer;
         transition: all 0.3s ease;
-        background: rgba(variables.$primary-gold, 0.02);
+        background: rgba($primary-gold, 0.02);
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -26,14 +26,14 @@
         justify-content: center;
 
         &:hover {
-            border-color: variables.$secondary-gold;
+            border-color: $secondary-gold;
 
             &:not(.has-image) {
-                background: rgba(variables.$primary-gold, 0.05);
+                background: rgba($primary-gold, 0.05);
             }
 
             .upload-content {
-                background: rgba(variables.$white, 0.95);
+                background: rgba($white, 0.95);
                 transform: scale(1.02);
             }
         }
@@ -43,7 +43,7 @@
             border-width: 3px;
 
             .upload-content {
-                background: rgba(variables.$white, 0.9);
+                background: rgba($white, 0.9);
                 backdrop-filter: blur(5px);
                 border-radius: 8px;
                 padding: 20px;
@@ -61,37 +61,44 @@
 
             i {
                 font-size: 3rem;
-                color: variables.$primary-gold;
+                color: $primary-gold;
                 margin-bottom: 15px;
                 display: block;
             }
 
             p {
                 font-size: 1.1rem;
-                color: variables.$dark-brown;
+                color: $dark-brown;
                 margin: 0 0 5px 0;
                 font-weight: 500;
             }
 
             small {
-                color: variables.$text-gray;
+                color: $text-gray;
                 font-weight: 400;
             }
         }
     }
 
     .upload-btn {
-        @include mixins.button-style(variables.$primary-gold, variables.$secondary-gold);
+        @include button-style($primary-gold, $secondary-gold);
         margin-top: 20px;
     }
 }
 
+.section-header{
+    margin-bottom: 20px;
+    font-family: $font-primary;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-normal;
+}
+
 .current-gallery {
-    @include mixins.card-style;
+    @include card-style;
     min-height: 300px;
 
     h3 {
-        color: variables.$dark-brown;
+        color: $dark-brown;
         font-size: 1.5rem;
         margin: 0 0 20px 0;
         font-weight: 600;
@@ -107,7 +114,7 @@
         grid-template-columns: repeat(3, 1fr); // 3 columnas fijas
     }
 
-    @include responsive.mobile {
+    @include mobile {
         grid-template-columns: 1fr;
         min-height: 300px;
     }
@@ -119,7 +126,7 @@
     overflow: hidden;
     aspect-ratio: 16/9;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background: rgba(variables.$primary-gold, 0.1);
+    background: rgba($primary-gold, 0.1);
 
     img {
         width: 100%;
@@ -140,9 +147,9 @@
         right: 0;
         bottom: 0;
         background: linear-gradient(90deg,
-                rgba(variables.$primary-gold, 0.1) 25%,
-                rgba(variables.$primary-gold, 0.2) 50%,
-                rgba(variables.$primary-gold, 0.1) 75%);
+                rgba($primary-gold, 0.1) 25%,
+                rgba($primary-gold, 0.2) 50%,
+                rgba($primary-gold, 0.1) 75%);
         background-size: 200% 100%;
         animation: shimmer 1.5s infinite;
     }
@@ -170,7 +177,7 @@
         color: #fff;
 
         .photo-title-input {
-            background: rgba(variables.$white, 0.9);
+            background: rgba($white, 0.9);
             border: none;
             padding: 8px 12px;
             border-radius: 6px;
@@ -201,20 +208,20 @@
     height: 37px;
 
     &.edit-btn {
-        background: variables.$primary-gold;
-        color: variables.$white;
+        background: $primary-gold;
+        color: $white;
 
         &:hover {
-            background: variables.$secondary-gold;
+            background: $secondary-gold;
         }
     }
 
     &.delete-btn {
-        background: variables.$danger-red;
-        color: variables.$white;
+        background: $danger-red;
+        color: $white;
 
         &:hover {
-            background: color.adjust(variables.$danger-red, $lightness: -10%, $space: hsl);
+            background: color.adjust($danger-red, $lightness: -10%, $space: hsl);
         }
     }
 }

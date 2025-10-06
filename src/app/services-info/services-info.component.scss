@@ -1,7 +1,7 @@
 @use "sass:color";
-@use "../admin-panel/styles/variables";
-@use "../admin-panel/styles/mixins";
-@use "../admin-panel/styles/responsive";
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
 
 .services-section {
     padding: 48px 24px;
@@ -19,9 +19,9 @@
     position: relative;
     overflow: hidden;
     font-family: 'Inter', sans-serif;
-    color: variables.$dark-brown;
+    color: $dark-brown;
 
-    @include responsive.mobile {
+    @include mobile {
         padding: 36px 16px;
         gap: 48px;
     }
@@ -32,30 +32,29 @@
     width: 100%;
 
     .section-title {
-        color: variables.$black;
-        font-size: 36px;
-        font-family: Inter;
-        line-height: 1.3;
-        font-weight: 700;
+        color: $black;
+        font-family: $font-primary;
+        font-size: $font-size-3xl;
+        font-weight: $font-weight-bold;
         text-align: center;
         margin-bottom: 20px;
 
-        @include responsive.mobile {
+        @include mobile {
             font-size: 28px;
         }
     }
 
     .section-subtitle {
-        color: variables.$black;
-        font-size: 16px;
-        font-family: Inter;
+        color: $black;
+        font-family: $font-mono;
+        font-size: $font-size-lg;
+        font-weight: $font-weight-normal;
         line-height: 1.6;
-        font-weight: 400;
         text-align: center;
         margin: 0 auto;
         max-width: 600px;
 
-        @include responsive.mobile {
+        @include mobile {
             font-size: 14px;
             line-height: 1.5;
         }
@@ -63,13 +62,13 @@
 }
 
 .loading-container {
-    @include mixins.card-style;
+    @include card-style;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 48px 32px;
-    color: variables.$dark-brown;
+    color: $dark-brown;
     font-family: Inter;
     background: rgba(255, 255, 255, 0.28);
     border-radius: 12px;
@@ -78,15 +77,15 @@
     .loading-spinner {
         width: 40px;
         height: 40px;
-        border: 4px solid rgba(variables.$primary-gold, 0.2);
-        border-left: 4px solid variables.$primary-gold;
+        border: 4px solid rgba($primary-gold, 0.2);
+        border-left: 4px solid $primary-gold;
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin-bottom: 24px;
     }
 
     p {
-        color: variables.$black;
+        color: $black;
         font-size: 16px;
         font-family: Inter;
         font-weight: 500;
@@ -126,16 +125,16 @@
     }
 
     &::-webkit-scrollbar-track {
-        background: rgba(variables.$secondary-gold, 0.3);
+        background: rgba($secondary-gold, 0.3);
         border-radius: 40px;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: variables.$primary-gold;
+        background: $primary-gold;
         border-radius: 40px;
 
         &:hover {
-            background: variables.$secondary-gold;
+            background: $secondary-gold;
         }
     }
 
@@ -152,14 +151,14 @@
         white-space: nowrap;
         font-family: Inter, sans-serif;
         font-weight: 600;
-        color: variables.$black;
+        color: $black;
         font-size: 14px;
         min-width: fit-content;
         flex-shrink: 0;
 
         i {
             font-size: 16px;
-            color: variables.$text-gray;
+            color: $text-gray;
             transition: color 0.3s ease;
         }
 
@@ -168,8 +167,8 @@
         }
 
         .service-count {
-            background: rgba(variables.$primary-gold, 0.2);
-            color: variables.$primary-gold;
+            background: rgba($primary-gold, 0.2);
+            color: $primary-gold;
             padding: 4px 8px;
             border-radius: 12px;
             font-size: 12px;
@@ -184,36 +183,36 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
             i {
-                color: variables.$primary-gold;
+                color: $primary-gold;
             }
 
             .service-count {
-                background: variables.$primary-gold;
-                color: variables.$white;
+                background: $primary-gold;
+                color: $white;
             }
         }
 
         &.active {
-            background: variables.$white;
+            background: $white;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transform: translateY(-1px);
 
             i {
-                color: variables.$primary-gold;
+                color: $primary-gold;
             }
 
             span {
-                color: variables.$primary-gold;
+                color: $primary-gold;
                 font-weight: 700;
             }
 
             .service-count {
-                background: variables.$primary-gold;
-                color: variables.$white;
+                background: $primary-gold;
+                color: $white;
             }
         }
 
-        @include responsive.mobile {
+        @include mobile {
             padding: 16px 25px;
             gap: 8px;
 
@@ -243,7 +242,7 @@
     min-height: 500px;
     box-sizing: border-box;
 
-    @include responsive.mobile {
+    @include mobile {
         flex-direction: column;
         gap: 24px;
     }
@@ -263,19 +262,19 @@
         align-items: center;
         margin-bottom: 16px;
         padding-bottom: 12px;
-        border-bottom: 2px solid variables.$dark-brown;
+        border-bottom: 2px solid $dark-brown;
 
         h3 {
             margin: 0;
-            color: variables.$light-gold;
+            color: $light-gold;
             font-weight: 700;
             font-size: 18px;
             font-family: Inter, sans-serif;
         }
 
         .services-count {
-            background: rgba(variables.$primary-gold, 0.2);
-            color: variables.$light-gold;
+            background: rgba($primary-gold, 0.2);
+            color: $light-gold;
             padding: 6px 12px;
             border-radius: 12px;
             font-size: 14px;
@@ -283,7 +282,7 @@
             font-family: Inter, sans-serif;
         }
 
-        @include responsive.mobile {
+        @include mobile {
             h3 {
                 font-size: 16px;
             }
@@ -306,16 +305,16 @@
         }
 
         &::-webkit-scrollbar-track {
-            background: rgba(variables.$primary-gold, 0.1);
+            background: rgba($primary-gold, 0.1);
             border-radius: 4px;
         }
 
         &::-webkit-scrollbar-thumb {
-            background: variables.$primary-gold;
+            background: $primary-gold;
             border-radius: 4px;
 
             &:hover {
-                background: variables.$secondary-gold;
+                background: $secondary-gold;
             }
         }
 
@@ -337,23 +336,23 @@
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
                 .service-arrow {
-                    color: variables.$primary-gold;
+                    color: $primary-gold;
                     transform: translateX(4px);
                 }
             }
 
             &.selected {
-                background: variables.$white;
+                background: $white;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
                 transform: translateY(-1px);
 
                 .service-info .service-name {
-                    color: variables.$primary-gold;
+                    color: $primary-gold;
                     font-weight: 700;
                 }
 
                 .service-arrow {
-                    color: variables.$primary-gold;
+                    color: $primary-gold;
                 }
             }
 
@@ -366,7 +365,7 @@
                 .service-name {
                     font-weight: 600;
                     font-size: 16px;
-                    color: variables.$dark-brown;
+                    color: $dark-brown;
                     transition: all 0.3s ease;
                     line-height: 1.3;
                     margin: 0;
@@ -382,8 +381,8 @@
                         display: flex;
                         align-items: center;
                         gap: 6px;
-                        background: rgba(variables.$primary-gold, 0.15);
-                        color: variables.$primary-gold;
+                        background: rgba($primary-gold, 0.15);
+                        color: $primary-gold;
                         padding: 4px 8px;
                         border-radius: 6px;
                         font-size: 12px;
@@ -396,8 +395,8 @@
                     }
 
                     .price {
-                        background: rgba(variables.$secondary-gold, 0.2);
-                        color: variables.$dark-brown;
+                        background: rgba($secondary-gold, 0.2);
+                        color: $dark-brown;
                         font-weight: 700;
                         padding: 4px 10px;
                         border-radius: 6px;
@@ -408,7 +407,7 @@
             }
 
             .service-arrow {
-                color: variables.$text-gray;
+                color: $text-gray;
                 transition: all 0.3s ease;
                 opacity: 0.6;
 
@@ -417,7 +416,7 @@
                 }
             }
 
-            @include responsive.mobile {
+            @include mobile {
                 padding: 12px 16px;
                 flex-direction: column;
                 align-items: flex-start;
@@ -451,7 +450,7 @@
         }
     }
 
-    @include responsive.mobile {
+    @include mobile {
         flex: 1;
         padding: 20px 24px;
     }
@@ -467,7 +466,7 @@
     overflow: hidden;
     min-width: 300px;
 
-    @include responsive.mobile {
+    @include mobile {
         flex: 1;
         order: -1;
     }
@@ -497,8 +496,8 @@
             padding: 16px;
 
             .service-badge {
-                background: rgba(variables.$primary-gold, 0.95);
-                color: variables.$white;
+                background: rgba($primary-gold, 0.95);
+                color: $white;
                 padding: 6px 12px;
                 border-radius: 12px;
                 font-size: 12px;
@@ -514,7 +513,7 @@
             transform: scale(1.05);
         }
 
-        @include responsive.mobile {
+        @include mobile {
             height: 180px;
         }
     }
@@ -528,12 +527,12 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 16px;
-            border-bottom: 2px solid variables.$dark-brown;
+            border-bottom: 2px solid $dark-brown;
 
             .service-title {
                 font-size: 20px;
                 font-weight: 700;
-                color: variables.$light-gold;
+                color: $light-gold;
                 font-family: Inter, sans-serif;
                 line-height: 1.3;
                 margin: 0;
@@ -544,24 +543,24 @@
                 align-items: baseline;
                 gap: 4px;
                 font-family: Inter, sans-serif;
-                background: rgba(variables.$primary-gold, 0.15);
+                background: rgba($primary-gold, 0.15);
                 padding: 8px 16px;
                 border-radius: 8px;
 
                 .price-amount {
                     font-size: 20px;
                     font-weight: 700;
-                    color: variables.$light-gold;
+                    color: $light-gold;
                 }
 
                 .currency {
                     font-size: 16px;
                     font-weight: 600;
-                    color: variables.$light-gold;
+                    color: $light-gold;
                 }
             }
 
-            @include responsive.mobile {
+            @include mobile {
                 flex-direction: column;
                 gap: 12px;
                 text-align: center;
@@ -589,20 +588,20 @@
 
             p {
                 font-size: 15px;
-                color: variables.$text-gray;
+                color: $text-gray;
                 margin: 0;
                 padding: 12px 16px;
                 line-height: 1.6;
                 border-radius: 8px;
-                border-left: 3px solid variables.$primary-gold;
+                border-left: 3px solid $primary-gold;
                 font-style: italic;
                 text-align: left;
                 font-family: Inter, sans-serif;
-                background: rgba(variables.$white, 0.8);
+                background: rgba($white, 0.8);
                 font-weight: 500;
             }
 
-            @include responsive.mobile {
+            @include mobile {
                 p {
                     font-size: 14px;
                     padding: 10px 14px;
@@ -621,12 +620,12 @@
                 align-items: center;
                 gap: 12px;
                 padding: 12px 16px;
-                background: rgba(variables.$white, 0.8);
+                background: rgba($white, 0.8);
                 border-radius: 8px;
 
                 i {
                     font-size: 16px;
-                    color: variables.$primary-gold;
+                    color: $primary-gold;
                     width: 20px;
                     flex-shrink: 0;
                 }
@@ -638,7 +637,7 @@
 
                     .feature-label {
                         font-size: 11px;
-                        color: variables.$text-gray;
+                        color: $text-gray;
                         font-weight: 600;
                         font-family: Inter, sans-serif;
                         text-transform: uppercase;
@@ -647,13 +646,13 @@
 
                     .feature-value {
                         font-size: 14px;
-                        color: variables.$dark-brown;
+                        color: $dark-brown;
                         font-weight: 500;
                         font-family: Inter, sans-serif;
                     }
                 }
 
-                @include responsive.mobile {
+                @include mobile {
                     padding: 10px 14px;
 
                     i {
@@ -678,12 +677,12 @@
             display: flex;
             gap: 12px;
             padding-top: 16px;
-            border-top: 2px solid variables.$dark-brown;
+            border-top: 2px solid $dark-brown;
 
             .btn-primary {
                 flex: 1;
-                background: variables.$primary-gold;
-                color: variables.$white;
+                background: $primary-gold;
+                color: $white;
                 border: none;
                 display: flex;
                 align-items: center;
@@ -700,9 +699,9 @@
                 letter-spacing: 0.5px;
 
                 &:hover {
-                    background: variables.$secondary-gold;
+                    background: $secondary-gold;
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(variables.$primary-gold, 0.3);
+                    box-shadow: 0 4px 12px rgba($primary-gold, 0.3);
                 }
 
                 i {
@@ -710,7 +709,7 @@
                 }
             }
 
-            @include responsive.mobile {
+            @include mobile {
                 flex-direction: column;
                 gap: 10px;
 
@@ -726,7 +725,7 @@
             }
         }
 
-        @include responsive.mobile {
+        @include mobile {
             padding: 20px;
         }
     }
@@ -743,7 +742,7 @@
         .placeholder-icon {
             width: 60px;
             height: 60px;
-            background: rgba(variables.$primary-gold, 0.15);
+            background: rgba($primary-gold, 0.15);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -752,21 +751,21 @@
 
             i {
                 font-size: 24px;
-                color: variables.$primary-gold;
+                color: $primary-gold;
             }
         }
 
         h3 {
             font-size: 18px;
             font-weight: 700;
-            color: variables.$dark-brown;
+            color: $dark-brown;
             font-family: Inter, sans-serif;
             margin: 0 0 12px 0;
         }
 
         p {
             font-size: 15px;
-            color: variables.$text-gray;
+            color: $text-gray;
             font-family: Inter, sans-serif;
             max-width: 250px;
             line-height: 1.5;
@@ -774,7 +773,7 @@
             font-weight: 500;
         }
 
-        @include responsive.mobile {
+        @include mobile {
             padding: 36px 24px;
 
             .placeholder-icon {
@@ -812,13 +811,13 @@
     box-sizing: border-box;
 
     i {
-        color: variables.$light-gold;
+        color: $light-gold;
         font-size: 18px;
         flex-shrink: 0;
     }
 
     p {
-        color: variables.$light-gold;
+        color: $light-gold;
         font-size: 15px;
         font-family: Inter;
         line-height: 1.5;
@@ -828,7 +827,7 @@
         font-style: italic;
     }
 
-    @include responsive.mobile {
+    @include mobile {
         padding: 12px 16px;
         flex-direction: column;
         gap: 8px;

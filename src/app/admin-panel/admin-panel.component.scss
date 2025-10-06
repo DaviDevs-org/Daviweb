@@ -1,89 +1,60 @@
-@use "styles/mixins.scss";
-@use "styles/responsive.scss";
-@use "styles/variables.scss";
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
 
 .admin-container {
-  height: 100vh; // Cambiar de min-height a height fijo
-  background: linear-gradient(135deg, variables.$background-gold 0%, variables.$light-gold 100%);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  height: 100vh;
+  background: linear-gradient(135deg, $background-gold 0%, $light-gold 100%);
+  font-family: $font-primary;
   display: flex;
   flex-direction: column;
-  overflow: hidden; // Prevenir scroll global
+  overflow: hidden;
 }
 
 .admin-content {
-  flex: 1; // Ocupar el espacio restante
+  flex: 1;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 30px 20px;
-  overflow-y: auto; // Solo el contenido principal hace scroll
+  padding: $spacing-xl $spacing-lg;
+  overflow-y: auto;
   overflow-x: hidden;
+  @include custom-scrollbar();
 
-  @include responsive.mobile {
-    padding: 20px 15px;
-  }
-
-  // Ocultar scrollbar pero mantener funcionalidad
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: rgba(variables.$primary-gold, 0.1);
-    border-radius: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(variables.$primary-gold, 0.3);
-    border-radius: 4px;
-
-    &:hover {
-      background: rgba(variables.$primary-gold, 0.5);
-    }
+  @include mobile {
+    padding: $spacing-lg $spacing-md;
   }
 }
 
 .content-section {
-  animation: fadeIn 0.5s ease-in-out;
-  min-height: 100%; // Asegurar que ocupe todo el espacio disponible
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  @include fade-in();
+  min-height: 100%;
 }
 
 .section-header {
-  margin-bottom: 30px;
+  margin-bottom: $spacing-xl;
 
   h2 {
-    color: variables.$dark-brown;
-    font-size: 2rem;
-    font-weight: 700;
+    color: $dark-brown;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    font-family: $font-primary;
     margin: 0 0 10px 0;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: $spacing-md;
 
     i {
-      color: variables.$primary-gold;
+      color: $primary-gold;
     }
 
-    @include responsive.mobile {
-      font-size: 1.5rem;
+    @include mobile {
+      font-size: $font-size-2xl;
     }
   }
 
   p {
-    color: variables.$text-gray;
-    font-size: 1.1rem;
+    color: $text-gray;
+    font-size: $font-size-lg;
+    font-family: $font-primary;
     margin: 0;
   }
 }

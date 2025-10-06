@@ -1,3 +1,6 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
 .header {
   display: flex;
   flex-direction: column;
@@ -8,50 +11,62 @@
   background: #000;
   color: white;
   text-align: center;
-  padding: 8px;
+  padding: $spacing-sm;
 }
 
 .text-next {
-  font-size: 12px;
-  font-family: Inter, sans-serif;
-  font-weight: 400;
+  font-size: $font-size-xs;
+  font-family: $font-primary;
+  font-weight: $font-weight-normal;
 }
 
 .nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  background-color: rgba(213, 120, 11, 0.58);
+  padding: $spacing-md $spacing-lg;
+  background-color: $background-nav;
   flex-wrap: wrap;
+  box-shadow: $shadow-sm;
 }
 
 .heading-text {
-  font-size: 20px;
-  font-weight: 700;
-  font-family: Inter, sans-serif;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  font-family: $font-primary;
   color: #0f172a;
 }
 
 .anchors {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: $spacing-lg;
   flex-wrap: wrap;
 }
 
 .anchor {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: $spacing-xs;
+  transition: transform $transition-fast;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .anchor-text {
-  font-size: 14px;
-  font-family: Inter, sans-serif;
-  color: #404040;
+  font-size: $font-size-sm;
+  font-family: $font-primary;
+  font-weight: $font-weight-medium;
+  color: $text-dark;
   cursor: pointer;
   text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $dark-brown;
+  }
 }
 
 .status {
@@ -60,28 +75,29 @@
 }
 
 .status-container {
-  color: white;
-  border-radius: 9999px;
-  padding: 8px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: Inter, sans-serif;
+  color: $white;
+  border-radius: $border-radius-full;
+  padding: $spacing-sm $spacing-lg;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  font-family: $font-primary;
   min-width: 80px;
   text-align: center;
+  box-shadow: $shadow-sm;
   
   &.open {
-    background-color: rgb(32, 160, 32);
+    background-color: $status-open;
   }
   
   &.closed {
-    background-color: rgb(235, 39, 39);
+    background-color: $status-closed;
   }
   
   &.warning {
-    background-color: rgb(255, 193, 7); // Amarillo/naranja
-    color: #000; // Texto negro para mejor contraste
-    padding: 6px 16px;
-    animation: pulse-warning 3s infinite;
+    background-color: $warning-yellow;
+    color: $black;
+    padding: 6px $spacing-md;
+    @include pulse(3s);
     
     .status-content {
       display: flex;
@@ -91,56 +107,140 @@
     }
     
     .status-text {
-      font-size: 12px;
-      font-weight: 600;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
       line-height: 1.2;
     }
     
     .timer {
-      font-size: 16px;
-      font-weight: 700;
-      font-family: 'Courier New', monospace;
+      font-size: $font-size-base;
+      font-weight: $font-weight-bold;
+      font-family: $font-mono;
       letter-spacing: 1px;
     }
   }
 }
 
-@keyframes pulse-warning {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.9;
-  }
-}
-
-.welcome-photo {
+.welcome-banner {
+  position: relative;
   width: 100%;
-  max-width: 100%;
-  height: 170px;
-  background-image: url('https://wallpapercave.com/wp/wp9441481.jpg');
+  height: 450px;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://wallpapercave.com/wp/wp9441481.jpg');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: $shadow-lg;
+
+  @include mobile {
+    height: 350px;
+  }
+
+  @include small-mobile {
+    height: 300px;
+  }
+}
+
+.banner-content {
+  text-align: center;
+  color: $white;
+  z-index: 2;
+  padding: $spacing-xl;
+  max-width: 800px;
+  @include fade-in();
+}
+
+.banner-title {
+  font-size: $font-size-4xl;
+  font-weight: $font-weight-extrabold;
+  font-family: $font-primary;
+  margin-bottom: $spacing-md;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 1px;
+
+  @include mobile {
+    font-size: $font-size-3xl;
+  }
+
+  @include small-mobile {
+    font-size: $font-size-2xl;
+  }
+}
+
+.banner-subtitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-medium;
+  font-family: $font-primary;
+  margin-bottom: $spacing-sm;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+
+  @include mobile {
+    font-size: $font-size-lg;
+  }
+
+  @include small-mobile {
+    font-size: $font-size-base;
+  }
+}
+
+.banner-description {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-normal;
+  font-family: $font-primary;
+  margin-bottom: $spacing-xl;
+  line-height: 1.8;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+
+  @include mobile {
+    font-size: $font-size-base;
+    margin-bottom: $spacing-lg;
+  }
+
+  @include small-mobile {
+    font-size: $font-size-sm;
+  }
+}
+
+.banner-button {
+  @include button-style($primary-gold);
+  font-size: $font-size-lg;
+  padding: $spacing-md $spacing-xl;
+  font-weight: $font-weight-bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: $shadow-lg;
+
+  i {
+    font-size: $font-size-xl;
+  }
+
+  @include mobile {
+    font-size: $font-size-base;
+    padding: $spacing-md $spacing-lg;
+  }
+
+  @include small-mobile {
+    font-size: $font-size-sm;
+    padding: $spacing-sm $spacing-md;
+  }
 }
 
 // Responsive adjustments
-@media (max-width: 768px) {
+@include mobile {
   .nav {
-    padding: 12px 16px;
-    gap: 12px;
+    padding: $spacing-sm $spacing-md;
+    gap: $spacing-sm;
   }
   
   .anchors {
-    gap: 16px;
+    gap: $spacing-md;
   }
   
   .status-container {
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: $font-size-xs;
     min-width: 70px;
     
     &.warning {
@@ -151,31 +251,31 @@
       }
       
       .timer {
-        font-size: 14px;
+        font-size: $font-size-sm;
       }
     }
   }
   
   .heading-text {
-    font-size: 18px;
+    font-size: $font-size-lg;
   }
   
   .anchor-text {
-    font-size: 12px;
+    font-size: $font-size-xs;
   }
 }
 
-@media (max-width: 480px) {
+@include small-mobile {
   .nav {
     flex-direction: column;
-    gap: 16px;
+    gap: $spacing-md;
     text-align: center;
   }
   
   .anchors {
     justify-content: center;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: $spacing-sm;
   }
   
   .status-container {
@@ -189,7 +289,7 @@
       }
       
       .timer {
-        font-size: 12px;
+        font-size: $font-size-xs;
       }
     }
   }

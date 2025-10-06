@@ -1,5 +1,8 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
 body{
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: $spacing-2xl;
 }

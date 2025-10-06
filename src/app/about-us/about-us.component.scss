@@ -1,108 +1,112 @@
-.about-us_37-132 {
-  padding: 48px 24px;
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.about-us {
+  padding: $spacing-2xl $spacing-lg;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 64px;
+  gap: $spacing-3xl;
   box-sizing: border-box;
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  background: rgba(97, 53, 35, 0.6);
-  border-radius: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  font-size: 17px;
-  font-family: 'Inter', sans-serif;
-  color: #000000;
+  background: $background-section;
+  border-radius: $border-radius-xl;
+  box-shadow: $shadow-md;
+  font-size: $font-size-lg;
+  font-family: $font-primary;
+  color: $black;
   overflow-x: hidden;
 
-  @media (max-width: 768px) {
-    padding: 32px 16px;
+  @include mobile {
+    padding: $spacing-xl $spacing-md;
     gap: 40px;
   }
 
-  @media (max-width: 480px) {
-    padding: 24px 12px;
-    gap: 32px;
+  @include small-mobile {
+    padding: $spacing-lg $spacing-sm;
+    gap: $spacing-xl;
   }
 }
 
-.heading_37-133 {
-  font-weight: bolder;
-  font-size: 30px;
+.heading {
+  font-family: $font-primary;
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
 
-  @media (max-width: 768px) {
+  @include mobile {
     font-size: 26px;
   }
 
-  @media (max-width: 480px) {
-    font-size: 24px;
+  @include small-mobile {
+    font-size: $font-size-2xl;
   }
 }
 
-.info_37-135 {
+.info {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  gap: 32px;
+  gap: $spacing-xl;
   box-sizing: border-box;
   width: 100%;
 
-  @media (max-width: 900px) {
+  @include tablet {
     flex-direction: column;
-    gap: 24px;
+    gap: $spacing-lg;
   }
 }
 
-.paragraph_37-136 {
+.paragraph {
   flex: 1 1 auto;
   min-width: 280px;
   max-width: 550px;
-  padding: 0 24px;
+  padding: 0 $spacing-lg;
   box-sizing: border-box;
   margin-left: 4%;
-  font-weight: 500;
-  line-height: 27px;
-  font-size: 17px;
+  font-weight: $font-weight-medium;
+  line-height: 1.7;
+  font-size: $font-size-lg;
   text-align: justify;
-  color: #000000;
-  font-family: 'Inter', sans-serif;
+  color: $black;
+  font-family: $font-primary;
 
-  @media (max-width: 900px) {
+  @include tablet {
     max-width: 100%;
     margin-left: 0;
-    padding: 0 12px;
+    padding: 0 $spacing-sm;
     text-align: left;
   }
 
-  @media (max-width: 480px) {
-    font-size: 15px;
-    line-height: 24px;
-    padding: 0 8px;
+  @include small-mobile {
+    font-size: $font-size-base;
+    line-height: 1.6;
+    padding: 0 $spacing-xs;
     min-width: auto;
   }
 }
 
 .text-block {
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 32px;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  line-height: 2;
   margin: 0;
   text-align: justify;
-  color: #000000;
-  font-family: 'Inter', sans-serif;
+  color: $black;
+  font-family: $font-primary;
 
-  @media (max-width: 900px) {
+  @include tablet {
     text-align: left;
   }
 
-  @media (max-width: 480px) {
-    font-size: 15px;
-    line-height: 26px;
+  @include small-mobile {
+    font-size: $font-size-base;
+    line-height: 1.6;
   }
 }
 
-.image_37-152 {
+.image {
   flex: 0 0 40%;
   width: 400px;
   max-width: 100%;
@@ -111,29 +115,35 @@
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: $border-radius-md;
   margin-right: 4%;
+  box-shadow: $shadow-md;
+  transition: transform $transition-normal;
 
-  @media (max-width: 900px) {
+  &:hover {
+    transform: scale(1.02);
+  }
+
+  @include tablet {
     flex: none;
     width: 100%;
     margin-right: 0;
-    order: -1; // Coloca la imagen arriba del texto en móvil
+    order: -1;
   }
 
-  @media (max-width: 480px) {
-    border-radius: 6px;
+  @include small-mobile {
+    border-radius: $border-radius-sm;
   }
 }
 
-.image_37-152 svg,
-.image_37-152 img {
+.image svg,
+.image img {
   width: 100%;
   height: auto;
   display: block;
-  border-radius: 8px;
+  border-radius: $border-radius-md;
 
-  @media (max-width: 480px) {
-    border-radius: 6px;
+  @include small-mobile {
+    border-radius: $border-radius-sm;
   }
 }

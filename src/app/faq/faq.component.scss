@@ -1,56 +1,75 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
 .faq {
-  padding: 32px 40px 48px 40px;
-  max-width: 1180px; /* igual que otros bloques */
+  padding: $spacing-xl 40px $spacing-2xl 40px;
+  max-width: 1180px;
   margin: 0 auto;
-  background: rgba(97, 53, 35, 0.6);
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  background: $background-section;
+  border-radius: $border-radius-xl;
+  box-shadow: $shadow-md;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 48px;
+  gap: $spacing-2xl;
   box-sizing: border-box;
   text-align: center;
   width: 100%;
   margin-bottom: 2%;
+
+  @include mobile {
+    padding: $spacing-lg $spacing-lg $spacing-xl;
+  }
 }
 
 .faq-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: $spacing-lg;
   width: 100%;
-  max-width: 1120px; /* un poco menos que el contenedor padre para dar margen */
+  max-width: 1120px;
   box-sizing: border-box;
   align-items: center;
 }
+
 .heading{
-  font-size: 36px;
-  font-weight: 700;
+  font-family: $font-primary;
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+
+  @include mobile {
+    font-size: $font-size-2xl;
+  }
 }
 
 .button {
   width: 100%;
-  max-width: 1120px; /* igual que el contenedor padre para no salirse */
-  padding: 14px 26px;
+  max-width: 1120px;
+  padding: $spacing-sm 26px;
   background-color: rgba(97, 53, 35, 0.76);
-  color: white;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  border-radius: 20px;
+  color: $white;
+  font-weight: $font-weight-semibold;
+  font-family: $font-primary;
+  font-size: $font-size-base;
+  border-radius: $border-radius-xl;
   border: 1.5px solid rgba(255,255,255,0.15);
   cursor: pointer;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+  box-shadow: $shadow-md;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
+  transition: all $transition-normal;
   text-shadow: 0 1px 1px rgba(0,0,0,0.2);
-}
 
-.button:hover {
-  background-color: rgb(140, 84, 62);
-  border-color: #7a4828;
-  transform: translateY(-3px);
+  &:hover {
+    background-color: rgb(140, 84, 62);
+    border-color: #7a4828;
+    transform: translateY(-3px);
+    box-shadow: $shadow-lg;
+  }
+
+  @include mobile {
+    padding: $spacing-sm $spacing-lg;
+    font-size: $font-size-sm;
+  }
 }

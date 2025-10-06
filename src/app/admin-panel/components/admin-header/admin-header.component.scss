@@ -1,11 +1,11 @@
 // admin-header.component.scss (ACTUALIZADO)
-@use "../../styles/variables";
-@use "../../styles/mixins";
-@use "../../styles/responsive";
+@use "../../../../styles/variables" as *;
+@use "../../../../styles/mixins" as *;
+
 
 .admin-header {
-    background: linear-gradient(135deg, variables.$primary-gold, variables.$secondary-gold);
-    color: variables.$white;
+    background: linear-gradient(135deg, $primary-gold, $secondary-gold);
+    color: $white;
     padding: 15px 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     position: sticky;
@@ -20,7 +20,7 @@
         justify-content: space-between;
         align-items: center;
 
-        @include responsive.mobile {
+        @include mobile {
             padding: 0 15px;
         }
     }
@@ -30,14 +30,14 @@
         align-items: center;
         gap: 12px;
 
-        @include responsive.mobile {
+        @include mobile {
             gap: 8px;
         }
 
         .scissors-icon {
             font-size: 1.8rem;
 
-            @include responsive.mobile {
+            @include mobile {
                 font-size: 1.5rem;
             }
         }
@@ -48,20 +48,20 @@
             margin: 0;
             letter-spacing: 0.5px;
 
-            @include responsive.mobile {
+            @include mobile {
                 font-size: 1.2rem;
                 letter-spacing: 0.3px;
             }
         }
 
         .admin-badge {
-            background: rgba(variables.$white, 0.2);
+            background: rgba($white, 0.2);
             padding: 4px 10px;
             border-radius: 16px;
             font-size: 0.75rem;
             font-weight: 500;
 
-            @include responsive.mobile {
+            @include mobile {
                 display: none; // Ocultar badge en móvil para ahorrar espacio
             }
         }
@@ -72,22 +72,22 @@
         align-items: center;
         gap: 15px;
 
-        @include responsive.mobile {
+        @include mobile {
             gap: 10px;
         }
 
         .welcome-text {
             font-weight: 500;
 
-            @include responsive.mobile {
+            @include mobile {
                 display: none; // Ocultar texto de bienvenida en móvil
             }
         }
 
         .logout-btn {
-            background: rgba(variables.$white, 0.1);
-            border: 2px solid rgba(variables.$white, 0.3);
-            color: variables.$white;
+            background: rgba($white, 0.1);
+            border: 2px solid rgba($white, 0.3);
+            color: $white;
             padding: 8px 14px;
             border-radius: 8px;
             cursor: pointer;
@@ -98,7 +98,7 @@
             gap: 6px;
             font-size: 0.9rem;
 
-            @include responsive.mobile {
+            @include mobile {
                 padding: 6px 10px;
                 font-size: 0.8rem;
 
@@ -108,9 +108,23 @@
             }
 
             &:hover {
-                background: rgba(variables.$white, 0.2);
-                border-color: rgba(variables.$white, 0.5);
+                background: rgba($white, 0.2);
+                border-color: rgba($white, 0.5);
             }
         }
     }
+    @media (max-width: 768px) {
+    .admin-header {
+        position: fixed; // Cambiar de sticky a fixed
+        width: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1001; // Mayor que el nav
+        
+        .header-content {
+            padding: 0 10px; // Reducir padding
+        }
+    }
+}
+
 }

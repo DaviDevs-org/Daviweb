@@ -1,7 +1,7 @@
 @use "sass:color";
-@use "../admin-panel/styles/variables";
-@use "../admin-panel/styles/mixins";
-@use "../admin-panel/styles/responsive";
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
 
 .barbers-section {
     padding: 48px 24px;
@@ -19,9 +19,9 @@
     position: relative;
     overflow: hidden;
     font-family: 'Inter', sans-serif;
-    color: variables.$dark-brown;
+    color: $dark-brown;
 
-    @include responsive.mobile {
+    @include mobile {
         padding: 36px 16px;
         gap: 48px;
     }
@@ -32,30 +32,30 @@
     width: 100%;
 
     .section-title {
-        color: variables.$black;
-        font-size: 36px;
-        font-family: Inter;
+        color: $black;
+        font-family: $font-primary;
+        font-size: $font-size-3xl;
+        font-weight: $font-weight-bold;
         line-height: 1.3;
-        font-weight: 700;
         text-align: center;
         margin-bottom: 20px;
 
-        @include responsive.mobile {
+        @include mobile {
             font-size: 28px;
         }
     }
 
     .section-subtitle {
-        color: variables.$black;
-        font-size: 16px;
-        font-family: Inter;
+        color: $black;
+        font-family: $font-mono;
+        font-size: $font-size-lg;
+        font-weight: $font-weight-normal;
         line-height: 1.6;
-        font-weight: 400;
         text-align: center;
         margin: 0 auto;
         max-width: 600px;
 
-        @include responsive.mobile {
+        @include mobile {
             font-size: 14px;
             line-height: 1.5;
         }
@@ -63,13 +63,13 @@
 }
 
 .loading-container {
-    @include mixins.card-style;
+    @include card-style;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 48px 32px;
-    color: variables.$dark-brown;
+    color: $dark-brown;
     font-family: Inter;
     background: rgba(255, 255, 255, 0.28);
     border-radius: 12px;
@@ -78,15 +78,15 @@
     .loading-spinner {
         width: 40px;
         height: 40px;
-        border: 4px solid rgba(variables.$primary-gold, 0.2);
-        border-left: 4px solid variables.$primary-gold;
+        border: 4px solid rgba($primary-gold, 0.2);
+        border-left: 4px solid $primary-gold;
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin-bottom: 24px;
     }
 
     p {
-        color: variables.$black;
+        color: $black;
         font-size: 16px;
         font-family: Inter;
         font-weight: 500;
@@ -115,7 +115,7 @@
     width: 100%;
     max-width: 1180px;
 
-    @include responsive.mobile {
+    @include mobile {
         grid-template-columns: 1fr;
         gap: 24px;
     }
@@ -139,11 +139,11 @@
     }
 
     &.featured {
-        border: 2px solid variables.$primary-gold;
-        box-shadow: 0 4px 20px rgba(variables.$primary-gold, 0.2);
+        border: 2px solid $primary-gold;
+        box-shadow: 0 4px 20px rgba($primary-gold, 0.2);
 
         &:hover {
-            box-shadow: 0 8px 30px rgba(variables.$primary-gold, 0.3);
+            box-shadow: 0 8px 30px rgba($primary-gold, 0.3);
         }
     }
 
@@ -172,8 +172,8 @@
             padding: 16px;
 
             .featured-badge {
-                background: rgba(variables.$primary-gold, 0.95);
-                color: variables.$white;
+                background: rgba($primary-gold, 0.95);
+                color: $white;
                 padding: 8px 16px;
                 border-radius: 20px;
                 font-size: 12px;
@@ -192,7 +192,7 @@
             }
         }
 
-        @include responsive.mobile {
+        @include mobile {
             height: 240px;
         }
     }
@@ -204,12 +204,12 @@
             text-align: center;
             margin-bottom: 20px;
             padding-bottom: 16px;
-            border-bottom: 2px solid variables.$dark-brown;
+            border-bottom: 2px solid $dark-brown;
 
             .barber-name {
                 font-size: 22px;
                 font-weight: 700;
-                color: variables.$light-gold;
+                color: $light-gold;
                 font-family: Inter, sans-serif;
                 line-height: 1.3;
                 margin: 0 0 8px 0;
@@ -217,19 +217,19 @@
 
             .barber-specialty {
                 font-size: 14px;
-                color: variables.$primary-gold;
+                color: $primary-gold;
                 font-family: Inter, sans-serif;
                 font-weight: 600;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 margin: 0;
-                background: rgba(variables.$primary-gold, 0.15);
+                background: rgba($primary-gold, 0.15);
                 padding: 4px 12px;
                 border-radius: 12px;
                 display: inline-block;
             }
 
-            @include responsive.mobile {
+            @include mobile {
                 .barber-name {
                     font-size: 20px;
                 }
@@ -249,24 +249,24 @@
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
-                background: rgba(variables.$white, 0.8);
+                background: rgba($white, 0.8);
                 padding: 10px 16px;
                 border-radius: 8px;
                 margin-bottom: 12px;
 
                 i {
                     font-size: 16px;
-                    color: variables.$primary-gold;
+                    color: $primary-gold;
                 }
 
                 span {
                     font-size: 14px;
-                    color: variables.$dark-brown;
+                    color: $dark-brown;
                     font-weight: 600;
                     font-family: Inter, sans-serif;
                 }
 
-                @include responsive.mobile {
+                @include mobile {
                     padding: 8px 14px;
 
                     i {
@@ -281,19 +281,19 @@
 
             .barber-description {
                 font-size: 15px;
-                color: variables.$text-gray;
+                color: $text-gray;
                 margin: 0;
                 padding: 12px 16px;
                 line-height: 1.6;
                 border-radius: 8px;
-                border-left: 3px solid variables.$primary-gold;
+                border-left: 3px solid $primary-gold;
                 font-style: italic;
                 text-align: center;
                 font-family: Inter, sans-serif;
-                background: rgba(variables.$white, 0.8);
+                background: rgba($white, 0.8);
                 font-weight: 500;
 
-                @include responsive.mobile {
+                @include mobile {
                     font-size: 14px;
                     padding: 10px 14px;
                 }
@@ -304,11 +304,11 @@
             display: flex;
             justify-content: center;
             padding-top: 16px;
-            border-top: 2px solid variables.$dark-brown;
+            border-top: 2px solid $dark-brown;
 
             .btn-primary {
-                background: variables.$primary-gold;
-                color: variables.$white;
+                background: $primary-gold;
+                color: $white;
                 border: none;
                 display: flex;
                 align-items: center;
@@ -326,16 +326,16 @@
                 min-width: 200px;
 
                 &:hover {
-                    background: variables.$secondary-gold;
+                    background: $secondary-gold;
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(variables.$primary-gold, 0.3);
+                    box-shadow: 0 4px 12px rgba($primary-gold, 0.3);
                 }
 
                 i {
                     font-size: 14px;
                 }
 
-                @include responsive.mobile {
+                @include mobile {
                     padding: 10px 20px;
                     font-size: 13px;
                     min-width: 180px;
@@ -347,7 +347,7 @@
             }
         }
 
-        @include responsive.mobile {
+        @include mobile {
             padding: 20px;
         }
     }
@@ -369,7 +369,7 @@
     .placeholder-icon {
         width: 60px;
         height: 60px;
-        background: rgba(variables.$primary-gold, 0.15);
+        background: rgba($primary-gold, 0.15);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -378,21 +378,21 @@
 
         i {
             font-size: 24px;
-            color: variables.$primary-gold;
+            color: $primary-gold;
         }
     }
 
     h3 {
         font-size: 18px;
         font-weight: 700;
-        color: variables.$dark-brown;
+        color: $dark-brown;
         font-family: Inter, sans-serif;
         margin: 0 0 12px 0;
     }
 
     p {
         font-size: 15px;
-        color: variables.$text-gray;
+        color: $text-gray;
         font-family: Inter, sans-serif;
         max-width: 300px;
         line-height: 1.5;
@@ -400,7 +400,7 @@
         font-weight: 500;
     }
 
-    @include responsive.mobile {
+    @include mobile {
         padding: 36px 24px;
 
         .placeholder-icon {
@@ -437,13 +437,13 @@
     box-sizing: border-box;
 
     i {
-        color: variables.$light-gold;
+        color: $light-gold;
         font-size: 18px;
         flex-shrink: 0;
     }
 
     p {
-        color: variables.$light-gold;
+        color: $light-gold;
         font-size: 15px;
         font-family: Inter;
         line-height: 1.5;
@@ -453,7 +453,7 @@
         font-style: italic;
     }
 
-    @include responsive.mobile {
+    @include mobile {
         padding: 12px 16px;
         flex-direction: column;
         gap: 8px;

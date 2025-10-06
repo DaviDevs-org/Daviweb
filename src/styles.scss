@@ -1,3 +1,6 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
 html {
   scroll-behavior: smooth;
   height: 100%;
@@ -9,18 +12,29 @@ body {
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow-y: auto; /* scroll vertical si hace falta */
-  background-color: rgba(189, 139, 63, 0.65);
-  font-family: 'Inter', sans-serif;
+  overflow-y: auto;
+  background-color: $background-primary;
+  font-family: $font-primary;
+  font-size: $font-size-base;
+  color: $black;
+  line-height: 1.6;
 }
 
 app-root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: rgba(189, 139, 63, 0.35);
+  background-color: $background-secondary;
   overflow-y: auto;
 }
-*{
+
+* {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// Scrollbar global
+html {
+  @include custom-scrollbar();
 }

@@ -1,7 +1,6 @@
 @use 'sass:color';
-@use '../../styles/variables' as *;
-@use '../../styles/mixins' as *;
-@use '../../styles/responsive' as *;
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
 
 // ------------------------
 // Contenedores y tarjetas
@@ -27,6 +26,12 @@
   }
 }
 
+.section-header{
+  margin-bottom: 20px;
+  font-family: $font-primary;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-normal;
+}
 .info-card {
   @include card-style;
   padding: 20px;
@@ -1132,7 +1137,7 @@
 
     &.completed {
       .step-number {
-        background: lighten($primary-gold, 20%);
+        background: color.adjust($primary-gold, $lightness: 20%);
         border-color: $primary-gold;
         color: $dark-brown;
       }
@@ -1400,7 +1405,7 @@
 
     &.completed {
       .step-number {
-        background: lighten($primary-gold, 35%);
+        background: color.adjust($primary-gold, $lightness: 35%);
         border-color: $primary-gold;
         color: $primary-gold;
       }

@@ -35,7 +35,7 @@ export class LoginComponent {
       }
       else{
         console.log(response.error)
-        this.toast.error(response.error)
+        this.toast.error("Email o contraseña incorrectos")
       }
       this.isLoading = false
     }
@@ -46,7 +46,7 @@ export class LoginComponent {
   }
 
   onForgotPassword() {
-    console.log('Recuperar contraseña');
+    this.toast.info("Contacte con el administrador para recuperar la contraseña")
 
   }
 

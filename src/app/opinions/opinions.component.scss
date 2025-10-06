@@ -1,3 +1,6 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
 .opinions {
   max-width: 1180px;
   margin: 0 auto;
@@ -12,9 +15,17 @@
 }
 
 .opinions-heading {
-  font-weight: 600;
-  font-size: 36px;
+  font-family: $font-primary;
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  color: $black;
   margin-bottom: 12px;
+}
+.subtitle{
+  color: $black;
+  font-family: $font-mono;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-normal;
 }
 
 .opinions-description {
@@ -58,14 +69,6 @@
 
 .opinion:hover {
   transform: translateY(-4px);
-}
-
-.opinion-text {
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #0f172a;
-  text-align: justify;
 }
 
 .more-reviews {
