@@ -1,4 +1,4 @@
-<div class="footer">
+<footer class="footer">
   <div class="footer-container">
     <div class="info">
       <div class="container-column">
@@ -7,8 +7,8 @@
           <a class="text" href="#" (click)="scrollToSection('featured-cuts'); $event.preventDefault()">Nuestros Cortes</a>
           <a class="text" href="#" (click)="scrollToSection('services'); $event.preventDefault()">Servicios y Precios</a>
           <a class="text" href="#" (click)="scrollToSection('appointments'); $event.preventDefault()">Reservar Cita</a>
-          <a class="text" href="#" (click)="scrollToSection('location-and-contact'); $event.preventDefault()">Política de Privacidad</a>
-          <a class="text" href="#" (click)="scrollToSection('location-and-contact'); $event.preventDefault()">Términos y Condiciones</a>
+          <a class="text" href="#" (click)="openLegal('aviso'); $event.preventDefault()">Aviso legal</a>
+          <a class="text" href="#" (click)="openLegal('privacidad'); $event.preventDefault()">Política de privacidad</a>
           <a class="text" [routerLink]=`admin`>Sección de administrador</a>
         </div>
       </div>
@@ -44,7 +44,16 @@
       </div>
     </div>
     <div class="copyright">
-        <span class="text">© 2025 Barbería Moderna. Todos los derechos reservados.</span>
+        <span class="text">© 2025 Peluquería Moderna. Todos los derechos reservados.</span>
     </div>
   </div>
-</div>
+  <app-legal-modal
+    [visible]="legalVisible"
+    [title]="legalTitle"
+    [content]="legalContent"
+    (closeModal)="closeModal()"
+  ></app-legal-modal>
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+</footer>

@@ -95,11 +95,11 @@ export class BarbersInfoComponent implements OnInit, OnDestroy {
 
   private getRandomDescription(name: string): string {
     const descriptions = [
-      `${name.split(' ')[0]} es un experto en técnicas tradicionales de barbería con un toque moderno.`,
+      `${name.split(' ')[0]} es un experto en técnicas tradicionales de peluquería con un toque moderno.`,
       `Especialista en crear el look perfecto para cada cliente, ${name.split(' ')[0]} combina precisión con creatividad.`,
       `Con años de experiencia, ${name.split(' ')[0]} domina tanto estilos clásicos como las últimas tendencias.`,
       `${name.split(' ')[0]} se enfoca en brindar una experiencia premium a cada cliente que atiende.`,
-      `Apasionado por la barbería, ${name.split(' ')[0]} está siempre actualizado con las nuevas técnicas y estilos.`
+      `Apasionado por la peluquería, ${name.split(' ')[0]} está siempre actualizado con las nuevas técnicas y estilos.`
     ];
     return descriptions[Math.floor(Math.random() * descriptions.length)];
   }

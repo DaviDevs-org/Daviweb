@@ -107,7 +107,10 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
 
     return formatted;
   }
-
+  onProgressInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.goToSlide(Number(input.value));
+  }
   private startAutoPlay() {
     // Solo iniciar autoplay si hay más de una imagen
     if (this.totalSlides() <= 1) return;
