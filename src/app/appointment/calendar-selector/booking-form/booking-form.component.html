@@ -1,6 +1,6 @@
 <form #bookingForm="ngForm" (ngSubmit)="onSubmit(bookingForm)" novalidate class="booking-form-container">
     <!-- Eliminados los párrafos de debug -->
-    
+
     <h3 class="form-title">Confirmar Reserva</h3>
     <p class="form-subtitle">Para el {{ date }} a las {{ time }}</p>
 
@@ -63,7 +63,25 @@
         </div>
     </div>
 
-    <button type="submit" class="submit-btn" [disabled]="!date || !time || submitting">
+    <div class="form-group privacy-consent">
+      <label class="checkbox-container">
+      <input
+        type="checkbox"
+        id="privacyConsent"
+        name="privacyConsent"
+        ngModel
+        required
+      />
+        He leído y acepto la
+        <a routerLink="/privacidad" target="_blank">Política de Privacidad</a>
+      </label>
+      <div class="error" [class.visible]="privacyConsentInvalid">
+        Debes aceptar la política de privacidad para enviar la reserva.
+      </div>
+    </div>
+
+
+  <button type="submit" class="submit-btn" [disabled]="!date || !time || submitting">
         <span *ngIf="!submitting">Confirmar Reserva</span>
         <span *ngIf="submitting">Procesando...</span>
     </button>

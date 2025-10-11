@@ -9,11 +9,12 @@ import { InfoManager } from '../../../services/admin-panel/info-management.servi
 import { AppointmentManagerService } from '../../../services/admin-panel/appointment-management.service';
 import { firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-booking-form',
   standalone: true,
-  imports: [FormsModule, NgIf, NgForOf],
+  imports: [FormsModule, NgIf, NgForOf, RouterLink],
   templateUrl: './booking-form.component.html',
   styleUrls: ['./booking-form.component.scss']
 })
@@ -66,15 +67,15 @@ export class BookingFormComponent implements OnChanges, OnInit {
 
   async ngOnInit(): Promise<void> {
     this.services = await this.sv.getServicesDirectly();
-    
+
     // Cargar datos de horarios para validación
     try {
       this.schedule = await this.infoManager.getSchedule();
       this.exceptions = await this.infoManager.getExceptions();
-      
+
       // Cargar citas existentes
       await this.loadExistingAppointments();
-      
+
       this.updateAvailableServices();
     } catch (error) {
       console.error('Error cargando horarios:', error);
@@ -140,7 +141,7 @@ export class BookingFormComponent implements OnChanges, OnInit {
     // Recargar citas existentes cuando cambie la fecha para tener datos actualizados
     await this.loadExistingAppointments();
 
-    this.availableServices = this.services.filter(service => 
+    this.availableServices = this.services.filter(service =>
       this.canScheduleService(selectedDate, this.time!, service)
     );
 
@@ -157,30 +158,30 @@ export class BookingFormComponent implements OnChanges, OnInit {
       // Servicio sin timeSegments, asumir duración por defecto de 30 minutos
       const startMinutes = this.timeToMinutes(time);
       const endTimeMinutes = startMinutes + 30;
-      
+
       // Verificar horarios de cierre
       if (!this.isTimeWithinSchedule(date, endTimeMinutes)) {
         return false;
       }
-      
+
       // Verificar colisiones con otras citas
       return !this.hasCollisionWithExistingAppointments(date, startMinutes, 30);
     }
 
     const dateKey = this.formatDate(date);
     const startMinutes = this.timeToMinutes(time);
-    
+
     // Calcular todos los slots que ocupará el servicio
     const serviceSlots: number[] = [];
     let currentTime = startMinutes;
-    
+
     service.timeSegments.forEach((segment, index) => {
       // Slots del servicio activo
       for (let i = 0; i < segment.duration; i += 30) {
         serviceSlots.push(currentTime + i);
       }
       currentTime += segment.duration;
-      
+
       // Slots del break (si existe y no es el último segmento)
       if (segment.breakAfter && segment.breakAfter > 0 && index < service.timeSegments.length - 1) {
         for (let i = 0; i < segment.breakAfter; i += 30) {
@@ -198,13 +199,13 @@ export class BookingFormComponent implements OnChanges, OnInit {
 
     // Verificar que no se sobreponga con otras citas
     const dayAppointments = this.getAppointmentsForDate(dateKey);
-    
+
     for (const appointment of dayAppointments) {
       if (!appointment.timeNormalized || appointment.timeNormalized === '—') continue;
-      
+
       const appointmentSegments = this.getAppointmentTimeSegments(appointment);
       const occupiedSlots: number[] = [];
-      
+
       appointmentSegments.forEach(segment => {
         // Solo verificar colisión con segmentos ACTIVOS, no con breaks
         if (segment.type === 'active') {
@@ -213,7 +214,7 @@ export class BookingFormComponent implements OnChanges, OnInit {
           }
         }
       });
-      
+
       // Verificar solapamiento solo con slots activos del nuevo servicio
       const activeServiceSlots = this.getActiveServiceSlots(service, startMinutes);
       const hasOverlap = activeServiceSlots.some(slot => occupiedSlots.includes(slot));
@@ -225,41 +226,46 @@ export class BookingFormComponent implements OnChanges, OnInit {
     return true;
   }
 
+  get privacyConsentInvalid(): boolean {
+    const consent = this.formRef?.controls['privacyConsent']?.value;
+    return this.submitted && !consent;
+  }
+
   private getActiveServiceSlots(service: Service, startMinutes: number): number[] {
     const activeSlots: number[] = [];
     let currentTime = startMinutes;
-    
+
     service.timeSegments.forEach((segment, index) => {
       // Solo agregar slots activos, no breaks
       for (let i = 0; i < segment.duration; i += 30) {
         activeSlots.push(currentTime + i);
       }
       currentTime += segment.duration;
-      
+
       // Saltar el break pero no agregarlo a activeSlots
       if (segment.breakAfter && segment.breakAfter > 0 && index < service.timeSegments.length - 1) {
         currentTime += segment.breakAfter;
       }
     });
-    
+
     return activeSlots;
   }
 
   private hasCollisionWithExistingAppointments(date: Date, startMinutes: number, duration: number): boolean {
     const dateKey = this.formatDate(date);
     const dayAppointments = this.getAppointmentsForDate(dateKey);
-    
+
     const newAppointmentSlots: number[] = [];
     for (let i = 0; i < duration; i += 30) {
       newAppointmentSlots.push(startMinutes + i);
     }
-    
+
     for (const appointment of dayAppointments) {
       if (!appointment.timeNormalized || appointment.timeNormalized === '—') continue;
-      
+
       const appointmentSegments = this.getAppointmentTimeSegments(appointment);
       const occupiedSlots: number[] = [];
-      
+
       appointmentSegments.forEach(segment => {
         if (segment.type === 'active') {
           for (let i = 0; i < segment.duration; i += 30) {
@@ -267,13 +273,13 @@ export class BookingFormComponent implements OnChanges, OnInit {
           }
         }
       });
-      
+
       const hasOverlap = newAppointmentSlots.some(slot => occupiedSlots.includes(slot));
       if (hasOverlap) {
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -310,9 +316,9 @@ export class BookingFormComponent implements OnChanges, OnInit {
   private isTimeWithinSchedule(date: Date, endTimeMinutes: number): boolean {
     const dateKey = this.formatDate(date);
     const exception = this.exceptions.find(ex => ex.date === dateKey);
-    
+
     let intervals: {open: string; close: string}[] = [];
-    
+
     if (exception) {
       if (exception.closed) return false;
       intervals = exception.intervals || [];
@@ -322,7 +328,7 @@ export class BookingFormComponent implements OnChanges, OnInit {
       if (!daySchedule || daySchedule.closed) return false;
       intervals = daySchedule.intervals || [];
     }
-    
+
     // Verificar que el tiempo final esté dentro de algún intervalo
     return intervals.some(interval => {
       const closeMinutes = this.timeToMinutes(interval.close);
@@ -382,6 +388,10 @@ export class BookingFormComponent implements OnChanges, OnInit {
     }
     if (!form.value.service) {
       this.toast.error('Escoja un servicio');
+      return;
+    }
+    if (!form.value.privacyConsent) {
+      this.toast.error('Debes aceptar la política de privacidad para enviar la reserva.');
       return;
     }
 
@@ -453,7 +463,7 @@ export class BookingFormComponent implements OnChanges, OnInit {
   }
 
   getTotalTime(service: Service): number {
-    return service.timeSegments!.reduce((total, segment) => 
+    return service.timeSegments!.reduce((total, segment) =>
       total + segment.duration + (segment.breakAfter || 0), 0);
   }
 }

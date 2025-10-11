@@ -222,6 +222,7 @@ textarea {
 }
 
 /* Mejoras específicas para móviles */
+
 @media (max-width: 480px) {
   .booking-form-container {
     padding: 20px 16px;
@@ -241,5 +242,50 @@ textarea {
   select {
     padding: 12px;
     font-size: 15px;
+  }
+}
+
+/*Botón aceptar privacidad*/
+
+.privacy-consent {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #f3e1b0;
+    font-weight: 600;
+    cursor: pointer;
+
+    a {
+      color: #d4b258;
+      text-decoration: underline;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: #b8953a;
+      }
+    }
+
+    input[type='checkbox'] {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid #d4b258;
+      accent-color: #b8953a; // cambia el tick
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+  }
+
+  .error {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #ff6b6b;
+    font-weight: 600;
   }
 }
