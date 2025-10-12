@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <div class="error contact-error" [class.visible]="contactEmpty">
+    <div class="error contact-error" [class.visible]="contactEmpty" aria-live="polite">
         Debes rellenar al menos un medio de contacto: email o teléfono.
     </div>
 
@@ -75,13 +75,13 @@
         He leído y acepto la
         <a routerLink="/privacidad" target="_blank">Política de Privacidad</a>
       </label>
-      <div class="error" [class.visible]="privacyConsentInvalid">
+      <div class="error" [class.visible]="privacyConsentInvalid" aria-live="polite">
         Debes aceptar la política de privacidad para enviar la reserva.
       </div>
     </div>
 
 
-  <button type="submit" class="submit-btn" [disabled]="!date || !time || submitting">
+  <button type="submit" class="submit-btn" [disabled]="!date || !time || submitting" [attr.aria-label]="'Confirmar reserva en peluquería moderna Alcorcón'">
         <span *ngIf="!submitting">Confirmar Reserva</span>
         <span *ngIf="submitting">Procesando...</span>
     </button>

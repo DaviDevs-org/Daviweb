@@ -19,7 +19,7 @@ export class HeaderComponent implements OnDestroy {
   // Señal editable (WritableSignal) con toda la estructura de BusinessStatus
   safeBusinessInfo: WritableSignal<BusinessStatus> = signal({
     isOpen: false,
-    currentDay: '', // <--- ahora sí incluido
+    currentDay: '',
     openTime: undefined,
     closeTime: undefined,
     nextOpenTime: undefined,

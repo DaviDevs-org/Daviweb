@@ -2,34 +2,29 @@
   <div class="footer-container">
     <div class="info">
       <div class="container-column">
-        <div class="heading">Enlaces</div>
+        <h3 class="heading">Enlaces</h3>
         <div class="container-column">
-          <a class="text" href="#" (click)="scrollToSection('featured-cuts'); $event.preventDefault()">Nuestros Cortes</a>
-          <a class="text" href="#" (click)="scrollToSection('services'); $event.preventDefault()">Servicios y Precios</a>
-          <a class="text" href="#" (click)="scrollToSection('appointments'); $event.preventDefault()">Reservar Cita</a>
+          <button type="button" class="text" (click)="scrollToSection('featured-cuts'); $event.preventDefault()">Nuestros Cortes</button>
+          <button type="button" class="text" (click)="scrollToSection('services'); $event.preventDefault()">Servicios y Precios</button>
+          <button type="button" class="text" (click)="scrollToSection('appointments'); $event.preventDefault()">Reservar Cita</button>
           <a class="text" routerLink="/aviso-legal">Aviso Legal</a>
           <a class="text" routerLink="/privacidad">Política de Privacidad</a>
           <a class="text" [routerLink]="'admin'">Sección de administrador</a>
-
         </div>
       </div>
       <div class="container-column">
-        <div class="heading">Contacto</div>
+        <h3 class="heading">Contacto</h3>
         <div class="container-row">
-          <i class="bi bi-geo-alt-fill"></i>
+          <i class="bi bi-geo-alt-fill" [attr.aria-hidden]="true"></i>
           <div class="text">{{location}}</div>
         </div>
         <div class="container-row">
-          <i class="bi bi-telephone-fill"></i>
+          <i class="bi bi-telephone-fill" [attr.aria-hidden]="true"></i>
           <div class="text">{{telephone}}</div>
-        </div>
-        <div class="container-row">
-          <i class="bi bi-envelope-fill"></i>
-          <div class="text">{{email}}</div>
         </div>
       </div>
       <div class="container-column">
-        <div class="heading">Horario</div>
+        <h3 class="heading">Horario</h3>
         <div class="container-column">
           @for (item of scheduleText; track $index) {
             <span class="text">{{item}}</span>
@@ -37,15 +32,19 @@
         </div>
       </div>
       <div class="container-column">
-        <div class="heading">Síguenos</div>
+        <h3 class="heading">Síguenos</h3>
         <div class="container-column">
-          <a href="https://www.instagram.com" target="_blank" class="icon-link"><i class="bi bi-instagram"></i></a>
-          <a href="https://www.facebook.com" target="_blank" class="icon-link"><i class="bi bi-facebook"></i></a>
+          <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="icon-link" aria-label="Instagram de Ro's Peluqueros">
+            <i class="bi bi-instagram" [attr.aria-hidden]="true"></i>
+          </a>
+          <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="icon-link" aria-label="Facebook de Ro's Peluqueros">
+            <i class="bi bi-facebook" [attr.aria-hidden]="true"></i>
+          </a>
         </div>
       </div>
     </div>
     <div class="copyright">
-        <span class="text">© 2025 Peluquería Moderna. Todos los derechos reservados.</span>
+      <span class="text">© 2025 Ro's Peluqueros. Todos los derechos reservados.</span>
     </div>
   </div>
   <app-legal-modal

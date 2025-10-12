@@ -7,6 +7,7 @@
         viewBox="0 0 43 43"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
       >
         <circle cx="21.5" cy="21.5" r="21.5" fill="url(#pattern0)" />
         <defs>
@@ -37,7 +38,7 @@
     </div>
   </div>
 
-  <div class="rating">
+  <div class="rating" [attr.aria-label]="'5 de 5 estrellas'">
     <app-star [property1]="'Default'"></app-star>
     <app-star [property1]="'Default'"></app-star>
     <app-star [property1]="'Default'"></app-star>
@@ -45,8 +46,8 @@
     <app-star [property1]="'Default'"></app-star>
   </div>
 
-  <div class="opinion-text">
+  <blockquote class="opinion-text" itemprop="reviewBody">
     Ambiente genial, buenos precios y atención personalizada. Y gracias al
     sistema de reservas no hay que hacer tiempos de espera.
-  </div>
+  </blockquote>
 </div>

@@ -1,4 +1,3 @@
-// services-info.component.ts
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Injector, OnDestroy, OnInit, runInInjectionContext } from "@angular/core";
 import { ServiceManager } from "../services/admin-panel/services-management.service";
 import { Service } from "../admin-panel/types/admin.types";
@@ -54,12 +53,12 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
   private organizeServicesByCategory(services: Service[]) {
     // Agrupar servicios por categoría
     const categoryMap = new Map<string, Service[]>();
-    
+
     services.forEach(service => {
       // Asumiendo que tienes un campo 'category' en tu Service type
       // Si no lo tienes, puedes categorizar por nombre o añadir este campo
       const category = this.getCategoryFromService(service);
-      
+
       if (!categoryMap.has(category)) {
         categoryMap.set(category, []);
       }
@@ -74,7 +73,7 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
       services: services
     }));
     this.categories.sort((a, b) => {
-      if (a.name === 'Otros') return 1;   
+      if (a.name === 'Otros') return 1;
       if (b.name === 'Otros') return -1;
       return a.name.localeCompare(b.name, "es", { sensitivity: "base" });
     });
@@ -91,7 +90,7 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
   private getCategoryFromService(service: Service): string {
     // Lógica para determinar la categoría basada en el nombre del servicio
     const name = service.name.toLowerCase();
-    
+
     if (name.includes('corte') || name.includes('fade') || name.includes('rapado')) {
       return 'Cortes';
     } else if (name.includes('barba') || name.includes('bigote')) {
@@ -116,7 +115,7 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
       'Cejas & Depilación': 'bi-eye',
       'Otros': 'bi-tools'
     };
-    
+
     return iconMap[categoryName] || 'bi-gear';
   }
 

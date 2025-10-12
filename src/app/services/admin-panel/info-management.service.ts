@@ -46,8 +46,7 @@ export class InfoManager {
   ];
 
   private defaultContactInfo: ContactInfo = {
-    phone: '+34 123 456 789',
-    email: 'info@peluqueriamoderna.com',
+    phone: '+34 916 42 56 60',
     address: 'Calle Principal, 123\n28001 Madrid, España'
   };
 

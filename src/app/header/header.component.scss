@@ -84,34 +84,34 @@
   min-width: 80px;
   text-align: center;
   box-shadow: $shadow-sm;
-  
+
   &.open {
     background-color: $status-open;
   }
-  
+
   &.closed {
     background-color: $status-closed;
   }
-  
+
   &.warning {
     background-color: $warning-yellow;
     color: $black;
     padding: 6px $spacing-md;
     @include pulse(3s);
-    
+
     .status-content {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2px;
     }
-    
+
     .status-text {
       font-size: $font-size-xs;
       font-weight: $font-weight-semibold;
       line-height: 1.2;
     }
-    
+
     .timer {
       font-size: $font-size-base;
       font-weight: $font-weight-bold;
@@ -137,7 +137,7 @@
   @include mobile {
     height: 400px;
     flex-direction: column-reverse;
-    
+
   }
 
   @include small-mobile {
@@ -161,6 +161,14 @@
   margin-bottom: $spacing-md;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   letter-spacing: 1px;
+
+  .banner-location {
+    display: block;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: #D4A574;
+    margin-top: $spacing-xs;
+  }
 
   @include mobile {
     font-size: $font-size-3xl;
@@ -196,6 +204,14 @@
   margin-bottom: $spacing-xl;
   line-height: 1.8;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+
+  .banner-experience {
+    display: block;
+    margin-top: $spacing-xs;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: $primary-gold;
+  }
 
   @include mobile {
     font-size: $font-size-base;
@@ -237,33 +253,33 @@
     padding: $spacing-sm $spacing-md;
     gap: $spacing-sm;
   }
-  
+
   .anchors {
     gap: $spacing-md;
   }
-  
+
   .status-container {
     padding: 6px 12px;
     font-size: $font-size-xs;
     min-width: 70px;
-    
+
     &.warning {
       padding: 4px 10px;
-      
+
       .status-text {
         font-size: 10px;
       }
-      
+
       .timer {
         font-size: $font-size-sm;
       }
     }
   }
-  
+
   .heading-text {
     font-size: $font-size-lg;
   }
-  
+
   .anchor-text {
     font-size: $font-size-xs;
   }
@@ -275,23 +291,23 @@
     gap: $spacing-md;
     text-align: center;
   }
-  
+
   .anchors {
     justify-content: center;
     flex-wrap: wrap;
     gap: $spacing-sm;
   }
-  
+
   .status-container {
     &.warning {
       .status-content {
         gap: 1px;
       }
-      
+
       .status-text {
         font-size: 9px;
       }
-      
+
       .timer {
         font-size: $font-size-xs;
       }

@@ -1,39 +1,30 @@
 <div class="opinions">
-  <div class="opinions-heading">
-    <span class="title">Lo que dicen nuestros clientes</span>
-  </div>
+  <h2 class="opinions-heading">Lo que dicen nuestros clientes</h2>
   <div class="opinions-description">
     <p class="subtitle">
-      Nos esforzamos por ofrecer la mejor experiencia quien entra por nuestra puerta.
+      Nos esforzamos por ofrecer la mejor experiencia a quienes entran por nuestra puerta.
     </p>
     <p class="subtitle">
       Esto es lo que opinan de nosotros.
     </p>
   </div>
-  <div class="opinions-list">
-    <app-opinion class="opinion"></app-opinion>
-    <app-opinion class="opinion"></app-opinion>
-    <app-opinion class="opinion"></app-opinion>
+  <div class="opinions-list" role="list">
+    <app-opinion class="opinion" role="listitem"></app-opinion>
+    <app-opinion class="opinion" role="listitem"></app-opinion>
+    <app-opinion class="opinion" role="listitem"></app-opinion>
   </div>
   <div class="more-reviews">
-    <div class="more-reviews-container">
+    <a
+      class="more-reviews-container"
+      href="https://www.google.com/maps/place/RO'S+PELUQUEROS..."
+      target="_blank"
+      rel="noopener"
+      [attr.aria-label]="'Ver más reseñas en Google de Ro\'s Peluqueros'"
+    >
       <span class="more-reviews-text">Ver más reseñas en Google</span>
       <div class="more-reviews-icon">
-        <svg
-          width="17"
-          height="16"
-          viewBox="0 0 17 16"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M7.151 3.99999H4.48433C4.13071 3.99999 3.79157 4.14047 3.54153 4.39051C3.29148 4.64056 3.151 4.9797 3.151 5.33332V12C3.151 12.3536 3.29148 12.6928 3.54153 12.9428C3.79157 13.1928 4.13071 13.3333 4.48433 13.3333H11.151C11.5046 13.3333 11.8438 13.1928 12.0938 12.9428C12.3439 12.6928 12.4843 12.3536 12.4843 12V9.33332M9.81767 2.66666H13.8177M13.8177 2.66666V6.66666M13.8177 2.66666L7.151 9.33332"
-            stroke="#404040"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <!-- SVG aquí -->
       </div>
-    </div>
+    </a>
   </div>
 </div>

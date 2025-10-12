@@ -17,9 +17,8 @@ export class FooterComponent {
   private cdr = inject(ChangeDetectorRef)
   private schedule = inject(ScheduleService)
 
-  location: string = "Calle Falsa 123, Ciudad, País"
-  telephone: string = "+34 600 000 000"
-  email: string = "info&#64;peluqueríamoderna.com"
+  location: string = "Calle Referéndum de Vita Grande, 28925 Alcorcón, Madrid"
+  telephone: string = "+34 916 42 56 60"
   scheduleText: string[] = ["Lunes a Viernes: 10:00-20:00", "Sábado: 9:00-18:00", "Domingo: Cerrado"]
 
   legalVisible = false;
@@ -33,7 +32,6 @@ export class FooterComponent {
     const response = await this.info.getContactInfo()
     this.location = response.address
     this.telephone = response.phone
-    this.email = response.email
     const responseSchedule = await this.info.getSchedule()
     this.scheduleText = this.schedule.splitScheduleText(this.schedule.formatScheduleText(responseSchedule))
     this.cdr.detectChanges();

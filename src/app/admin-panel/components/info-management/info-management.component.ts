@@ -18,7 +18,7 @@ import { AlertService } from '../../../services/alert/alert.service';
 })
 export class InfoManagementComponent implements OnInit {
   schedule: ScheduleDay[] = [];
-  contactInfo: ContactInfo = { phone: '', email: '', address: '' };
+  contactInfo: ContactInfo = { phone: '', address: '' };
   exceptions: ExceptionItem[] = [];
   currentExceptionStep: 'date' | 'type' | 'hours' | 'complete' = 'complete';
   tempException: Partial<ExceptionItem> | null = null;

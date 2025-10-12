@@ -1,12 +1,12 @@
 <div class="location-contact" id="location-and-contact">
   <div class="section-heading">
-    <span>Ubicación y Contacto</span>
+    <h2 class="section-heading">Ubicación y Contacto</h2>
   </div>
 
   <div class="content-container">
     <div class="map-container">
       @if (coords) {
-      <iframe [src]="coords" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+      <iframe [src]="coords" width="100%" height="100%" style="border:0;" title="Ubicación de la peluquería en el mapa" allowfullscreen="" loading="lazy"
         referrerpolicy="no-referrer-when-downgrade">
       </iframe>
       }
@@ -25,7 +25,7 @@
                   stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
-            <span>Dirección</span>
+            <h3>Dirección</h3>
           </div>
           <div class="info-text">
             <span>{{contactInfo?.address}}</span>
@@ -35,19 +35,16 @@
         <div class="info-section">
           <div class="info-heading">
             <div class="icon-wrapper">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path
                   d="M18.33 14.1v2.5a1.67 1.67 0 0 1-1.83 1.67c-2.56-.28-5.03-1.16-7.2-2.57a15.47 15.47 0 0 1-4.97-4.96A15.57 15.57 0 0 1 1.77 3.48a1.67 1.67 0 0 1 1.66-1.81h2.5a1.67 1.67 0 0 1 1.66 1.43c.1.8.3 1.6.58 2.37.15.4.14.84-.03 1.23a1.67 1.67 0 0 1-.37.56l-1.06 1.06a13.34 13.34 0 0 0 5.5 5.5l1.07-1.06a1.67 1.67 0 0 1 1.79-.37c.4.17.84.18 1.23.04a13.31 13.31 0 0 0 2.37.57 1.67 1.67 0 0 1 1.43 1.66Z"
                   stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
-            <span>Contacto</span>
+            <h3>Contacto</h3>
           </div>
           <div class="info-text">
             <span>{{contactInfo?.phone}}</span>
-          </div>
-          <div class="info-text">
-            <span>{{contactInfo?.email}}</span>
           </div>
         </div>
 
@@ -61,7 +58,7 @@
                   stroke-linejoin="round" />
               </svg>
             </div>
-            <span>Horario</span>
+            <h3>Horario</h3>
           </div>
           <div class="schedule-container">
             @for (item of scheduleText; track $index) {

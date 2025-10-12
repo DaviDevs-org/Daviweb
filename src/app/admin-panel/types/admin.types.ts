@@ -43,7 +43,7 @@ export class Service {
 
   // Calcular el tiempo total sumando todos los segmentos
   get totalTime(): number {
-    return this.timeSegments.reduce((total, segment) => 
+    return this.timeSegments.reduce((total, segment) =>
       total + segment.duration + (segment.breakAfter || 0), 0);
   }
 
@@ -100,12 +100,8 @@ export interface ScheduleDay {
 
 export interface ContactInfo {
   phone: string;
-  email: string;
   address: string;
 }
-
-
-
 
 export interface Statistics {
   monthlyClients: number;
