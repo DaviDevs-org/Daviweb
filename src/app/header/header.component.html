@@ -5,7 +5,7 @@
 
   <div class="nav">
     <div class="heading">
-      <span class="heading-text">PELUQUERÍA MODERNA</span>
+      <span class="heading-text">RO'S PELUQUEROS</span>
     </div>
 
     <div class="anchors">
@@ -52,13 +52,16 @@
 
   <div class="welcome-banner">
     <div class="banner-content">
-      <h1 class="banner-title">PELUQUERÍA MODERNA</h1>
-      <p class="banner-subtitle">Tu estilo, nuestra pasión</p>
-      <p class="banner-description">
-        Expertos en cortes modernos, afeitados clásicos y cuidado de barba.
-        <br>Más de 20 años de experiencia al servicio de tu imagen.
-      </p>
-      <button class="banner-button" (click)="scrollToSection('appointments')">
+      <h1 class="banner-title">
+        RO'S PELUQUEROS
+        <span class="banner-location">Peluquería moderna en Alcorcón</span>
+      </h1>
+      <h2 class="banner-subtitle">Tu estilo, mi pasión</h2>
+      <h3 class="banner-description">
+        ¡Experta en cortes de pelo modernos, tintes, mechas, permanente y mucho más!
+        <span class="banner-experience">+20 años de experiencia al servicio de tu imagen.</span>
+      </h3>
+      <button class="banner-button" (click)="scrollToSection('appointments')" [attr.aria-label]="'Reservar cita online'">
         <i class="bi bi-calendar-check"></i>
         Reservar Cita
       </button>

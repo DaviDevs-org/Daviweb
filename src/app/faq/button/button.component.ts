@@ -12,6 +12,8 @@ import {CommonModule, NgClass} from '@angular/common';
 })
 export class ButtonComponent {
   @Input() property1: "Default" | "Deployed" = "Default";
+  @Input() questionId!: string;
+
   question:string = "¿Cómo reservo si aún no está habilitado el sistema online?";
   answer:string = "Siempre puedes llamar por teléfono dentro del horario"
   changeState(){
@@ -22,4 +24,12 @@ export class ButtonComponent {
       this.property1 = "Default"
     }
   }
+  onKeyDown(event: KeyboardEvent) {
+    // Accesibilidad: colapsa/despliega con Enter/Espacio
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      this.changeState();
+    }
+  }
+
 }

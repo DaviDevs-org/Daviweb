@@ -1,4 +1,3 @@
-<!-- services-refactored.component.html -->
 <div class="services-section" id="services">
     <div class="services-header">
         <h2 class="section-title">Servicios y Precios</h2>
@@ -64,7 +63,8 @@
                 @if (selectedService) {
                 <div class="service-image">
                     <img [src]="selectedService.imageUrl || '/assets/images/default-service.jpg'"
-                        [alt]="selectedService.name" class="service-photo">
+                         [alt]="selectedService.name + ' realizado en peluquería moderna en Madrid | RO\'S PELUQUEROS'"
+                         class="service-photo">
 
                     <div class="image-overlay">
                         <div class="service-badge">{{ selectedCategory?.name }}</div>
@@ -96,10 +96,13 @@
                     </div>
 
                     <div class="service-actions">
-                        <button class="btn-primary" (click)="scrollToSection('appointments'); $event.preventDefault()">
-                            <i class="bi bi-calendar-check"></i>
-                            Reservar este servicio
-                        </button>
+                      <button class="btn-primary"
+                              [attr.aria-label]="'Reservar el servicio {{ selectedService.name }} online'"
+                              (click)="scrollToSection('appointments'); $event.preventDefault()">
+                        <i class="bi bi-calendar-check"></i>
+                        Reservar este servicio
+                      </button>
+
                     </div>
                 </div>
                 } @else {

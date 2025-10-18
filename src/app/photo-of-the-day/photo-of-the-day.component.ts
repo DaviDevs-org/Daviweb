@@ -43,12 +43,15 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
       const imagesList = await this.galleryService.getImages();
       const galleryPhotos = await this.galleryService.getImageInfo(imagesList);
 
-      // Convertir las fotos de la galería a elementos del carrusel
-      const items: CarouselItem[] = galleryPhotos.map(photo => ({
-        image: photo.url,
-        caption: this.formatCaption(photo.name),
-        alt: photo.name
-      }));
+      // Convertir las fotos de la galería a elementos del carrusel, alt SEO optimizado
+      const items: CarouselItem[] = galleryPhotos.map(photo => {
+        const baseName = this.formatCaption(photo.name);
+        return {
+          image: photo.url,
+          caption: baseName,
+          alt: `${baseName} realizado en peluquería moderna en Madrid | RO'S PELUQUEROS`
+        };
+      });
 
       this.carouselItems.set(items);
       this.totalSlides.set(items.length);
@@ -60,34 +63,34 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
 
     } catch (error) {
       console.error('Error loading gallery images:', error);
-      // Fallback con imágenes por defecto si hay error
       this.loadFallbackImages();
     } finally {
       this.isLoading.set(false);
     }
   }
 
+
   private loadFallbackImages() {
     const fallbackItems: CarouselItem[] = [
       {
         image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
         caption: 'Corte clásico fade – Cliente: Pedro L.',
-        alt: 'Corte clásico fade'
+        alt: "Corte clásico fade realizado en peluquería moderna en Madrid | RO'S PELUQUEROS"
       },
       {
         image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
         caption: 'Afeitado con navaja – Cliente: Marco S.',
-        alt: 'Afeitado con navaja'
+        alt: "Afeitado con navaja realizado en peluquería moderna en Madrid | RO'S PELUQUEROS"
       },
       {
         image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
         caption: 'Corte texturizado – Cliente: Antonio G.',
-        alt: 'Corte texturizado'
+        alt: "Corte texturizado realizado en peluquería moderna en Madrid | RO'S PELUQUEROS"
       },
       {
         image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
         caption: 'Estilo vintage – Cliente: Raúl M.',
-        alt: 'Estilo vintage'
+        alt: "Estilo vintage realizado en peluquería moderna en Madrid | RO'S PELUQUEROS"
       }
     ];
 

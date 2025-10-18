@@ -5,7 +5,7 @@
 <div class="modal" *ngIf="visible" role="dialog" aria-modal="true" [attr.aria-label]="title">
     <header class="modal-header">
         <h2>{{ title }}</h2>
-        <button class="close-icon" (click)="close()" aria-label="Cerrar">✕</button>
+        <button class="close-icon" (click)="close()" [attr.aria-label]="'Cerrar'">✕</button>
     </header>
 
     <div class="modal-body">
