@@ -57,7 +57,14 @@
   font-size: $font-size-sm;
   font-family: $font-primary;
 }
-
+.button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+}
 
 .copyright {
   text-align: center;

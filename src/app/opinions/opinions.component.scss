@@ -2,16 +2,9 @@
 @use '../../styles/mixins' as *;
 
 .opinions {
-  max-width: 1180px;
-  margin: 0 auto;
   padding: 48px 24px;
-  background: rgba(97, 53, 35, 0.6);
-  border-radius: 16px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  font-family: 'Inter', sans-serif;
-  color: #0f172a;
   box-sizing: border-box;
-  text-align: center;
+  @include section;
 }
 
 .opinions-heading {

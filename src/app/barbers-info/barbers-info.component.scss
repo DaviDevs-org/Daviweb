@@ -5,11 +5,6 @@
 
 .barbers-section {
     padding: 48px 24px;
-    max-width: 1180px;
-    margin: 0 auto;
-    background: #885B34;
-    border-radius: 16px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -19,7 +14,7 @@
     position: relative;
     overflow: hidden;
     font-family: 'Inter', sans-serif;
-    color: $dark-brown;
+    @include section;
 
     @include mobile {
         padding: 36px 16px;

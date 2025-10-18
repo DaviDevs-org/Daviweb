@@ -11,6 +11,6 @@ export const routes: Routes = [
     {path:'login', component:LoginComponent},
     {path:'admin', component:AdminPanelComponent, canActivate:[AuthenticationService]},
     {path:'aviso-legal', component:LegalAdviceComponent},
-    { path: 'privacidad', component: PrivacyTermsComponent },
+    {path: 'privacidad', component: PrivacyTermsComponent },
     {path:'**', redirectTo:''}
 ];

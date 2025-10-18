@@ -271,20 +271,22 @@ export class InfoManager {
 
   async getBarberSettings(): Promise<BarberSettings> {
     try {
-      const ref = doc(this.firestore, this.barberPath);
-      const snap = await getDoc(ref);
-      if (!snap.exists()) {
-        const defaultSettings: BarberSettings = { settings: { barberSelection: false, staff: [] } } as any;
-        await setDoc(ref, defaultSettings);
-        return defaultSettings;
-      }
-      const data = snap.data() as any;
+      return await runInInjectionContext(this.injector, async () => {
+        const ref = doc(this.firestore, this.barberPath);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          const defaultSettings: BarberSettings = { settings: { barberSelection: false, staff: [] } } as any;
+          await setDoc(ref, defaultSettings);
+          return defaultSettings;
+        }
+        const data = snap.data() as any;
 
-      if (data && (data.barberSelection !== undefined || data.staff !== undefined)) {
-        return { settings: { barberSelection: !!data.barberSelection, staff: data.staff ?? [] } } as any;
-      }
+        if (data && (data.barberSelection !== undefined || data.staff !== undefined)) {
+          return { settings: { barberSelection: !!data.barberSelection, staff: data.staff ?? [] } } as any;
+        }
 
-      return data as BarberSettings;
+        return data as BarberSettings;
+      });
     } catch (err) {
       console.error('Error getting barber settings:', err);
       return { settings: { barberSelection: false, staff: [] } } as any;

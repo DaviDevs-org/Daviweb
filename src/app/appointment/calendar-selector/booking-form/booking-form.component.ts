@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AppointmentService } from '../../../services/appointments.service';
-import { NgForOf, NgIf } from '@angular/common';
+import { isPlatformBrowser, NgForOf, NgIf } from '@angular/common';
 import { Barber, Service, ScheduleDay, ExceptionItem, Appointment } from '../../../admin-panel/types/admin.types';
 import { ServiceManager } from '../../../services/admin-panel/services-management.service';
 import { AlertService } from '../../../services/alert/alert.service';
@@ -30,6 +30,7 @@ export class BookingFormComponent implements OnChanges, OnInit {
   private toast = inject(AlertService);
   private infoManager = inject(InfoManager);
   private apptSvc = inject(AppointmentManagerService);
+  private platformId = inject(PLATFORM_ID);
 
   @Output() formSubmitted = new EventEmitter<{
     name: string;
@@ -84,6 +85,10 @@ export class BookingFormComponent implements OnChanges, OnInit {
   }
 
   private async loadExistingAppointments(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)){
+      this.existingAppointments = []
+      return
+    }
     try {
       const appointments$ = this.apptSvc.getAppointments().pipe(
         map(list => list.map(a => this.normalizeAppointment(a)))
