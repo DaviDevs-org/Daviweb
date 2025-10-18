@@ -1,4 +1,3 @@
-// services-management.component.ts
 import { Component, ElementRef, inject, Injector, runInInjectionContext, signal, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -342,7 +341,7 @@ export class ServicesManagementComponent implements OnDestroy {
 
   toggleBreaks() {
     this.hasBreaks = !this.hasBreaks;
-    
+
     if (this.hasBreaks) {
       // Si activa breaks, asegurar que hay al menos 2 segmentos
       if (this.newService.timeSegments.length === 1) {

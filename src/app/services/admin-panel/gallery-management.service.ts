@@ -1,4 +1,3 @@
-// src/app/services/gallery-management.service.ts
 import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
   ListResult,
@@ -21,7 +20,7 @@ import { AlertService } from '../alert/alert.service';
 export class GalleryService {
   private injector = inject(Injector);
   private storage = inject(Storage);
-  private toast = inject(AlertService)
+  private toast = inject(AlertService);
 
   uploadImage(file: File) {
     const id = crypto.randomUUID();
@@ -97,38 +96,33 @@ export class GalleryService {
   async getImageInfo(list: ListResult): Promise<GalleryPhoto[]> {
     return runInInjectionContext(this.injector, async () => {
       const images: GalleryPhoto[] = [];
-
-      // Procesar en paralelo pero de forma controlada
       const promises = list.items.map(async (imageRef) => {
         try {
-          // Usar Promise.all para ejecutar ambas operaciones en paralelo
           const [metadata, url] = await Promise.all([
             getMetadata(imageRef),
             getDownloadURL(imageRef)
           ]);
-
           const originalName = metadata.customMetadata?.['originalName'] ?? 'Sin nombre';
           const date = metadata.customMetadata?.['date'] ?? '';
-
           return new GalleryPhoto(originalName, url, date, imageRef.name);
         } catch (error) {
           console.error('Error processing image:', imageRef.name, error);
           return null;
         }
       });
-
       const results = await Promise.all(promises);
       return results.filter((photo): photo is GalleryPhoto => photo !== null);
     });
   }
 
-  /**
-   * listAll debe ejecutarse también dentro del context
-   */
-  async getImages(): Promise<ListResult> {
+  async getImages(limit?: number): Promise<ListResult> {
     return runInInjectionContext(this.injector, async () => {
       const reference = ref(this.storage, 'pruebas');
-      return await listAll(reference);
+      const listResult = await listAll(reference);
+      if (limit !== undefined) {
+        listResult.items = listResult.items.slice(0, limit);
+      }
+      return listResult;
     });
   }
 

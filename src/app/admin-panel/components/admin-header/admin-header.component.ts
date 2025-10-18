@@ -1,4 +1,3 @@
-// admin-header.component.ts
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../../../services/authentication.service';
@@ -15,9 +14,12 @@ export class AdminHeaderComponent {
   private auth = inject(AuthenticationService)
   private toast = inject(AlertService)
 
-  async onLogout(){
-    if ( await this.toast.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-      this.auth.logOut()
+  @Output() logout = new EventEmitter<void>();  // <-- AQUÍ
+
+  async onLogout() {
+    if (await this.toast.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+      this.logout.emit();         // <-- EMITIR EVENTO PARA EL PADRE
+      this.auth.logOut();
     }
   }
 }

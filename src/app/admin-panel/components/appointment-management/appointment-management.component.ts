@@ -1,5 +1,5 @@
-import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, OnDestroy, ViewChild, ElementRef, AfterViewInit, Inject, PLATFORM_ID} from '@angular/core';
+import {CommonModule, isPlatformBrowser} from '@angular/common';
 import { AppointmentManagerService } from '../../../services/admin-panel/appointment-management.service';
 import { Appointment, Service, ScheduleDay, ExceptionItem } from '../../types/admin.types';
 import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
@@ -46,10 +46,11 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   constructor(
     private apptSvc: AppointmentManagerService,
     private fb: FormBuilder,
+    @Inject(PLATFORM_ID) private platformId: Object,
     private sv: ServiceManager,
     private app: AppointmentService,
     private infoManager: InfoManager,
-    private toast: AlertService,
+    private toast: AlertService
   ) {
     this.editForm = this.fb.group({
       name: ['', Validators.required],
@@ -226,7 +227,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     }
 
     // Cargar servicios
-    this.services = await this.sv.getServicesDirectly();
+    this.services = await this.sv.getServicesDirectly(isPlatformBrowser(this.platformId) ? undefined : 6);
 
     // Observar cambios en la cita seleccionada Y que esté en el día actual para hacer scroll
     combineLatest([this.selectedAppointment$, this.filteredForDay$]).subscribe(([appointment, dayList]) => {
@@ -265,18 +266,18 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     const dateKey = this.toISODate(date);
     const startMinutes = this.timeToMinutes(time);
-    
+
     // Calcular todos los slots que ocupará el servicio
     const serviceSlots: number[] = [];
     let currentTime = startMinutes;
-    
+
     service.timeSegments.forEach((segment, index) => {
       // Slots del servicio activo
       for (let i = 0; i < segment.duration; i += 30) {
         serviceSlots.push(currentTime + i);
       }
       currentTime += segment.duration;
-      
+
       // Slots del break (si existe y no es el último segmento)
       if (segment.breakAfter && segment.breakAfter > 0 && index < service.timeSegments.length - 1) {
         for (let i = 0; i < segment.breakAfter; i += 30) {
@@ -294,19 +295,19 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     // Verificar que no se sobreponga con otras citas
     const dayAppointments = this.getAppointmentsForDate(dateKey, excludeAppointmentId);
-    
+
     for (const appointment of dayAppointments) {
       if (!appointment.timeNormalized) continue;
-      
+
       const appointmentSegments = this.getAppointmentTimeSegments(appointment);
       const occupiedSlots: number[] = [];
-      
+
       appointmentSegments.forEach(segment => {
         for (let i = 0; i < segment.duration; i += 30) {
           occupiedSlots.push(segment.start + i);
         }
       });
-      
+
       // Verificar solapamiento
       const hasOverlap = serviceSlots.some(slot => occupiedSlots.includes(slot));
       if (hasOverlap) {
@@ -320,9 +321,9 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   private isTimeWithinSchedule(date: Date, endTimeMinutes: number): boolean {
     const dateKey = this.toISODate(date);
     const exception = this.exceptions.find(ex => ex.date === dateKey);
-    
+
     let intervals: {open: string, close: string}[] = [];
-    
+
     if (exception) {
       if (exception.closed) return false;
       intervals = exception.intervals || [];
@@ -332,7 +333,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       if (!daySchedule || daySchedule.closed) return false;
       intervals = daySchedule.intervals || [];
     }
-    
+
     // Verificar que el tiempo final esté dentro de algún intervalo
     return intervals.some(interval => {
       const closeMinutes = this.timeToMinutes(interval.close);
@@ -343,8 +344,8 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   private getAppointmentsForDate(dateKey: string, excludeId?: string): Appointment[] {
     let appointments: Appointment[] = [];
     this.appointments$.pipe(take(1)).subscribe(appts => {
-      appointments = appts.filter(a => 
-        a.dateISO === dateKey && 
+      appointments = appts.filter(a =>
+        a.dateISO === dateKey &&
         (excludeId ? a.id !== excludeId : true)
       );
     });
@@ -408,7 +409,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const appointment = this.findReservation(dayList, hour);
     return appointment ? this.getSlotType(dayList, hour, appointment) === 'end' : false;
   }
-  
+
   isBreakSlot(dayList: Appointment[], hour: string): boolean {
     return this.findBreakSlot(dayList, hour) !== undefined;
   }
@@ -804,7 +805,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       if (!a.timeNormalized) return false;
       const slotMinutes = this.timeToMinutes(hour.substring(0, 5));
       const activeSegments = this.getActiveTimeSegments(a);
-      return activeSegments.some(segment => 
+      return activeSegments.some(segment =>
         slotMinutes >= segment.start && slotMinutes < (segment.start + segment.duration)
       );
     });

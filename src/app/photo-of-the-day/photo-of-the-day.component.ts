@@ -1,5 +1,5 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, signal, Inject, PLATFORM_ID } from '@angular/core';
 import { GalleryService } from '../services/admin-panel/gallery-management.service';
 import { GalleryPhoto } from '../admin-panel/types/admin.types';
 
@@ -13,24 +13,24 @@ interface CarouselItem {
   selector: 'app-photo-of-the-day',
   templateUrl: './photo-of-the-day.component.html',
   styleUrls: ['./photo-of-the-day.component.scss'],
-  imports: [CommonModule, NgOptimizedImage]
+  imports: [CommonModule]
 })
 export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
   private galleryService = inject(GalleryService);
-
   carouselItems = signal<CarouselItem[]>([]);
   currentSlide = signal(0);
   totalSlides = signal(0);
   isLoading = signal(true);
-
   private intervalId?: number;
+
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   async ngOnInit() {
     await this.loadGalleryImages();
   }
 
   ngOnDestroy() {
-    if (this.intervalId) {
+    if (isPlatformBrowser(this.platformId) && this.intervalId) {
       clearInterval(this.intervalId);
     }
   }
@@ -38,12 +38,10 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
   private async loadGalleryImages() {
     try {
       this.isLoading.set(true);
+      // SOLO EN SSR limitamos el número de imágenes
+      const imagesList = await this.galleryService.getImages(isPlatformBrowser(this.platformId) ? undefined : 4);
 
-      // Obtener las imágenes del storage
-      const imagesList = await this.galleryService.getImages();
       const galleryPhotos = await this.galleryService.getImageInfo(imagesList);
-
-      // Convertir las fotos de la galería a elementos del carrusel, alt SEO optimizado
       const items: CarouselItem[] = galleryPhotos.map(photo => {
         const baseName = this.formatCaption(photo.name);
         return {
@@ -52,15 +50,11 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
           alt: `${baseName} realizado en peluquería moderna en Madrid | RO'S PELUQUEROS`
         };
       });
-
       this.carouselItems.set(items);
       this.totalSlides.set(items.length);
-
-      // Solo iniciar autoplay si hay imágenes
       if (items.length > 1) {
         this.startAutoPlay();
       }
-
     } catch (error) {
       console.error('Error loading gallery images:', error);
       this.loadFallbackImages();
@@ -68,7 +62,6 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
       this.isLoading.set(false);
     }
   }
-
 
   private loadFallbackImages() {
     const fallbackItems: CarouselItem[] = [
@@ -93,38 +86,35 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
         alt: "Estilo vintage realizado en peluquería moderna en Madrid | RO'S PELUQUEROS"
       }
     ];
-
     this.carouselItems.set(fallbackItems);
     this.totalSlides.set(fallbackItems.length);
     this.startAutoPlay();
   }
 
   private formatCaption(filename: string): string {
-    // Remover la extensión del archivo
     const nameWithoutExtension = filename.replace(/\.[^/.]+$/, '');
-
-    // Capitalizar la primera letra y reemplazar guiones/underscore por espacios
     const formatted = nameWithoutExtension
-      .replace(/[-_]/g, ' ')
+      .replace(/[\-_]/g, ' ')
       .replace(/\b\w/g, l => l.toUpperCase());
-
     return formatted;
   }
+
   onProgressInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.goToSlide(Number(input.value));
   }
-  private startAutoPlay() {
-    // Solo iniciar autoplay si hay más de una imagen
-    if (this.totalSlides() <= 1) return;
 
-    this.intervalId = window.setInterval(() => {
-      this.nextSlide();
-    }, 8000);
+  private startAutoPlay() {
+    if (this.totalSlides() <= 1) return;
+    if (isPlatformBrowser(this.platformId)) {
+      this.intervalId = window.setInterval(() => {
+        this.nextSlide();
+      }, 8000);
+    }
   }
 
   private stopAutoPlay() {
-    if (this.intervalId) {
+    if (isPlatformBrowser(this.platformId) && this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = undefined;
     }
@@ -132,11 +122,8 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
 
   goToSlide(index: number) {
     if (this.totalSlides() === 0) return;
-
     this.currentSlide.set(index);
     this.stopAutoPlay();
-
-    // Reiniciar autoplay solo si hay múltiples imágenes
     if (this.totalSlides() > 1) {
       this.startAutoPlay();
     }
@@ -144,13 +131,10 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
 
   nextSlide() {
     if (this.totalSlides() <= 1) return;
-
     const current = this.currentSlide();
     const total = this.totalSlides();
     this.currentSlide.set((current + 1) % total);
     this.stopAutoPlay();
-
-    // Reiniciar autoplay solo si hay múltiples imágenes
     if (this.totalSlides() > 1) {
       this.startAutoPlay();
     }
@@ -158,13 +142,10 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
 
   prevSlide() {
     if (this.totalSlides() <= 1) return;
-
     const current = this.currentSlide();
     const total = this.totalSlides();
     this.currentSlide.set(current === 0 ? total - 1 : current - 1);
     this.stopAutoPlay();
-
-    // Reiniciar autoplay solo si hay múltiples imágenes
     if (this.totalSlides() > 1) {
       this.startAutoPlay();
     }
@@ -180,7 +161,6 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Método para actualizar las imágenes (útil si se llama desde el admin)
   async refreshGallery() {
     await this.loadGalleryImages();
   }

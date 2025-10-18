@@ -1,9 +1,8 @@
-// alert.component.ts
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 export interface AlertConfig {
-  type: 'success' | 'error' | 'warning' | 'info' | 'confirm'| 'prompt';
+  type: 'success' | 'error' | 'warning' | 'info' | 'confirm' | 'prompt';
   title: string;
   message: string;
   confirmText?: string;
@@ -30,43 +29,51 @@ export class CustomAlertComponent implements OnInit {
     message: '',
     position: 'top-right'
   };
-  
+
   @Output() confirmed = new EventEmitter<boolean>();
   @Output() closed = new EventEmitter<void>();
-  @Output() promptResult = new EventEmitter<string | null | false>(); // Ahora puede ser false
-  
+  @Output() promptResult = new EventEmitter<string | null | false>();
+
   @ViewChild('promptInput') promptInput?: ElementRef<HTMLInputElement>;
-  
+
   isVisible = false;
   private autoCloseTimer?: number;
 
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
   ngOnInit() {
-    // Aparición rápida para toast
     setTimeout(() => {
       this.isVisible = true;
-      
+
       // Para prompts, asegurar que el input mantenga el foco
       if (this.config.type === 'prompt') {
         this.focusInput();
       }
     }, 10);
-    
-    // Auto-cierre solo si hay duración y no es confirmación ni prompt
-    if (this.config.duration && this.config.type !== 'confirm' && this.config.type !== 'prompt') {
-      this.autoCloseTimer = window.setTimeout(() => {
-        this.close();
-      }, this.config.duration);
+
+    if (
+      this.config.duration &&
+      this.config.type !== 'confirm' &&
+      this.config.type !== 'prompt'
+    ) {
+      if (isPlatformBrowser(this.platformId)) {
+        this.autoCloseTimer = window.setTimeout(() => {
+          this.close();
+        }, this.config.duration);
+      }
     }
   }
 
   private focusInput() {
     setTimeout(() => {
-      const input = document.querySelector('.toast-input') as HTMLInputElement;
-      if (input) {
-        input.focus();
-        // Si hay un valor por defecto, seleccionarlo
-        if (this.config.defaultValue) {
-          input.select();
+      if (isPlatformBrowser(this.platformId)) {
+        const input = document.querySelector('.toast-input') as HTMLInputElement;
+        if (input) {
+          input.focus();
+          // Si hay un valor por defecto, seleccionarlo
+          if (this.config.defaultValue) {
+            input.select();
+          }
         }
       }
     }, 100);
@@ -93,10 +100,8 @@ export class CustomAlertComponent implements OnInit {
   cancel() {
     this.clearAutoClose();
     if (this.config.type === 'prompt') {
-      // Para prompts, cancelar devuelve false
       this.promptResult.emit(false);
     } else {
-      // Para confirmaciones, cancelar devuelve false
       this.confirmed.emit(false);
     }
     this.close();
@@ -105,8 +110,6 @@ export class CustomAlertComponent implements OnInit {
   confirmPrompt() {
     this.clearAutoClose();
     const inputValue = this.promptInput?.nativeElement.value || '';
-    
-    // Si el input está vacío (sin contar espacios), devolver null
     if (inputValue.trim() === '') {
       this.promptResult.emit(null);
     } else {
@@ -116,12 +119,12 @@ export class CustomAlertComponent implements OnInit {
   }
 
   onInputBlur(event: Event) {
-    // Prevenir que se cierre al perder el foco accidentalmente
-    // Solo durante los primeros segundos después de aparecer
     setTimeout(() => {
-      const input = event.target as HTMLInputElement;
-      if (input && document.activeElement !== input) {
-        input.focus();
+      if (isPlatformBrowser(this.platformId)) {
+        const input = event.target as HTMLInputElement;
+        if (input && document.activeElement !== input) {
+          input.focus();
+        }
       }
     }, 10);
   }
@@ -133,7 +136,7 @@ export class CustomAlertComponent implements OnInit {
   }
 
   private clearAutoClose() {
-    if (this.autoCloseTimer) {
+    if (isPlatformBrowser(this.platformId) && this.autoCloseTimer) {
       window.clearTimeout(this.autoCloseTimer);
       this.autoCloseTimer = undefined;
     }

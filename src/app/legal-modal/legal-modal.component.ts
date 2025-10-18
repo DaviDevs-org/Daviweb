@@ -1,5 +1,15 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, HostListener } from '@angular/core';
+import {CommonModule, isPlatformBrowser} from '@angular/common';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+  SimpleChanges,
+  HostListener,
+  Inject,
+  PLATFORM_ID
+} from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
@@ -16,7 +26,7 @@ export class LegalModalComponent implements OnChanges {
 
   sanitizedContent: SafeHtml = '';
 
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(private sanitizer: DomSanitizer, @Inject(PLATFORM_ID) private platformId: Object) { }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes["content"]) {
@@ -24,8 +34,10 @@ export class LegalModalComponent implements OnChanges {
       this.sanitizedContent = this.sanitizer.bypassSecurityTrustHtml(this.content || '');
     }
     if (changes["visible"]) {
-      // bloquear scroll de body cuando esté visible
-      document.body.classList.toggle('no-scroll', this.visible);
+      if (isPlatformBrowser(this.platformId)) {
+        // bloquear scroll de body cuando esté visible
+        document.body.classList.toggle('no-scroll', this.visible);
+      }
     }
   }
 

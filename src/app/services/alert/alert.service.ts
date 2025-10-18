@@ -1,6 +1,6 @@
-// alert.service.ts
-import { Injectable, ComponentRef, ApplicationRef, createComponent } from '@angular/core';
+import { Injectable, ComponentRef, ApplicationRef, createComponent, Inject, PLATFORM_ID } from '@angular/core';
 import { CustomAlertComponent, AlertConfig } from './alert.component';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -10,85 +10,75 @@ export class AlertService {
   private alertContainer?: HTMLDivElement;
   private isCreating = false; // Flag para prevenir creación simultánea
 
-  constructor(private appRef: ApplicationRef) {}
+  constructor(
+    private appRef: ApplicationRef,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   // Método principal para mostrar alertas
   private async showAlert(config: AlertConfig): Promise<boolean | string | null | false> {
-    // Esperar a que termine cualquier creación en progreso
     while (this.isCreating) {
       await new Promise(resolve => setTimeout(resolve, 50));
     }
-
     return this.createAlert(config);
   }
 
   private createAlert(config: AlertConfig): Promise<boolean | string | null | false> {
     return new Promise((resolve) => {
       this.isCreating = true;
-
-      // Cerrar alerta anterior si existe - sin delay
       this.closeCurrentAlert();
-
       try {
-        // Pequeño delay para asegurar que el DOM esté limpio
         setTimeout(() => {
           try {
-            // Crear contenedor para la alerta
-            this.createAlertContainer();
+            // SOLO EN CLIENTE:
+            if (isPlatformBrowser(this.platformId)) {
+              this.createAlertContainer();
 
-            // Crear el componente
-            const environmentInjector = this.appRef.injector;
-            this.alertRef = createComponent(CustomAlertComponent, {
-              environmentInjector,
-              hostElement: this.alertContainer
-            });
-            
-            // Configurar el componente con valores por defecto
-            this.alertRef.instance.config = {
-              position: 'top-right',
-              ...config
-            };
+              const environmentInjector = this.appRef.injector;
+              this.alertRef = createComponent(CustomAlertComponent, {
+                environmentInjector,
+                hostElement: this.alertContainer
+              });
 
-            let resolved = false;
-            const resolveOnce = (result: any) => {
-              if (!resolved) {
-                resolved = true;
-                // Limpiar inmediatamente para liberar la cola
-                this.closeCurrentAlert();
-                this.isCreating = false;
-                resolve(result);
-              }
-            };
+              this.alertRef.instance.config = {
+                position: 'top-right',
+                ...config
+              };
 
-            // Escuchar eventos
-            this.alertRef.instance.confirmed.subscribe((result: boolean) => {
-              resolveOnce(result);
-            });
+              let resolved = false;
+              const resolveOnce = (result: any) => {
+                if (!resolved) {
+                  resolved = true;
+                  this.closeCurrentAlert();
+                  this.isCreating = false;
+                  resolve(result);
+                }
+              };
 
-            this.alertRef.instance.promptResult.subscribe((result: string | null | false) => {
-              resolveOnce(result);
-            });
+              this.alertRef.instance.confirmed.subscribe((result: boolean) => {
+                resolveOnce(result);
+              });
 
-            this.alertRef.instance.closed.subscribe(() => {
-              if (config.type !== 'confirm' && config.type !== 'prompt') {
-                resolveOnce(true);
-              }
-            });
+              this.alertRef.instance.promptResult.subscribe((result: string | null | false) => {
+                resolveOnce(result);
+              });
 
-            // Detectar cambios y registrar
-            this.alertRef.changeDetectorRef.detectChanges();
-            this.appRef.attachView(this.alertRef.hostView);
-            
-            // Marcar como completada la creación
+              this.alertRef.instance.closed.subscribe(() => {
+                if (config.type !== 'confirm' && config.type !== 'prompt') {
+                  resolveOnce(true);
+                }
+              });
+
+              this.alertRef.changeDetectorRef.detectChanges();
+              this.appRef.attachView(this.alertRef.hostView);
+            }
             this.isCreating = false;
-            
           } catch (error) {
             console.error('Error creating alert component:', error);
             this.isCreating = false;
             resolve(false);
           }
-        }, 10); // Mínimo delay para limpiar el DOM
-        
+        }, 10);
       } catch (error) {
         console.error('Error in createAlert setup:', error);
         this.isCreating = false;
@@ -98,18 +88,18 @@ export class AlertService {
   }
 
   private createAlertContainer() {
-    // Crear nuevo contenedor siempre
-    this.alertContainer = document.createElement('div');
-    this.alertContainer.id = 'alert-container-' + Date.now();
-    this.alertContainer.style.position = 'fixed';
-    this.alertContainer.style.top = '0';
-    this.alertContainer.style.left = '0';
-    this.alertContainer.style.width = '100%';
-    this.alertContainer.style.height = '100%';
-    this.alertContainer.style.pointerEvents = 'none';
-    this.alertContainer.style.zIndex = '10000';
-    
-    document.body.appendChild(this.alertContainer);
+    if (isPlatformBrowser(this.platformId)) {
+      this.alertContainer = document.createElement('div');
+      this.alertContainer.id = 'alert-container-' + Date.now();
+      this.alertContainer.style.position = 'fixed';
+      this.alertContainer.style.top = '0';
+      this.alertContainer.style.left = '0';
+      this.alertContainer.style.width = '100%';
+      this.alertContainer.style.height = '100%';
+      this.alertContainer.style.pointerEvents = 'none';
+      this.alertContainer.style.zIndex = '10000';
+      document.body.appendChild(this.alertContainer);
+    }
   }
 
   private closeCurrentAlert() {
@@ -123,8 +113,7 @@ export class AlertService {
         this.alertRef = undefined;
       }
     }
-
-    if (this.alertContainer?.parentNode) {
+    if (isPlatformBrowser(this.platformId) && this.alertContainer?.parentNode) {
       try {
         this.alertContainer.parentNode.removeChild(this.alertContainer);
         this.alertContainer = undefined;
@@ -136,10 +125,10 @@ export class AlertService {
   }
 
   /* ========== MÉTODOS PRINCIPALES ========== */
-  
+
   success(
-    message: string, 
-    duration: number | null = 3000, 
+    message: string,
+    duration: number | null = 3000,
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
   ): Promise<boolean> {
     return this.showAlert({
@@ -152,8 +141,8 @@ export class AlertService {
   }
 
   error(
-    message: string, 
-    duration: number | null = null, // Errores persistentes por defecto
+    message: string,
+    duration: number | null = null,
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
   ): Promise<boolean> {
     return this.showAlert({
@@ -166,8 +155,8 @@ export class AlertService {
   }
 
   warning(
-    message: string, 
-    duration: number | null = 4000, 
+    message: string,
+    duration: number | null = 4000,
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
   ): Promise<boolean> {
     return this.showAlert({
@@ -180,8 +169,8 @@ export class AlertService {
   }
 
   info(
-    message: string, 
-    duration: number | null = 3000, 
+    message: string,
+    duration: number | null = 3000,
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
   ): Promise<boolean> {
     return this.showAlert({
@@ -194,7 +183,7 @@ export class AlertService {
   }
 
   confirm(
-    message: string, 
+    message: string,
     confirmText: string = 'Confirmar',
     cancelText: string = 'Cancelar',
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
@@ -206,12 +195,12 @@ export class AlertService {
       confirmText,
       cancelText,
       position,
-      duration: undefined // Confirmaciones siempre persistentes
+      duration: undefined
     }) as Promise<boolean>;
   }
 
   /* ========== MÉTODOS PROMPT ========== */
-  
+
   prompt(
     message: string,
     placeholder: string = '',
@@ -226,7 +215,7 @@ export class AlertService {
       defaultValue,
       position,
       inputType: 'text',
-      duration: undefined // Prompts siempre persistentes
+      duration: undefined
     }) as Promise<string | null | false>;
   }
 
@@ -277,7 +266,7 @@ export class AlertService {
       title: 'Contraseña requerida',
       message,
       placeholder,
-      defaultValue: '', // No valores por defecto para passwords
+      defaultValue: '',
       position,
       inputType: 'password',
       duration: undefined
@@ -303,11 +292,11 @@ export class AlertService {
   }
 
   /* ========== MÉTODOS CON TÍTULOS PERSONALIZADOS ========== */
-  
+
   successWithTitle(
     title: string,
-    message: string, 
-    duration: number | null = 3000, 
+    message: string,
+    duration: number | null = 3000,
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
   ): Promise<boolean> {
     return this.showAlert({
@@ -321,8 +310,8 @@ export class AlertService {
 
   errorWithTitle(
     title: string,
-    message: string, 
-    duration: number | null = null, 
+    message: string,
+    duration: number | null = null,
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
   ): Promise<boolean> {
     return this.showAlert({
@@ -336,8 +325,8 @@ export class AlertService {
 
   warningWithTitle(
     title: string,
-    message: string, 
-    duration: number | null = 4000, 
+    message: string,
+    duration: number | null = 4000,
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
   ): Promise<boolean> {
     return this.showAlert({
@@ -351,8 +340,8 @@ export class AlertService {
 
   infoWithTitle(
     title: string,
-    message: string, 
-    duration: number | null = 3000, 
+    message: string,
+    duration: number | null = 3000,
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-right'
   ): Promise<boolean> {
     return this.showAlert({
@@ -366,7 +355,7 @@ export class AlertService {
 
   confirmWithTitle(
     title: string,
-    message: string, 
+    message: string,
     confirmText: string = 'Confirmar',
     cancelText: string = 'Cancelar',
     position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' = 'top-center'
@@ -383,11 +372,10 @@ export class AlertService {
   }
 
   /* ========== MÉTODO RÁPIDO ========== */
-  
-  // Notificación rápida con título automático
+
   notify(
-    type: 'success' | 'error' | 'warning' | 'info', 
-    message: string, 
+    type: 'success' | 'error' | 'warning' | 'info',
+    message: string,
     duration?: number | null,
     position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center'
   ): Promise<boolean> {
@@ -408,34 +396,30 @@ export class AlertService {
     if (duration !== undefined) {
       config.duration = duration || undefined;
     } else {
-      // Duración por defecto según tipo
       if (type === 'error') {
-        config.duration = undefined; // Errores persistentes por defecto
+        config.duration = undefined;
       } else if (type === 'warning') {
         config.duration = 4000;
       } else {
         config.duration = 3000;
       }
     }
-
     return this.showAlert(config) as Promise<boolean>;
   }
 
   /* ========== MÉTODO PERSONALIZADO ========== */
-  
+
   custom(config: AlertConfig): Promise<boolean | string | null | false> {
     return this.showAlert(config);
   }
 
   /* ========== CONTROL MANUAL ========== */
-  
-  // Cerrar alerta manualmente
+
   close(): void {
     this.closeCurrentAlert();
     this.isCreating = false;
   }
 
-  // Verificar si hay una alerta activa
   isActive(): boolean {
     return !!this.alertRef || this.isCreating;
   }
