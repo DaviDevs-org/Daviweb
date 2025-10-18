@@ -27,7 +27,9 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba($hover-color, 0.3);
         }
-    } @else {
+    }
+
+    @else {
         &:hover:not(:disabled) {
             background: linear-gradient(135deg, color.adjust($bg-color, $lightness: -5%, $space: hsl), color.adjust($bg-color, $lightness: -15%, $space: hsl));
             transform: translateY(-2px);
@@ -92,6 +94,16 @@
     &:hover {
         box-shadow: $shadow-lg;
     }
+}
+
+@mixin section {
+    background-color: $background-section;
+    max-width: 1180px;
+    margin: 0 auto;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    text-align: center;
+    width: 100%;
 }
 
 // ============================================
@@ -168,6 +180,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -179,10 +192,13 @@
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
         opacity: 1;
     }
+
     50% {
         transform: scale(1.05);
         opacity: 0.9;

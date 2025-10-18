@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, WritableSignal, signal } from "@angular/core";
-import { ViewportScroller, CommonModule } from "@angular/common";
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, WritableSignal, signal, PLATFORM_ID, afterNextRender } from "@angular/core";
+import { ViewportScroller, CommonModule, isPlatformBrowser } from "@angular/common";
 import { InfoManager, BusinessStatus } from "../services/admin-panel/info-management.service";
 import { from, interval, Subscription } from "rxjs";
-import { switchMap } from "rxjs/operators";
+import { switchMap, takeUntil } from "rxjs/operators";
+import { Subject } from "rxjs";
 
 @Component({
   selector: "app-header",
@@ -15,6 +16,8 @@ import { switchMap } from "rxjs/operators";
 export class HeaderComponent implements OnDestroy {
   private viewportScroller = inject(ViewportScroller);
   private info = inject(InfoManager);
+  private platformId = inject(PLATFORM_ID);
+  private destroy$ = new Subject<void>();
 
   // Señal editable (WritableSignal) con toda la estructura de BusinessStatus
   safeBusinessInfo: WritableSignal<BusinessStatus> = signal({
@@ -35,7 +38,35 @@ export class HeaderComponent implements OnDestroy {
   private subscription: Subscription | null = null;
 
   constructor() {
-    // Inicializamos con valor real
+    // ✅ Solo ejecutar en el navegador usando afterNextRender
+    afterNextRender(() => {
+      this.initializeBusinessStatus();
+    });
+  }
+
+  ngOnDestroy() {
+    // ✅ Limpieza completa de todos los recursos
+    this.destroy$.next();
+    this.destroy$.complete();
+    
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  scrollToSection(elementId: string) {
+    // ✅ ViewportScroller es seguro en SSR, pero podemos protegerlo igualmente
+    if (isPlatformBrowser(this.platformId)) {
+      this.viewportScroller.scrollToAnchor(elementId);
+    }
+  }
+
+  // ✅ Método extraído para inicialización solo en navegador
+  private initializeBusinessStatus() {
+    // Cargar estado inicial
     from(this.info.isBusinessOpen()).subscribe(status => {
       this.safeBusinessInfo.set({
         ...status,
@@ -46,21 +77,22 @@ export class HeaderComponent implements OnDestroy {
       }
     });
 
+    // Iniciar actualizaciones periódicas
     this.startUpdater();
   }
 
-  ngOnDestroy() {
-    if (this.countdownInterval) clearInterval(this.countdownInterval);
-    if (this.subscription) this.subscription.unsubscribe();
-  }
-
-  scrollToSection(elementId: string) {
-    this.viewportScroller.scrollToAnchor(elementId);
-  }
-
   private startUpdater() {
+    // ✅ Protección adicional aunque ya estamos en el navegador
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    // ✅ Usar takeUntil para auto-limpieza
     this.subscription = interval(30000)
-      .pipe(switchMap(() => this.info.isBusinessOpen()))
+      .pipe(
+        switchMap(() => this.info.isBusinessOpen()),
+        takeUntil(this.destroy$)
+      )
       .subscribe(status => {
         this.safeBusinessInfo.set({
           ...status,
@@ -76,8 +108,14 @@ export class HeaderComponent implements OnDestroy {
   }
 
   private startCountdown(minutes: number) {
+    // ✅ Solo ejecutar en navegador
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.stopCountdown();
     let remainingSeconds = minutes * 60;
+    
     this.countdownInterval = setInterval(() => {
       remainingSeconds--;
       const current = this.safeBusinessInfo();
@@ -94,8 +132,10 @@ export class HeaderComponent implements OnDestroy {
   }
 
   private stopCountdown() {
-    if (this.countdownInterval) clearInterval(this.countdownInterval);
-    this.countdownInterval = null;
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
   }
 
   private async refreshStatus() {

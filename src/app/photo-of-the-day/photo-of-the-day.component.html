@@ -65,10 +65,5 @@
         [class.active]="i === currentSlide()" (click)="goToSlide(i)" type="button">
       </button>
     </div>
-    <!-- Barra de progreso tipo slide -->
-    <div class="carousel-progress-container">
-      <input type="range" min="0" [max]="totalSlides() - 1" [value]="currentSlide()" class="carousel-progress"
-        (input)="onProgressInput($event)" />
-    </div>
   </div>
 </div>

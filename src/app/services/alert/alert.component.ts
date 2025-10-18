@@ -1,6 +1,6 @@
 // alert.component.ts
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef, PLATFORM_ID, inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 export interface AlertConfig {
   type: 'success' | 'error' | 'warning' | 'info' | 'confirm'| 'prompt';
@@ -39,6 +39,7 @@ export class CustomAlertComponent implements OnInit {
   
   isVisible = false;
   private autoCloseTimer?: number;
+  private platformId = inject(PLATFORM_ID);
 
   ngOnInit() {
     // Aparición rápida para toast
@@ -52,7 +53,7 @@ export class CustomAlertComponent implements OnInit {
     }, 10);
     
     // Auto-cierre solo si hay duración y no es confirmación ni prompt
-    if (this.config.duration && this.config.type !== 'confirm' && this.config.type !== 'prompt') {
+    if (this.config.duration && this.config.type !== 'confirm' && this.config.type !== 'prompt' && isPlatformBrowser(this.platformId)) {
       this.autoCloseTimer = window.setTimeout(() => {
         this.close();
       }, this.config.duration);
@@ -133,7 +134,7 @@ export class CustomAlertComponent implements OnInit {
   }
 
   private clearAutoClose() {
-    if (this.autoCloseTimer) {
+    if (this.autoCloseTimer && isPlatformBrowser(this.platformId)) {
       window.clearTimeout(this.autoCloseTimer);
       this.autoCloseTimer = undefined;
     }

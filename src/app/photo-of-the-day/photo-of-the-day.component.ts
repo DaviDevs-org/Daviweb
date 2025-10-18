@@ -1,5 +1,5 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser, NgOptimizedImage } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
 import { GalleryService } from '../services/admin-panel/gallery-management.service';
 import { GalleryPhoto } from '../admin-panel/types/admin.types';
 
@@ -17,6 +17,7 @@ interface CarouselItem {
 })
 export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
   private galleryService = inject(GalleryService);
+  private platformId = inject(PLATFORM_ID);
 
   carouselItems = signal<CarouselItem[]>([]);
   currentSlide = signal(0);
@@ -57,7 +58,7 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
       this.totalSlides.set(items.length);
 
       // Solo iniciar autoplay si hay imágenes
-      if (items.length > 1) {
+      if (items.length > 1 && isPlatformBrowser(this.platformId)) {
         this.startAutoPlay();
       }
 
@@ -117,10 +118,11 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
   private startAutoPlay() {
     // Solo iniciar autoplay si hay más de una imagen
     if (this.totalSlides() <= 1) return;
-
-    this.intervalId = window.setInterval(() => {
-      this.nextSlide();
-    }, 8000);
+    if (isPlatformBrowser(this.platformId)) {
+      this.intervalId = window.setInterval(() => {
+        this.nextSlide();
+      }, 8000);
+    }
   }
 
   private stopAutoPlay() {

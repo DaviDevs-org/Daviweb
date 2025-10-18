@@ -3,19 +3,13 @@
 
 .photo-of-the-day {
   padding: 32px 40px 48px 40px;
-  max-width: 1180px;
-  margin: 0 auto;
-  background: rgba(97, 53, 35, 0.6);
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 48px;
   box-sizing: border-box;
-  text-align: center;
-  width: 100%;
   margin-top: 2%;
+  @include section;
 
   .heading {
     font-family: $font-primary;
