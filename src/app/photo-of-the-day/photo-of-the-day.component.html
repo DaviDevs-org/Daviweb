@@ -19,7 +19,7 @@
   <div *ngIf="!isLoading() && totalSlides() === 1" class="single-image-container">
     <div class="single-image-wrapper">
       <!-- width/height reflejan la ratio intrínseca (ej. 1024x1024). priority porque es LCP -->
-      <img [src]="carouselItems()[0].image" [alt]="carouselItems()[0].alt" width="1024" height="1024" priority
+      <img [ngSrc]="carouselItems()[0].image" [alt]="carouselItems()[0].alt" width="1024" height="1024" priority
         decoding="async" class="single-image">
       <div class="image-caption">
         <span>{{ carouselItems()[0].caption }}</span>
@@ -36,7 +36,7 @@
         <div class="carousel-slide" *ngFor="let item of carouselItems(); let i = index"
           [style.width]="(100 / totalSlides()) + '%'">
           <!-- width/height intrínsecos; marcar priority SOLO si es el slide visible -->
-          <img [src]="item.image" [alt]="item.alt" width="1024" height="1024" class="carousel-image"
+          <img [ngSrc]="item.image" [alt]="item.alt" width="1024" height="1024" class="carousel-image"
             [attr.priority]="i === currentSlide() ? '' : null" [attr.loading]="i === currentSlide() ? null : 'lazy'"
             decoding="async">
           <div class="carousel-caption">

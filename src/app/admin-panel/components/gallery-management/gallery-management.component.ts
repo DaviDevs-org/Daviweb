@@ -1,9 +1,6 @@
 // gallery-management.component.ts
-import {
-  Component, ElementRef, inject, signal, ViewChild, OnDestroy, Injector, runInInjectionContext, ChangeDetectorRef,
-  Inject, PLATFORM_ID
-} from '@angular/core';
-import {CommonModule, isPlatformBrowser} from '@angular/common';
+import { Component, ElementRef, inject, signal, ViewChild, OnDestroy, Injector, runInInjectionContext, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GalleryPhoto } from '../../types/admin.types';
 import { GalleryService } from '../../../services/admin-panel/gallery-management.service';
@@ -34,19 +31,15 @@ export class GalleryManagementComponent implements OnDestroy {
   isLoading = signal(true);
   imageLoadStates: boolean[] = [];
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
-
-  async ngOnInit() {
-    await runInInjectionContext(this.injector, async () => {
-      // Sólo limita en SSR, cliente carga todo
-      const images = await this.gallery.getImages(isPlatformBrowser(this.platformId) ? undefined : 8);
-      const gallery = await this.gallery.getImageInfo(images);
-      this.galleryPhotos.set(gallery);
+  ngOnInit() {
+    runInInjectionContext(this.injector, async () => {
+      const images = await this.gallery.getImages()
+      const gallery = await this.gallery.getImageInfo(images)
+      this.galleryPhotos.set(gallery)
       this.imageLoadStates = new Array(gallery.length).fill(false);
-      this.isLoading.set(false);
+      this.isLoading.set(false)
     });
   }
-
   onImageLoad(index: number) {
     this.imageLoadStates[index] = true;
     this.cdr.detectChanges();

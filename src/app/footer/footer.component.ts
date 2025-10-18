@@ -4,9 +4,6 @@ import { RouterLink } from "@angular/router";
 import { InfoManager } from "../services/admin-panel/info-management.service";
 import { ScheduleService } from "../services/schedule.service";
 import { LegalModalComponent } from "../legal-modal/legal-modal.component";
-import { isPlatformBrowser } from '@angular/common';
-import { Inject, PLATFORM_ID } from '@angular/core';
-
 @Component({
   selector: "app-footer",
   templateUrl: "./footer.component.html",
@@ -30,8 +27,6 @@ export class FooterComponent {
   loading = false;
 
   private scrollY: number = 0;
-
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   async ngOnInit() {
     const response = await this.info.getContactInfo()
@@ -71,12 +66,9 @@ export class FooterComponent {
 
       if (!text) throw new Error('El documento está vacío o tiene un formato no compatible.');
       this.legalContent = text;
-
-      if (isPlatformBrowser(this.platformId)) {
-        this.scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-        document.body.style.position = 'fixed';
-        document.body.style.top = `-${this.scrollY}px`;
-      }
+      this.scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${this.scrollY}px`;
 
     } catch (err: any) {
       this.legalContent = `<p style="color:#a00"><strong>Error:</strong> ${err?.message || 'No se ha podido cargar el documento legal.'
@@ -90,20 +82,18 @@ export class FooterComponent {
   closeModal() {
     this.legalVisible = false;
     this.loading = false;
+    const y = this.scrollY;
+    const html = document.documentElement;
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
 
-    if (isPlatformBrowser(this.platformId)) {
-      const y = this.scrollY;
-      const html = document.documentElement;
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
+    html.style.scrollBehavior = 'auto';
+    window.scrollTo(0, y);
+    html.style.scrollBehavior = '';
 
 
-      html.style.scrollBehavior = 'auto';
-      window.scrollTo(0, y);
-      html.style.scrollBehavior = '';
-    }
   }
 }

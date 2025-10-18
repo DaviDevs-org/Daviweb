@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, WritableSignal, signal, Inject, PLATFORM_ID } from "@angular/core";
-import { ViewportScroller, CommonModule, isPlatformBrowser } from "@angular/common";
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, WritableSignal, signal } from "@angular/core";
+import { ViewportScroller, CommonModule } from "@angular/common";
 import { InfoManager, BusinessStatus } from "../services/admin-panel/info-management.service";
 import { from, interval, Subscription } from "rxjs";
 import { switchMap } from "rxjs/operators";
@@ -16,6 +16,7 @@ export class HeaderComponent implements OnDestroy {
   private viewportScroller = inject(ViewportScroller);
   private info = inject(InfoManager);
 
+  // Señal editable (WritableSignal) con toda la estructura de BusinessStatus
   safeBusinessInfo: WritableSignal<BusinessStatus> = signal({
     isOpen: false,
     currentDay: '',
@@ -33,19 +34,19 @@ export class HeaderComponent implements OnDestroy {
   private countdownInterval: any = null;
   private subscription: Subscription | null = null;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
-    // Siempre: consulta inicial (SSR y navegador)
+  constructor() {
+    // Inicializamos con valor real
     from(this.info.isBusinessOpen()).subscribe(status => {
       this.safeBusinessInfo.set({
         ...status,
         remainingSeconds: status.remainingMinutes ? status.remainingMinutes * 60 : 0
       });
+      if (status.isWarning && status.remainingMinutes) {
+        this.startCountdown(status.remainingMinutes);
+      }
     });
 
-    // Solo en navegador: refresco y cuenta atrás
-    if (isPlatformBrowser(this.platformId)) {
-      this.startUpdater();
-    }
+    this.startUpdater();
   }
 
   ngOnDestroy() {
