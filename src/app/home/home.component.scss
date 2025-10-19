@@ -1,8 +1,380 @@
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
 
-.body{
+.body {
     display: flex;
     flex-direction: column;
     gap: $spacing-2xl;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.skeleton-services {
+    padding: 48px 24px;
+    max-width: 1180px;
+    width: 100%;
+    margin: 0 auto;
+    background: #885B34;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+
+    .skeleton-header {
+        height: 100px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .skeleton-categories {
+        height: 80px;
+        background: rgba(255, 255, 255, 0.28);
+        border-radius: 12px;
+        animation: pulse 1.5s ease-in-out infinite;
+        animation-delay: 0.2s;
+    }
+
+    .skeleton-content {
+        height: 500px;
+        background: rgba(255, 255, 255, 0.28);
+        border-radius: 12px;
+        animation: pulse 1.5s ease-in-out infinite;
+        animation-delay: 0.4s;
+    }
+}
+
+
+.skeleton-barbers {
+    padding: 48px 24px;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    @include section;
+
+    @include mobile {
+        padding: 36px 16px;
+    }
+
+    .skeleton-header {
+        width: 100%;
+        max-width: 600px;
+        height: 120px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .skeleton-cards {
+        width: 100%;
+        max-width: 1180px;
+        height: 450px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        animation: pulse 1.5s ease-in-out infinite;
+        animation-delay: 0.2s;
+    }
+
+    .skeleton-note {
+        width: 100%;
+        max-width: 800px;
+        height: 60px;
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: 8px;
+        animation: pulse 1.5s ease-in-out infinite;
+        animation-delay: 0.4s;
+    }
+}
+
+.skeleton-appointment {
+    @include section;
+    padding: 24px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 700px;
+
+    @include mobile {
+        padding: 20px;
+        min-height: 650px;
+    }
+
+    .skeleton-calendar-header {
+        width: 100%;
+        max-width: 600px;
+        height: 80px;
+        margin: 0 auto;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .skeleton-calendar-grid {
+        width: 100%;
+        max-width: 850px;
+        height: 500px;
+        margin: 0 auto;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        animation: pulse 1.5s ease-in-out infinite;
+        animation-delay: 0.2s;
+    }
+}
+
+.skeleton-location {
+    @include section;
+    padding: 48px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+
+    @include mobile {
+        padding: 36px 16px;
+        gap: 32px;
+    }
+
+    .skeleton-heading {
+        width: 300px;
+        height: 45px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .skeleton-content {
+        display: flex;
+        gap: 48px;
+        width: 100%;
+
+        @include tablet {
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .skeleton-map {
+            flex: 1 1 55%;
+            height: 384px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            animation: pulse 1.5s ease-in-out infinite;
+            animation-delay: 0.2s;
+
+            @include tablet {
+                height: 350px;
+            }
+        }
+
+        .skeleton-info {
+            flex: 1 1 40%;
+            height: 384px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            animation: pulse 1.5s ease-in-out infinite;
+            animation-delay: 0.4s;
+
+            @include tablet {
+                height: 300px;
+            }
+        }
+    }
+}
+
+.skeleton-about {
+    @include section;
+    padding: 48px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+
+    @include mobile {
+        padding: 36px 16px;
+        gap: 40px;
+    }
+
+    .skeleton-heading {
+        width: 250px;
+        height: 45px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .skeleton-content {
+        display: flex;
+        flex-direction: row;
+        gap: 48px;
+        width: 100%;
+
+        @include tablet {
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .skeleton-text {
+            flex: 1 1 60%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            animation: pulse 1.5s ease-in-out infinite;
+            animation-delay: 0.2s;
+        }
+
+        .skeleton-image {
+            flex: 0 0 40%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            animation: pulse 1.5s ease-in-out infinite;
+            animation-delay: 0.4s;
+
+            @include tablet {
+                width: 100%;
+                order: -1;
+            }
+        }
+    }
+}
+
+.skeleton-opinions {
+    @include section;
+    padding: 48px 24px;
+
+    @include mobile {
+        padding: 36px 16px;
+    }
+
+    .skeleton-heading {
+        width: 250px;
+        height: 45px;
+        margin: 0 auto 12px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .skeleton-subtitle {
+        width: 400px;
+        height: 24px;
+        margin: 0 auto 36px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
+        animation: pulse 1.5s ease-in-out infinite;
+        animation-delay: 0.1s;
+
+        @include mobile {
+            width: 280px;
+        }
+    }
+
+    .skeleton-cards-container {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 0 12px;
+        max-width: 100%;
+
+        .skeleton-card {
+            flex: 1 1 300px;
+            max-width: 320px;
+            min-width: 280px;
+            height: 320px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 40px;
+            animation: pulse 1.5s ease-in-out infinite;
+
+            &:nth-child(1) {
+                animation-delay: 0.2s;
+            }
+
+            &:nth-child(2) {
+                animation-delay: 0.3s;
+            }
+
+            &:nth-child(3) {
+                animation-delay: 0.4s;
+            }
+        }
+    }
+}
+
+.skeleton-faq {
+    @include section;
+    padding: 36px 40px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+
+    @include mobile {
+        padding: 24px 24px 36px;
+    }
+
+    .skeleton-heading {
+        width: 300px;
+        height: 45px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .skeleton-items {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        width: 100%;
+        max-width: 1120px;
+
+        .skeleton-item {
+            width: 100%;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 20px;
+            animation: pulse 1.5s ease-in-out infinite;
+
+            &:nth-child(1) {
+                animation-delay: 0.2s;
+            }
+
+            &:nth-child(2) {
+                animation-delay: 0.3s;
+            }
+
+            &:nth-child(3) {
+                animation-delay: 0.4s;
+            }
+
+            &:nth-child(4) {
+                animation-delay: 0.5s;
+            }
+        }
+    }
+}
+
+.skeleton-footer {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 48px 24px 24px;
+    box-sizing: border-box;
+    min-height: 350px;
+
+    @include mobile {
+        padding: 36px 16px 16px;
+        min-height: 400px;
+    }
 }

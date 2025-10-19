@@ -35,8 +35,7 @@
         [style.transform]="'translateX(-' + (currentSlide() * (100 / totalSlides())) + '%)'">
         <div class="carousel-slide" *ngFor="let item of carouselItems(); let i = index"
           [style.width]="(100 / totalSlides()) + '%'">
-          <!-- width/height intrínsecos; marcar priority SOLO si es el slide visible -->
-          <img [ngSrc]="item.image" [alt]="item.alt" width="1024" height="1024" class="carousel-image"
+          <img [ngSrc]="item.image" [alt]="item.alt" fill class="carousel-image"
             [attr.priority]="i === currentSlide() ? '' : null" [attr.loading]="i === currentSlide() ? null : 'lazy'"
             decoding="async">
           <div class="carousel-caption">

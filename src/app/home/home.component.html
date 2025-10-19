@@ -1,13 +1,84 @@
 <div class="body">
     <app-header></app-header>
     <app-photo-of-the-day></app-photo-of-the-day>
-    <app-services-info></app-services-info>
-    <app-barbers-info></app-barbers-info>
-    <app-appointment></app-appointment>
-    <app-location-and-contact></app-location-and-contact>
-    <app-about-us></app-about-us>
-    <app-opinions></app-opinions>
-    <app-faq></app-faq>
-    <app-footer></app-footer>
+
+    @defer (on viewport) {
+    <app-services-info />
+    } @placeholder {
+    <div class="skeleton-services">
+        <div class="skeleton-header"></div>
+        <div class="skeleton-categories"></div>
+        <div class="skeleton-content"></div>
+    </div>
+    }
+    @defer (on viewport) {
+    <app-barbers-info />
+    } @placeholder {
+    <div class="skeleton-barbers">
+        <div class="skeleton-header"></div>
+        <div class="skeleton-cards"></div>
+        <div class="skeleton-note"></div>
+    </div>
+    }
+    @defer (on viewport) {
+    <app-appointment />
+    } @placeholder {
+    <div class="skeleton-appointment">
+        <div class="skeleton-calendar-header"></div>
+        <div class="skeleton-calendar-grid"></div>
+    </div>
+    }
+    @defer (on viewport) {
+    <app-location-and-contact />
+    } @placeholder {
+    <div class="skeleton-location">
+        <div class="skeleton-heading"></div>
+        <div class="skeleton-content">
+            <div class="skeleton-map"></div>
+            <div class="skeleton-info"></div>
+        </div>
+    </div>
+    }
+    @defer (on viewport) {
+    <app-about-us />
+    } @placeholder {
+    <div class="skeleton-about">
+        <div class="skeleton-heading"></div>
+        <div class="skeleton-content">
+            <div class="skeleton-text"></div>
+            <div class="skeleton-image"></div>
+        </div>
+    </div>
+    }
+    @defer (on viewport) {
+    <app-opinions />
+    } @placeholder {
+    <div class="skeleton-opinions">
+        <div class="skeleton-heading"></div>
+        <div class="skeleton-subtitle"></div>
+        <div class="skeleton-cards-container">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        </div>
+    </div>
+    }
+    @defer (on viewport) {
+    <app-faq />
+    } @placeholder {
+    <div class="skeleton-faq">
+        <div class="skeleton-heading"></div>
+        <div class="skeleton-items">
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+        </div>
+    </div>
+    }
+    @defer (on viewport) {
+    <app-footer />
+    } @placeholder {
+    <div class="skeleton-footer"></div>
+    }
 </div>
-    

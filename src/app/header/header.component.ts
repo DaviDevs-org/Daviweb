@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, WritableSignal, signal, PLATFORM_ID, afterNextRender } from "@angular/core";
-import { ViewportScroller, CommonModule, isPlatformBrowser } from "@angular/common";
+import { ViewportScroller, CommonModule, isPlatformBrowser, NgOptimizedImage } from "@angular/common";
 import { InfoManager, BusinessStatus } from "../services/admin-panel/info-management.service";
 import { from, interval, Subscription } from "rxjs";
 import { switchMap, takeUntil } from "rxjs/operators";
@@ -10,7 +10,7 @@ import { Subject } from "rxjs";
   templateUrl: "./header.component.html",
   styleUrls: ["./header.component.scss"],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnDestroy {

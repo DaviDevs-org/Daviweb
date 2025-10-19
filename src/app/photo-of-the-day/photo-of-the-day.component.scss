@@ -52,8 +52,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 // No images state
@@ -93,7 +98,7 @@
     position: relative;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 
     .single-image {
       width: 100%;
@@ -138,7 +143,7 @@
     overflow: hidden;
     border-radius: 8px;
     position: relative;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 
   .carousel-track {
@@ -148,20 +153,21 @@
   }
 
   .carousel-slide {
-    height: 100%;
+    width: 100%;
     position: relative;
+    aspect-ratio: 16/9;
     flex-shrink: 0;
+    overflow: hidden; // Evita desbordamiento
   }
 
   .single-image,
   .carousel-image {
     width: 100%;
-    height: auto;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
+    height: 100%; // Cambia auto por 100%
+    object-fit: contain; // Para que llene sin deformar
     object-position: center;
-    display: block;
   }
+
 
   .carousel-caption {
     position: absolute;
@@ -339,11 +345,13 @@
     background: $background-gold;
     border-radius: 6px;
   }
+
   &::-moz-range-track {
     height: 8px;
     background: $background-gold;
     border-radius: 6px;
   }
+
   &::-ms-fill-lower,
   &::-ms-fill-upper {
     background: $background-gold;
@@ -362,6 +370,7 @@
     transition: background 0.3s;
     cursor: pointer;
   }
+
   &::-moz-range-thumb {
     width: 18px;
     height: 18px;
@@ -371,6 +380,7 @@
     box-shadow: 0 2px 3px rgba($primary-gold, 0.16);
     cursor: pointer;
   }
+
   &::-ms-thumb {
     width: 18px;
     height: 18px;

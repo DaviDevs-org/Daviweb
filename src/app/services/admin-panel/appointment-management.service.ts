@@ -1,5 +1,5 @@
 // src/app/services/appointment.service.ts
-import { Injectable } from '@angular/core';
+import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
     Firestore,
     collection,
@@ -16,13 +16,15 @@ import { Appointment } from '../../admin-panel/types/admin.types';
 @Injectable({ providedIn: 'root' })
 export class AppointmentManagerService {
     private path = 'pruebas/data/appointments';
-
-    constructor(private firestore: Firestore) { }
+    private firestore = inject(Firestore);
+    private injector = inject(Injector)
 
     getAppointments(): Observable<Appointment[]> {
-        const ref = collection(this.firestore, this.path);
-        const q = query(ref, orderBy('datetime', 'asc'));
-        return collectionData(q, { idField: 'id' }) as Observable<Appointment[]>;
+        return runInInjectionContext(this.injector, () => {
+            const ref = collection(this.firestore, this.path);
+            const q = query(ref, orderBy('datetime', 'asc'));
+            return collectionData(q, { idField: 'id' }) as Observable<Appointment[]>;
+        });
     }
 
     async updateAppointment(id: string, data: Partial<Appointment>) {
