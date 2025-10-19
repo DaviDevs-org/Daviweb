@@ -4,7 +4,7 @@ import { InfoManager, BusinessStatus } from "../services/admin-panel/info-manage
 import { from, interval, Subscription } from "rxjs";
 import { switchMap, takeUntil } from "rxjs/operators";
 import { Subject } from "rxjs";
-
+//
 @Component({
   selector: "app-header",
   templateUrl: "./header.component.html",
@@ -48,7 +48,7 @@ export class HeaderComponent implements OnDestroy {
     // ✅ Limpieza completa de todos los recursos
     this.destroy$.next();
     this.destroy$.complete();
-    
+
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
     }
@@ -115,7 +115,7 @@ export class HeaderComponent implements OnDestroy {
 
     this.stopCountdown();
     let remainingSeconds = minutes * 60;
-    
+
     this.countdownInterval = setInterval(() => {
       remainingSeconds--;
       const current = this.safeBusinessInfo();
