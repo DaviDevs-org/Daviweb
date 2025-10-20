@@ -32,13 +32,15 @@ export class AppointmentService {
         createdAt: serverTimestamp()
       });
 
-      // Guardar reserved slot (campo datetime necesario para consultas "desde ahora")
-      await addDoc(reservedCol, {
+      // Guardar reserved slots por cada segmento ACTIVO de 30min
+      const slots = this.computeActiveSlotDateTimes(datetime, appointment);
+      await Promise.all(slots.map(s => addDoc(reservedCol, {
         date: appointment.date,
-        time: appointment.time,
-        datetime,
+        time: s.time,
+        datetime: s.datetime,
+        appointmentId: docRef.id,
         createdAt: serverTimestamp()
-      });
+      })));
 
       return { success: true, appointmentId: docRef.id };
     } catch (err: any) {
@@ -46,5 +48,38 @@ export class AppointmentService {
       console.error('AppointmentService.addAppointment error:', err);
       throw new Error(err?.message || 'Error añadiendo la cita');
     }
+  }
+
+  // Calcula los Date/HH:mm de cada slot ACTIVO (30min) teniendo en cuenta los breaks
+  private computeActiveSlotDateTimes(startDateTime: Date, appointment: Appointment): { time: string; datetime: Date }[] {
+    const out: { time: string; datetime: Date }[] = [];
+
+    // Helper para formatear HH:mm
+    const fmt = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+
+    // Si hay estructura de segmentos en el servicio, respetarla
+    const segments = appointment?.service?.timeSegments;
+    if (segments && Array.isArray(segments) && segments.length > 0) {
+      let accumulated = 0; // minutos desde el inicio
+      segments.forEach((seg: any, idx: number) => {
+        const duration = Number(seg?.duration) || 0;
+        // Añadir slots activos cada 30min dentro del segmento
+        for (let m = 0; m < duration; m += 30) {
+          const dt = new Date(startDateTime.getTime() + (accumulated + m) * 60000);
+          out.push({ time: fmt(dt), datetime: dt });
+        }
+        accumulated += duration;
+        const breakAfter = Number(seg?.breakAfter) || 0;
+        // Sumar break al acumulado (pero no reservar esos slots) si no es el último segmento
+        if (breakAfter > 0 && idx < segments.length - 1) {
+          accumulated += breakAfter;
+        }
+      });
+      return out;
+    }
+
+    // Fallback: si no hay segmentos, reservar solo el slot inicial (30min)
+    out.push({ time: fmt(startDateTime), datetime: startDateTime });
+    return out;
   }
 }

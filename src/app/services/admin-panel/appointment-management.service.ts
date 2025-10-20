@@ -8,7 +8,9 @@ import {
     updateDoc,
     deleteDoc,
     query,
-    orderBy
+    orderBy,
+    where,
+    getDocs
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Appointment } from '../../admin-panel/types/admin.types';
@@ -33,7 +35,16 @@ export class AppointmentManagerService {
     }
 
     async deleteAppointment(id: string) {
+        // Borrar la cita
         const d = doc(this.firestore, `${this.path}/${id}`);
-        return deleteDoc(d);
+        await deleteDoc(d);
+
+        // Borrar slots reservados asociados
+        const reservedCol = collection(this.firestore, 'pruebas', 'data', 'reservedSlots');
+        const qSlots = query(reservedCol, where('appointmentId', '==', id));
+        const snaps = await getDocs(qSlots);
+        const deletions: Promise<void>[] = [];
+        snaps.forEach(s => deletions.push(deleteDoc(s.ref)));
+        await Promise.all(deletions);
     }
 }

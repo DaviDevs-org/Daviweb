@@ -105,64 +105,25 @@ export class CalendarSelectorComponent implements OnDestroy {
   }
 
   private async loadBookedSlotsFromAppointments() {
-    if (!isPlatformBrowser(this.platformId)) {
-      // En servidor, usa solo los reservedSlots públicos
-      const slots = await firstValueFrom(this.reservedSlotsService.getReservedSlotsFromNow());
-      this.bookedSlotsByDate = {};
-      (slots ?? []).forEach((slot: ReservedSlot) => {
-        const dateKey = slot.date;
-        if (!this.bookedSlotsByDate[dateKey]) this.bookedSlotsByDate[dateKey] = [];
-        this.bookedSlotsByDate[dateKey].push(slot.time);
-      });
-      return;
-    }
-    try {
-      const appointments$ = this.apptSvc.getAppointments().pipe(
-        map(list => list.map(a => this.normalizeAppointment(a)))
-      );
+    // Usamos siempre los reservedSlots públicos
+    const slots = await firstValueFrom(this.reservedSlotsService.getReservedSlotsFromNow());
+    this.bookedSlotsByDate = {};
+    (slots ?? []).forEach((slot: ReservedSlot) => {
+      const dateKey = slot.date;
+      if (!this.bookedSlotsByDate[dateKey]) this.bookedSlotsByDate[dateKey] = [];
+      const norm = this.normalizeTime(slot.time);
+      if (!this.bookedSlotsByDate[dateKey].includes(norm)) {
+        this.bookedSlotsByDate[dateKey].push(norm);
+      }
+    });
+  }
 
-      const appointments = await firstValueFrom(appointments$);
-      this.bookedSlotsByDate = {};
-
-      appointments.forEach(appointment => {
-        if (!appointment.dateISO || !appointment.timeNormalized || appointment.timeNormalized === '—') return;
-
-        const dateKey = appointment.dateISO;
-        if (!this.bookedSlotsByDate[dateKey]) {
-          this.bookedSlotsByDate[dateKey] = [];
-        }
-
-        // Obtener todos los segmentos de tiempo que ocupa la cita (incluyendo breaks)
-        const timeSegments = this.getAppointmentTimeSegments(appointment);
-
-        timeSegments.forEach(segment => {
-          // Solo marcar como ocupados los slots ACTIVOS, no los breaks
-          if (segment.type === 'active') {
-            for (let minutes = segment.start; minutes < segment.start + segment.duration; minutes += 30) {
-              const hours = Math.floor(minutes / 60);
-              const mins = minutes % 60;
-              const timeSlot = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-
-              if (!this.bookedSlotsByDate[dateKey].includes(timeSlot)) {
-                this.bookedSlotsByDate[dateKey].push(timeSlot);
-              }
-            }
-          }
-        });
-      });
-
-      console.log('Slots ocupados cargados desde citas:', this.bookedSlotsByDate);
-    } catch (error) {
-      console.error('Error cargando slots ocupados:', error);
-      // Fallback al método anterior si falla
-      const slots = await firstValueFrom(this.reservedSlotsService.getReservedSlotsFromNow());
-      this.bookedSlotsByDate = {};
-      (slots ?? []).forEach((slot: ReservedSlot) => {
-        const dateKey = slot.date;
-        if (!this.bookedSlotsByDate[dateKey]) this.bookedSlotsByDate[dateKey] = [];
-        this.bookedSlotsByDate[dateKey].push(slot.time);
-      });
-    }
+  private normalizeTime(t: string | undefined | null): string {
+    if (!t) return '00:00';
+    const [h, m] = t.split(':').map(v => Number(v));
+    const hh = isNaN(h) ? 0 : h;
+    const mm = isNaN(m) ? 0 : m;
+    return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
   }
 
   // Método helper para convertir tiempo a minutos

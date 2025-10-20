@@ -10,6 +10,7 @@ import {
   getDocs
 } from '@angular/fire/firestore';
 import { Service } from '../../admin-panel/types/admin.types';
+import { Storage, ref, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -19,6 +20,7 @@ export class ServiceManager {
   private firestore = inject(Firestore);
   private injector = inject(Injector);
   private path = '/pruebas/data/services';
+  private storage = inject(Storage);
 
   getServices(): Observable<Service[]> {
     return runInInjectionContext(this.injector, () => {
@@ -42,9 +44,29 @@ export class ServiceManager {
     });
   }
 
-  deleteService(id: string) {
-    return runInInjectionContext(this.injector, () => {
+  async deleteService(id: string) {
+    return runInInjectionContext(this.injector, async () => {
       const placeRef = doc(this.firestore, `${this.path}/${id}`);
+      // Leer el documento para obtener la imageUrl y borrar la imagen
+      try {
+        const { getDoc } = await import('@angular/fire/firestore');
+        const snap = await getDoc(placeRef);
+        if (snap.exists()) {
+          const data = snap.data() as any;
+          const imageUrl: string | undefined = data?.imageUrl;
+          if (imageUrl) {
+            try {
+              const r = ref(this.storage, imageUrl);
+              await deleteObject(r);
+            } catch (e) {
+              console.warn('No se pudo borrar la imagen del servicio o no existe:', e);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('No se pudo obtener el servicio antes de borrar para limpiar imagen:', e);
+      }
+      // Borrar el documento del servicio
       return deleteDoc(placeRef);
     });
   }

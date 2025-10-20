@@ -1,5 +1,6 @@
 import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import { Firestore, doc, getDoc, updateDoc, setDoc, arrayUnion, arrayRemove } from '@angular/fire/firestore';
+import { Storage, ref, deleteObject } from '@angular/fire/storage';
 import {
   ContactInfo,
   ScheduleDay,
@@ -29,6 +30,7 @@ export interface BusinessStatus {
 export class InfoManager {
   private firestore = inject(Firestore);
   private injector = inject(Injector);
+  private storage = inject(Storage);
 
   private schedulePath = '/pruebas/data/info/schedule';
   private contactInfoPath = '/pruebas/data/info/contact-info';
@@ -327,8 +329,17 @@ export class InfoManager {
 
   async removeBarber(barber: Barber): Promise<void> {
     try {
-      const ref = doc(this.firestore, this.barberPath);
-      await updateDoc(ref, { 'settings.staff': arrayRemove(barber) });
+      const refDoc = doc(this.firestore, this.barberPath);
+      // Intentar borrar la imagen asociada si existe
+      if (barber.imageUrl) {
+        try {
+          const r = ref(this.storage, barber.imageUrl);
+          await deleteObject(r);
+        } catch (e) {
+          console.warn('No se pudo borrar la imagen del barber o no existe:', e);
+        }
+      }
+      await updateDoc(refDoc, { 'settings.staff': arrayRemove(barber) });
     } catch (err) {
       console.error('Error removing barber:', err);
     }
