@@ -8,6 +8,7 @@ import { percentage } from '@angular/fire/storage';
 import { Subscription } from 'rxjs';
 import { GalleryService } from '../../../services/admin-panel/gallery-management.service';
 import { AlertService } from '../../../services/alert/alert.service';
+import { ImageProcessingService } from '../../../services/image-processing.service';
 
 @Component({
   selector: 'app-info-management',
@@ -32,8 +33,10 @@ export class InfoManagementComponent implements OnInit {
 
   private galleryService = inject(GalleryService);
   private toast = inject(AlertService);
+  private imageProcessor = inject(ImageProcessingService);
 
   selectedBarberFile: File | null = null;
+  processedBarberBlob: Blob | null = null;
   barberImagePreviewUrl: string = '';
   barberUploadProgress = signal('0%');
   isBarberUploading: boolean = false;
@@ -480,7 +483,7 @@ export class InfoManagementComponent implements OnInit {
       this.toast.error('Error al cambiar visibilidad del peluquero');
     }
   }
-  onBarberFileSelected(event: Event): void {
+  async onBarberFileSelected(event: Event): Promise<void> {
     const target = event.target as HTMLInputElement;
     if (target.files && target.files.length > 0) {
       const file = target.files[0];
@@ -496,12 +499,18 @@ export class InfoManagementComponent implements OnInit {
         return;
       }
 
-      if (this.barberImagePreviewUrl) {
-        URL.revokeObjectURL(this.barberImagePreviewUrl);
+      // Procesar a WebP (manteniendo proporción, limitar tamaño)
+      try {
+        const { blob } = await this.imageProcessor.processGeneric(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.84 });
+        this.selectedBarberFile = file;
+        this.processedBarberBlob = blob;
+        if (this.barberImagePreviewUrl) {
+          URL.revokeObjectURL(this.barberImagePreviewUrl);
+        }
+        this.barberImagePreviewUrl = URL.createObjectURL(blob);
+      } catch (e) {
+        this.toast.error('No se pudo procesar la imagen.');
       }
-
-      this.selectedBarberFile = file;
-      this.barberImagePreviewUrl = URL.createObjectURL(file);
     }
   }
   private async uploadBarberImageIfSelected(): Promise<string | null> {
@@ -510,7 +519,7 @@ export class InfoManagementComponent implements OnInit {
     }
 
     return new Promise((resolve, reject) => {
-      const task = this.galleryService.uploadBarberImage(this.selectedBarberFile!);
+  const task = this.galleryService.uploadBarberImage(this.processedBarberBlob || this.selectedBarberFile!, this.selectedBarberFile!.name);
       if (!task) {
         reject('Error al iniciar la subida');
         return;
@@ -550,6 +559,7 @@ export class InfoManagementComponent implements OnInit {
   }
   private clearBarberFileSelection(): void {
     this.selectedBarberFile = null;
+    this.processedBarberBlob = null;
 
     if (this.barberImagePreviewUrl) {
       URL.revokeObjectURL(this.barberImagePreviewUrl);

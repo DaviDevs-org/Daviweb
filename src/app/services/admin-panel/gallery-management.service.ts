@@ -23,17 +23,20 @@ export class GalleryService {
   private storage = inject(Storage);
   private toast = inject(AlertService)
 
-  uploadImage(file: File) {
+  uploadImage(input: Blob | File, originalName?: string) {
     const id = crypto.randomUUID();
     const path = `pruebas/${id}`;
     const storageRef = ref(this.storage, path);
 
     try {
+      const contentType = (input as File).type || 'image/webp';
+      const lastModified = (input as File).lastModified ?? Date.now();
       return runInInjectionContext(this.injector, () =>
-        uploadBytesResumable(storageRef, file, {
+        uploadBytesResumable(storageRef, input, {
+          contentType,
           customMetadata: {
-            originalName: file.name,
-            date: file.lastModified.toString()
+            originalName: originalName || (input as File).name || 'image.webp',
+            date: lastModified.toString()
           }
         })
       );
@@ -42,18 +45,21 @@ export class GalleryService {
       return undefined;
     }
   }
-  uploadServiceImage(file: File) {
+  uploadServiceImage(input: Blob | File, originalName?: string) {
     const id = crypto.randomUUID();
     const path = `pruebas/services/${id}`;
     const storageRef = ref(this.storage, path);
 
     try {
       // uploadBytesResumable devuelve un UploadTask inmediatamente
+      const contentType = (input as File).type || 'image/webp';
+      const lastModified = (input as File).lastModified ?? Date.now();
       return runInInjectionContext(this.injector, () =>
-        uploadBytesResumable(storageRef, file, {
+        uploadBytesResumable(storageRef, input, {
+          contentType,
           customMetadata: {
-            originalName: file.name,
-            date: file.lastModified.toString()
+            originalName: originalName || (input as File).name || 'image.webp',
+            date: lastModified.toString()
           }
         })
       );
@@ -62,18 +68,21 @@ export class GalleryService {
       return undefined;
     }
   }
-  uploadBarberImage(file: File) {
+  uploadBarberImage(input: Blob | File, originalName?: string) {
     const id = crypto.randomUUID();
     const path = `pruebas/barbers/${id}`;
     const storageRef = ref(this.storage, path);
 
     try {
       // uploadBytesResumable devuelve un UploadTask inmediatamente
+      const contentType = (input as File).type || 'image/webp';
+      const lastModified = (input as File).lastModified ?? Date.now();
       return runInInjectionContext(this.injector, () =>
-        uploadBytesResumable(storageRef, file, {
+        uploadBytesResumable(storageRef, input, {
+          contentType,
           customMetadata: {
-            originalName: file.name,
-            date: file.lastModified.toString()
+            originalName: originalName || (input as File).name || 'image.webp',
+            date: lastModified.toString()
           }
         })
       );

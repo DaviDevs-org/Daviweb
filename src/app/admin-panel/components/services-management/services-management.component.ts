@@ -9,6 +9,7 @@ import { ServiceManager } from '../../../services/admin-panel/services-managemen
 import { GalleryService } from '../../../services/admin-panel/gallery-management.service';
 import { Service, NewService, TimeSegment } from '../../types/admin.types';
 import { AlertService } from '../../../services/alert/alert.service';
+import { ImageProcessingService } from '../../../services/image-processing.service';
 
 @Component({
   selector: 'app-services-management',
@@ -25,10 +26,12 @@ export class ServicesManagementComponent implements OnDestroy {
   private service = inject(ServiceManager);
   private galleryService = inject(GalleryService);
   private toast = inject(AlertService)
+  private imageProcessor = inject(ImageProcessingService);
 
   services: Service[] = [];
   selectedFile: File | null = null;
   imagePreviewUrl: string = '';
+  processedBlob: Blob | null = null;
   uploadProgress = signal('0%');
   isUploading: boolean = false;
   uploadSubscription: Subscription | undefined = undefined;
@@ -55,7 +58,7 @@ export class ServicesManagementComponent implements OnDestroy {
     });
   }
 
-  onFileSelected(event: Event): void {
+  async onFileSelected(event: Event): Promise<void> {
     const target = event.target as HTMLInputElement;
     if (target.files && target.files.length > 0) {
       const file = target.files[0];
@@ -71,13 +74,19 @@ export class ServicesManagementComponent implements OnDestroy {
         return;
       }
 
-      // Limpiar URL anterior si existe
-      if (this.imagePreviewUrl) {
-        URL.revokeObjectURL(this.imagePreviewUrl);
+      // Procesar genéricamente a WebP (reducción de tamaño)
+      try {
+        const { blob } = await this.imageProcessor.processGeneric(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.84 });
+        this.selectedFile = file;
+        this.processedBlob = blob;
+        // Limpiar URL anterior si existe
+        if (this.imagePreviewUrl) {
+          URL.revokeObjectURL(this.imagePreviewUrl);
+        }
+        this.imagePreviewUrl = URL.createObjectURL(blob);
+      } catch (e) {
+        this.toast.error('No se pudo procesar la imagen.');
       }
-
-      this.selectedFile = file;
-      this.imagePreviewUrl = URL.createObjectURL(file);
     }
   }
 
@@ -87,7 +96,7 @@ export class ServicesManagementComponent implements OnDestroy {
     }
 
     return new Promise((resolve, reject) => {
-      const task = this.galleryService.uploadServiceImage(this.selectedFile!);
+  const task = this.galleryService.uploadServiceImage(this.processedBlob || this.selectedFile!, this.selectedFile!.name);
       if (!task) {
         reject('Error al iniciar la subida');
         return;
@@ -131,6 +140,7 @@ export class ServicesManagementComponent implements OnDestroy {
 
   private clearFileSelection(): void {
     this.selectedFile = null;
+    this.processedBlob = null;
 
     if (this.imagePreviewUrl) {
       URL.revokeObjectURL(this.imagePreviewUrl);

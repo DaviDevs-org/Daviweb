@@ -7,6 +7,7 @@ import { GalleryService } from '../../../services/admin-panel/gallery-management
 import { Subscription } from 'rxjs';
 import { percentage } from '@angular/fire/storage';
 import { AlertService } from '../../../services/alert/alert.service';
+import { ImageProcessingService } from '../../../services/image-processing.service';
 
 
 @Component({
@@ -22,8 +23,10 @@ export class GalleryManagementComponent implements OnDestroy {
   private toast = inject(AlertService)
   private injector = inject(Injector)
   private cdr = inject(ChangeDetectorRef)
+  private imageProcessor = inject(ImageProcessingService)
 
   selectedFile: File | null = null;
+  processedBlob: Blob | null = null;
   imagePreviewUrl: string = '';
   progress = signal('0%');
   susbscription: Subscription | undefined = undefined;
@@ -50,7 +53,6 @@ export class GalleryManagementComponent implements OnDestroy {
     if (target.files && target.files.length > 0) {
       const file = target.files[0];
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-
       if (!allowedTypes.includes(file.type)) {
         this.toast.error('Por favor, selecciona una imagen JPG, PNG o WebP.');
         return;
@@ -59,24 +61,45 @@ export class GalleryManagementComponent implements OnDestroy {
         this.toast.error('El archivo es demasiado grande. Máximo 5MB.');
         return;
       }
-
-      // Limpiar URL anterior si existe
-      if (this.imagePreviewUrl) {
-        URL.revokeObjectURL(this.imagePreviewUrl);
-      }
-
-      this.selectedFile = file;
-      this.imagePreviewUrl = URL.createObjectURL(file);
+      // Comprobar orientación horizontal mínima (evitar verticales en carrusel)
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = async () => {
+        if (img.width < img.height) {
+          this.toast.error('Por favor, usa una imagen horizontal (apaisada).');
+          URL.revokeObjectURL(url);
+          return;
+        }
+        try {
+          const { blob } = await this.imageProcessor.processForCarousel(file, { maxWidth: 1600, quality: 0.82 });
+          this.selectedFile = file;
+          this.processedBlob = blob;
+          // Limpiar URL anterior si existe
+          if (this.imagePreviewUrl) {
+            URL.revokeObjectURL(this.imagePreviewUrl);
+          }
+          this.imagePreviewUrl = URL.createObjectURL(blob);
+        } catch (e) {
+          this.toast.error('No se pudo procesar la imagen.');
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      };
+      img.onerror = () => {
+        this.toast.error('No se pudo cargar la imagen.');
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
     }
   }
 
   uploadImage() {
-    if (!this.selectedFile) {
+    if (!this.selectedFile || !this.processedBlob) {
       this.toast.error('Por favor, selecciona una imagen primero.');
       return;
     }
 
-    const task = this.gallery.uploadImage(this.selectedFile);
+    const task = this.gallery.uploadImage(this.processedBlob, this.selectedFile.name);
     if (!task) { return; }
 
     if (this.susbscription) {
@@ -99,7 +122,7 @@ export class GalleryManagementComponent implements OnDestroy {
         this.galleryPhotos.update(images => [
           ...images,
           new GalleryPhoto(
-            this.selectedFile!.name,
+            this.selectedFile!.name.replace(/\.(jpe?g|png|webp)$/i, '.webp'),
             downloadURL,
             this.selectedFile!.lastModified.toString(),
             task.snapshot.ref.name
@@ -107,6 +130,7 @@ export class GalleryManagementComponent implements OnDestroy {
         ]);
 
         this.selectedFile = null;
+        this.processedBlob = null;
 
         // Limpiar la URL de previsualización
         if (this.imagePreviewUrl) {
@@ -123,15 +147,16 @@ export class GalleryManagementComponent implements OnDestroy {
   }
 
   async deleteImage(i: number) {
-    const id = this.galleryPhotos()[i].id!
-    const response = await this.gallery.deleteImage(id)
-    this.galleryPhotos.update(photos =>
-      photos.filter((_, index) => index !== i)
-    );
     if (! await this.toast.confirm('¿Estás seguro de que deseas eliminar esta imagen?')) {
       return;
+    } else {
+      const id = this.galleryPhotos()[i].id!
+      const response = await this.gallery.deleteImage(id)
+      this.galleryPhotos.update(photos =>
+        photos.filter((_, index) => index !== i)
+      );
+      this.toast.success("Foto eliminada con éxito");
     }
-    this.toast.success("Foto eliminada con éxito")
   }
 
   async updateImage(i: number) {
