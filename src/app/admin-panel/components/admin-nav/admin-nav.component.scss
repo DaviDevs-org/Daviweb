@@ -45,14 +45,14 @@
         }
 
         &:hover {
-            color: $primary-gold;
-            background: rgba($primary-gold, 0.05);
+            color: $primary;
+            background: rgba($primary, 0.05);
         }
 
         &.active {
-            color: $primary-gold;
-            border-bottom-color: $primary-gold;
-            background: rgba($primary-gold, 0.05);
+            color: $primary;
+            border-bottom-color: $primary;
+            background: rgba($primary, 0.05);
         }
     }
 }
@@ -73,7 +73,7 @@
 
     .menu-toggle {
         width: 100%;
-        background: $primary-gold;
+        background: $primary;
         color: $white;
         border: none;
         padding: $spacing-sm $spacing-md;
@@ -89,7 +89,7 @@
         transition: all $transition-normal;
 
         &:hover {
-            background: $secondary-gold;
+            background: $secondary;
         }
 
         .menu-icon {
@@ -179,14 +179,14 @@
             }
 
             &:hover {
-                color: $primary-gold;
-                background: rgba($primary-gold, 0.05);
+                color: $primary;
+                background: rgba($primary, 0.05);
             }
 
             &.active {
-                color: $primary-gold;
-                background: rgba($primary-gold, 0.08);
-                border-left: 4px solid $primary-gold;
+                color: $primary;
+                background: rgba($primary, 0.08);
+                border-left: 4px solid $primary;
             }
         }
     }

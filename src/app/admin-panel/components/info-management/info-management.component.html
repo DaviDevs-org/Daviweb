@@ -19,10 +19,10 @@
           <div class="intervals-container">
             <div class="time-inputs" *ngFor="let interval of day.intervals; let i=index">
               <input type="time" [(ngModel)]="interval.open" class="time-input" [disabled]="day.closed"
-                (blur)="validateInterval(day, interval)">
+                (blur)="validateInterval(day, interval)" [attr.aria-label]="'Hora de apertura ' + day.name + ' intervalo ' + (i+1)">
               <span class="time-separator">-</span>
               <input type="time" [(ngModel)]="interval.close" class="time-input" [disabled]="day.closed"
-                (blur)="validateInterval(day, interval)">
+                (blur)="validateInterval(day, interval)" [attr.aria-label]="'Hora de cierre ' + day.name + ' intervalo ' + (i+1)">
               <button type="button" class="danger-btn" (click)="removeInterval(day,i)"
                 [disabled]="day.intervals.length <= 1 || day.closed" title="Eliminar intervalo">
                 <i class="bi bi-trash"></i>
@@ -74,7 +74,8 @@
         <div class="creation-step" *ngIf="currentExceptionStep === 'date'">
           <div class="step-content">
             <h4>Selecciona la fecha</h4>
-            <input type="date" [(ngModel)]="tempException.date" class="form-input">
+            <label class="sr-only" for="exception-date">Selecciona la fecha</label>
+            <input id="exception-date" type="date" [(ngModel)]="tempException.date" class="form-input" aria-label="Fecha de excepción">
             <div class="step-actions">
               <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
               <button type="button" class="next-btn" (click)="nextStep()"
@@ -251,8 +252,9 @@
                   <p>{{ selectedBarberFile ? 'Cambiar imagen' : 'Añadir imagen' }}</p>
                   <small>{{ selectedBarberFile ? selectedBarberFile.name : 'JPG, PNG, WebP (máx. 5MB)' }}</small>
                 </div>
-                <input #barberFileInput type="file" accept="image/*" (change)="onBarberFileSelected($event)"
-                  style="display: none;">
+                  <label for="barber-file" class="sr-only">Seleccionar imagen del peluquero</label>
+                  <input id="barber-file" #barberFileInput type="file" accept="image/*" (change)="onBarberFileSelected($event)"
+                    class="visually-hidden" aria-label="Seleccionar imagen del peluquero">
               </div>
               <!-- Progress bar -->
               <div class="barber-progress" *ngIf="barberUploadProgress() !== '0%'">
@@ -262,7 +264,7 @@
 
             <!-- Input de nombre y botón -->
             <div class="barber-name-section">
-              <input type="text" placeholder="Nombre del nuevo peluquero" #newBarberInput>
+              <input type="text" placeholder="Nombre del nuevo peluquero" #newBarberInput aria-label="Nombre del nuevo peluquero">
               <button type="button" class="add-btn" [disabled]="isBarberUploading"
                 (click)="addBarber(newBarberInput.value); newBarberInput.value=''">
                 <i class="bi bi-plus-circle" *ngIf="!isBarberUploading"></i>

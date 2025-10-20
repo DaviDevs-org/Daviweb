@@ -5,6 +5,31 @@
     display: flex;
     flex-direction: column;
     gap: $spacing-2xl;
+    background-color: #9d9b9d !important;
+}
+
+/* Visually hidden but accessible text for screen readers */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Focus styles respecting existing theme but ensuring high contrast */
+:focus {
+    outline: 3px solid rgba(0,0,0,0.9);
+    outline-offset: 2px;
+}
+
+/* Prefer focus-visible to avoid showing outlines on mouse click */
+:focus:not(:focus-visible) {
+    outline: none;
 }
 
 @keyframes pulse {
@@ -39,7 +64,7 @@
 
     .skeleton-categories {
         height: 80px;
-        background: rgba(255, 255, 255, 0.28);
+        background: $background-grey;
         border-radius: 12px;
         animation: pulse 1.5s ease-in-out infinite;
         animation-delay: 0.2s;
@@ -47,7 +72,7 @@
 
     .skeleton-content {
         height: 500px;
-        background: rgba(255, 255, 255, 0.28);
+        background: $background-grey;
         border-radius: 12px;
         animation: pulse 1.5s ease-in-out infinite;
         animation-delay: 0.4s;

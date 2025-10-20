@@ -1,11 +1,11 @@
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
 
+// FAQ adaptado a la nueva paleta
 .faq {
   padding: $spacing-xl 40px $spacing-2xl 40px;
   max-width: 1180px;
   margin: 0 auto;
-  background: $background-section;
   border-radius: $border-radius-xl;
   box-shadow: $shadow-md;
   display: flex;
@@ -16,7 +16,9 @@
   text-align: center;
   width: 100%;
   margin-bottom: 2%;
-
+  color: $white;
+  @include section;
+  
   @include mobile {
     padding: $spacing-lg $spacing-lg $spacing-xl;
   }
@@ -46,13 +48,13 @@
   width: 100%;
   max-width: 1120px;
   padding: $spacing-sm 26px;
-  background-color: rgba(97, 53, 35, 0.76);
+    background-color: $background-primary;
   color: $white;
   font-weight: $font-weight-semibold;
   font-family: $font-primary;
   font-size: $font-size-base;
   border-radius: $border-radius-xl;
-  border: 1.5px solid rgba(255,255,255,0.15);
+    border: 2px solid $primary;
   cursor: pointer;
   box-shadow: $shadow-md;
   display: flex;
@@ -60,14 +62,13 @@
   justify-content: center;
   transition: all $transition-normal;
   text-shadow: 0 1px 1px rgba(0,0,0,0.2);
-
   &:hover {
-    background-color: rgb(140, 84, 62);
-    border-color: #7a4828;
+      background-color: $primary;
+      color: $white;
+      border-color: $primary-light;
     transform: translateY(-3px);
     box-shadow: $shadow-lg;
   }
-
   @include mobile {
     padding: $spacing-sm $spacing-lg;
     font-size: $font-size-sm;

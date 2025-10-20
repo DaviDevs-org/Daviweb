@@ -6,7 +6,7 @@
     margin-bottom: 40px;
 
     h3 {
-        color: $dark-brown;
+        color: $secondary-dark;
         font-size: 1.5rem;
         margin: 0 0 20px 0;
         font-weight: 600;
@@ -30,19 +30,19 @@
 
     label {
         display: block;
-        color: $dark-brown;
+        color: $secondary-dark;
         font-weight: 600;
         margin-bottom: 12px;
     }
 
     .upload-area {
-        border: 2px dashed $primary-gold;
+        border: 2px dashed $primary;
         border-radius: 12px;
         padding: 30px;
         text-align: center;
         cursor: pointer;
         transition: all 0.3s ease;
-        background: rgba($primary-gold, 0.02);
+        background: rgba($primary, 0.02);
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -53,10 +53,10 @@
         justify-content: center;
 
         &:hover {
-            border-color: $secondary-gold;
+            border-color: $secondary;
 
             &:not(.has-image) {
-                background: rgba($primary-gold, 0.05);
+                background: rgba($primary, 0.05);
             }
 
             .upload-content {
@@ -87,14 +87,14 @@
 
             i {
                 font-size: 2rem;
-                color: $primary-gold;
+                color: $primary;
                 margin-bottom: 10px;
                 display: block;
             }
 
             p {
                 font-size: 1rem;
-                color: $dark-brown;
+                color: $secondary-dark;
                 margin: 0 0 5px 0;
                 font-weight: 500;
             }
@@ -123,7 +123,7 @@
 
     label {
         display: block;
-        color: $dark-brown;
+        color: $secondary-dark;
         font-weight: 600;
         margin-bottom: 8px;
     }
@@ -176,7 +176,7 @@
     @include card-style;
 
     h3 {
-        color: $dark-brown;
+        color: $secondary-dark;
         font-size: 1.5rem;
         margin: 0 0 20px 0;
         font-weight: 600;
@@ -200,8 +200,8 @@
     transition: all 0.3s ease;
 
     &:hover {
-        border-color: $primary-gold;
-        box-shadow: 0 6px 20px rgba($primary-gold, 0.1);
+        border-color: $primary;
+        box-shadow: 0 6px 20px rgba($primary, 0.1);
     }
 
     .service-image {
@@ -233,7 +233,7 @@
 
         h4 {
             margin: 0;
-            color: $dark-brown;
+            color: $secondary-dark;
             font-weight: 600;
         }
 
@@ -242,7 +242,7 @@
             gap: 10px;
 
             .service-price {
-                background: $primary-gold;
+                background: $primary;
                 color: $white;
                 padding: 6px 12px;
                 border-radius: 20px;
@@ -285,11 +285,11 @@
     gap: 6px;
 
     &.edit-btn {
-        background: $primary-gold;
+        background: $primary;
         color: $white;
 
         &:hover {
-            background: $secondary-gold;
+            background: $secondary;
         }
     }
 
@@ -322,7 +322,7 @@
     color: #fff;
     text-align: center;
     white-space: nowrap;
-    background-color: $primary-gold;
+    background-color: $primary;
     transition: width 0.6s ease;
 }
 
@@ -368,7 +368,7 @@
 
     h4 {
         margin: 0;
-        color: $dark-brown;
+        color: $secondary-dark;
         font-size: 1rem;
     }
 }
@@ -392,7 +392,7 @@
 }
 
 .add-segment-btn {
-    background: $primary-gold;
+    background: $primary;
     color: $white;
     border: none;
     border-radius: 6px;
@@ -405,13 +405,13 @@
     margin-bottom: 15px;
 
     &:hover {
-        background: $secondary-gold;
+        background: $secondary;
     }
 }
 
 .time-summary {
-    background: rgba($primary-gold, 0.1);
-    border-left: 3px solid $primary-gold;
+    background: rgba($primary, 0.1);
+    border-left: 3px solid $primary;
     padding: 10px 15px;
     border-radius: 4px;
 
@@ -437,7 +437,7 @@
 }
 
 .segment-duration {
-    background: $primary-gold;
+    background: $primary;
     color: $white;
     padding: 4px 8px;
     border-radius: 12px;
@@ -466,21 +466,21 @@
     cursor: pointer;
     margin-bottom: 1.5rem;
     padding: 1rem;
-    background: rgba($primary-gold, 0.05);
+    background: rgba($primary, 0.05);
     border-radius: 12px;
-    border: 2px solid rgba($primary-gold, 0.1);
+    border: 2px solid rgba($primary, 0.1);
     transition: all 0.3s ease;
 
     &:hover {
-        border-color: rgba($primary-gold, 0.3);
-        background: rgba($primary-gold, 0.08);
+        border-color: rgba($primary, 0.3);
+        background: rgba($primary, 0.08);
     }
 
     input[type="checkbox"] {
         margin-right: 0.5rem;
         width: 20px;
         height: 20px;
-        accent-color: $primary-gold;
+        accent-color: $primary;
     }
     .checkmark{
         text-align: center;
@@ -498,7 +498,7 @@
                 display: block;
                 margin-bottom: 0.5rem;
                 font-weight: 600;
-                color: $dark-brown;
+                color: $secondary-dark;
             }
         }
     }
@@ -513,9 +513,9 @@
         .btn-increase {
             width: 44px;
             height: 44px;
-            border: 2px solid $primary-gold;
+            border: 2px solid $primary;
             background: $white;
-            color: $primary-gold;
+            color: $primary;
             border-radius: 8px;
             cursor: pointer;
             display: flex;
@@ -524,7 +524,7 @@
             transition: all 0.3s ease;
 
             &:hover:not(:disabled) {
-                background: $primary-gold;
+                background: $primary;
                 color: $white;
             }
 
@@ -559,16 +559,16 @@
         align-items: center;
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid rgba($primary-gold, 0.1);
+        border-bottom: 2px solid rgba($primary, 0.1);
 
         h4 {
             margin: 0;
-            color: $dark-brown;
+            color: $secondary-dark;
             font-size: 1.2rem;
         }
 
         .btn-add-segment {
-            background: $primary-gold;
+            background: $primary;
             color: $white;
             border: none;
             padding: 0.5rem 1rem;
@@ -581,7 +581,7 @@
             transition: all 0.3s ease;
 
             &:hover {
-                background: $secondary-gold;
+                background: $secondary;
                 transform: translateY(-1px);
             }
         }
@@ -596,15 +596,15 @@
 
 .time-segment-card {
     background: $white;
-    border: 2px solid rgba($primary-gold, 0.1);
+    border: 2px solid rgba($primary, 0.1);
     border-radius: 12px;
     padding: 1.5rem;
     transition: all 0.3s ease;
     position: relative;
 
     &:hover {
-        border-color: rgba($primary-gold, 0.3);
-        box-shadow: 0 4px 15px rgba($primary-gold, 0.1);
+        border-color: rgba($primary, 0.3);
+        box-shadow: 0 4px 15px rgba($primary, 0.1);
     }
 
     .segment-header {
@@ -618,10 +618,10 @@
             align-items: center;
             gap: 0.5rem;
             font-weight: 600;
-            color: $dark-brown;
+            color: $secondary-dark;
 
             i {
-                color: $primary-gold;
+                color: $primary;
             }
         }
 
@@ -691,7 +691,7 @@
                 }
 
                 .suffix {
-                    background: rgba($primary-gold, 0.1);
+                    background: rgba($primary, 0.1);
                     padding: 0.5rem 0.75rem;
                     color: $text-gray;
                     font-weight: 600;
@@ -713,11 +713,11 @@
         align-items: center;
         gap: 1rem;
         padding: 1rem;
-        background: rgba($primary-gold, 0.03);
+        background: rgba($primary, 0.03);
         border-radius: 8px;
 
         .active-time {
-            background: $primary-gold;
+            background: $primary;
             color: $white;
             padding: 0.5rem 1rem;
             border-radius: 20px;
@@ -732,7 +732,7 @@
             color: $text-gray;
 
             i {
-                color: $primary-gold;
+                color: $primary;
             }
 
             .break-time {
@@ -751,8 +751,8 @@
     margin-top: 1.5rem;
 
     .summary-card {
-        background: linear-gradient(135deg, rgba($primary-gold, 0.05), rgba($secondary-gold, 0.02));
-        border: 2px solid rgba($primary-gold, 0.1);
+        background: linear-gradient(135deg, rgba($primary, 0.05), rgba($secondary, 0.02));
+        border: 2px solid rgba($primary, 0.1);
         border-radius: 12px;
         padding: 1.5rem;
 
@@ -761,19 +761,19 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.5rem 0;
-            border-bottom: 1px solid rgba($primary-gold, 0.1);
+            border-bottom: 1px solid rgba($primary, 0.1);
 
             &:last-child {
                 border-bottom: none;
             }
 
             .label {
-                color: $dark-brown;
+                color: $secondary-dark;
                 font-weight: 600;
             }
 
             .value {
-                background: $primary-gold;
+                background: $primary;
                 color: $white;
                 padding: 0.25rem 0.75rem;
                 border-radius: 12px;

@@ -97,7 +97,7 @@
 }
 
 @mixin section {
-    background-color: $background-section;
+    background-color: $background-section !important;
     max-width: 1180px;
     margin: 0 auto;
     border-radius: 20px;
@@ -121,8 +121,8 @@
 
     &:focus {
         outline: none;
-        border-color: $primary-gold;
-        box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba($primary, 0.1);
     }
 
     &:disabled {
@@ -136,7 +136,7 @@
     display: block;
     font-weight: $font-weight-medium;
     font-size: $font-size-sm;
-    color: $dark-brown;
+    color: $secondary-dark;
     margin-bottom: $spacing-xs;
     font-family: $font-primary;
 }
@@ -208,7 +208,7 @@
 // ============================================
 // MIXINS DE SCROLLBAR
 // ============================================
-@mixin custom-scrollbar($track-color: rgba($primary-gold, 0.1), $thumb-color: rgba($primary-gold, 0.3)) {
+@mixin custom-scrollbar($track-color: rgba($primary, 0.1), $thumb-color: rgba($primary, 0.3)) {
     &::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -224,7 +224,7 @@
         border-radius: $border-radius-sm;
 
         &:hover {
-            background: rgba($primary-gold, 0.5);
+            background: rgba($primary, 0.5);
         }
     }
 }

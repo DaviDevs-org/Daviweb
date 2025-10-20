@@ -4,7 +4,7 @@
 .login-container {
   min-height: 100svh;
   height: 100svh;
-  background: linear-gradient(135deg, $primary-gold 0%, $secondary-gold 50%, $dark-brown 100%);
+  background: linear-gradient(135deg, $primary 0%, $secondary 50%, $secondary-dark 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,10 +41,10 @@
 }
 
 .login-header {
-  background: linear-gradient(135deg, $background-gold, $light-gold);
+  background: linear-gradient(135deg, $background-accent, $primary-light);
   padding: 30px 25px 20px;
   text-align: center;
-  border-bottom: 1px solid rgba($primary-gold, 0.2);
+  border-bottom: 1px solid rgba($primary, 0.2);
 
   .scissors-icon {
     font-size: 2rem;
@@ -52,7 +52,7 @@
   }
 
   h2 {
-    color: $dark-brown;
+    color: $secondary-dark;
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0 0 8px 0;
@@ -76,7 +76,7 @@
 
   label {
     display: block;
-    color: $dark-brown;
+    color: $secondary-dark;
     font-weight: 600;
     margin-bottom: 6px;
     font-size: 0.85rem;
@@ -102,8 +102,8 @@
 
   &:focus {
     outline: none;
-    border-color: $primary-gold;
-    box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.1);
   }
 
   &::placeholder {
@@ -137,7 +137,7 @@
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: rgba($primary-gold, 0.1);
+    background-color: rgba($primary, 0.1);
   }
 }
 
@@ -155,7 +155,7 @@
 .login-btn {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, $primary-gold, $secondary-gold);
+  background: linear-gradient(135deg, $primary, $secondary);
   color: $white;
   border: none;
   border-radius: 10px;
@@ -168,9 +168,9 @@
   overflow: hidden;
 
   &:hover:not(:disabled) {
-    background: linear-gradient(135deg, $secondary-gold, $dark-brown);
+    background: linear-gradient(135deg, $secondary, $secondary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba($primary-gold, 0.3);
+    box-shadow: 0 8px 25px rgba($primary, 0.3);
   }
 
   &:active {
@@ -183,7 +183,7 @@
   }
 
   &.loading {
-    background: linear-gradient(135deg, $secondary-gold, $dark-brown);
+    background: linear-gradient(135deg, $secondary, $secondary-dark);
   }
 }
 
@@ -211,7 +211,7 @@
 .forgot-password-btn {
   background: none;
   border: none;
-  color: $primary-gold;
+  color: $primary;
   font-size: 0.85rem;
   cursor: pointer;
   text-decoration: underline;
@@ -220,15 +220,15 @@
   transition: color 0.3s ease;
 
   &:hover {
-    color: $dark-brown;
+    color: $secondary-dark;
   }
 }
 
 .login-footer {
-  background: $background-gold;
+  background: $background-accent;
   padding: 15px 25px;
   text-align: center;
-  border-top: 1px solid rgba($primary-gold, 0.2);
+  border-top: 1px solid rgba($primary, 0.2);
 
   p {
     color: $text-gray;

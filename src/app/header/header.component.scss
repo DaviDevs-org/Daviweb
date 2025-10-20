@@ -32,7 +32,7 @@
       font-size: $font-size-xl;
       font-weight: $font-weight-bold;
       font-family: $font-primary;
-      color: #0f172a;
+      color: $primary-light;
     }
 
     .anchors {
@@ -46,6 +46,7 @@
         align-items: center;
         gap: $spacing-xs;
         transition: transform $transition-fast;
+        color: $primary-light;
 
         &:hover {
           transform: translateY(-2px);
@@ -55,13 +56,13 @@
           font-size: $font-size-sm;
           font-family: $font-primary;
           font-weight: $font-weight-medium;
-          color: $text-dark;
+          color: $primary-light;
           cursor: pointer;
           text-decoration: none;
           transition: color $transition-fast;
 
           &:hover {
-            color: $dark-brown;
+            color: $primary;
           }
         }
       }
@@ -178,7 +179,7 @@
           display: block;
           font-size: $font-size-xl;
           font-weight: $font-weight-bold;
-          color: #D4A574;
+          color: $primary;
           margin-top: $spacing-xs;
         }
 
@@ -222,7 +223,7 @@
           margin-top: $spacing-xs;
           font-size: $font-size-base;
           font-weight: $font-weight-semibold;
-          color: $primary-gold;
+          color: $primary;
         }
 
         @include mobile {
@@ -236,7 +237,7 @@
       }
 
       .banner-button {
-        @include button-style($primary-gold);
+        @include button-style($primary);
         font-size: $font-size-lg;
         padding: $spacing-md $spacing-xl;
         font-weight: $font-weight-bold;

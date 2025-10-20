@@ -97,16 +97,16 @@
     }
 
     &::-webkit-scrollbar-track {
-        background: rgba($primary-gold, 0.1);
+        background: rgba($primary, 0.1);
         border-radius: 4px;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: rgba($primary-gold, 0.3);
+        background: rgba($primary, 0.3);
         border-radius: 4px;
 
         &:hover {
-            background: rgba($primary-gold, 0.5);
+            background: rgba($primary, 0.5);
         }
     }
 }
@@ -118,7 +118,7 @@
     margin-bottom: 1rem;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 2px solid rgba($primary-gold, 0.1);
+    border: 2px solid rgba($primary, 0.1);
     background: $white;
     position: relative;
     overflow: hidden;
@@ -139,7 +139,7 @@
         // Reducir efectos en mobile para mejor performance
         &:hover {
             transform: none;
-            box-shadow: 0 2px 8px rgba($primary-gold, 0.15);
+            box-shadow: 0 2px 8px rgba($primary, 0.15);
         }
     }
 
@@ -150,7 +150,7 @@
         left: 0;
         width: 5px;
         height: 100%;
-        background: linear-gradient(180deg, $primary-gold, $secondary-gold);
+        background: linear-gradient(180deg, $primary, $secondary);
         transform: scaleY(0);
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -162,7 +162,7 @@
         right: 0;
         width: 100%;
         height: 2px;
-        background: linear-gradient(90deg, transparent, rgba($primary-gold, 0.3));
+        background: linear-gradient(90deg, transparent, rgba($primary, 0.3));
         transform: scaleX(0);
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         transform-origin: right;
@@ -170,9 +170,9 @@
 
     &:hover {
         transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 12px 35px rgba($primary-gold, 0.15),
+        box-shadow: 0 12px 35px rgba($primary, 0.15),
             0 5px 15px rgba(0, 0, 0, 0.1);
-        border-color: rgba($primary-gold, 0.4);
+        border-color: rgba($primary, 0.4);
 
         &::before {
             transform: scaleY(1);
@@ -185,15 +185,15 @@
     }
 
     &.active {
-        background: linear-gradient(135deg, rgba($primary-gold, 0.05), rgba($secondary-gold, 0.02));
-        border-color: $primary-gold;
-        box-shadow: 0 8px 25px rgba($primary-gold, 0.2),
+        background: linear-gradient(135deg, rgba($primary, 0.05), rgba($secondary, 0.02));
+        border-color: $primary;
+        box-shadow: 0 8px 25px rgba($primary, 0.2),
             inset 0 1px 0 rgba($white, 0.8);
         transform: translateY(-2px);
 
         @include mobile {
             transform: none;
-            box-shadow: 0 4px 15px rgba($primary-gold, 0.15);
+            box-shadow: 0 4px 15px rgba($primary, 0.15);
         }
 
         &::before {
@@ -205,7 +205,7 @@
         }
 
         .card-title {
-            color: $primary-gold;
+            color: $primary;
             font-weight: 700;
         }
     }
@@ -228,7 +228,7 @@
     .card-title {
         font-weight: 600;
         font-size: 1.15rem;
-        color: $dark-brown;
+        color: $secondary-dark;
         transition: all 0.3s ease;
         line-height: 1.3;
 
@@ -254,8 +254,8 @@
         }
 
         .date {
-            background: rgba($primary-gold, 0.1);
-            color: $primary-gold;
+            background: rgba($primary, 0.1);
+            color: $primary;
             padding: 3px 12px;
             border-radius: 6px;
             font-size: 0.9rem;
@@ -282,8 +282,8 @@
             }
 
             .time {
-                background: rgba($secondary-gold, 0.15);
-                color: $dark-brown;
+                background: rgba($secondary, 0.15);
+                color: $secondary-dark;
                 font-size: 0.85rem;
                 font-weight: 700;
                 padding: 2px 6px;
@@ -310,7 +310,7 @@
         div {
             margin-bottom: 0.3rem;
             padding-left: 0.4rem;
-            border-left: 2px solid rgba($primary-gold, 0.1);
+            border-left: 2px solid rgba($primary, 0.1);
             display: flex;
             flex-wrap: wrap;
             gap: 0.25rem;
@@ -329,7 +329,7 @@
         }
 
         strong {
-            color: $dark-brown;
+            color: $secondary-dark;
             font-weight: 600;
             margin-right: 0.5rem;
 
@@ -354,7 +354,7 @@
         }
 
         i {
-            color: $primary-gold
+            color: $primary
         }
     }
 }
@@ -381,7 +381,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, $primary-gold, $secondary-gold);
+    background: linear-gradient(135deg, $primary, $secondary);
     position: relative;
     overflow: hidden;
 
@@ -452,7 +452,7 @@
     .btn.today-btn {
         background: rgba($white, 0.9);
         border: 2px solid rgba($white, 0.3);
-        color: $primary-gold;
+        color: $primary;
         padding: 8px 16px;
         border-radius: 20px;
         cursor: pointer;
@@ -541,11 +541,11 @@
 }
 
 .day-summary {
-    background: linear-gradient(135deg, rgba($primary-gold, 0.1), rgba($secondary-gold, 0.05));
+    background: linear-gradient(135deg, rgba($primary, 0.1), rgba($secondary, 0.05));
     padding: 0.75rem 1rem;
     border-radius: 12px;
     margin-bottom: 1rem;
-    border: 1px solid rgba($primary-gold, 0.2);
+    border: 1px solid rgba($primary, 0.2);
     display: flex;
     align-items: end;
     gap: 10px;
@@ -556,7 +556,7 @@
     }
 
     .summary-text {
-        color: $primary-gold;
+        color: $primary;
         font-weight: 600;
         font-size: 0.9rem;
         display: flex;
@@ -565,7 +565,7 @@
     }
 
     i {
-        color: $primary-gold
+        color: $primary
     }
 }
 
@@ -593,16 +593,16 @@
     }
 
     &::-webkit-scrollbar-track {
-        background: rgba($primary-gold, 0.05);
+        background: rgba($primary, 0.05);
         border-radius: 4px;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, rgba($primary-gold, 0.4), rgba($primary-gold, 0.6));
+        background: linear-gradient(180deg, rgba($primary, 0.4), rgba($primary, 0.6));
         border-radius: 4px;
 
         &:hover {
-            background: linear-gradient(180deg, rgba($primary-gold, 0.6), rgba($primary-gold, 0.8));
+            background: linear-gradient(180deg, rgba($primary, 0.6), rgba($primary, 0.8));
         }
     }
 
@@ -692,25 +692,25 @@
         margin-bottom: 0.5rem;
         background: rgba($white, 0.8);
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba($primary-gold, 0.05);
-        border: 1px solid rgba($primary-gold, 0.1);
+        box-shadow: 0 2px 8px rgba($primary, 0.05);
+        border: 1px solid rgba($primary, 0.1);
     }
 
     &:hover {
-        background: rgba($primary-gold, 0.02);
+        background: rgba($primary, 0.02);
     }
 
     &.has-appointment {
-        background: rgba($primary-gold, 0.03);
+        background: rgba($primary, 0.03);
 
         @include mobile {
-            background: rgba($primary-gold, 0.08);
-            box-shadow: 0 3px 12px rgba($primary-gold, 0.15);
+            background: rgba($primary, 0.08);
+            box-shadow: 0 3px 12px rgba($primary, 0.15);
         }
 
         .hour-label {
-            background: rgba($primary-gold, 0.15);
-            color: $primary-gold;
+            background: rgba($primary, 0.15);
+            color: $primary;
             font-weight: 700;
             width: 80px;
             padding: 10px 8px;
@@ -733,7 +733,7 @@
             padding-left: 0;
             padding-top: 0.5rem;
             border-left: none;
-            border-top: 1px solid rgba($primary-gold, 0.1);
+            border-top: 1px solid rgba($primary, 0.1);
         }
     }
 }
@@ -744,14 +744,14 @@
     font-size: 0.9rem;
     font-weight: 600;
     text-align: center;
-    background: rgba($primary-gold, 0.08);
+    background: rgba($primary, 0.08);
     padding: 12px 8px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    border: 1px solid rgba($primary-gold, 0.1);
+    border: 1px solid rgba($primary, 0.1);
 
     @include mobile {
         width: 100%;
@@ -765,13 +765,13 @@
     flex: 1;
     display: flex;
     align-items: center;
-    border-left: 3px solid rgba($primary-gold, 0.1);
+    border-left: 3px solid rgba($primary, 0.1);
     padding-left: 1rem;
     position: relative;
 
     @include mobile {
         border-left: none;
-        border-top: 2px solid rgba($primary-gold, 0.1);
+        border-top: 2px solid rgba($primary, 0.1);
         padding-left: 0;
         padding-top: 0.5rem;
     }
@@ -784,10 +784,10 @@
     padding: 1rem 1.25rem;
     border-radius: 16px;
     background: linear-gradient(135deg,
-            rgba($primary-gold, 0.12),
-            rgba($secondary-gold, 0.08));
-    border: 2px solid rgba($primary-gold, 0.25);
-    box-shadow: 0 4px 15px rgba($primary-gold, 0.15);
+            rgba($primary, 0.12),
+            rgba($secondary, 0.08));
+    border: 2px solid rgba($primary, 0.25);
+    box-shadow: 0 4px 15px rgba($primary, 0.15);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     flex: 1;
     cursor: pointer;
@@ -810,7 +810,7 @@
 
         &:hover {
             transform: none;
-            box-shadow: 0 4px 12px rgba($primary-gold, 0.2);
+            box-shadow: 0 4px 12px rgba($primary, 0.2);
         }
     }
 
@@ -821,15 +821,15 @@
         left: 0;
         right: 0;
         height: 3px;
-        background: linear-gradient(90deg, $primary-gold, $secondary-gold);
+        background: linear-gradient(90deg, $primary, $secondary);
         transform: scaleX(0);
         transition: transform 0.4s ease;
     }
 
     &:hover {
         transform: translateX(8px) translateY(-2px);
-        box-shadow: 0 8px 25px rgba($primary-gold, 0.25);
-        border-color: $primary-gold;
+        box-shadow: 0 8px 25px rgba($primary, 0.25);
+        border-color: $primary;
 
         &::before {
             transform: scaleX(1);
@@ -843,13 +843,13 @@
 
     &.selected {
         background: linear-gradient(135deg,
-                rgba($primary-gold, 0.2),
-                rgba($secondary-gold, 0.15));
-        border-color: $primary-gold;
-        box-shadow: 0 6px 20px rgba($primary-gold, 0.3);
+                rgba($primary, 0.2),
+                rgba($secondary, 0.15));
+        border-color: $primary;
+        box-shadow: 0 6px 20px rgba($primary, 0.3);
 
         @include mobile {
-            box-shadow: 0 4px 15px rgba($primary-gold, 0.25);
+            box-shadow: 0 4px 15px rgba($primary, 0.25);
         }
 
         &::before {
@@ -885,7 +885,7 @@
     .res-time {
         font-weight: 700;
         font-size: 1rem;
-        color: $primary-gold;
+        color: $primary;
         background: rgba($white, 0.9);
         padding: 4px 8px;
         border-radius: 8px;
@@ -915,7 +915,7 @@
     }
 
     .res-name {
-        color: $dark-brown;
+        color: $secondary-dark;
         font-size: 1rem;
         font-weight: 700;
         line-height: 1.3;
@@ -958,8 +958,8 @@
             }
 
             &.barber-info {
-                background: rgba($secondary-gold, 0.15) !important;
-                color: $secondary-gold !important;
+                background: rgba($secondary, 0.15) !important;
+                color: $secondary !important;
                 font-weight: 600;
 
                 @include mobile {
@@ -967,13 +967,13 @@
                 }
 
                 i {
-                    color: $secondary-gold !important;
+                    color: $secondary !important;
                 }
             }
         }
 
         i {
-            color: $primary-gold
+            color: $primary
         }
     }
 
@@ -992,7 +992,7 @@
         }
 
         .action-btn {
-            background: rgba($primary-gold, 0.2);
+            background: rgba($primary, 0.2);
             border: none;
             border-radius: 8px;
             padding: 8px;
@@ -1006,7 +1006,7 @@
             }
 
             &:hover {
-                background: rgba($primary-gold, 0.3);
+                background: rgba($primary, 0.3);
                 transform: scale(1.1);
 
                 @include mobile {
@@ -1016,7 +1016,7 @@
         }
 
         i {
-            color: $dark-brown
+            color: $secondary-dark
         }
     }
 }
@@ -1029,8 +1029,8 @@
     justify-content: center;
     padding: 1rem;
     border-radius: 12px;
-    border: 2px dashed rgba($primary-gold, 0.2);
-    background: rgba($primary-gold, 0.02);
+    border: 2px dashed rgba($primary, 0.2);
+    background: rgba($primary, 0.02);
     transition: all 0.3s ease;
     cursor: pointer;
     gap: 0.5rem;
@@ -1047,18 +1047,18 @@
     }
 
     &:hover:not(.disabled) {
-        border-color: rgba($primary-gold, 0.6);
-        background: rgba($primary-gold, 0.1);
+        border-color: rgba($primary, 0.6);
+        background: rgba($primary, 0.1);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba($primary-gold, 0.2);
+        box-shadow: 0 4px 12px rgba($primary, 0.2);
 
         @include mobile {
             transform: none;
-            box-shadow: 0 2px 8px rgba($primary-gold, 0.15);
+            box-shadow: 0 2px 8px rgba($primary, 0.15);
         }
 
         .availability-text {
-            color: $primary-gold;
+            color: $primary;
             font-weight: 600;
         }
 
@@ -1085,7 +1085,7 @@
 
     .availability-text {
         font-size: 0.9rem;
-        color: rgba($primary-gold, 0.7);
+        color: rgba($primary, 0.7);
         font-weight: 500;
         transition: all 0.3s ease;
         text-align: center;
@@ -1096,7 +1096,7 @@
     }
 
     .create-appointment-btn {
-        background: linear-gradient(135deg, $primary-gold, $secondary-gold);
+        background: linear-gradient(135deg, $primary, $secondary);
         color: $white;
         border: none;
         border-radius: 8px;
@@ -1125,14 +1125,14 @@
 
         &:hover {
             background: linear-gradient(135deg,
-                    color.adjust($primary-gold, $lightness: -5%),
-                    color.adjust($secondary-gold, $lightness: -5%));
+                    color.adjust($primary, $lightness: -5%),
+                    color.adjust($secondary, $lightness: -5%));
             transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba($primary-gold, 0.4);
+            box-shadow: 0 5px 15px rgba($primary, 0.4);
 
             @include mobile {
                 transform: none;
-                box-shadow: 0 3px 10px rgba($primary-gold, 0.3);
+                box-shadow: 0 3px 10px rgba($primary, 0.3);
             }
         }
 
@@ -1162,7 +1162,7 @@
     justify-content: center;
     padding: 3rem 2rem;
     text-align: center;
-    background: linear-gradient(135deg, rgba($primary-gold, 0.03), rgba($white, 0.8));
+    background: linear-gradient(135deg, rgba($primary, 0.03), rgba($white, 0.8));
 
     @include mobile {
         padding: 2rem 1rem;
@@ -1179,7 +1179,7 @@
     }
 
     h3 {
-        color: $dark-brown;
+        color: $secondary-dark;
         margin: 0 0 0.5rem 0;
         font-weight: 600;
         font-size: 1.3rem;
@@ -1202,8 +1202,8 @@
 
 .selected-detail {
     @include card-style;
-    border: 2px solid rgba($primary-gold, 0.3);
-    background: linear-gradient(135deg, rgba($primary-gold, 0.05), rgba($white, 0.95));
+    border: 2px solid rgba($primary, 0.3);
+    background: linear-gradient(135deg, rgba($primary, 0.05), rgba($white, 0.95));
     position: relative;
     overflow: hidden;
     width: 100%;
@@ -1229,7 +1229,7 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(90deg, $primary-gold, $secondary-gold);
+        background: linear-gradient(90deg, $primary, $secondary);
     }
 
     .detail-header {
@@ -1247,7 +1247,7 @@
 
         h4 {
             margin: 0;
-            color: $dark-brown;
+            color: $secondary-dark;
             font-size: 1.4rem;
             font-weight: 700;
             display: flex;
@@ -1261,9 +1261,9 @@
         }
 
         .close-btn {
-            background: rgba($primary-gold, 0.1);
-            border: 2px solid rgba($primary-gold, 0.2);
-            color: $primary-gold;
+            background: rgba($primary, 0.1);
+            border: 2px solid rgba($primary, 0.2);
+            color: $primary;
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -1282,7 +1282,7 @@
             }
 
             &:hover {
-                background: rgba($primary-gold, 0.2);
+                background: rgba($primary, 0.2);
                 transform: scale(1.1) rotate(90deg);
 
                 @include mobile {
@@ -1310,7 +1310,7 @@
         padding: 0.6rem;
         border-radius: 12px;
         background: rgba($white, 0.8);
-        border: 1px solid rgba($primary-gold, 0.1);
+        border: 1px solid rgba($primary, 0.1);
         font-size: 0.9rem;
         line-height: 1.5;
         transition: all 0.3s ease;
@@ -1331,8 +1331,8 @@
         }
 
         &:hover {
-            background: rgba($primary-gold, 0.05);
-            border-color: rgba($primary-gold, 0.2);
+            background: rgba($primary, 0.05);
+            border-color: rgba($primary, 0.2);
         }
 
         &:last-child {
@@ -1340,7 +1340,7 @@
         }
 
         strong {
-            color: $primary-gold;
+            color: $primary;
             font-weight: 700;
             display: inline-block;
             min-width: 100px;
@@ -1358,7 +1358,7 @@
         }
 
         span {
-            color: $dark-brown;
+            color: $secondary-dark;
             font-weight: 500;
         }
     }
@@ -1367,7 +1367,7 @@
         display: flex;
         gap: 0.75rem;
         padding-top: 1rem;
-        border-top: 2px solid rgba($primary-gold, 0.1);
+        border-top: 2px solid rgba($primary, 0.1);
 
         @include mobile {
             flex-direction: column;
@@ -1392,34 +1392,34 @@
             }
 
             &.action-primary {
-                background: linear-gradient(135deg, $primary-gold, $secondary-gold);
+                background: linear-gradient(135deg, $primary, $secondary);
                 color: $white;
                 border: none;
 
                 &:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 8px 25px rgba($primary-gold, 0.3);
+                    box-shadow: 0 8px 25px rgba($primary, 0.3);
 
                     @include mobile {
                         transform: translateY(-1px);
-                        box-shadow: 0 4px 15px rgba($primary-gold, 0.25);
+                        box-shadow: 0 4px 15px rgba($primary, 0.25);
                     }
                 }
             }
 
             &.action-secondary {
-                background: rgba($primary-gold, 0.1);
-                color: $primary-gold;
-                border: 2px solid rgba($primary-gold, 0.3);
+                background: rgba($primary, 0.1);
+                color: $primary;
+                border: 2px solid rgba($primary, 0.3);
 
                 &:hover {
-                    background: rgba($primary-gold, 0.2);
+                    background: rgba($primary, 0.2);
                     transform: translateY(-2px);
-                    box-shadow: 0 5px 15px rgba($primary-gold, 0.2);
+                    box-shadow: 0 5px 15px rgba($primary, 0.2);
 
                     @include mobile {
                         transform: translateY(-1px);
-                        box-shadow: 0 3px 10px rgba($primary-gold, 0.15);
+                        box-shadow: 0 3px 10px rgba($primary, 0.15);
                     }
                 }
             }
@@ -1433,7 +1433,7 @@
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     background: rgba($white, 0.95);
-    border: 2px solid rgba($primary-gold, 0.2);
+    border: 2px solid rgba($primary, 0.2);
 
     @include mobile {
         padding: 1rem;
@@ -1447,7 +1447,7 @@
         align-items: center;
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid rgba($primary-gold, 0.1);
+        border-bottom: 2px solid rgba($primary, 0.1);
 
         @include mobile {
             margin-bottom: 1rem;
@@ -1458,7 +1458,7 @@
 
         h3 {
             margin: 0;
-            color: $dark-brown;
+            color: $secondary-dark;
             font-size: 1.3rem;
             display: flex;
             align-items: center;
@@ -1470,14 +1470,14 @@
             }
 
             i {
-                color: $primary-gold;
+                color: $primary;
             }
         }
 
         .back-btn {
-            background: rgba($primary-gold, 0.1);
-            border: 2px solid rgba($primary-gold, 0.2);
-            color: $primary-gold;
+            background: rgba($primary, 0.1);
+            border: 2px solid rgba($primary, 0.2);
+            color: $primary;
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -1494,7 +1494,7 @@
             }
 
             &:hover {
-                background: rgba($primary-gold, 0.2);
+                background: rgba($primary, 0.2);
                 transform: scale(1.1);
 
                 @include mobile {
@@ -1548,7 +1548,7 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: $dark-brown;
+            color: $secondary-dark;
             font-size: 0.9rem;
 
             @include mobile {
@@ -1562,7 +1562,7 @@
         textarea {
             width: 100%;
             padding: 0.75rem 1rem;
-            border: 2px solid rgba($primary-gold, 0.2);
+            border: 2px solid rgba($primary, 0.2);
             border-radius: 10px;
             font-size: 0.95rem;
             transition: all 0.3s ease;
@@ -1578,13 +1578,13 @@
 
             &:focus {
                 outline: none;
-                border-color: $primary-gold;
-                box-shadow: 0 0 0 3px rgba($primary-gold, 0.15);
+                border-color: $primary;
+                box-shadow: 0 0 0 3px rgba($primary, 0.15);
                 transform: translateY(-1px);
             }
 
             &:hover {
-                border-color: rgba($primary-gold, 0.4);
+                border-color: rgba($primary, 0.4);
             }
 
             // Placeholder styling
@@ -1661,7 +1661,7 @@
         justify-content: flex-end;
         margin-top: 1.5rem;
         padding-top: 1.5rem;
-        border-top: 2px solid rgba($primary-gold, 0.1);
+        border-top: 2px solid rgba($primary, 0.1);
 
         @include mobile {
             flex-direction: column;
@@ -1691,16 +1691,16 @@
             }
 
             &.btn-primary {
-                background: linear-gradient(135deg, $primary-gold, $secondary-gold);
+                background: linear-gradient(135deg, $primary, $secondary);
                 color: $white;
 
                 &:hover:not(:disabled) {
                     transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba($primary-gold, 0.35);
+                    box-shadow: 0 6px 20px rgba($primary, 0.35);
 
                     @include mobile {
                         transform: translateY(-1px);
-                        box-shadow: 0 4px 12px rgba($primary-gold, 0.3);
+                        box-shadow: 0 4px 12px rgba($primary, 0.3);
                     }
                 }
 
@@ -1710,14 +1710,14 @@
             }
 
             &.btn-secondary {
-                background: rgba($primary-gold, 0.08);
-                color: $primary-gold;
-                border: 2px solid rgba($primary-gold, 0.3);
+                background: rgba($primary, 0.08);
+                color: $primary;
+                border: 2px solid rgba($primary, 0.3);
 
                 &:hover:not(:disabled) {
-                    background: rgba($primary-gold, 0.15);
+                    background: rgba($primary, 0.15);
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba($primary-gold, 0.2);
+                    box-shadow: 0 4px 12px rgba($primary, 0.2);
 
                     @include mobile {
                         transform: translateY(-1px);
@@ -1759,30 +1759,30 @@
 /* Animaciones optimizadas para mobile */
 @keyframes highlightPulse {
     0% {
-        box-shadow: 0 6px 20px rgba($primary-gold, 0.3);
+        box-shadow: 0 6px 20px rgba($primary, 0.3);
     }
 
     50% {
-        box-shadow: 0 10px 30px rgba($primary-gold, 0.6), 0 0 20px rgba($primary-gold, 0.4);
+        box-shadow: 0 10px 30px rgba($primary, 0.6), 0 0 20px rgba($primary, 0.4);
     }
 
     100% {
-        box-shadow: 0 6px 20px rgba($primary-gold, 0.3);
+        box-shadow: 0 6px 20px rgba($primary, 0.3);
     }
 }
 
 @include mobile {
     @keyframes highlightPulse {
         0% {
-            box-shadow: 0 4px 15px rgba($primary-gold, 0.25);
+            box-shadow: 0 4px 15px rgba($primary, 0.25);
         }
 
         50% {
-            box-shadow: 0 6px 20px rgba($primary-gold, 0.4), 0 0 15px rgba($primary-gold, 0.3);
+            box-shadow: 0 6px 20px rgba($primary, 0.4), 0 0 15px rgba($primary, 0.3);
         }
 
         100% {
-            box-shadow: 0 4px 15px rgba($primary-gold, 0.25);
+            box-shadow: 0 4px 15px rgba($primary, 0.25);
         }
     }
 }
@@ -2178,7 +2178,7 @@
                 font-size: 0.9rem;
                 background: rgba($white, 0.9);
                 border: 2px solid rgba($white, 0.3);
-                color: $primary-gold;
+                color: $primary;
                 border-radius: 20px;
                 cursor: pointer;
                 font-weight: 700;
@@ -2298,7 +2298,7 @@
                 height: 4px;
                 background: linear-gradient(90deg,
                         transparent,
-                        $primary-gold,
+                        $primary,
                         transparent);
                 border-radius: 2px;
             }
@@ -2318,7 +2318,7 @@
                 height: 4px;
                 background: linear-gradient(90deg,
                         transparent,
-                        $primary-gold,
+                        $primary,
                         transparent);
                 border-radius: 2px;
             }
@@ -2339,7 +2339,7 @@
             color: $text-gray;
             font-weight: 600;
             white-space: nowrap;
-            background: rgba($primary-gold, 0.1);
+            background: rgba($primary, 0.1);
             padding: 0.25rem 0.5rem;
             border-radius: 8px;
             width: 100%;
@@ -2353,7 +2353,7 @@
             padding: 0.5rem 0.75rem;
 
             i {
-                color: $primary-gold;
+                color: $primary;
             }
 
             span {
@@ -2496,11 +2496,11 @@
     gap: 0.5rem;
     margin-bottom: 0.5rem;
     padding: 0.3rem 0.6rem;
-    background: rgba($primary-gold, 0.08);
+    background: rgba($primary, 0.08);
     border-radius: 8px;
-    border: 1px solid rgba($primary-gold, 0.15);
+    border: 1px solid rgba($primary, 0.15);
     font-size: 0.8rem;
-    color: $primary-gold;
+    color: $primary;
     font-weight: 600;
 
     @include mobile {

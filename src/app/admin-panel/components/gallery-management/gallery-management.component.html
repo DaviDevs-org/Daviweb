@@ -16,15 +16,16 @@
                 <p>{{ selectedFile ? 'Cambiar imagen' : 'Haz clic o arrastra una imagen aquí' }}</p>
                 <small>{{ selectedFile ? selectedFile.name : 'Formatos: JPG, PNG, WebP (máx. 5MB)' }}</small>
             </div>
-            <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;">
+            <label for="gallery-file" class="sr-only">Seleccionar imagen</label>
+            <input id="gallery-file" #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" class="visually-hidden" aria-label="Seleccionar imagen para galería">
         </div>
         <div class="progress">
             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75"
                 aria-valuemin="0" aria-valuemax="100" [style.width]="progress()"></div>
         </div>
-        <button class="upload-btn" [disabled]="!selectedFile" (click)="uploadImage()">
-            <i class="bi bi-upload"></i>
-            Subir Imagen
+        <button class="upload-btn" [disabled]="!selectedFile" (click)="uploadImage()" aria-label="Subir imagen seleccionada">
+            <i class="bi bi-upload" aria-hidden="true"></i>
+            <span>Subir Imagen</span>
         </button>
     </div>
 
@@ -37,11 +38,13 @@
                 <div class="skeleton-loader" *ngIf="!imageLoadStates[i]"></div>
                 <div class="photo-overlay">
                     <div class="photo-actions">
-                        <button class="action-btn edit-btn" (click)="updateImage(i)">
-                            <i class="bi bi-pencil"></i>
+                        <button class="action-btn edit-btn" (click)="updateImage(i)" [attr.aria-label]="'Editar imagen ' + photo.name">
+                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                            <span class="sr-only">Editar imagen {{ photo.name }}</span>
                         </button>
-                        <button class="action-btn delete-btn" (click)="deleteImage(i)">
-                            <i class="bi bi-trash"></i>
+                        <button class="action-btn delete-btn" (click)="deleteImage(i)" [attr.aria-label]="'Eliminar imagen ' + photo.name">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
+                            <span class="sr-only">Eliminar imagen {{ photo.name }}</span>
                         </button>
                         <div class="photo-info">{{photo.name}}</div>
                     </div>

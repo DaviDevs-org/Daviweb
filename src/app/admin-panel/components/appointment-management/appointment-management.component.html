@@ -47,7 +47,8 @@
         </aside>
 
         <!-- Lado derecho: calendario por día y detalles -->
-        <main class="right-panel">
+            <section role="region" aria-labelledby="calendar-section-heading" class="right-panel">
+                <h3 id="calendar-section-heading" class="sr-only">Calendario y detalles</h3>
             <!-- Header del calendario con navegación mejorada -->
             <div class="calendar-header">
                 <!-- Navegación por meses (Desktop) -->
@@ -442,6 +443,6 @@
                         (click)="deleteAppointment(selected.id || '')">Eliminar</button>
                 </div>
             </div>
-        </main>
+    </section>
     </div>
 </section>

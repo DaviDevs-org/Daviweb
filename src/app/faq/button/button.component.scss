@@ -4,7 +4,7 @@
 .root {
   padding: 16px 10px;
   box-sizing: border-box;
-  background: rgba(202, 136, 111, 0.51);
+  background: $background-grey;
   font-family: 'Inter', sans-serif;
   color: #0f172a;
   width: 100%;
@@ -68,7 +68,7 @@
 }
 
 .answer {
-  border-top: 2px solid #6A3D27;
+  border-top: 2px solid $text-gray;
 }
 
 .bi {

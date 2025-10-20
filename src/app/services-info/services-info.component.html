@@ -36,9 +36,12 @@
 
                 <div class="services-list">
                     @for (service of selectedCategory?.services; track service.name) {
-                    <div class="service-item" [class.selected]="selectedService?.name === service.name"
-                        (click)="selectService(service)">
-
+                    <button class="service-item"
+                        [class.selected]="selectedService?.name === service.name"
+                        (click)="selectService(service)"
+                        tabindex="0" role="button"
+                        [attr.aria-label]="'Ver detalles del servicio ' + service.name + ', duración ' + service.totalTime + ' minutos, precio ' + service.price + ' euros'"
+                    >
                         <div class="service-info">
                             <h4 class="service-name">{{ service.name }}</h4>
                             <div class="service-meta">
@@ -53,7 +56,7 @@
                         <div class="service-arrow">
                             <i class="bi bi-chevron-right"></i>
                         </div>
-                    </div>
+                    </button>
                     }
                 </div>
             </div>

@@ -9,13 +9,13 @@
     margin-bottom: 30px;
 
     .upload-area {
-        border: 2px dashed $primary-gold;
+        border: 2px dashed $primary;
         border-radius: 12px;
         padding: 40px;
         text-align: center;
         cursor: pointer;
         transition: all 0.3s ease;
-        background: rgba($primary-gold, 0.02);
+        background: rgba($primary, 0.02);
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -26,10 +26,10 @@
         justify-content: center;
 
         &:hover {
-            border-color: $secondary-gold;
+            border-color: $secondary;
 
             &:not(.has-image) {
-                background: rgba($primary-gold, 0.05);
+                background: rgba($primary, 0.05);
             }
 
             .upload-content {
@@ -61,14 +61,14 @@
 
             i {
                 font-size: 3rem;
-                color: $primary-gold;
+                color: $primary;
                 margin-bottom: 15px;
                 display: block;
             }
 
             p {
                 font-size: 1.1rem;
-                color: $dark-brown;
+                color: $secondary-dark;
                 margin: 0 0 5px 0;
                 font-weight: 500;
             }
@@ -81,7 +81,7 @@
     }
 
     .upload-btn {
-        @include button-style($primary-gold, $secondary-gold);
+        @include button-style($primary, $secondary);
         margin-top: 20px;
     }
 }
@@ -98,7 +98,7 @@
     min-height: 300px;
 
     h3 {
-        color: $dark-brown;
+        color: $secondary-dark;
         font-size: 1.5rem;
         margin: 0 0 20px 0;
         font-weight: 600;
@@ -126,7 +126,7 @@
     overflow: hidden;
     aspect-ratio: 16/9;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background: rgba($primary-gold, 0.1);
+    background: rgba($primary, 0.1);
 
     img {
         width: 100%;
@@ -147,9 +147,9 @@
         right: 0;
         bottom: 0;
         background: linear-gradient(90deg,
-                rgba($primary-gold, 0.1) 25%,
-                rgba($primary-gold, 0.2) 50%,
-                rgba($primary-gold, 0.1) 75%);
+                rgba($primary, 0.1) 25%,
+                rgba($primary, 0.2) 50%,
+                rgba($primary, 0.1) 75%);
         background-size: 200% 100%;
         animation: shimmer 1.5s infinite;
     }
@@ -208,11 +208,11 @@
     height: 37px;
 
     &.edit-btn {
-        background: $primary-gold;
+        background: $primary;
         color: $white;
 
         &:hover {
-            background: $secondary-gold;
+            background: $secondary;
         }
     }
 

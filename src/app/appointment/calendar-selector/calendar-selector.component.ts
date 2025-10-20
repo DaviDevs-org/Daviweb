@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, OnDestroy, inject, PLATFORM_ID } from '@angular/core';
+import { Component, EventEmitter, Output, OnDestroy, inject, PLATFORM_ID, ViewChild, ElementRef } from '@angular/core';
 import { isPlatformBrowser, NgClass, NgForOf, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HourSelectorComponent } from './hour-selector/hour-selector.component';
@@ -28,6 +28,112 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./calendar-selector.component.scss']
 })
 export class CalendarSelectorComponent implements OnDestroy {
+  // Día actualmente enfocado para navegación por teclado
+  focusedDay: Date | null = null;
+  
+
+  /** Cuando el calendario se renderiza, enfoca el día seleccionado o el primero disponible */
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.focusFirstAvailableDay();
+    }, 0);
+  }
+  /** Maneja la navegación por teclado en el calendario */
+  onDayKeydown(event: KeyboardEvent, day: Date | null) {
+    if (!day || !this.isAvailable(day)) return;
+    const key = event.key;
+    if (key === 'Enter' || key === ' ') {
+      event.preventDefault();
+      this.selectDate(day);
+      return;
+    }
+    // Navegación con flechas
+    const pos = this.findDayPosition(day);
+    if (!pos) return;
+    let { weekIdx, dayIdx } = pos;
+    let nextDay: Date | null = null;
+    if (key === 'ArrowRight') {
+      nextDay = this.findNextAvailableDay(weekIdx, dayIdx, 0, 1);
+    } else if (key === 'ArrowLeft') {
+      nextDay = this.findNextAvailableDay(weekIdx, dayIdx, 0, -1);
+    } else if (key === 'ArrowDown') {
+      nextDay = this.findNextAvailableDay(weekIdx, dayIdx, 1, 0);
+    } else if (key === 'ArrowUp') {
+      nextDay = this.findNextAvailableDay(weekIdx, dayIdx, -1, 0);
+    }
+    if (nextDay) {
+      event.preventDefault();
+      this.focusedDay = nextDay;
+      this.focusDayElement(nextDay);
+    }
+  }
+
+  /** Busca la posición de un día en la matriz */
+  findDayPosition(day: Date): { weekIdx: number, dayIdx: number } | null {
+    for (let weekIdx = 0; weekIdx < this.calendarMatrix.length; weekIdx++) {
+      const week = this.calendarMatrix[weekIdx];
+      for (let dayIdx = 0; dayIdx < week.length; dayIdx++) {
+        const d = week[dayIdx];
+        if (d && this.formatDate(d) === this.formatDate(day)) {
+          return { weekIdx, dayIdx };
+        }
+      }
+    }
+    return null;
+  }
+
+  /** Busca el siguiente día disponible en la dirección indicada */
+  findNextAvailableDay(weekIdx: number, dayIdx: number, weekStep: number, dayStep: number): Date | null {
+    let w = weekIdx + weekStep;
+    let d = dayIdx + dayStep;
+    while (w >= 0 && w < this.calendarMatrix.length) {
+      const week = this.calendarMatrix[w];
+      while (d >= 0 && d < week.length) {
+        const candidate = week[d];
+        if (candidate && this.isAvailable(candidate)) {
+          return candidate;
+        }
+        d += dayStep;
+      }
+      d = dayStep > 0 ? 0 : week.length - 1;
+      w += weekStep;
+    }
+    return null;
+  }
+
+  /** Enfoca el elemento del día en el DOM */
+  focusDayElement(day: Date) {
+    const selector = `[data-day='${this.formatDate(day)}']`;
+    const el = document.querySelector(selector) as HTMLElement;
+    if (el) {
+      el.focus();
+    }
+  }
+  focusFirstAvailableDay() {
+    for (const week of this.calendarMatrix) {
+      for (const day of week) {
+        if (day && this.isAvailable(day)) {
+          this.focusedDay = day;
+          return;
+        }
+      }
+    }
+  }
+  /** Formatea la fecha como yyyy-mm-dd para data-day y lógica interna */
+  public formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  /** Devuelve true si el día está deshabilitado (fuera del mes actual o no reservable) */
+  isDisabled(day: Date): boolean {
+    // Deshabilitar días fuera del mes actual
+    return day.getMonth() !== this.selectedMonth;
+    // Si quieres deshabilitar días no reservables, añade lógica aquí
+  }
+
+  // Implementaciones duplicadas eliminadas. Se mantienen las versiones correctas más abajo.
 
   @Output() dateSelected = new EventEmitter<Date>();
 
@@ -59,6 +165,7 @@ export class CalendarSelectorComponent implements OnDestroy {
 
   private destroy$ = new Subject<void>();
   private platformId = inject(PLATFORM_ID)
+  @ViewChild('monthYearBtn') monthYearBtn?: ElementRef<HTMLButtonElement>;
 
   constructor(
     private reservedSlotsService: ReservedSlotsService,
@@ -209,6 +316,8 @@ export class CalendarSelectorComponent implements OnDestroy {
     this.showPicker = false;
     this.generateCalendar();
     this.computeAvailableHoursForCurrentMatrix();
+    // Restaurar foco al cambiar de mes para mejorar la navegación por teclado
+    this.restoreFocusAfterMonthChange();
   }
 
   generateCalendar() {
@@ -440,10 +549,29 @@ export class CalendarSelectorComponent implements OnDestroy {
     }
   }
 
-  private formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  // Implementación duplicada eliminada. Se mantiene la versión principal.
+
+  private restoreFocusAfterMonthChange() {
+    // Solo en browser
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    setTimeout(() => {
+      try {
+        // Intentar enfocar el primer botón de día disponible
+        const firstDayBtn = document.querySelector('[data-day]') as HTMLElement | null;
+        if (firstDayBtn) {
+          firstDayBtn.focus();
+          return;
+        }
+
+        // Si no hay día, enfocar el botón del mes
+        if (this.monthYearBtn && this.monthYearBtn.nativeElement) {
+          this.monthYearBtn.nativeElement.focus();
+        }
+      } catch (e) {
+        // cualquier error no debe romper la UI
+        console.warn('restoreFocusAfterMonthChange error', e);
+      }
+    }, 0);
   }
 }

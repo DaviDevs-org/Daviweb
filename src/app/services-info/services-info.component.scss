@@ -7,7 +7,6 @@
     padding: 48px 24px;
     max-width: 1180px;
     margin: 0 auto;
-    background: #885B34;
     border-radius: 16px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -19,7 +18,8 @@
     position: relative;
     overflow: hidden;
     font-family: 'Inter', sans-serif;
-    color: $dark-brown;
+    color: $secondary-dark;
+    @include section;
 
     @include mobile {
         padding: 36px 16px;
@@ -32,7 +32,7 @@
     width: 100%;
 
     .section-title {
-        color: $black;
+        color: $white;
         font-family: $font-primary;
         font-size: $font-size-3xl;
         font-weight: $font-weight-bold;
@@ -45,7 +45,7 @@
     }
 
     .section-subtitle {
-        color: $black;
+        color: $white;
         font-family: $font-mono;
         font-size: $font-size-lg;
         font-weight: $font-weight-normal;
@@ -68,17 +68,17 @@
     align-items: center;
     justify-content: center;
     padding: 48px 32px;
-    color: $dark-brown;
+    color: $secondary-dark;
     font-family: Inter;
-    background: rgba(255, 255, 255, 0.28);
+    background: $background-grey;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 
     .loading-spinner {
         width: 40px;
         height: 40px;
-        border: 4px solid rgba($primary-gold, 0.2);
-        border-left: 4px solid $primary-gold;
+        border: 4px solid rgba($primary, 0.2);
+        border-left: 4px solid $primary;
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin-bottom: 24px;
@@ -112,7 +112,7 @@
     gap: 12px;
     overflow-x: auto;
     padding: 22px;
-    background: rgba(255, 255, 255, 0.28);
+    background: $background-grey;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 100%;
@@ -125,16 +125,16 @@
     }
 
     &::-webkit-scrollbar-track {
-        background: rgba($secondary-gold, 0.3);
+        background: rgba($secondary, 0.3);
         border-radius: 40px;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: $primary-gold;
+        background: $primary;
         border-radius: 40px;
 
         &:hover {
-            background: $secondary-gold;
+            background: $secondary;
         }
     }
 
@@ -167,8 +167,8 @@
         }
 
         .service-count {
-            background: rgba($primary-gold, 0.2);
-            color: $primary-gold;
+            background: rgba($primary, 0.2);
+            color: $primary;
             padding: 4px 8px;
             border-radius: 12px;
             font-size: 12px;
@@ -183,11 +183,11 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
             i {
-                color: $primary-gold;
+                color: $primary;
             }
 
             .service-count {
-                background: $primary-gold;
+                background: $primary;
                 color: $white;
             }
         }
@@ -198,16 +198,16 @@
             transform: translateY(-1px);
 
             i {
-                color: $primary-gold;
+                color: $primary;
             }
 
             span {
-                color: $primary-gold;
+                color: $primary;
                 font-weight: 700;
             }
 
             .service-count {
-                background: $primary-gold;
+                background: $primary;
                 color: $white;
             }
         }
@@ -250,7 +250,7 @@
 
 .services-panel {
     flex: 1 1 55%;
-    background: rgba(255, 255, 255, 0.28);
+    background: $background-grey;
     border-radius: 12px;
     padding: 24px 32px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -262,19 +262,19 @@
         align-items: center;
         margin-bottom: 16px;
         padding-bottom: 12px;
-        border-bottom: 2px solid $dark-brown;
+        border-bottom: 2px solid $secondary-dark;
 
         h3 {
             margin: 0;
-            color: $light-gold;
+            color: $primary-light;
             font-weight: 700;
             font-size: 18px;
             font-family: Inter, sans-serif;
         }
 
         .services-count {
-            background: rgba($primary-gold, 0.2);
-            color: $light-gold;
+            background: rgba($primary, 0.2);
+            color: $primary-light;
             padding: 6px 12px;
             border-radius: 12px;
             font-size: 14px;
@@ -305,16 +305,16 @@
         }
 
         &::-webkit-scrollbar-track {
-            background: rgba($primary-gold, 0.1);
+            background: rgba($primary, 0.1);
             border-radius: 4px;
         }
 
         &::-webkit-scrollbar-thumb {
-            background: $primary-gold;
+            background: $primary;
             border-radius: 4px;
 
             &:hover {
-                background: $secondary-gold;
+                background: $secondary;
             }
         }
 
@@ -329,6 +329,8 @@
             align-items: center;
             justify-content: space-between;
             gap: 16px;
+            width: 100%;
+            border: none;
 
             &:hover {
                 background: rgba(255, 255, 255, 0.8);
@@ -336,7 +338,7 @@
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
                 .service-arrow {
-                    color: $primary-gold;
+                    color: $primary;
                     transform: translateX(4px);
                 }
             }
@@ -347,12 +349,12 @@
                 transform: translateY(-1px);
 
                 .service-info .service-name {
-                    color: $primary-gold;
+                    color: $primary;
                     font-weight: 700;
                 }
 
                 .service-arrow {
-                    color: $primary-gold;
+                    color: $primary;
                 }
             }
 
@@ -361,11 +363,12 @@
                 display: flex;
                 flex-direction: column;
                 gap: 12px;
+                align-items: start;
 
                 .service-name {
                     font-weight: 600;
                     font-size: 16px;
-                    color: $dark-brown;
+                    color: $secondary-dark;
                     transition: all 0.3s ease;
                     line-height: 1.3;
                     margin: 0;
@@ -381,8 +384,8 @@
                         display: flex;
                         align-items: center;
                         gap: 6px;
-                        background: rgba($primary-gold, 0.15);
-                        color: $primary-gold;
+                        background: rgba($primary, 0.15);
+                        color: $primary;
                         padding: 4px 8px;
                         border-radius: 6px;
                         font-size: 12px;
@@ -395,8 +398,8 @@
                     }
 
                     .price {
-                        background: rgba($secondary-gold, 0.2);
-                        color: $dark-brown;
+                        background: rgba($secondary, 0.2);
+                        color: $secondary-dark;
                         font-weight: 700;
                         padding: 4px 10px;
                         border-radius: 6px;
@@ -458,7 +461,7 @@
 
 .service-details {
     flex: 1 1 40%;
-    background: rgba(255, 255, 255, 0.28);
+    background: $background-grey;
     border-radius: 12px;
     padding: 0;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -496,7 +499,7 @@
             padding: 16px;
 
             .service-badge {
-                background: rgba($primary-gold, 0.95);
+                background: rgba($primary, 0.95);
                 color: $white;
                 padding: 6px 12px;
                 border-radius: 12px;
@@ -527,12 +530,12 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 16px;
-            border-bottom: 2px solid $dark-brown;
+            border-bottom: 2px solid $secondary-dark;
 
             .service-title {
                 font-size: 20px;
                 font-weight: 700;
-                color: $light-gold;
+                color: $primary-light;
                 font-family: Inter, sans-serif;
                 line-height: 1.3;
                 margin: 0;
@@ -543,20 +546,20 @@
                 align-items: baseline;
                 gap: 4px;
                 font-family: Inter, sans-serif;
-                background: rgba($primary-gold, 0.15);
+                background: rgba($primary, 0.15);
                 padding: 8px 16px;
                 border-radius: 8px;
 
                 .price-amount {
                     font-size: 20px;
                     font-weight: 700;
-                    color: $light-gold;
+                    color: $primary-light;
                 }
 
                 .currency {
                     font-size: 16px;
                     font-weight: 600;
-                    color: $light-gold;
+                    color: $primary-light;
                 }
             }
 
@@ -593,7 +596,7 @@
                 padding: 12px 16px;
                 line-height: 1.6;
                 border-radius: 8px;
-                border-left: 3px solid $primary-gold;
+                border-left: 3px solid $primary;
                 font-style: italic;
                 text-align: left;
                 font-family: Inter, sans-serif;
@@ -625,7 +628,7 @@
 
                 i {
                     font-size: 16px;
-                    color: $primary-gold;
+                    color: $primary;
                     width: 20px;
                     flex-shrink: 0;
                 }
@@ -646,7 +649,7 @@
 
                     .feature-value {
                         font-size: 14px;
-                        color: $dark-brown;
+                        color: $secondary-dark;
                         font-weight: 500;
                         font-family: Inter, sans-serif;
                     }
@@ -677,11 +680,11 @@
             display: flex;
             gap: 12px;
             padding-top: 16px;
-            border-top: 2px solid $dark-brown;
+            border-top: 2px solid $secondary-dark;
 
             .btn-primary {
                 flex: 1;
-                background: $primary-gold;
+                background: $primary;
                 color: $white;
                 border: none;
                 display: flex;
@@ -699,9 +702,9 @@
                 letter-spacing: 0.5px;
 
                 &:hover {
-                    background: $secondary-gold;
+                    background: $secondary;
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba($primary-gold, 0.3);
+                    box-shadow: 0 4px 12px rgba($primary, 0.3);
                 }
 
                 i {
@@ -742,7 +745,7 @@
         .placeholder-icon {
             width: 60px;
             height: 60px;
-            background: rgba($primary-gold, 0.15);
+            background: rgba($primary, 0.15);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -751,14 +754,14 @@
 
             i {
                 font-size: 24px;
-                color: $primary-gold;
+                color: $primary;
             }
         }
 
         h3 {
             font-size: 18px;
             font-weight: 700;
-            color: $dark-brown;
+            color: $secondary-dark;
             font-family: Inter, sans-serif;
             margin: 0 0 12px 0;
         }
@@ -805,19 +808,19 @@
     width: 100%;
     max-width: 1180px;
     padding: 16px 24px;
-    background: rgba(255, 255, 255, 0.28);
+    background: $background-grey;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
 
     i {
-        color: $light-gold;
+        color: $primary-light;
         font-size: 18px;
         flex-shrink: 0;
     }
 
     p {
-        color: $light-gold;
+        color: $primary-light;
         font-size: 15px;
         font-family: Inter;
         line-height: 1.5;

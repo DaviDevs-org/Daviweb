@@ -1,37 +1,57 @@
 <div class="body">
-    <app-header></app-header>
-    <app-photo-of-the-day></app-photo-of-the-day>
+        <app-header></app-header>
 
-    @defer (on viewport) {
-    <app-services-info />
-    } @placeholder {
-    <div class="skeleton-services">
+        <!-- Página: encabezado accesible (oculto visualmente si ya hay un título visible en header) -->
+        <h1 class="sr-only" id="home-heading">Peluquería - Inicio</h1>
+
+        <!-- Foto del día (sección) -->
+        <section aria-labelledby="photo-heading" class="section photo-section">
+            <h2 class="sr-only" id="photo-heading">Foto del día</h2>
+            <app-photo-of-the-day></app-photo-of-the-day>
+        </section>
+
+        @defer (on viewport) {
+        <section aria-labelledby="services-heading" class="section services-section">
+            <h2 class="sr-only" id="services-heading">Servicios</h2>
+            <app-services-info />
+        </section>
+        } @placeholder {
+        <div class="skeleton-services" aria-hidden="true">
         <div class="skeleton-header"></div>
         <div class="skeleton-categories"></div>
         <div class="skeleton-content"></div>
     </div>
     }
-    @defer (on viewport) {
-    <app-barbers-info />
-    } @placeholder {
-    <div class="skeleton-barbers">
+        @defer (on viewport) {
+        <section aria-labelledby="barbers-heading" class="section barbers-section">
+            <h2 class="sr-only" id="barbers-heading">Barberos</h2>
+            <app-barbers-info />
+        </section>
+        } @placeholder {
+        <div class="skeleton-barbers" aria-hidden="true">
         <div class="skeleton-header"></div>
         <div class="skeleton-cards"></div>
         <div class="skeleton-note"></div>
     </div>
     }
-    @defer (on viewport) {
-    <app-appointment />
-    } @placeholder {
-    <div class="skeleton-appointment">
+        @defer (on viewport) {
+        <section aria-labelledby="appointment-heading" class="section appointment-section">
+            <h2 class="sr-only" id="appointment-heading">Reserva de cita</h2>
+            <app-appointment />
+        </section>
+        } @placeholder {
+        <div class="skeleton-appointment" aria-hidden="true">
         <div class="skeleton-calendar-header"></div>
         <div class="skeleton-calendar-grid"></div>
     </div>
     }
-    @defer (on viewport) {
-    <app-location-and-contact />
-    } @placeholder {
-    <div class="skeleton-location">
+        @defer (on viewport) {
+        <section aria-labelledby="location-heading" class="section location-section">
+            <h2 class="sr-only" id="location-heading">Ubicación y contacto</h2>
+            <app-location-and-contact />
+        </section>
+        } @placeholder {
+        <div class="skeleton-location" aria-hidden="true">
         <div class="skeleton-heading"></div>
         <div class="skeleton-content">
             <div class="skeleton-map"></div>
@@ -39,10 +59,13 @@
         </div>
     </div>
     }
-    @defer (on viewport) {
-    <app-about-us />
-    } @placeholder {
-    <div class="skeleton-about">
+        @defer (on viewport) {
+        <section aria-labelledby="about-heading" class="section about-section">
+            <h2 class="sr-only" id="about-heading">Sobre nosotros</h2>
+            <app-about-us />
+        </section>
+        } @placeholder {
+        <div class="skeleton-about" aria-hidden="true">
         <div class="skeleton-heading"></div>
         <div class="skeleton-content">
             <div class="skeleton-text"></div>
@@ -50,10 +73,13 @@
         </div>
     </div>
     }
-    @defer (on viewport) {
-    <app-opinions />
-    } @placeholder {
-    <div class="skeleton-opinions">
+        @defer (on viewport) {
+        <section aria-labelledby="opinions-heading" class="section opinions-section">
+            <h2 class="sr-only" id="opinions-heading">Opiniones</h2>
+            <app-opinions />
+        </section>
+        } @placeholder {
+        <div class="skeleton-opinions" aria-hidden="true">
         <div class="skeleton-heading"></div>
         <div class="skeleton-subtitle"></div>
         <div class="skeleton-cards-container">
@@ -63,10 +89,13 @@
         </div>
     </div>
     }
-    @defer (on viewport) {
-    <app-faq />
-    } @placeholder {
-    <div class="skeleton-faq">
+        @defer (on viewport) {
+        <section aria-labelledby="faq-heading" class="section faq-section">
+            <h2 class="sr-only" id="faq-heading">Preguntas frecuentes</h2>
+            <app-faq />
+        </section>
+        } @placeholder {
+        <div class="skeleton-faq" aria-hidden="true">
         <div class="skeleton-heading"></div>
         <div class="skeleton-items">
             <div class="skeleton-item"></div>
@@ -76,9 +105,12 @@
         </div>
     </div>
     }
-    @defer (on viewport) {
-    <app-footer />
-    } @placeholder {
-    <div class="skeleton-footer"></div>
-    }
+        @defer (on viewport) {
+        <section aria-labelledby="footer-heading" class="section footer-section">
+            <h2 class="sr-only" id="footer-heading">Pie de página</h2>
+            <app-footer />
+        </section>
+        } @placeholder {
+        <div class="skeleton-footer" aria-hidden="true"></div>
+        }
 </div>

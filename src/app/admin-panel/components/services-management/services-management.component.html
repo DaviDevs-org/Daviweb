@@ -21,8 +21,9 @@
                         <p>{{ selectedFile ? 'Cambiar imagen' : 'Haz clic para añadir imagen' }}</p>
                         <small>{{ selectedFile ? selectedFile.name : 'Formatos: JPG, PNG, WebP (máx. 5MB)' }}</small>
                     </div>
-                    <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)"
-                        style="display: none;">
+                    <label for="service-file" class="sr-only">Seleccionar imagen del servicio</label>
+                    <input id="service-file" #fileInput type="file" accept="image/*" (change)="onFileSelected($event)"
+                        class="visually-hidden" aria-label="Seleccionar imagen del servicio">
                 </div>
                 <!-- Progress bar para upload -->
                 <div class="progress" *ngIf="uploadProgress() !== '0%'">
@@ -61,14 +62,14 @@
                             <div class="input-with-buttons">
                                 <label>Duración total del servicio</label>
                                 <div class="number-controls">
-                                    <button type="button" class="btn-decrease" (click)="removeTimeSegment(0)"
-                                        [disabled]="newService.timeSegments[0].duration <= 15">
-                                        <i class="bi bi-dash"></i>
-                                    </button>
+                                            <button type="button" class="btn-decrease" (click)="removeTimeSegment(0)"
+                                                [disabled]="newService.timeSegments[0].duration <= 15" aria-label="Disminuir duración">
+                                                <i class="bi bi-dash" aria-hidden="true"></i>
+                                            </button>
                                     <input type="number" [(ngModel)]="newService.timeSegments[0].duration"
                                         name="totalDuration" min="15" step="15" class="form-input duration-input">
-                                    <button type="button" class="btn-increase" (click)="addTimeSegment()">
-                                        <i class="bi bi-plus"></i>
+                                    <button type="button" class="btn-increase" (click)="addTimeSegment()" aria-label="Aumentar duración">
+                                        <i class="bi bi-plus" aria-hidden="true"></i>
                                     </button>
                                 </div>
                                 <span class="input-suffix">minutos</span>

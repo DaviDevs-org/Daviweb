@@ -11,7 +11,7 @@
     <div class="header">
       <button class="arrow-btn" (click)="prevMonth()" [attr.aria-label]="'Mes anterior'">&#9664;</button>
 
-      <button class="month-year-btn" (click)="togglePicker()">
+      <button #monthYearBtn class="month-year-btn" (click)="togglePicker()" aria-label="Seleccionar mes y año">
         {{ monthNames[selectedMonth] }} {{ selectedYear }}
         <span class="arrow" [class.open]="showPicker">&#9662;</span>
       </button>
@@ -29,21 +29,30 @@
       </select>
     </div>
 
-    <table class="calendar-table">
+    <table class="calendar-table" role="grid" aria-label="Calendario de citas">
       <thead>
-        <tr>
-          <th *ngFor="let day of weekDays">{{ day }}</th>
+        <tr role="row">
+          <th *ngFor="let wd of weekDays" role="columnheader">{{ wd }}</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let week of calendarMatrix">
-          <td *ngFor="let day of week" [ngClass]="{
-                        'day-available': day && isAvailable(day),
-                        'day-unavailable': day && !isAvailable(day),
-                        'today': isToday(day),
-                        'selected': isSelected(day),
-                        'disabled': !day
-                        }" (click)="selectDate(day)">
+        <tr *ngFor="let week of calendarMatrix" role="row">
+          <td *ngFor="let day of week"
+              role="gridcell"
+              [attr.tabindex]="day && isAvailable(day) && focusedDay && formatDate(day) === formatDate(focusedDay) ? 0 : -1"
+              [ngClass]="{
+                'day-available': day && isAvailable(day),
+                'day-unavailable': day && !isAvailable(day),
+                'today': isToday(day),
+                'selected': isSelected(day),
+                'disabled': !day,
+                'focused': focusedDay && day && formatDate(day) === formatDate(focusedDay)
+              }"
+              (click)="selectDate(day)"
+              (keydown)="onDayKeydown($event, day)"
+              [attr.aria-selected]="isSelected(day)"
+              [attr.aria-disabled]="!day || !isAvailable(day)"
+              [attr.data-day]="day ? formatDate(day) : null">
             <span class="day-content">{{ day?.getDate() || '' }}</span>
           </td>
         </tr>

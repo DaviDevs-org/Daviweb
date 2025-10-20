@@ -45,9 +45,11 @@
             type="button" 
             class="password-toggle"
             (click)="togglePasswordVisibility()"
+            [attr.aria-pressed]="showPassword"
+            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
           >
-            <i *ngIf="showPassword" class="bi bi-eye-fill"></i>
-            <i *ngIf="!showPassword" class="bi bi-eye-slash-fill"></i>
+            <i *ngIf="showPassword" class="bi bi-eye-fill" aria-hidden="true"></i>
+            <i *ngIf="!showPassword" class="bi bi-eye-slash-fill" aria-hidden="true"></i>
           </button>
         </div>
         <div class="error-message" *ngIf="loginForm.submitted && !loginData.password">
@@ -67,13 +69,13 @@
             <div class="spinner"></div>
             Iniciando...
           </span>
-        </button>
-
         <button 
           type="button" 
           class="forgot-password-btn"
           (click)="onForgotPassword()"
-        >
+          aria-label="Recuperar contraseña">
+          1Olvidaste tu contrasea?
+        </button>
           ¿Olvidaste tu contraseña?
         </button>
       </div>

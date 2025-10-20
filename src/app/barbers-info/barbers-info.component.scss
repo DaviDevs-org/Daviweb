@@ -27,7 +27,7 @@
     width: 100%;
 
     .section-title {
-        color: $black;
+        color: $white;
         font-family: $font-primary;
         font-size: $font-size-3xl;
         font-weight: $font-weight-bold;
@@ -41,7 +41,7 @@
     }
 
     .section-subtitle {
-        color: $black;
+        color: $white;
         font-family: $font-mono;
         font-size: $font-size-lg;
         font-weight: $font-weight-normal;
@@ -49,6 +49,7 @@
         text-align: center;
         margin: 0 auto;
         max-width: 600px;
+        
 
         @include mobile {
             font-size: 14px;
@@ -64,17 +65,17 @@
     align-items: center;
     justify-content: center;
     padding: 48px 32px;
-    color: $dark-brown;
+    color: $secondary-dark;
     font-family: Inter;
-    background: rgba(255, 255, 255, 0.28);
+    background: $background-grey;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 
     .loading-spinner {
         width: 40px;
         height: 40px;
-        border: 4px solid rgba($primary-gold, 0.2);
-        border-left: 4px solid $primary-gold;
+        border: 4px solid rgba($primary, 0.2);
+        border-left: 4px solid $primary;
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin-bottom: 24px;
@@ -117,7 +118,7 @@
 }
 
 .barber-card {
-    background: rgba(255, 255, 255, 0.28);
+    background: $background-grey;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -134,11 +135,11 @@
     }
 
     &.featured {
-        border: 2px solid $primary-gold;
-        box-shadow: 0 4px 20px rgba($primary-gold, 0.2);
+        border: 2px solid $primary;
+        box-shadow: 0 4px 20px rgba($primary, 0.2);
 
         &:hover {
-            box-shadow: 0 8px 30px rgba($primary-gold, 0.3);
+            box-shadow: 0 8px 30px rgba($primary, 0.3);
         }
     }
 
@@ -167,7 +168,7 @@
             padding: 16px;
 
             .featured-badge {
-                background: rgba($primary-gold, 0.95);
+                background: rgba($primary, 0.95);
                 color: $white;
                 padding: 8px 16px;
                 border-radius: 20px;
@@ -199,12 +200,12 @@
             text-align: center;
             margin-bottom: 20px;
             padding-bottom: 16px;
-            border-bottom: 2px solid $dark-brown;
+            border-bottom: 2px solid $secondary-dark;
 
             .barber-name {
                 font-size: 22px;
                 font-weight: 700;
-                color: $light-gold;
+                color: $primary-light;
                 font-family: Inter, sans-serif;
                 line-height: 1.3;
                 margin: 0 0 8px 0;
@@ -212,13 +213,13 @@
 
             .barber-specialty {
                 font-size: 14px;
-                color: $primary-gold;
+                color: $primary;
                 font-family: Inter, sans-serif;
                 font-weight: 600;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 margin: 0;
-                background: rgba($primary-gold, 0.15);
+                background: rgba($primary, 0.15);
                 padding: 4px 12px;
                 border-radius: 12px;
                 display: inline-block;
@@ -251,12 +252,12 @@
 
                 i {
                     font-size: 16px;
-                    color: $primary-gold;
+                    color: $primary;
                 }
 
                 span {
                     font-size: 14px;
-                    color: $dark-brown;
+                    color: $secondary-dark;
                     font-weight: 600;
                     font-family: Inter, sans-serif;
                 }
@@ -281,7 +282,7 @@
                 padding: 12px 16px;
                 line-height: 1.6;
                 border-radius: 8px;
-                border-left: 3px solid $primary-gold;
+                border-left: 3px solid $primary;
                 font-style: italic;
                 text-align: center;
                 font-family: Inter, sans-serif;
@@ -299,10 +300,10 @@
             display: flex;
             justify-content: center;
             padding-top: 16px;
-            border-top: 2px solid $dark-brown;
+            border-top: 2px solid $secondary-dark;
 
             .btn-primary {
-                background: $primary-gold;
+                background: $primary;
                 color: $white;
                 border: none;
                 display: flex;
@@ -321,9 +322,9 @@
                 min-width: 200px;
 
                 &:hover {
-                    background: $secondary-gold;
+                    background: $secondary;
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba($primary-gold, 0.3);
+                    box-shadow: 0 4px 12px rgba($primary, 0.3);
                 }
 
                 i {
@@ -355,7 +356,7 @@
     justify-content: center;
     padding: 48px 32px;
     text-align: center;
-    background: rgba(255, 255, 255, 0.28);
+    background: $background-grey;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 100%;
@@ -364,7 +365,7 @@
     .placeholder-icon {
         width: 60px;
         height: 60px;
-        background: rgba($primary-gold, 0.15);
+        background: rgba($primary, 0.15);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -373,14 +374,14 @@
 
         i {
             font-size: 24px;
-            color: $primary-gold;
+            color: $primary;
         }
     }
 
     h3 {
         font-size: 18px;
         font-weight: 700;
-        color: $dark-brown;
+        color: $secondary-dark;
         font-family: Inter, sans-serif;
         margin: 0 0 12px 0;
     }
@@ -426,19 +427,19 @@
     width: 100%;
     max-width: 1180px;
     padding: 16px 24px;
-    background: rgba(255, 255, 255, 0.28);
+    background: $background-grey;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
 
     i {
-        color: $light-gold;
+        color: $primary-light;
         font-size: 18px;
         flex-shrink: 0;
     }
 
     p {
-        color: $light-gold;
+        color: $primary-light;
         font-size: 15px;
         font-family: Inter;
         line-height: 1.5;

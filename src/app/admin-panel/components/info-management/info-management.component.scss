@@ -41,7 +41,7 @@
   }
 
   h3 {
-    color: $dark-brown;
+    color: $secondary-dark;
     font-size: 1.2rem;
     margin: 0 0 15px 0;
     font-weight: 600;
@@ -56,7 +56,7 @@
     }
 
     i {
-      color: $primary-gold;
+      color: $primary;
     }
   }
 }
@@ -109,20 +109,20 @@
   }
 
   &:hover {
-    border-color: rgba($primary-gold, 0.4);
-    box-shadow: 0 2px 8px rgba($primary-gold, 0.1);
+    border-color: rgba($primary, 0.4);
+    box-shadow: 0 2px 8px rgba($primary, 0.1);
   }
 
   .day-label {
     font-weight: 600;
-    color: $dark-brown;
+    color: $secondary-dark;
     font-size: 0.95rem;
     display: flex;
     align-items: center;
     min-height: 40px; // Altura consistente
 
     @include mobile {
-      background: rgba($primary-gold, 0.08);
+      background: rgba($primary, 0.08);
       padding: 10px 12px;
       border-radius: 8px;
       margin-bottom: 0;
@@ -174,8 +174,8 @@
       // ESTÉTICA MEJORADA - COHERENTE CON EL RESTO
       &:focus {
         outline: none;
-        border-color: $primary-gold;
-        box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba($primary, 0.1);
       }
 
       &:disabled {
@@ -271,7 +271,7 @@
   }
 
   .add-btn {
-    @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+    @include button-style($primary, color.scale($primary, $lightness: -10%));
     font-size: 0.8rem;
     padding: 8px 12px;
     min-width: 140px;
@@ -347,7 +347,7 @@
     gap: 8px;
     margin-bottom: 20px;
     padding: 12px;
-    background: rgba($primary-gold, 0.1);
+    background: rgba($primary, 0.1);
     border-radius: 8px;
     cursor: pointer;
 
@@ -383,7 +383,7 @@
     }
 
     &:hover {
-      background: rgba($primary-gold, 0.08);
+      background: rgba($primary, 0.08);
       transform: translateY(-1px);
     }
 
@@ -449,8 +449,8 @@
 
         &:focus {
           outline: none;
-          border-color: $primary-gold;
-          box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+          border-color: $primary;
+          box-shadow: 0 0 0 3px rgba($primary, 0.1);
         }
       }
 
@@ -503,9 +503,9 @@
     gap: 15px;
     margin-top: 20px;
     padding: 20px;
-    border: 2px dashed rgba($primary-gold, 0.3);
+    border: 2px dashed rgba($primary, 0.3);
     border-radius: 12px;
-    background: rgba($primary-gold, 0.05);
+    background: rgba($primary, 0.05);
 
     @include mobile {
       padding: 15px;
@@ -525,7 +525,7 @@
 
       label {
         font-weight: 600;
-        color: $dark-brown;
+        color: $secondary-dark;
         font-size: 0.9rem;
         text-align: center;
 
@@ -537,9 +537,9 @@
       .barber-upload-area {
         width: 120px;
         height: 120px;
-        border: 2px dashed rgba($primary-gold, 0.4);
+        border: 2px dashed rgba($primary, 0.4);
         border-radius: 50%;
-        background: rgba($primary-gold, 0.05);
+        background: rgba($primary, 0.05);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -557,13 +557,13 @@
         }
 
         &:hover {
-          border-color: $primary-gold;
-          background-color: rgba($primary-gold, 0.1);
+          border-color: $primary;
+          background-color: rgba($primary, 0.1);
         }
 
         &.has-image {
           border-style: solid;
-          border-color: $primary-gold;
+          border-color: $primary;
 
           .barber-upload-content {
             background: rgba(0, 0, 0, 0.7);
@@ -597,7 +597,7 @@
 
           i {
             font-size: 2rem;
-            color: $primary-gold;
+            color: $primary;
             margin-bottom: 8px;
 
             @include mobile {
@@ -609,7 +609,7 @@
           p {
             font-size: 0.7rem;
             font-weight: 600;
-            color: $dark-brown;
+            color: $secondary-dark;
             margin: 0 0 4px 0;
 
             @include mobile {
@@ -632,7 +632,7 @@
       .barber-progress {
         width: 120px;
         height: 4px;
-        background: rgba($primary-gold, 0.2);
+        background: rgba($primary, 0.2);
         border-radius: 2px;
         overflow: hidden;
 
@@ -643,7 +643,7 @@
 
         .barber-progress-bar {
           height: 100%;
-          background: $primary-gold;
+          background: $primary;
           transition: width 0.3s ease;
           border-radius: 2px;
         }
@@ -674,13 +674,13 @@
 
         &:focus {
           outline: none;
-          border-color: $primary-gold;
-          box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+          border-color: $primary;
+          box-shadow: 0 0 0 3px rgba($primary, 0.1);
         }
       }
 
       .add-btn {
-        @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+        @include button-style($primary, color.scale($primary, $lightness: -10%));
         font-size: 0.9rem;
         padding: 8px 14px;
         min-width: 140px;
@@ -704,7 +704,7 @@
 // Botones generales
 // ------------------------
 .save-btn {
-  @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+  @include button-style($primary, color.scale($primary, $lightness: -10%));
   font-size: 1rem;
   min-width: 160px;
   justify-content: center;
@@ -722,12 +722,12 @@
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba($primary-gold, 0.3);
+    box-shadow: 0 8px 25px rgba($primary, 0.3);
   }
 }
 
 .add-btn {
-  @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+  @include button-style($primary, color.scale($primary, $lightness: -10%));
   font-size: 0.85rem;
   padding: 5px 10px;
   min-width: 120px;
@@ -781,7 +781,7 @@
 .form-group {
   label {
     font-weight: 600;
-    color: $dark-brown;
+    color: $secondary-dark;
     margin-bottom: 8px;
     display: block;
 
@@ -854,8 +854,8 @@
   }
 
   &:hover {
-    border-color: rgba($primary-gold, 0.4);
-    background: rgba($primary-gold, 0.05);
+    border-color: rgba($primary, 0.4);
+    background: rgba($primary, 0.05);
   }
 
   .ex-date {
@@ -871,8 +871,8 @@
 
     &:focus {
       outline: none;
-      border-color: $primary-gold;
-      box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba($primary, 0.1);
     }
   }
 
@@ -904,7 +904,7 @@
 
     label {
       font-weight: 600;
-      color: $dark-brown;
+      color: $secondary-dark;
       margin-bottom: 12px;
       display: block;
 
@@ -948,8 +948,8 @@
 
           &:focus {
             outline: none;
-            border-color: $primary-gold;
-            box-shadow: 0 0 0 3px rgba($primary-gold, 0.1);
+            border-color: $primary;
+            box-shadow: 0 0 0 3px rgba($primary, 0.1);
           }
         }
 
@@ -995,7 +995,7 @@
       }
 
       .add-btn {
-        @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+        @include button-style($primary, color.scale($primary, $lightness: -10%));
         font-size: 0.8rem;
         padding: 6px 10px;
         align-self: flex-start;
@@ -1042,16 +1042,16 @@
   display: flex;
   justify-content: center;
   padding: 20px;
-  border: 2px dashed rgba($primary-gold, 0.4);
+  border: 2px dashed rgba($primary, 0.4);
   border-radius: 12px;
-  background: rgba($primary-gold, 0.05);
+  background: rgba($primary, 0.05);
 
   @include mobile {
     padding: 15px;
   }
 
   .add-btn {
-    @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+    @include button-style($primary, color.scale($primary, $lightness: -10%));
     font-size: 1rem;
     padding: 12px 20px;
     min-width: 180px;
@@ -1065,15 +1065,15 @@
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba($primary-gold, 0.3);
+      box-shadow: 0 6px 20px rgba($primary, 0.3);
     }
   }
 }
 
 // Estilos para el nuevo flujo de excepciones
 .exception-creation-flow {
-  background: rgba($primary-gold, 0.05);
-  border: 2px solid rgba($primary-gold, 0.2);
+  background: rgba($primary, 0.05);
+  border: 2px solid rgba($primary, 0.2);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -1092,7 +1092,7 @@
     left: 10%;
     right: 10%;
     height: 2px;
-    background: rgba($primary-gold, 0.3);
+    background: rgba($primary, 0.3);
     z-index: 1;
   }
 
@@ -1124,22 +1124,22 @@
 
     &.active {
       .step-number {
-        background: $primary-gold;
-        border-color: $primary-gold;
+        background: $primary;
+        border-color: $primary;
         color: white;
       }
 
       .step-label {
-        color: $dark-brown;
+        color: $secondary-dark;
         font-weight: 600;
       }
     }
 
     &.completed {
       .step-number {
-        background: color.adjust($primary-gold, $lightness: 20%);
-        border-color: $primary-gold;
-        color: $dark-brown;
+        background: color.adjust($primary, $lightness: 20%);
+        border-color: $primary;
+        color: $secondary-dark;
       }
     }
   }
@@ -1148,7 +1148,7 @@
 .creation-step {
   .step-content {
     h4 {
-      color: $dark-brown;
+      color: $secondary-dark;
       margin-bottom: 20px;
       text-align: center;
     }
@@ -1171,25 +1171,25 @@
     background: white;
 
     &:hover {
-      border-color: $primary-gold;
+      border-color: $primary;
       transform: translateY(-2px);
     }
 
     &.selected {
-      border-color: $primary-gold;
-      background: rgba($primary-gold, 0.1);
+      border-color: $primary;
+      background: rgba($primary, 0.1);
     }
 
     i {
       font-size: 2rem;
-      color: $primary-gold;
+      color: $primary;
       display: block;
       margin-bottom: 10px;
     }
 
     span {
       font-weight: 600;
-      color: $dark-brown;
+      color: $secondary-dark;
     }
   }
 }
@@ -1238,7 +1238,7 @@
 
     .exception-info {
       strong {
-        color: $dark-brown;
+        color: $secondary-dark;
         display: block;
         margin-bottom: 5px;
       }
@@ -1247,7 +1247,7 @@
         font-size: 0.9rem;
         padding: 4px 8px;
         border-radius: 6px;
-        background: rgba($primary-gold, 0.1);
+        background: rgba($primary, 0.1);
 
         &.closed {
           background: rgba($danger-red, 0.1);
@@ -1274,11 +1274,11 @@
     }
 
     .interval-tag {
-      background: rgba($primary-gold, 0.1);
+      background: rgba($primary, 0.1);
       padding: 4px 8px;
       border-radius: 6px;
       font-size: 0.85rem;
-      color: $dark-brown;
+      color: $secondary-dark;
     }
   }
 }
@@ -1296,7 +1296,7 @@
 }
 
 .edit-btn {
-  @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+  @include button-style($primary, color.scale($primary, $lightness: -10%));
   font-size: 0.8rem;
   padding: 6px 12px;
 }
@@ -1306,7 +1306,7 @@
 }
 
 .next-btn {
-  @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+  @include button-style($primary, color.scale($primary, $lightness: -10%));
 }
 
 // Añadir estos estilos al final de info-management.component.scss
@@ -1314,8 +1314,8 @@
 // ===== NUEVOS ESTILOS MEJORADOS PARA EXCEPCIONES =====
 
 .exception-creation-flow {
-  background: rgba($primary-gold, 0.05);
-  border: 2px solid rgba($primary-gold, 0.2);
+  background: rgba($primary, 0.05);
+  border: 2px solid rgba($primary, 0.2);
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 24px;
@@ -1339,7 +1339,7 @@
     left: 15%;
     right: 15%;
     height: 3px;
-    background: rgba($primary-gold, 0.2);
+    background: rgba($primary, 0.2);
     z-index: 1;
 
     @include mobile {
@@ -1391,23 +1391,23 @@
 
     &.active {
       .step-number {
-        background: $primary-gold;
-        border-color: $primary-gold;
+        background: $primary;
+        border-color: $primary;
         color: white;
         transform: scale(1.1);
       }
 
       .step-label {
-        color: $dark-brown;
+        color: $secondary-dark;
         font-weight: 600;
       }
     }
 
     &.completed {
       .step-number {
-        background: color.adjust($primary-gold, $lightness: 35%);
-        border-color: $primary-gold;
-        color: $primary-gold;
+        background: color.adjust($primary, $lightness: 35%);
+        border-color: $primary;
+        color: $primary;
       }
     }
   }
@@ -1416,7 +1416,7 @@
 .creation-step {
   .step-content {
     h4 {
-      color: $dark-brown;
+      color: $secondary-dark;
       margin-bottom: 24px;
       text-align: center;
       font-size: 1.3rem;
@@ -1465,21 +1465,21 @@
     background: white;
 
     &:hover {
-      border-color: $primary-gold;
+      border-color: $primary;
       transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba($primary-gold, 0.15);
+      box-shadow: 0 4px 15px rgba($primary, 0.15);
     }
 
     &.selected {
-      border-color: $primary-gold;
-      background: rgba($primary-gold, 0.08);
+      border-color: $primary;
+      background: rgba($primary, 0.08);
       transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba($primary-gold, 0.2);
+      box-shadow: 0 4px 20px rgba($primary, 0.2);
     }
 
     i {
       font-size: 2.5rem;
-      color: $primary-gold;
+      color: $primary;
       display: block;
       margin-bottom: 12px;
 
@@ -1490,7 +1490,7 @@
 
     span {
       font-weight: 600;
-      color: $dark-brown;
+      color: $secondary-dark;
       font-size: 1rem;
 
       @include mobile {
@@ -1518,7 +1518,7 @@
 
   label {
     font-weight: 600;
-    color: $dark-brown;
+    color: $secondary-dark;
     min-width: 80px;
 
     @include mobile {
@@ -1544,8 +1544,8 @@
 
     &:focus {
       outline: none;
-      border-color: $primary-gold;
-      box-shadow: 0 0 0 3px rgba($primary-gold, 0.15);
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba($primary, 0.15);
     }
 
     &:invalid {
@@ -1579,19 +1579,19 @@
 .closed-message {
   text-align: center;
   padding: 30px 20px;
-  background: rgba($primary-gold, 0.08);
+  background: rgba($primary, 0.08);
   border-radius: 10px;
-  border: 2px dashed rgba($primary-gold, 0.3);
+  border: 2px dashed rgba($primary, 0.3);
 
   i {
     font-size: 3rem;
-    color: $primary-gold;
+    color: $primary;
     margin-bottom: 12px;
     display: block;
   }
 
   p {
-    color: $dark-brown;
+    color: $secondary-dark;
     font-weight: 600;
     font-size: 1.1rem;
     margin: 0;
@@ -1630,8 +1630,8 @@
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: rgba($primary-gold, 0.5);
-    box-shadow: 0 4px 15px rgba($primary-gold, 0.1);
+    border-color: rgba($primary, 0.5);
+    box-shadow: 0 4px 15px rgba($primary, 0.1);
   }
 
   .exception-header {
@@ -1650,7 +1650,7 @@
       flex: 1;
 
       strong {
-        color: $dark-brown;
+        color: $secondary-dark;
         font-size: 1.2rem;
         display: block;
         margin-bottom: 8px;
@@ -1665,8 +1665,8 @@
         padding: 6px 12px;
         border-radius: 20px;
         font-weight: 600;
-        background: rgba($primary-gold, 0.1);
-        color: $primary-gold;
+        background: rgba($primary, 0.1);
+        color: $primary;
         display: inline-block;
 
         &.closed {
@@ -1699,7 +1699,7 @@
 
     span {
       font-weight: 600;
-      color: $dark-brown;
+      color: $secondary-dark;
     }
 
     .interval-tags {
@@ -1709,13 +1709,13 @@
     }
 
     .interval-tag {
-      background: rgba($primary-gold, 0.1);
+      background: rgba($primary, 0.1);
       padding: 6px 12px;
       border-radius: 20px;
       font-size: 0.85rem;
-      color: $dark-brown;
+      color: $secondary-dark;
       font-weight: 500;
-      border: 1px solid rgba($primary-gold, 0.2);
+      border: 1px solid rgba($primary, 0.2);
     }
   }
 }
@@ -1743,9 +1743,9 @@
   display: flex;
   justify-content: center;
   padding: 24px;
-  border: 2px dashed rgba($primary-gold, 0.4);
+  border: 2px dashed rgba($primary, 0.4);
   border-radius: 12px;
-  background: rgba($primary-gold, 0.03);
+  background: rgba($primary, 0.03);
   margin-top: 20px;
 
   @include mobile {
@@ -1753,7 +1753,7 @@
   }
 
   .add-btn.large {
-    @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+    @include button-style($primary, color.scale($primary, $lightness: -10%));
     font-size: 1.1rem;
     padding: 14px 28px;
     min-width: 220px;
@@ -1766,14 +1766,14 @@
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba($primary-gold, 0.3);
+      box-shadow: 0 6px 20px rgba($primary, 0.3);
     }
   }
 }
 
 // Botones mejorados
 .edit-btn {
-  @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+  @include button-style($primary, color.scale($primary, $lightness: -10%));
   font-size: 0.9rem;
   padding: 8px 16px;
 }
@@ -1785,13 +1785,13 @@
 }
 
 .next-btn {
-  @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+  @include button-style($primary, color.scale($primary, $lightness: -10%));
   font-size: 0.9rem;
   padding: 8px 16px;
 }
 
 .save-btn {
-  @include button-style($primary-gold, color.scale($primary-gold, $lightness: -10%));
+  @include button-style($primary, color.scale($primary, $lightness: -10%));
   font-size: 1rem;
   padding: 10px 20px;
 }

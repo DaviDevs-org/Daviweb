@@ -1,13 +1,14 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as *;
 
+// Opinion adaptado a la nueva paleta
 .opinion {
-  background-color: rgba(112, 62, 40, 0.6);
-  border-radius: 12px;
+  background-color: $background-secondary;
+  border-radius: $border-radius-lg;
   padding: 24px 32px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  color: #0f172a;
+  box-shadow: $shadow-sm;
+  color: $secondary;
   font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 16px;
@@ -30,7 +31,7 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  background: rgba(64, 34, 21, 0.61);
+  background: $primary-light;
 }
 
 .opinion-info {
@@ -42,13 +43,13 @@
 .platform {
   font-weight: 700;
   font-size: 14px;
-  color: #5c301e; /* marrón oscuro */
+  color: $primary;
 }
 
 .user-name {
   font-weight: 800;
   font-size: 18px;
-  color: #0f172a;
+  color: $secondary;
   margin-top: 2px;
 }
 
@@ -61,12 +62,12 @@
   font-size: 15px;
   font-weight: 600;
   line-height: 1.5;
-  color: #0f172a;
+  color: $secondary;
   text-align: justify;
 }
 
 .rating app-star {
   width: 22px;
   height: 22px;
-  fill: #f59e0b; /* dorado */
+  fill: $primary;
 }

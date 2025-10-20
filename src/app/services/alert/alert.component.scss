@@ -4,9 +4,9 @@
 // @use '../../admin-panel/styles/mixins';
 
 // Variables temporales (reemplazar con las tuyas)
-$primary-gold: #d4af37;
+$primary: #d4af37;
 $danger-red: #dc3545;
-$dark-brown: #3e2723;
+$secondary-dark: #3e2723;
 $text-gray: #6c757d;
 $light-gray: #f8f9fa;
 $border-color: #dee2e6;
@@ -117,10 +117,10 @@ $border-color: #dee2e6;
     }
 
     &.toast-confirm {
-        border-left: 4px solid $primary-gold;
+        border-left: 4px solid $primary;
 
         .toast-icon i {
-            color: $primary-gold;
+            color: $primary;
         }
     }
 
@@ -157,7 +157,7 @@ $border-color: #dee2e6;
         .toast-title {
             font-weight: 600;
             font-size: 0.9rem;
-            color: $dark-brown;
+            color: $secondary-dark;
             margin-bottom: 4px;
         }
 
@@ -206,11 +206,11 @@ $border-color: #dee2e6;
                 transition: all 0.2s ease;
 
                 &.toast-btn-primary {
-                    background: $primary-gold;
+                    background: $primary;
                     color: white;
 
                     &:hover {
-                        background: color.scale($primary-gold, $lightness: -10%);
+                        background: color.scale($primary, $lightness: -10%);
                     }
                 }
 
@@ -242,7 +242,7 @@ $border-color: #dee2e6;
 
         &:hover {
             background: rgba(0, 0, 0, 0.1);
-            color: $dark-brown;
+            color: $secondary-dark;
         }
 
         i {

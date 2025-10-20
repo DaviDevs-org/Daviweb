@@ -6,9 +6,9 @@
   <app-admin-nav [activeTab]="activeTab" (tabChange)="onTabChange($event)">
   </app-admin-nav>
 
-  <!-- Contenido principal -->
-  <main class="admin-content">
-
+  <!-- Contenido principal (landmark secundario para el panel de administración) -->
+  <div role="region" aria-labelledby="admin-content-heading" class="admin-content">
+    <h2 id="admin-content-heading" class="sr-only">Contenido del panel de administración</h2>
     <!-- Sección: Galería de Fotos -->
     <app-gallery-management *ngIf="activeTab === 'gallery'"></app-gallery-management>
 
@@ -21,5 +21,5 @@
     <!-- Sección: Estadísticas -->
     <app-appointment-management *ngIf="activeTab === 'appointment'"></app-appointment-management>
 
-  </main>
+  </div>
 </div>

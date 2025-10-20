@@ -1,5 +1,5 @@
 <div class="toast-notification" [class.show]="isVisible"
-    [ngClass]="['toast-' + config.type, 'toast-' + (config.position || 'top-right')]">
+    [ngClass]="['toast-' + config.type, 'toast-' + (config.position || 'top-right')]" role="status" aria-live="polite" aria-atomic="true">
 
     <div class="toast-icon">
         <i [class]="getIcon()"></i>
@@ -11,26 +11,28 @@
 
         <!-- Input para prompts -->
         <div *ngIf="config.type === 'prompt'" class="toast-input-container">
-            <input #promptInput class="toast-input" [type]="config.inputType || 'text'"
-                [placeholder]="config.placeholder || ''" [value]="config.defaultValue || ''"
+            <label for="toast-prompt-input" class="sr-only">{{ config.placeholder || 'Entrada' }}</label>
+            <input id="toast-prompt-input" #promptInput class="toast-input" [type]="config.inputType || 'text'"
+                [placeholder]="config.placeholder || ''" [value]="config.defaultValue || ''" [attr.aria-label]="config.placeholder || 'Entrada'"
                 (keyup.enter)="confirmPrompt()" (keyup.escape)="cancel()" (blur)="onInputBlur($event)" autofocus>
         </div>
 
         <!-- Botones para confirmaciones y prompts -->
         <div *ngIf="config.type === 'confirm' || config.type === 'prompt'" class="toast-actions">
-            <button class="toast-btn toast-btn-secondary" (click)="cancel()">
+            <button class="toast-btn toast-btn-secondary" (click)="cancel()" aria-label="Cancelar">
                 {{ config.cancelText || 'Cancelar' }}
             </button>
             <button class="toast-btn toast-btn-primary"
-                (click)="config.type === 'prompt' ? confirmPrompt() : confirm()">
+                (click)="config.type === 'prompt' ? confirmPrompt() : confirm()" aria-label="Confirmar">
                 {{ config.confirmText || (config.type === 'prompt' ? 'Aceptar' : 'Confirmar') }}
             </button>
         </div>
     </div>
 
     <!-- Botón cerrar solo para notificaciones (no para confirmaciones ni prompts) -->
-    <button *ngIf="config.type !== 'confirm' && config.type !== 'prompt'" class="toast-close" (click)="close()">
-        <i class="bi bi-x"></i>
+    <button *ngIf="config.type !== 'confirm' && config.type !== 'prompt'" class="toast-close" (click)="close()" aria-label="Cerrar notificación">
+        <i class="bi bi-x" aria-hidden="true"></i>
+        <span class="sr-only">Cerrar</span>
     </button>
 
     <!-- Barra de progreso para auto-cierre -->
