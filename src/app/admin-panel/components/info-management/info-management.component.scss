@@ -35,13 +35,14 @@
 .info-card {
   @include card-style;
   padding: 20px;
+  background: $background-primary;
 
   @include mobile {
     padding: 12px;
   }
 
   h3 {
-    color: $secondary-dark;
+  color: $primary;
     font-size: 1.2rem;
     margin: 0 0 15px 0;
     font-weight: 600;
@@ -1585,7 +1586,7 @@
 
   i {
     font-size: 3rem;
-    color: $primary;
+  color: $primary-light;
     margin-bottom: 12px;
     display: block;
   }

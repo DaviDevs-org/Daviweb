@@ -6,16 +6,17 @@
 
 .upload-section {
     @include card-style;
+    background: $background-primary;
     margin-bottom: 30px;
 
     .upload-area {
-        border: 2px dashed $primary;
+    border: 2px dashed $primary;
         border-radius: 12px;
         padding: 40px;
         text-align: center;
         cursor: pointer;
         transition: all 0.3s ease;
-        background: rgba($primary, 0.02);
+    background: $background-primary;
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -26,7 +27,7 @@
         justify-content: center;
 
         &:hover {
-            border-color: $secondary;
+            border-color: $primary;
 
             &:not(.has-image) {
                 background: rgba($primary, 0.05);
@@ -81,7 +82,7 @@
     }
 
     .upload-btn {
-        @include button-style($primary, $secondary);
+    @include button-style($primary, $background-primary);
         margin-top: 20px;
     }
 }

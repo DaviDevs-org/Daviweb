@@ -6,7 +6,7 @@
     margin-bottom: 40px;
 
     h3 {
-        color: $secondary-dark;
+    color: $primary-light;
         font-size: 1.5rem;
         margin: 0 0 20px 0;
         font-weight: 600;
@@ -19,9 +19,10 @@
     font-weight: $font-weight-normal;
 }
 .service-form,
-.contact-form {
-    @include card-style;
-    margin-bottom: 30px;
+        .contact-form {
+            @include card-style;
+            margin-bottom: 30px;
+            background: $background-primary;
 }
 
 // Estilos para la sección de upload de imagen

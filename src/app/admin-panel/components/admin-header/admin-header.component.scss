@@ -4,8 +4,9 @@
 
 
 .admin-header {
-    background: linear-gradient(135deg, $primary, $secondary);
+    background: $background-primary;
     color: $white;
+    border-bottom: 2px solid $primary;
     padding: 15px 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     position: sticky;
@@ -47,6 +48,7 @@
             font-weight: 700;
             margin: 0;
             letter-spacing: 0.5px;
+            color: $primary-light;
 
             @include mobile {
                 font-size: 1.2rem;
@@ -55,7 +57,8 @@
         }
 
         .admin-badge {
-            background: rgba($white, 0.2);
+            background: $primary;
+            color: $white;
             padding: 4px 10px;
             border-radius: 16px;
             font-size: 0.75rem;
@@ -85,9 +88,13 @@
         }
 
         .logout-btn {
-            background: rgba($white, 0.1);
-            border: 2px solid rgba($white, 0.3);
-            color: $white;
+            background: $background-primary;
+            border: 2px solid $primary;
+            color: $primary-light;
+            &:hover {
+                background: $primary;
+                color: $white;
+            }
             padding: 8px 14px;
             border-radius: 8px;
             cursor: pointer;

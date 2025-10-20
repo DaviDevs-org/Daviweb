@@ -2,7 +2,8 @@
 @use '../../../../styles/mixins' as *;
 
 .admin-nav {
-    background: $white;
+    background: $background-primary;
+    border-bottom: 2px solid $primary;
     border-bottom: 1px solid $border-color;
     position: sticky;
     top: 73px;
@@ -33,7 +34,7 @@
         font-weight: $font-weight-medium;
         font-family: $font-primary;
         font-size: $font-size-base;
-        color: $text-gray;
+    color: $white;
         border-bottom: 3px solid transparent;
         transition: all $transition-normal;
         display: flex;
@@ -45,14 +46,14 @@
         }
 
         &:hover {
-            color: $primary;
-            background: rgba($primary, 0.05);
+            color: $primary-light;
+            background: rgba($primary, 0.10);
         }
-
         &.active {
             color: $primary;
             border-bottom-color: $primary;
-            background: rgba($primary, 0.05);
+            background: rgba($primary, 0.18);
+            font-weight: $font-weight-bold;
         }
     }
 }
@@ -60,7 +61,7 @@
 .nav-mobile {
     display: none;
     padding: 0 $spacing-md;
-    background: $white;
+    background: $background-primary;
 
     @include mobile {
         display: block;
@@ -75,6 +76,10 @@
         width: 100%;
         background: $primary;
         color: $white;
+        &:hover {
+            background: $primary-light;
+            color: $background-primary;
+        }
         border: none;
         padding: $spacing-sm $spacing-md;
         margin-top: 3px;
@@ -89,7 +94,7 @@
         transition: all $transition-normal;
 
         &:hover {
-            background: $secondary;
+            background: $primary;
         }
 
         .menu-icon {
