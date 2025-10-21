@@ -10,17 +10,8 @@
       <div class="form-group">
         <label for="email">Email</label>
         <div class="input-container">
-          <input 
-            type="email" 
-            id="email" 
-            name="email"
-            [(ngModel)]="loginData.email"
-            required
-            email
-            placeholder="tu@email.com"
-            class="form-input"
-            [class.error]="loginForm.submitted && !loginData.email"
-          >
+          <input type="email" id="email" name="email" [(ngModel)]="loginData.email" required email
+            placeholder="tu@email.com" class="form-input" [class.error]="loginForm.submitted && !loginData.email">
           <span class="input-icon"><i class="bi bi-person-fill"></i></span>
         </div>
         <div class="error-message" *ngIf="loginForm.submitted && !loginData.email">
@@ -31,23 +22,12 @@
       <div class="form-group">
         <label for="password">Contraseña</label>
         <div class="input-container">
-          <input 
-            [type]="showPassword ? 'text' : 'password'" 
-            id="password" 
-            name="password"
-            [(ngModel)]="loginData.password"
-            required
-            placeholder="Tu contraseña"
-            class="form-input"
-            [class.error]="loginForm.submitted && !loginData.password"
-          >
-          <button 
-            type="button" 
-            class="password-toggle"
-            (click)="togglePasswordVisibility()"
+          <input [type]="showPassword ? 'text' : 'password'" id="password" name="password"
+            [(ngModel)]="loginData.password" required placeholder="Tu contraseña" class="form-input"
+            [class.error]="loginForm.submitted && !loginData.password">
+          <button type="button" class="password-toggle" (click)="togglePasswordVisibility()"
             [attr.aria-pressed]="showPassword"
-            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-          >
+            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
             <i *ngIf="showPassword" class="bi bi-eye-fill" aria-hidden="true"></i>
             <i *ngIf="!showPassword" class="bi bi-eye-slash-fill" aria-hidden="true"></i>
           </button>
@@ -58,27 +38,17 @@
       </div>
 
       <div class="form-actions">
-        <button 
-          type="submit" 
-          class="login-btn"
-          [disabled]="isLoading"
-          [class.loading]="isLoading"
-        >
+        <button type="submit" class="login-btn" [disabled]="isLoading" [class.loading]="isLoading">
           <span *ngIf="!isLoading">Iniciar Sesión</span>
           <span *ngIf="isLoading" class="loading-spinner">
             <div class="spinner"></div>
             Iniciando...
           </span>
-        <button 
-          type="button" 
-          class="forgot-password-btn"
-          (click)="onForgotPassword()"
-          aria-label="Recuperar contraseña">
-          1Olvidaste tu contrasea?
-        </button>
-          ¿Olvidaste tu contraseña?
         </button>
       </div>
+      <button type="button" class="forgot-password-btn" (click)="onForgotPassword()" aria-label="Recuperar contraseña">
+        ¿Olvidaste tu contraseña?
+      </button>
     </form>
 
     <div class="login-footer">

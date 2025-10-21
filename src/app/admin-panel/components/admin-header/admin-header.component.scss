@@ -35,8 +35,10 @@
             gap: 8px;
         }
 
-        .scissors-icon {
+        .bi-scissors {
             font-size: 1.8rem;
+            rotate: 180deg;
+            color: $primary-light;
 
             @include mobile {
                 font-size: 1.5rem;

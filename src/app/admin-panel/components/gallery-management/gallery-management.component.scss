@@ -6,17 +6,17 @@
 
 .upload-section {
     @include card-style;
-    background: $background-primary;
+    background: $white;
     margin-bottom: 30px;
 
     .upload-area {
-    border: 2px dashed $primary;
+        border: 2px dashed $primary;
         border-radius: 12px;
         padding: 40px;
         text-align: center;
         cursor: pointer;
         transition: all 0.3s ease;
-    background: $background-primary;
+        background: $light-gray;
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -82,7 +82,7 @@
     }
 
     .upload-btn {
-    @include button-style($primary, $background-primary);
+        @include button-style($primary, $secondary);
         margin-top: 20px;
     }
 }
@@ -92,11 +92,13 @@
     font-family: $font-primary;
     font-size: $font-size-lg;
     font-weight: $font-weight-normal;
+    color: $secondary-dark;
 }
 
 .current-gallery {
     @include card-style;
     min-height: 300px;
+    background: $white;
 
     h3 {
         color: $secondary-dark;

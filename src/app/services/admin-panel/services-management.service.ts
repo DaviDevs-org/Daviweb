@@ -12,6 +12,7 @@ import {
 import { Service } from '../../admin-panel/types/admin.types';
 import { Storage, ref, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +26,9 @@ export class ServiceManager {
   getServices(): Observable<Service[]> {
     return runInInjectionContext(this.injector, () => {
       const placeRef = collection(this.firestore, this.path);
-      return collectionData(placeRef, { idField: 'id' }) as Observable<Service[]>;
+      return (collectionData(placeRef, { idField: 'id' }) as Observable<any[]>).pipe(
+        map(services => services.map(s => this.mapToServiceInstance(s)))
+      );
     });
   }
 
@@ -33,8 +36,22 @@ export class ServiceManager {
     return runInInjectionContext(this.injector, async () => {
       const placeRef = collection(this.firestore, this.path);
       const snapshot = await getDocs(placeRef);
-      return snapshot.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Service[];
+      return snapshot.docs.map(d => {
+        const data = { id: d.id, ...(d.data() as any) };
+        return this.mapToServiceInstance(data);
+      });
     });
+  }
+
+  private mapToServiceInstance(data: any): Service {
+    return new Service(
+      data.name,
+      data.description,
+      data.timeSegments || [],
+      data.price,
+      data.imageUrl,
+      data.id
+    );
   }
 
   addService(s: Service) {

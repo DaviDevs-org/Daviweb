@@ -31,18 +31,19 @@
   font-family: $font-primary;
   font-size: $font-size-lg;
   font-weight: $font-weight-normal;
+  color: $secondary-dark;
 }
 .info-card {
   @include card-style;
   padding: 20px;
-  background: $background-primary;
+  background: $white;
 
   @include mobile {
     padding: 12px;
   }
 
   h3 {
-  color: $primary;
+    color: $secondary-dark;
     font-size: 1.2rem;
     margin: 0 0 15px 0;
     font-weight: 600;
@@ -97,7 +98,7 @@
   padding: 12px 15px;
   border: 1px solid rgba($border-color, 0.3);
   border-radius: 10px;
-  background: white;
+  background: $light-gray;
   transition: all 0.3s ease;
 
   // CORRECCIÓN RESPONSIVE - EVITAR OVERFLOW
@@ -169,8 +170,9 @@
       transition: all 0.3s ease;
       min-width: 90px;
       font-size: 0.9rem;
-      background: white;
+      background: $white;
       font-family: inherit;
+      color: $black;
 
       // ESTÉTICA MEJORADA - COHERENTE CON EL RESTO
       &:focus {
@@ -373,7 +375,7 @@
     align-items: center;
     padding: 15px;
     border-radius: 10px;
-    background: rgba($light-gray, 0.15);
+    background: $light-gray;
     transition: all 0.3s ease;
     gap: 15px;
 
@@ -504,9 +506,9 @@
     gap: 15px;
     margin-top: 20px;
     padding: 20px;
-    border: 2px dashed rgba($primary, 0.3);
+    border: 2px dashed rgba($primary, 0.5);
     border-radius: 12px;
-    background: rgba($primary, 0.05);
+    background: $white;
 
     @include mobile {
       padding: 15px;
@@ -844,7 +846,7 @@
   padding: 20px;
   border: 2px solid rgba($border-color, 0.5);
   border-radius: 12px;
-  background: rgba($light-gray, 0.3);
+  background: $light-gray;
   margin-bottom: 15px;
   transition: all 0.3s ease;
 

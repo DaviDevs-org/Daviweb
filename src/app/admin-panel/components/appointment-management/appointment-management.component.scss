@@ -24,6 +24,7 @@
     font-family: $font-primary;
     font-size: $font-size-lg;
     font-weight: $font-weight-normal;
+    color: $secondary-dark;
 }
 
 .appointment-grid {
@@ -119,7 +120,7 @@
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border: 2px solid rgba($primary, 0.1);
-    background: $background-primary;
+    background: $light-gray;
     position: relative;
     overflow: hidden;
     width: 100%;
@@ -453,7 +454,7 @@
     .btn.today-btn {
         background: rgba($white, 0.9);
         border: 2px solid rgba($white, 0.3);
-    color: $primary;
+        color: $secondary-dark;
         padding: 8px 16px;
         border-radius: 20px;
         cursor: pointer;
@@ -557,7 +558,7 @@
     }
 
     .summary-text {
-    color: $primary-light;
+        color: $secondary-dark;
         font-weight: 600;
         font-size: 0.9rem;
         display: flex;
@@ -698,11 +699,11 @@
     }
 
     &:hover {
-        background: rgba($primary, 0.02);
+        background: $light-gray;
     }
 
     &.has-appointment {
-        background: rgba($primary, 0.03);
+        background: $white;
 
         @include mobile {
             background: rgba($primary, 0.08);
@@ -745,7 +746,7 @@
     font-size: 0.9rem;
     font-weight: 600;
     text-align: center;
-    background: rgba($primary, 0.08);
+    background: $light-gray;
     padding: 12px 8px;
     border-radius: 12px;
     display: flex;
@@ -1031,7 +1032,7 @@
     padding: 1rem;
     border-radius: 12px;
     border: 2px dashed rgba($primary, 0.2);
-    background: rgba($primary, 0.02);
+    background: $white;
     transition: all 0.3s ease;
     cursor: pointer;
     gap: 0.5rem;
@@ -1049,7 +1050,7 @@
 
     &:hover:not(.disabled) {
         border-color: rgba($primary, 0.6);
-    background: $background-secondary;
+        background: $white;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba($primary, 0.2);
 
@@ -1163,7 +1164,7 @@
     justify-content: center;
     padding: 3rem 2rem;
     text-align: center;
-    background: linear-gradient(135deg, rgba($primary, 0.03), rgba($white, 0.8));
+    background: $light-gray;
 
     @include mobile {
         padding: 2rem 1rem;
@@ -1204,7 +1205,7 @@
 .selected-detail {
     @include card-style;
     border: 2px solid rgba($primary, 0.3);
-    background: linear-gradient(135deg, rgba($primary, 0.05), rgba($white, 0.95));
+    background: $white;
     position: relative;
     overflow: hidden;
     width: 100%;
@@ -1433,7 +1434,7 @@
     @include card-style;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    background: rgba($white, 0.95);
+    background: $white;
     border: 2px solid rgba($primary, 0.2);
 
     @include mobile {

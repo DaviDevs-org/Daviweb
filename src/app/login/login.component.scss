@@ -4,7 +4,7 @@
 .login-container {
   min-height: 100svh;
   height: 100svh;
-  background: linear-gradient(135deg, $primary 0%, $secondary 50%, $secondary-dark 100%);
+  background: linear-gradient(135deg, $primary-light 60%, $white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,7 +41,7 @@
 }
 
 .login-header {
-  background: linear-gradient(135deg, $background-accent, $primary-light);
+  background: linear-gradient(135deg, $background-section);
   padding: 30px 25px 20px;
   text-align: center;
   border-bottom: 1px solid rgba($primary, 0.2);
@@ -49,10 +49,11 @@
   .scissors-icon {
     font-size: 2rem;
     margin-bottom: 12px;
+    color: $white;
   }
 
   h2 {
-    color: $secondary-dark;
+    color: $white;
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0 0 8px 0;
@@ -60,7 +61,7 @@
   }
 
   p {
-    color: $text-gray;
+    color: $white;
     font-size: 0.85rem;
     margin: 0;
     font-weight: 500;
@@ -69,6 +70,10 @@
 
 .login-form {
   padding: 25px 25px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0px
 }
 
 .form-group {
@@ -99,6 +104,7 @@
   transition: all 0.3s ease;
   background: $white;
   box-sizing: border-box;
+  color: $black;
 
   &:focus {
     outline: none;
@@ -127,7 +133,7 @@
 
 .password-toggle {
   position: absolute;
-  right: 16px;
+  right: 11px;
   background: none;
   border: none;
   font-size: 1.1rem;
@@ -135,6 +141,7 @@
   padding: 4px;
   border-radius: 4px;
   transition: background-color 0.2s ease;
+  color: $text-gray;
 
   &:hover {
     background-color: rgba($primary, 0.1);
@@ -148,16 +155,12 @@
   font-weight: 500;
 }
 
-.form-actions {
-  margin-top: 25px;
-}
-
 .login-btn {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, $primary, $secondary);
+  background: $background-section;
   color: $white;
-  border: none;
+  border: 3px solid $primary;
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
@@ -168,7 +171,6 @@
   overflow: hidden;
 
   &:hover:not(:disabled) {
-    background: linear-gradient(135deg, $secondary, $secondary-dark);
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba($primary, 0.3);
   }
@@ -215,9 +217,11 @@
   font-size: 0.85rem;
   cursor: pointer;
   text-decoration: underline;
-  width: 100%;
+  width: auto;
   padding: 6px;
   transition: color 0.3s ease;
+  font-weight: 700;
+  margin: 0 auto;
 
   &:hover {
     color: $secondary-dark;
@@ -225,13 +229,13 @@
 }
 
 .login-footer {
-  background: $background-accent;
+  background: $background-section;
   padding: 15px 25px;
   text-align: center;
   border-top: 1px solid rgba($primary, 0.2);
 
   p {
-    color: $text-gray;
+    color: $white;
     font-size: 0.75rem;
     margin: 0;
   }
@@ -283,6 +287,7 @@
     padding: 12px 14px;
     padding-right: 40px;
     font-size: 0.9rem;
+    color: $black;
   }
 
   .input-icon,
