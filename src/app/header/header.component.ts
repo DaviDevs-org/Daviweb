@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, WritableSignal, signal, PLATFORM_ID, afterNextRender } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, WritableSignal, signal, PLATFORM_ID, afterNextRender, NgZone } from "@angular/core";
 import { ViewportScroller, CommonModule, isPlatformBrowser, NgOptimizedImage } from "@angular/common";
 import { InfoManager, BusinessStatus } from "../services/admin-panel/info-management.service";
 import { from, interval, Subscription } from "rxjs";
@@ -18,6 +18,7 @@ export class HeaderComponent implements OnDestroy {
   private info = inject(InfoManager);
   private platformId = inject(PLATFORM_ID);
   private destroy$ = new Subject<void>();
+  private ngZone = inject(NgZone);
 
   // Señal editable (WritableSignal) con toda la estructura de BusinessStatus
   safeBusinessInfo: WritableSignal<BusinessStatus> = signal({
@@ -82,33 +83,34 @@ export class HeaderComponent implements OnDestroy {
   }
 
   private startUpdater() {
-    // ✅ Protección adicional aunque ya estamos en el navegador
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
 
-    // ✅ Usar takeUntil para auto-limpieza
-    this.subscription = interval(30000)
-      .pipe(
-        switchMap(() => this.info.isBusinessOpen()),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(status => {
-        this.safeBusinessInfo.set({
-          ...status,
-          remainingSeconds: status.remainingMinutes ? status.remainingMinutes * 60 : 0
-        });
+    this.ngZone.runOutsideAngular(() => {
+      this.subscription = interval(30000)
+        .pipe(
+          switchMap(() => this.info.isBusinessOpen()),
+          takeUntil(this.destroy$)
+        )
+        .subscribe(status => {
+          this.ngZone.run(() => {
+            this.safeBusinessInfo.set({
+              ...status,
+              remainingSeconds: status.remainingMinutes ? status.remainingMinutes * 60 : 0
+            });
 
-        if (status.isWarning && status.remainingMinutes) {
-          this.startCountdown(status.remainingMinutes);
-        } else {
-          this.stopCountdown();
-        }
-      });
+            if (status.isWarning && status.remainingMinutes) {
+              this.startCountdown(status.remainingMinutes);
+            } else {
+              this.stopCountdown();
+            }
+          });
+        });
+    });
   }
 
   private startCountdown(minutes: number) {
-    // ✅ Solo ejecutar en navegador
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
@@ -116,19 +118,26 @@ export class HeaderComponent implements OnDestroy {
     this.stopCountdown();
     let remainingSeconds = minutes * 60;
 
-    this.countdownInterval = setInterval(() => {
-      remainingSeconds--;
-      const current = this.safeBusinessInfo();
-      this.safeBusinessInfo.set({
-        ...current,
-        remainingSeconds: remainingSeconds
-      });
+    // ✅ Ejecutar fuera de la zona de Angular
+    this.ngZone.runOutsideAngular(() => {
+      this.countdownInterval = setInterval(() => {
+        remainingSeconds--;
 
-      if (remainingSeconds <= 0) {
-        this.stopCountdown();
-        this.refreshStatus();
-      }
-    }, 1000);
+        // ✅ Volver a la zona para actualizar señales
+        this.ngZone.run(() => {
+          const current = this.safeBusinessInfo();
+          this.safeBusinessInfo.set({
+            ...current,
+            remainingSeconds: remainingSeconds
+          });
+
+          if (remainingSeconds <= 0) {
+            this.stopCountdown();
+            this.refreshStatus();
+          }
+        });
+      }, 1000);
+    });
   }
 
   private stopCountdown() {
