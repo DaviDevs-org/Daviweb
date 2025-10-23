@@ -1588,20 +1588,74 @@
 
   i {
     font-size: 3rem;
-  color: $primary-light;
-    margin-bottom: 12px;
+    color: $primary-light;
+    margin-bottom: 10px;
     display: block;
   }
 
   p {
-    color: $secondary-dark;
-    font-weight: 600;
     font-size: 1.1rem;
-    margin: 0;
+    color: $secondary-dark;
+    margin: 10px 0;
   }
 }
 
-.step-actions {
+// Estilos para el selector de rango de fechas
+.range-selector {
+  text-align: center;
+  padding: 30px 20px;
+  background: rgba($danger-red, 0.05);
+  border-radius: 10px;
+  border: 2px dashed rgba($danger-red, 0.3);
+
+  i {
+    font-size: 3rem;
+    color: $danger-red;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: $secondary-dark;
+    margin: 10px 0 20px 0;
+    font-weight: 600;
+  }
+
+  small {
+    display: block;
+    margin-top: 15px;
+    color: $text-gray;
+    font-style: italic;
+  }
+
+  .date-range-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+    text-align: left;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    .form-group {
+      label {
+        display: block;
+        font-weight: 600;
+        color: $secondary-dark;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+      }
+
+      .form-input {
+        width: 100%;
+      }
+    }
+  }
+}.step-actions {
   display: flex;
   gap: 12px;
   justify-content: center;
@@ -1676,6 +1730,19 @@
           background: rgba($danger-red, 0.1);
           color: $danger-red;
         }
+
+        &.range {
+          background: rgba($danger-red, 0.15);
+          color: $danger-red;
+        }
+      }
+
+      .range-info {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.85rem;
+        color: $text-gray;
+        font-style: italic;
       }
     }
 

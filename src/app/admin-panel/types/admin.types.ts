@@ -98,8 +98,11 @@ export interface ExceptionItem {
   date: string;
   closed: boolean;
   intervals: Interval[];
-  exceptionType: 'closed' | 'custom';
+  exceptionType: 'closed' | 'custom' | 'range';
   isEditing?: boolean;
+  // Para excepciones de tipo 'range' (intervalo de fechas)
+  startDate?: string;
+  endDate?: string;
 }
 
 export type Interval = {

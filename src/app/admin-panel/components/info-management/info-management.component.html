@@ -53,41 +53,28 @@
       <!-- Flujo de creación -->
       <div class="exception-creation-flow" *ngIf="tempException">
         <div class="creation-steps">
-          <div class="step" [class.active]="currentExceptionStep === 'date'"
-            [class.completed]="currentExceptionStep !== 'date'">
-            <span class="step-number">1</span>
-            <span class="step-label">Fecha</span>
-          </div>
           <div class="step" [class.active]="currentExceptionStep === 'type'"
-            [class.completed]="currentExceptionStep === 'hours'">
-            <span class="step-number">2</span>
+            [class.completed]="currentExceptionStep !== 'type'">
+            <span class="step-number">1</span>
             <span class="step-label">Tipo</span>
           </div>
-          <div class="step" [class.active]="currentExceptionStep === 'hours'"
-            [class.completed]="currentExceptionStep === 'complete'">
-            <span class="step-number">3</span>
-            <span class="step-label">Horario</span>
+          <div class="step" 
+            *ngIf="tempException.exceptionType === 'closed' || tempException.exceptionType === 'custom'"
+            [class.active]="currentExceptionStep === 'date'"
+            [class.completed]="currentExceptionStep === 'hours'">
+            <span class="step-number">2</span>
+            <span class="step-label">Fecha</span>
+          </div>
+          <div class="step" [class.active]="currentExceptionStep === 'hours'">
+            <span class="step-number">{{ (tempException.exceptionType === 'closed' || tempException.exceptionType === 'custom') ? '3' : '2' }}</span>
+            <span class="step-label">{{ tempException.exceptionType === 'range' ? 'Período' : 'Horario' }}</span>
           </div>
         </div>
 
-        <!-- Paso 1: Fecha -->
-        <div class="creation-step" *ngIf="currentExceptionStep === 'date'">
-          <div class="step-content">
-            <h4>Selecciona la fecha</h4>
-            <label class="sr-only" for="exception-date">Selecciona la fecha</label>
-            <input id="exception-date" type="date" [(ngModel)]="tempException.date" class="form-input" aria-label="Fecha de excepción">
-            <div class="step-actions">
-              <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
-              <button type="button" class="next-btn" (click)="nextStep()"
-                [disabled]="!tempException.date">Siguiente</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Paso 2: Tipo -->
+        <!-- Paso 1: Tipo -->
         <div class="creation-step" *ngIf="currentExceptionStep === 'type'">
           <div class="step-content">
-            <h4>¿Qué quieres hacer en esta fecha?</h4>
+            <h4>¿Qué tipo de excepción deseas crear?</h4>
             <div class="exception-type-options">
               <div class="type-option" *ngFor="let type of exceptionTypes"
                 [class.selected]="tempException.exceptionType === type.value" (click)="selectExceptionType(type.value)">
@@ -96,13 +83,27 @@
               </div>
             </div>
             <div class="step-actions">
-              <button type="button" class="cancel-btn" (click)="prevStep()">Atrás</button>
               <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
             </div>
           </div>
         </div>
 
-        <!-- Paso 3: Horarios -->
+        <!-- Paso 2: Fecha (solo para closed y custom) -->
+        <div class="creation-step" *ngIf="currentExceptionStep === 'date'">
+          <div class="step-content">
+            <h4>Selecciona la fecha</h4>
+            <label class="sr-only" for="exception-date">Selecciona la fecha</label>
+            <input id="exception-date" type="date" [(ngModel)]="tempException.date" class="form-input" aria-label="Fecha de excepción">
+            <div class="step-actions">
+              <button type="button" class="cancel-btn" (click)="prevStep()">Atrás</button>
+              <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
+              <button type="button" class="next-btn" (click)="nextStepFromDate()"
+                [disabled]="!tempException.date">Siguiente</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 3/2: Horarios -->
         <div class="creation-step" *ngIf="currentExceptionStep === 'hours'">
           <div class="step-content">
             <h4>Configura los horarios especiales</h4>
@@ -132,6 +133,22 @@
               <small>No se permitirán reservas para esta fecha</small>
             </div>
 
+            <div *ngIf="tempException.exceptionType === 'range'" class="range-selector">
+              <i class="bi bi-calendar-range"></i>
+              <p>Selecciona el intervalo de fechas a cerrar</p>
+              <div class="date-range-inputs">
+                <div class="form-group">
+                  <label for="start-date">Fecha de inicio</label>
+                  <input id="start-date" type="date" [(ngModel)]="tempException.startDate" class="form-input" required>
+                </div>
+                <div class="form-group">
+                  <label for="end-date">Fecha de fin</label>
+                  <input id="end-date" type="date" [(ngModel)]="tempException.endDate" class="form-input" required>
+                </div>
+              </div>
+              <small>La peluquería estará cerrada todos los días en este intervalo</small>
+            </div>
+
             <div class="step-actions">
               <button type="button" class="cancel-btn" (click)="prevStep()">Atrás</button>
               <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
@@ -144,12 +161,15 @@
       <!-- Lista de excepciones existentes -->
       <div class="exceptions-list" *ngIf="!tempException">
         <div class="exceptions-container">
-          <div class="exception-item" *ngFor="let ex of exceptions; let i=index">
+          <div class="exception-item" *ngFor="let ex of getGroupedExceptions(); let i=index">
             <div class="exception-header">
               <div class="exception-info">
                 <strong>{{ex.date | date:'fullDate'}}</strong>
-                <span class="exception-type" [class.closed]="ex.closed">
-                  {{ex.closed ? '❌ Cerrado todo el día' : '🕒 Horario especial'}}
+                <span class="exception-type" [class.closed]="ex.closed" [class.range]="ex.exceptionType === 'range'">
+                  {{ex.exceptionType === 'range' ? '📅 Cierre por intervalo' : (ex.closed ? '❌ Cerrado todo el día' : '🕒 Horario especial')}}
+                </span>
+                <span *ngIf="ex.exceptionType === 'range' && ex.startDate && ex.endDate" class="range-info">
+                  ({{ex.startDate | date:'shortDate'}} - {{ex.endDate | date:'shortDate'}})
                 </span>
               </div>
               <div class="exception-actions">

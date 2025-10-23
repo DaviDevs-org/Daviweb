@@ -25,7 +25,8 @@ export class InfoManagementComponent implements OnInit {
   tempException: Partial<ExceptionItem> | null = null;
   exceptionTypes = [
     { value: 'closed', label: 'Cerrar todo el día', icon: 'bi bi-x-circle' },
-    { value: 'custom', label: 'Horario especial', icon: 'bi bi-clock' }
+    { value: 'custom', label: 'Horario especial', icon: 'bi bi-clock' },
+    { value: 'range', label: 'Cerrar varios días', icon: 'bi bi-calendar-range' }
   ];
 
   barberSettings: any = { settings: { barberSelection: false, staff: [] }, barberSelection: false, staff: [] };
@@ -60,6 +61,31 @@ export class InfoManagementComponent implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  // Método para obtener excepciones agrupadas (para mejor visualización de rangos)
+  getGroupedExceptions(): ExceptionItem[] {
+    const grouped: ExceptionItem[] = [];
+    const processedRanges = new Set<string>();
+
+    for (const ex of this.exceptions) {
+      if (ex.exceptionType === 'range' && ex.startDate && ex.endDate) {
+        const rangeKey = `${ex.startDate}-${ex.endDate}`;
+        
+        // Si ya procesamos este rango, saltar
+        if (processedRanges.has(rangeKey)) continue;
+        
+        processedRanges.add(rangeKey);
+        
+        // Añadir solo la primera excepción del rango (representa todo el rango)
+        grouped.push(ex);
+      } else {
+        // Excepciones individuales (closed, custom)
+        grouped.push(ex);
+      }
+    }
+
+    return grouped;
   }
 
   // ===== HORARIOS SEMANALES =====
@@ -115,11 +141,15 @@ export class InfoManagementComponent implements OnInit {
   // ===== EXCEPCIONES =====
   startNewException() {
     this.tempException = {
+      date: '', // Se usa solo para tipos 'closed' y 'custom'
       closed: false,
       intervals: [{ open: '09:00', close: '14:00' }],
-      exceptionType: undefined
+      exceptionType: undefined,
+      startDate: undefined, // Para tipo 'range'
+      endDate: undefined     // Para tipo 'range'
     };
-    this.currentExceptionStep = 'date';
+    // Saltamos directamente al paso de tipo
+    this.currentExceptionStep = 'type';
   }
 
   validateExceptionDate(): boolean {
@@ -147,26 +177,31 @@ export class InfoManagementComponent implements OnInit {
     if (!this.tempException) return;
 
     // Validar tipo
-    if (type !== 'closed' && type !== 'custom') {
+    if (type !== 'closed' && type !== 'custom' && type !== 'range') {
       console.error('Tipo de excepción no válido:', type);
       return;
     }
 
-    const validType = type as 'closed' | 'custom';
+    const validType = type as 'closed' | 'custom' | 'range';
 
     this.tempException.exceptionType = validType;
-    this.tempException.closed = validType === 'closed';
+    this.tempException.closed = validType === 'closed' || validType === 'range';
 
-    if (validType === 'closed') {
-      this.tempException.intervals = [];
-      // No llamar finishException automáticamente, dejar que el usuario confirme
-      this.currentExceptionStep = 'hours'; // Ir al paso final para confirmar
-    } else {
-      this.currentExceptionStep = 'hours';
-      // Asegurar que hay al menos un intervalo
-      if (!this.tempException.intervals || this.tempException.intervals.length === 0) {
-        this.tempException.intervals = [{ open: '09:00', close: '14:00' }];
+    if (validType === 'closed' || validType === 'custom') {
+      // Para closed y custom, necesitamos seleccionar una fecha individual primero
+      this.currentExceptionStep = 'date';
+      if (validType === 'closed') {
+        this.tempException.intervals = [];
+      } else {
+        // Asegurar que hay al menos un intervalo para custom
+        if (!this.tempException.intervals || this.tempException.intervals.length === 0) {
+          this.tempException.intervals = [{ open: '09:00', close: '14:00' }];
+        }
       }
+    } else if (validType === 'range') {
+      // Para rangos, ir directamente al paso de configuración de fechas
+      this.tempException.intervals = [];
+      this.currentExceptionStep = 'hours';
     }
   }
 
@@ -237,7 +272,68 @@ export class InfoManagementComponent implements OnInit {
   }
 
   async finishException() {
-    if (!this.tempException?.date || !this.tempException.exceptionType) {
+    if (!this.tempException?.exceptionType) {
+      this.toast.error('Completa todos los campos obligatorios');
+      return;
+    }
+
+    // Validaciones específicas por tipo
+    if (this.tempException.exceptionType === 'range') {
+      // Para tipo 'range' necesitamos startDate y endDate
+      if (!this.tempException.startDate || !this.tempException.endDate) {
+        this.toast.error('Debes seleccionar una fecha de inicio y fin');
+        return;
+      }
+
+      // Validar que la fecha de inicio sea anterior o igual a la de fin
+      if (this.tempException.startDate > this.tempException.endDate) {
+        this.toast.error('La fecha de inicio debe ser anterior o igual a la fecha de fin');
+        return;
+      }
+
+      // Crear múltiples excepciones, una por cada día en el rango
+      const exceptionsToAdd: ExceptionItem[] = [];
+      const start = new Date(this.tempException.startDate);
+      const end = new Date(this.tempException.endDate);
+
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const dateKey = this.formatDateToISO(d);
+        
+        // Verificar si ya existe una excepción para esta fecha
+        if (this.exceptions.find(ex => ex.date === dateKey)) {
+          this.toast.error(`Ya existe una excepción para el día ${dateKey}`);
+          return;
+        }
+
+        exceptionsToAdd.push({
+          date: dateKey,
+          closed: true,
+          intervals: [],
+          exceptionType: 'range',
+          startDate: this.tempException.startDate,
+          endDate: this.tempException.endDate
+        });
+      }
+
+      this.exceptions.push(...exceptionsToAdd);
+      this.exceptions.sort((a, b) => a.date.localeCompare(b.date));
+
+      try {
+        await this.infoManager.saveExceptions(this.exceptions);
+        this.cancelException();
+        this.toast.success(`Se cerraron ${exceptionsToAdd.length} días correctamente`);
+      } catch (error) {
+        // Revertir en caso de error
+        exceptionsToAdd.forEach(ex => {
+          this.exceptions = this.exceptions.filter(e => e.date !== ex.date);
+        });
+        this.toast.error('Error al guardar las excepciones');
+      }
+      return;
+    }
+
+    // Validaciones para otros tipos (closed, custom)
+    if (!this.tempException?.date) {
       this.toast.error('Completa todos los campos obligatorios');
       return;
     }
@@ -287,6 +383,13 @@ export class InfoManagementComponent implements OnInit {
     }
   }
 
+  private formatDateToISO(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   cancelException() {
     // Si estábamos editando una excepción (tempException tiene fecha pero no está en la lista), restaurarla
     if (this.tempException?.date) {
@@ -309,23 +412,63 @@ export class InfoManagementComponent implements OnInit {
   }
 
   async editException(index: number) {
+    const groupedExceptions = this.getGroupedExceptions();
+    const exceptionToEdit = groupedExceptions[index];
+    
+    if (!exceptionToEdit) return;
+
+    // Si es un rango, no permitir edición por ahora (sería complejo)
+    if (exceptionToEdit.exceptionType === 'range') {
+      this.toast.error('Para modificar un rango, elimínalo y crea uno nuevo');
+      return;
+    }
+
     // Guardar la excepción original para poder restaurarla si se cancela
-    const originalException = { ...this.exceptions[index] };
+    const originalException = { ...exceptionToEdit };
 
     this.tempException = {
       ...originalException
     };
 
     // Remover temporalmente de la lista
-    this.exceptions.splice(index, 1);
+    const indexInOriginal = this.exceptions.findIndex(ex => ex.date === exceptionToEdit.date);
+    if (indexInOriginal !== -1) {
+      this.exceptions.splice(indexInOriginal, 1);
+    }
     this.currentExceptionStep = 'hours';
   }
 
   async removeException(index: number) {
-    if (!await this.toast.confirm('¿Seguro que desea eliminar esta excepción?')) return;
+    const groupedExceptions = this.getGroupedExceptions();
+    const exceptionToRemove = groupedExceptions[index];
+    
+    if (!exceptionToRemove) return;
+
+    // Determinar mensaje de confirmación según el tipo
+    let confirmMessage = '¿Seguro que desea eliminar esta excepción?';
+    if (exceptionToRemove.exceptionType === 'range' && exceptionToRemove.startDate && exceptionToRemove.endDate) {
+      const start = new Date(exceptionToRemove.startDate);
+      const end = new Date(exceptionToRemove.endDate);
+      const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      confirmMessage = `¿Seguro que desea eliminar este rango de ${days} días?`;
+    }
+
+    if (!await this.toast.confirm(confirmMessage)) return;
 
     const backup = [...this.exceptions];
-    this.exceptions.splice(index, 1);
+
+    // Si es un rango, eliminar todos los días del rango
+    if (exceptionToRemove.exceptionType === 'range' && exceptionToRemove.startDate && exceptionToRemove.endDate) {
+      this.exceptions = this.exceptions.filter(ex => {
+        // Mantener excepciones que NO son parte de este rango
+        return !(ex.exceptionType === 'range' && 
+                 ex.startDate === exceptionToRemove.startDate && 
+                 ex.endDate === exceptionToRemove.endDate);
+      });
+    } else {
+      // Eliminar excepción individual
+      this.exceptions = this.exceptions.filter(ex => ex.date !== exceptionToRemove.date);
+    }
 
     try {
       await this.infoManager.saveExceptions(this.exceptions);
@@ -343,11 +486,25 @@ export class InfoManagementComponent implements OnInit {
     }
   }
 
+  nextStepFromDate() {
+    if (this.validateExceptionDate()) {
+      this.currentExceptionStep = 'hours';
+    }
+  }
+
   prevStep() {
     if (this.currentExceptionStep === 'type') {
-      this.currentExceptionStep = 'date';
-    } else if (this.currentExceptionStep === 'hours') {
+      // No hay paso anterior desde tipo (es el primero)
+      return;
+    } else if (this.currentExceptionStep === 'date') {
       this.currentExceptionStep = 'type';
+    } else if (this.currentExceptionStep === 'hours') {
+      // Volver al paso anterior según el tipo
+      if (this.tempException?.exceptionType === 'range') {
+        this.currentExceptionStep = 'type';
+      } else {
+        this.currentExceptionStep = 'date';
+      }
     }
   }
 
