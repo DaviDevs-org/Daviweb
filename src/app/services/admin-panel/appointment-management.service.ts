@@ -1,19 +1,18 @@
-// src/app/services/appointment.service.ts
 import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
-    Firestore,
-    collection,
-    collectionData,
-    doc,
-    updateDoc,
-    deleteDoc,
-    query,
-    orderBy,
-    where,
-    getDocs
+  Firestore,
+  collection,
+  collectionData,
+  doc,
+  updateDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  where,
+  getDocs, addDoc
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { Appointment } from '../../admin-panel/types/admin.types';
+import {Appointment, AppointmentFirestore} from '../../admin-panel/types/admin.types';
 
 @Injectable({ providedIn: 'root' })
 export class AppointmentManagerService {
@@ -29,12 +28,19 @@ export class AppointmentManagerService {
         });
     }
 
-    async updateAppointment(id: string, data: Partial<Appointment>) {
-        const d = doc(this.firestore, `${this.path}/${id}`);
-        return updateDoc(d, data as any);
-    }
+  async addAppointment(data: AppointmentFirestore) {
+    const ref = collection(this.firestore, this.path);
+    return await addDoc(ref, data);
+  }
 
-    async deleteAppointment(id: string) {
+
+  async updateAppointment(id: string, data: Partial<AppointmentFirestore>) {
+    const d = doc(this.firestore, `${this.path}/${id}`);
+    return updateDoc(d, data);
+  }
+
+
+  async deleteAppointment(id: string) {
         // Borrar la cita
         const d = doc(this.firestore, `${this.path}/${id}`);
         await deleteDoc(d);

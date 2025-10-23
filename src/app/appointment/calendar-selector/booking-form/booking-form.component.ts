@@ -400,7 +400,6 @@ export class BookingFormComponent implements OnChanges, OnInit {
       return;
     }
 
-    // Validación adicional: verificar que el servicio seleccionado esté disponible para este horario
     const selectedService = this.services.find(s => s.name === form.value.service);
     if (selectedService && this.date && this.time) {
       const selectedDate = this.parseDate(this.date);
@@ -421,13 +420,15 @@ export class BookingFormComponent implements OnChanges, OnInit {
       phone: phone || '',
       description: form.value.description?.trim() || '',
       barber: form.value.barber || '',
-      service: selectedService
+      service: selectedService // <-- instancia completa
     };
+
     this.submitting = true;
     this.formSubmitted.emit(appointmentData);
   }
 
-  resetAll(): void {
+
+    resetAll(): void {
     if (this.formRef) {
       this.formRef.resetForm();
     }

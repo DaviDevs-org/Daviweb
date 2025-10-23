@@ -31,28 +31,47 @@ export interface Appointment {
   barber?: string;
 }
 
+// Primero, en types/admin.types.ts
+export interface ServiceDTO {
+  name: string;
+  description: string;
+  timeSegments: TimeSegment[];
+  price: number;
+  imageUrl?: string;
+}
+
+export interface AppointmentFirestore {
+  name: string;
+  email?: string;
+  phone?: string;
+  description?: string;
+  date: string;
+  time: string;
+  service?: ServiceDTO;
+  barber?: string;
+  datetime?: { seconds: number; nanoseconds: number };
+}
+
+// Mantén tu Service con métodos para la app
 export class Service {
   constructor(
     public name: string,
     public description: string,
-    public timeSegments: TimeSegment[], // Cambiar time por timeSegments
+    public timeSegments: TimeSegment[],
     public price: number,
     public imageUrl?: string,
     public id?: string
   ) {}
 
-  // Calcular el tiempo total sumando todos los segmentos
-  get totalTime(): number {
-    return this.timeSegments.reduce((total, segment) =>
-      total + segment.duration + (segment.breakAfter || 0), 0);
+  totalTime() {
+    return this.timeSegments.reduce((t, s) => t + s.duration + (s.breakAfter || 0), 0);
   }
 
-  // Calcular solo el tiempo activo (sin breaks)
-  get activeTime(): number {
-    return this.timeSegments.reduce((total, segment) => total + segment.duration, 0);
+  activeTime() {
+    return this.timeSegments.reduce((t, s) => t + s.duration, 0);
   }
 
-  toJson() {
+  toJson(): ServiceDTO {
     return {
       name: this.name,
       description: this.description,

@@ -25,9 +25,13 @@ export class AppointmentService {
       // Validación y construcción de datetime
       const datetime = this.buildDateTimeFrom(appointment.date, appointment.time);
 
-      // Guardar appointment (puedes incluir datetime aquí si lo deseas)
+      // Convertir service a objeto plano para Firestore
+      const servicePlain = appointment.service ? appointment.service.toJson() : undefined;
+
+      // Guardar appointment
       const docRef = await addDoc(appointmentsCol, {
         ...appointment,
+        service: servicePlain,
         datetime,
         createdAt: serverTimestamp()
       });
@@ -44,11 +48,11 @@ export class AppointmentService {
 
       return { success: true, appointmentId: docRef.id };
     } catch (err: any) {
-      // lanza el error para que el caller lo capture y muestre el mensaje adecuado
       console.error('AppointmentService.addAppointment error:', err);
       throw new Error(err?.message || 'Error añadiendo la cita');
     }
   }
+
 
   // Calcula los Date/HH:mm de cada slot ACTIVO (30min) teniendo en cuenta los breaks
   private computeActiveSlotDateTimes(startDateTime: Date, appointment: Appointment): { time: string; datetime: Date }[] {

@@ -1,7 +1,14 @@
 import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppointmentManagerService } from '../../../services/admin-panel/appointment-management.service';
-import { Appointment, Service, ScheduleDay, ExceptionItem } from '../../types/admin.types';
+import {
+  Appointment,
+  Service,
+  ScheduleDay,
+  ExceptionItem,
+  AppointmentFirestore,
+  ServiceDTO
+} from '../../types/admin.types';
 import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -265,18 +272,18 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     const dateKey = this.toISODate(date);
     const startMinutes = this.timeToMinutes(time);
-    
+
     // Calcular todos los slots que ocupará el servicio
     const serviceSlots: number[] = [];
     let currentTime = startMinutes;
-    
+
     service.timeSegments.forEach((segment, index) => {
       // Slots del servicio activo
       for (let i = 0; i < segment.duration; i += 30) {
         serviceSlots.push(currentTime + i);
       }
       currentTime += segment.duration;
-      
+
       // Slots del break (si existe y no es el último segmento)
       if (segment.breakAfter && segment.breakAfter > 0 && index < service.timeSegments.length - 1) {
         for (let i = 0; i < segment.breakAfter; i += 30) {
@@ -294,19 +301,19 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     // Verificar que no se sobreponga con otras citas
     const dayAppointments = this.getAppointmentsForDate(dateKey, excludeAppointmentId);
-    
+
     for (const appointment of dayAppointments) {
       if (!appointment.timeNormalized) continue;
-      
+
       const appointmentSegments = this.getAppointmentTimeSegments(appointment);
       const occupiedSlots: number[] = [];
-      
+
       appointmentSegments.forEach(segment => {
         for (let i = 0; i < segment.duration; i += 30) {
           occupiedSlots.push(segment.start + i);
         }
       });
-      
+
       // Verificar solapamiento
       const hasOverlap = serviceSlots.some(slot => occupiedSlots.includes(slot));
       if (hasOverlap) {
@@ -320,9 +327,9 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   private isTimeWithinSchedule(date: Date, endTimeMinutes: number): boolean {
     const dateKey = this.toISODate(date);
     const exception = this.exceptions.find(ex => ex.date === dateKey);
-    
+
     let intervals: {open: string, close: string}[] = [];
-    
+
     if (exception) {
       if (exception.closed) return false;
       intervals = exception.intervals || [];
@@ -332,7 +339,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       if (!daySchedule || daySchedule.closed) return false;
       intervals = daySchedule.intervals || [];
     }
-    
+
     // Verificar que el tiempo final esté dentro de algún intervalo
     return intervals.some(interval => {
       const closeMinutes = this.timeToMinutes(interval.close);
@@ -343,8 +350,8 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   private getAppointmentsForDate(dateKey: string, excludeId?: string): Appointment[] {
     let appointments: Appointment[] = [];
     this.appointments$.pipe(take(1)).subscribe(appts => {
-      appointments = appts.filter(a => 
-        a.dateISO === dateKey && 
+      appointments = appts.filter(a =>
+        a.dateISO === dateKey &&
         (excludeId ? a.id !== excludeId : true)
       );
     });
@@ -408,7 +415,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const appointment = this.findReservation(dayList, hour);
     return appointment ? this.getSlotType(dayList, hour, appointment) === 'end' : false;
   }
-  
+
   isBreakSlot(dayList: Appointment[], hour: string): boolean {
     return this.findBreakSlot(dayList, hour) !== undefined;
   }
@@ -491,41 +498,33 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       return;
     }
 
-    if (!this.validateServiceScheduling()) {
-      return;
-    }
+    if (!this.validateServiceScheduling()) return;
 
     this.isSaving = true;
     try {
       const formData = this.editForm.value;
-      const service = this.services.find(s => s.name === formData.serviceId);
+      const serviceInstance = this.services.find(s => s.name === formData.serviceId);
 
-      if (this.isEditing && this.editedAppointment && this.editedAppointment.id) {
-        await this.apptSvc.updateAppointment(this.editedAppointment.id, {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          description: formData.description,
-          date: formData.date,
-          time: formData.time,
-          service: service,
-          barber: formData.barberId
-        });
+      // Convertimos a DTO plano
+      const serviceDTO: ServiceDTO | undefined = serviceInstance?.toJson();
 
+      const appointmentFirestore: AppointmentFirestore = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        description: formData.description,
+        date: formData.date,
+        time: formData.time,
+        service: serviceDTO,
+        barber: formData.barberId,
+        datetime: this.createTimestamp(formData.date, formData.time)
+      };
+
+      if (this.isEditing && this.editedAppointment?.id) {
+        await this.apptSvc.updateAppointment(this.editedAppointment.id, appointmentFirestore);
         this.toast.success('Cita actualizada correctamente', 0, 'top-center');
       } else {
-        await this.app.addAppointment({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          description: formData.description,
-          date: formData.date,
-          time: formData.time,
-          service: service,
-          barber: formData.barberId,
-          datetime: this.createTimestamp(formData.date, formData.time)
-        });
-
+        await this.apptSvc.addAppointment(appointmentFirestore);
         this.toast.success('Cita creada correctamente', 3000, 'top-center');
       }
 
@@ -542,6 +541,10 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       this.isSaving = false;
     }
   }
+
+
+
+
 
   private createTimestamp(dateStr: string, timeStr: string): any {
     const [year, month, day] = dateStr.split('-').map(Number);
@@ -804,7 +807,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       if (!a.timeNormalized) return false;
       const slotMinutes = this.timeToMinutes(hour.substring(0, 5));
       const activeSegments = this.getActiveTimeSegments(a);
-      return activeSegments.some(segment => 
+      return activeSegments.some(segment =>
         slotMinutes >= segment.start && slotMinutes < (segment.start + segment.duration)
       );
     });

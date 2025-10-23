@@ -91,7 +91,7 @@ export class ServiceManager {
   updateService(id: string, s: Service) {
     return runInInjectionContext(this.injector, () => {
       const placeRef = doc(this.firestore, `${this.path}/${id}`);
-      return updateDoc(placeRef, s.toJson());
+      return updateDoc(placeRef, s.toJson() as any);
     });
   }
 }
