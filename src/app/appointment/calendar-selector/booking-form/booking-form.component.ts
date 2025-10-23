@@ -34,7 +34,6 @@ export class BookingFormComponent implements OnChanges, OnInit {
 
   @Output() formSubmitted = new EventEmitter<{
     name: string;
-    email: string;
     phone: string;
     description?: string;
     barber?: string;
@@ -367,24 +366,16 @@ export class BookingFormComponent implements OnChanges, OnInit {
       return;
     }
 
-    const email = form.value.email?.trim();
     const phone = form.value.phone?.trim();
-    const hasEmail = !!email;
     const hasPhone = !!phone;
-    const emailValid = hasEmail ? this.isEmailValid(email) : true;
     const phoneValid = hasPhone ? this.isPhoneValid(phone) : true;
-    const hasContact = hasEmail || hasPhone;
 
     if (form.controls['name']?.invalid) {
       this.toast.error('El nombre es inválido');
       return;
     }
-    if (!hasContact) {
-      this.toast.error('Tiene que tener al menos una forma de contacto');
-      return;
-    }
-    if (!emailValid) {
-      this.toast.error('Introduce un email válido (tu-usuario@tu-proveedor.x)');
+    if (!hasPhone) {
+      this.toast.error('El teléfono es obligatorio');
       return;
     }
     if (!phoneValid) {
@@ -416,8 +407,7 @@ export class BookingFormComponent implements OnChanges, OnInit {
 
     const appointmentData = {
       name: form.value.name.trim(),
-      email: email || '',
-      phone: phone || '',
+      phone: phone,
       description: form.value.description?.trim() || '',
       barber: form.value.barber || '',
       service: selectedService // <-- instancia completa
@@ -440,32 +430,15 @@ export class BookingFormComponent implements OnChanges, OnInit {
     return phoneRegex.test(phone);
   }
 
-  isEmailValid(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
   get nameInvalid(): boolean {
     const name = this.formRef?.controls['name'];
     return this.submitted && !!name?.invalid;
-  }
-
-  get emailInvalid(): boolean {
-    const email = this.formRef?.controls['email'];
-    const value = email?.value?.trim();
-    return this.submitted && !!value && !this.isEmailValid(value);
   }
 
   get phoneInvalid(): boolean {
     const phone = this.formRef?.controls['phone'];
     const value = phone?.value?.trim();
     return this.submitted && !!value && !this.isPhoneValid(value);
-  }
-
-  get contactEmpty(): boolean {
-    const email = this.formRef?.controls['email']?.value?.trim();
-    const phone = this.formRef?.controls['phone']?.value?.trim();
-    return this.submitted && !email && !phone;
   }
 
   getTotalTime(service: Service): number {

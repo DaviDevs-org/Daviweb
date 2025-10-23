@@ -33,6 +33,7 @@ export class BarbersInfoComponent implements OnInit, OnDestroy {
 
   barbers: BarberDisplay[] = [];
   loading = true;
+  barberSelectionEnabled = false; // Nueva propiedad para controlar si la sección se muestra
 
   ngOnInit() {
     runInInjectionContext(this.injector, () => {
@@ -43,6 +44,17 @@ export class BarbersInfoComponent implements OnInit, OnDestroy {
   private async loadBarbers() {
     try {
       const barberSettings = await this.infoManager.getBarberSettings();
+      
+      // Verificar si la selección de peluqueros está habilitada
+      this.barberSelectionEnabled = barberSettings?.settings?.barberSelection ?? false;
+      
+      // Si no está habilitada, no mostrar peluqueros
+      if (!this.barberSelectionEnabled) {
+        this.barbers = [];
+        this.loading = false;
+        this.cdr.detectChanges();
+        return;
+      }
       
       // Obtener solo los peluqueros visibles
       let visibleBarbers: Barber[] = [];

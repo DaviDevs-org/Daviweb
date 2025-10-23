@@ -41,6 +41,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   editForm: FormGroup;
   services: Service[] = [];
   barbers: Barber[] = [];
+  barberSelectionEnabled = false;
 
   // Nuevos datos desde InfoManager (igual que en calendar-selector)
   schedule: ScheduleDay[] = [];
@@ -60,7 +61,6 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   ) {
     this.editForm = this.fb.group({
       name: ['', Validators.required],
-      email: [''],
       phone: [''],
       date: ['', Validators.required],
       time: ['', Validators.required],
@@ -221,6 +221,9 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       this.exceptions = await this.infoManager.getExceptions();
       this.generateHoursForSelectedDate(); // Regenerar horas con los datos cargados
 
+      // Cargar configuración de selección de peluqueros
+      const barberSettings = await this.infoManager.getBarberSettings();
+      this.barberSelectionEnabled = barberSettings?.settings?.barberSelection ?? false;
       await this.loadBarbers();
 
       console.log('Datos cargados en appointment-management:', {
@@ -459,7 +462,6 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     this.selectedAppointmentId$.next(appointment.id || null);
     this.editForm.patchValue({
       name: appointment.name || '',
-      email: appointment.email || '',
       phone: appointment.phone || '',
       date: appointment.date || '',
       time: appointment.time || '',
@@ -510,7 +512,6 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
       const appointmentFirestore: AppointmentFirestore = {
         name: formData.name,
-        email: formData.email,
         phone: formData.phone,
         description: formData.description,
         date: formData.date,

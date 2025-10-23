@@ -47,7 +47,7 @@
                             <div class="service-meta">
                                 <span class="duration">
                                     <i class="bi bi-clock"></i>
-                                    {{ service.totalTime }} min
+                                    {{ service.totalTime() }} min
                                 </span>
                                 <span class="price">{{ service.price }}€</span>
                             </div>
@@ -92,7 +92,7 @@
                             <i class="bi bi-clock"></i>
                             <div>
                                 <span class="feature-label">Duración</span>
-                                <span class="feature-value">Aprox. {{ selectedService.totalTime }} minutos</span>
+                                <span class="feature-value">Aprox. {{ selectedService.totalTime() }} minutos</span>
                             </div>
                         </div>
 

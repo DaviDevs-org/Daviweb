@@ -1,4 +1,6 @@
 <!-- barbers-info.component.html -->
+<!-- Solo mostrar la sección si barberSelection está habilitado -->
+@if (barberSelectionEnabled) {
 <div class="barbers-section" id="barbers">
     <div class="barbers-header">
         <p class="section-title">Nuestro Equipo</p>
@@ -85,3 +87,4 @@
     </div>
     }
 </div>
+}

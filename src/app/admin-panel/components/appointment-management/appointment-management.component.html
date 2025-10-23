@@ -32,9 +32,8 @@
                     </div>
 
                     <div class="card-body">
-                        <div><strong>Email:</strong> {{ a.email || '—' }}</div>
                         <div><strong>Teléfono:</strong> {{ a.phone || '—' }}</div>
-                        <div><strong>Peluquero:</strong> {{ a.barber }}</div>
+                        <div *ngIf="barberSelectionEnabled"><strong>Peluquero:</strong> {{ a.barber }}</div>
                         <div *ngIf="a.description"><strong>Nota:</strong> {{ a.description }}</div>
                     </div>
 
@@ -182,17 +181,8 @@
                         </div>
                     </div>
 
-                    <!-- Contacto - Email y Teléfono -->
+                    <!-- Contacto - Teléfono -->
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="editEmail">Email</label>
-                            <input type="email" id="editEmail" formControlName="email" placeholder="cliente@email.com">
-                            <div class="error-message"
-                                *ngIf="editForm.get('email')?.invalid && editForm.get('email')?.touched">
-                                Formato de email inválido
-                            </div>
-                        </div>
-
                         <div class="form-group">
                             <label for="editPhone">Teléfono</label>
                             <input type="tel" id="editPhone" formControlName="phone" placeholder="+34 123 456 789">
@@ -241,7 +231,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" *ngIf="barberSelectionEnabled">
                             <label for="editBarber">Peluquero</label>
                             <select id="editBarber" formControlName="barberId">
                                 <option value="Cualquiera">Sin peluquero específico</option>
@@ -308,14 +298,11 @@
                                             </div>
                                             <div class="res-name">{{ res.name }}</div>
 
-                                            <div class="res-contact" *ngIf="res.phone || res.email">
+                                            <div class="res-contact" *ngIf="res.phone || (barberSelectionEnabled && res.barber)">
                                                 <span *ngIf="res.phone" class="contact-item">
                                                     <i class="bi bi-telephone-fill"></i> {{ res.phone }}
                                                 </span>
-                                                <span *ngIf="res.email" class="contact-item">
-                                                    <i class="bi bi-envelope-fill"></i> {{ res.email }}
-                                                </span>
-                                                <span *ngIf="res.barber" class="contact-item barber-info">
+                                                <span *ngIf="barberSelectionEnabled && res.barber" class="contact-item barber-info">
                                                     <i class="bi bi-person-fill"></i> {{ res.barber }}
                                                 </span>
                                             </div>
@@ -419,6 +406,7 @@
                         <span>No especificado</span>
                         }
                     </div>
+                    @if (barberSelectionEnabled) {
                     <div class="detail-item">
                         <strong>Peluquero:</strong>
                         @if (selected.barber) {
@@ -427,14 +415,17 @@
                         <span>Sin asignar</span>
                         }
                     </div>
-                    <div class="detail-item">
-                        <strong>Email:</strong>
-                        <span>{{ selected.email || 'No especificado' }}</span>
-                    </div>
+                    }
                     <div class="detail-item">
                         <strong>Teléfono:</strong>
                         <span>{{ selected.phone || 'No especificado' }}</span>
                     </div>
+                    @if (selected.description) {
+                    <div class="detail-item">
+                        <strong>Nota:</strong>
+                        <span>{{ selected.description }}</span>
+                    </div>
+                    }
                 </div>
 
                 <div class="detail-actions">

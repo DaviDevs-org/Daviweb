@@ -503,7 +503,7 @@ export class CalendarSelectorComponent implements OnDestroy {
     this.showForm = true;
   }
 
-  async handleFormSubmit(data: { name: string; email: string; phone: string; description?: string; barber?: string, service: Service }) {
+  async handleFormSubmit(data: { name: string; phone: string; description?: string; barber?: string, service: Service }) {
     if (!this.selectedDate || !this.selectedHour) {
       this.toast.error('Error: Fecha u hora no seleccionada');
       return;
