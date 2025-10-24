@@ -60,7 +60,7 @@
                     }
 
                     <div class="barber-actions">
-                        <button class="btn-primary" (click)="scrollToSection('appointments'); $event.preventDefault()">
+                        <button class="btn-primary" (click)="bookWithBarber(barber); $event.preventDefault()">
                             <i class="bi bi-calendar-check"></i>
                             Reservar con {{ barber.name.split(' ')[0] }}
                         </button>

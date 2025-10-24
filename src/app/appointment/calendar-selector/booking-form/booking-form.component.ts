@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, inject, OnInit, PLATFORM_ID, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AppointmentService } from '../../../services/appointments.service';
 import { isPlatformBrowser, NgForOf, NgIf } from '@angular/common';
@@ -7,9 +7,10 @@ import { ServiceManager } from '../../../services/admin-panel/services-managemen
 import { AlertService } from '../../../services/alert/alert.service';
 import { InfoManager } from '../../../services/admin-panel/info-management.service';
 import { AppointmentManagerService } from '../../../services/admin-panel/appointment-management.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
-import {RouterLink} from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { BookingPreselectionService } from '../../../services/booking-preselection.service';
 
 @Component({
   selector: 'app-booking-form',
@@ -18,7 +19,7 @@ import {RouterLink} from '@angular/router';
   templateUrl: './booking-form.component.html',
   styleUrls: ['./booking-form.component.scss']
 })
-export class BookingFormComponent implements OnChanges, OnInit {
+export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, AfterViewInit {
 
   @Input() date?: string | null = null;
   @Input() time?: string | null = null;
@@ -26,11 +27,14 @@ export class BookingFormComponent implements OnChanges, OnInit {
   @Input() barbers: Barber[] = [];
   @Input() allowBarberSelection: boolean = false;
 
+  @ViewChild('bookingForm') bookingFormRef?: NgForm;
+
   private sv = inject(ServiceManager);
   private toast = inject(AlertService);
   private infoManager = inject(InfoManager);
   private apptSvc = inject(AppointmentManagerService);
   private platformId = inject(PLATFORM_ID);
+  private preselectionService = inject(BookingPreselectionService);
 
   @Output() formSubmitted = new EventEmitter<{
     name: string;
@@ -45,6 +49,8 @@ export class BookingFormComponent implements OnChanges, OnInit {
   submitting = false;
   services: Service[] = [];
   availableServices: Service[] = [];
+  
+  private preselectionSubscription?: Subscription;
 
   // Datos de horarios para validación
   schedule: ScheduleDay[] = [];
@@ -79,8 +85,44 @@ export class BookingFormComponent implements OnChanges, OnInit {
       this.updateAvailableServices();
     } catch (error) {
       console.error('Error cargando horarios:', error);
-      this.availableServices = [...this.services]; // Fallback: todos los servicios disponibles
     }
+  }
+
+  ngAfterViewInit(): void {
+    // Suscribirse a las preselecciones después de que la vista esté lista
+    setTimeout(() => {
+      this.preselectionSubscription = this.preselectionService.preselection$.subscribe(preselection => {
+        this.applyPreselection(preselection);
+      });
+      
+      // Aplicar preselección inicial si existe
+      const initialPreselection = this.preselectionService.getPreselection();
+      this.applyPreselection(initialPreselection);
+    }, 0);
+  }
+
+  private applyPreselection(preselection: any): void {
+    if (!this.bookingFormRef) return;
+
+    if (preselection.serviceName) {
+      const serviceControl = this.bookingFormRef.controls['service'];
+      if (serviceControl) {
+        serviceControl.setValue(preselection.serviceName);
+        serviceControl.markAsTouched();
+      }
+    }
+
+    if (preselection.barberName && this.allowBarberSelection) {
+      const barberControl = this.bookingFormRef.controls['barber'];
+      if (barberControl) {
+        barberControl.setValue(preselection.barberName);
+        barberControl.markAsTouched();
+      }
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.preselectionSubscription?.unsubscribe();
   }
 
   private async loadExistingAppointments(): Promise<void> {
@@ -415,6 +457,9 @@ export class BookingFormComponent implements OnChanges, OnInit {
 
     this.submitting = true;
     this.formSubmitted.emit(appointmentData);
+    
+    // Limpiar las preselecciones después de enviar el formulario
+    this.preselectionService.clearPreselection();
   }
 
 
@@ -423,6 +468,8 @@ export class BookingFormComponent implements OnChanges, OnInit {
       this.formRef.resetForm();
     }
     this.submitted = false;
+    // Limpiar las preselecciones al resetear
+    this.preselectionService.clearPreselection();
   }
 
   isPhoneValid(phone: string): boolean {

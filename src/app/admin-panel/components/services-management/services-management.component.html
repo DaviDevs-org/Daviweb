@@ -2,9 +2,9 @@
     <div class="section-header">
         <h2>
             <i class="bi bi-scissors"></i>
-            Servicios y Precios
+            Servicios
         </h2>
-        <p>Gestiona los servicios ofrecidos y sus precios</p>
+        <p>Gestiona los servicios ofrecidos</p>
     </div>
 
     <!-- Añadir nuevo servicio -->
@@ -32,28 +32,26 @@
                 </div>
             </div>
 
-            <div class="form-row">
+            <!-- Fila con nombre y checkbox -->
+            <div class="form-row-inline">
+                <!-- Nombre del servicio -->
                 <div class="form-group">
                     <label>Nombre del Servicio</label>
                     <input type="text" [(ngModel)]="newService.name" name="serviceName"
                         placeholder="Ej: Corte de Pelo Masculino" class="form-input">
                 </div>
-                <div class="form-group">
-                    <label>Precio</label>
-                    <div class="price-input-group">
-                        <input type="number" [(ngModel)]="newService.price" name="servicePrice" placeholder="25"
-                            class="form-input price-input">
-                        <span class="currency">€</span>
-                    </div>
-                </div>
+
+                <!-- Checkbox de segmentos avanzados -->
                 <div class="form-group">
                     <label class="checkbox-label">
                         <input type="checkbox" [(ngModel)]="hasBreaks" (click)="toggleBreaks()" name="hasBreaks">
                         <span class="checkmark">Segmentos de Tiempo (avanzado)</span>
                     </label>
                 </div>
+            </div>
 
-                <div class="form-group time-configuration">
+            <!-- Configuración de tiempo -->
+            <div class="form-group time-configuration">
                     <label>Tiempo del Servicio</label>
 
                     <!-- Modo simple (sin breaks) -->
@@ -71,8 +69,9 @@
                                     <button type="button" class="btn-increase" (click)="addTimeSegment()" aria-label="Aumentar duración">
                                         <i class="bi bi-plus" aria-hidden="true"></i>
                                     </button>
+                                    <span class="input-suffix">minutos</span>
                                 </div>
-                                <span class="input-suffix">minutos</span>
+                                
                             </div>
                         </div>
                         <small class="help-text">Tiempo total que ocupará la cita en el calendario</small>
@@ -161,7 +160,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
+
+            <!-- Descripción -->
             <div class="form-group">
                 <label>Descripción</label>
                 <textarea [(ngModel)]="newService.description" name="serviceDescription"
@@ -189,8 +189,7 @@
                     <div class="service-header">
                         <h4>{{ service.name }}</h4>
                         <div class="service-header-data">
-                            <div class="service-price">{{ service.price }}€</div>
-                            <div class="service-time">{{ this.getTotalTime(service.timeSegments)}}m</div>
+                            <div class="service-time">{{ this.getTotalTime(service.timeSegments)}} min</div>
                         </div>
                     </div>
                     <div class="time-segments-display" *ngIf="service.timeSegments && service.timeSegments.length > 0">

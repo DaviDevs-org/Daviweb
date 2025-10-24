@@ -162,10 +162,6 @@ export class ServicesManagementComponent implements OnDestroy {
       return;
     }
 
-    if (this.newService.price <= 0) {
-      this.toast.error('Por favor, ingresa un precio válido.');
-      return;
-    }
     const hasValidSegment = this.newService.timeSegments.some(segment => segment.duration > 0);
     if (!hasValidSegment) {
       this.toast.error('Por favor, ingresa al menos un segmento de tiempo válido.');
@@ -185,7 +181,7 @@ export class ServicesManagementComponent implements OnDestroy {
         this.newService.name,
         this.newService.description,
         this.newService.timeSegments,
-        this.newService.price,
+        0, // Precio por defecto 0
         imageUrl!
       );
 
@@ -222,22 +218,6 @@ export class ServicesManagementComponent implements OnDestroy {
       return
     };
     if (newName == false) return;
-
-    const newPriceStr = await this.toast.promptNumber(
-      'Nuevo precio (€):',
-      'Ej: 25.50'
-    );
-    if (newPriceStr === null) {
-      this.toast.error('Por favor, introduzca un precio válido');
-      return;
-    }
-    if (newPriceStr === false) return;
-
-    const newPrice = parseFloat(newPriceStr!);
-    if (isNaN(newPrice) || newPrice <= 0) {
-      this.toast.error('Por favor, ingresa un precio válido.');
-      return;
-    }
 
     const timeSegments: TimeSegment[] = [];
     let addMoreSegments = true;
@@ -276,7 +256,7 @@ export class ServicesManagementComponent implements OnDestroy {
       'Descripción del servicio...'
     );
     if (newDescription === null) {
-      this.toast.error('Por favor, introduzca un precio válido');
+      this.toast.error('Por favor, introduzca una descripción válida');
       return;
     }
     if (newDescription == false) return;
@@ -285,7 +265,7 @@ export class ServicesManagementComponent implements OnDestroy {
       newName,
       newDescription,
       timeSegments,
-      newPrice,
+      0, // Precio por defecto 0
       serviceU.imageUrl!
     );
 

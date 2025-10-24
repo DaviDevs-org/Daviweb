@@ -4,6 +4,7 @@ import { Service } from "../admin-panel/types/admin.types";
 import { Subscription } from "rxjs";
 import { Auth } from '@angular/fire/auth';
 import { CommonModule, ViewportScroller } from '@angular/common';
+import { BookingPreselectionService } from "../services/booking-preselection.service";
 
 interface ServiceCategory {
   id: string;
@@ -25,7 +26,8 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
   private auth = inject(Auth);
   private cdr = inject(ChangeDetectorRef);
   private injector = inject(Injector);
-  private viewportScroller = inject(ViewportScroller)
+  private viewportScroller = inject(ViewportScroller);
+  private preselectionService = inject(BookingPreselectionService);
 
   private subscriptions: Subscription[] = [];
 
@@ -84,9 +86,17 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
     }
   }
 
+  bookService(service: Service) {
+    // Guardar el servicio preseleccionado
+    this.preselectionService.setService(service.name);
+    // Navegar a la sección de citas
+    this.viewportScroller.scrollToAnchor('appointments');
+  }
+
   scrollToSection(elementId: string) {
     this.viewportScroller.scrollToAnchor(elementId);
   }
+  
   private getCategoryFromService(service: Service): string {
     // Lógica para determinar la categoría basada en el nombre del servicio
     const name = service.name.toLowerCase();

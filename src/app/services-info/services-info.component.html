@@ -1,8 +1,8 @@
 <div class="services-section" id="services">
     <div class="services-header">
-        <h2 class="section-title">Servicios y Precios</h2>
+        <h2 class="section-title">Servicios</h2>
         <p class="section-subtitle">
-            Ofrecemos una amplia gama de servicios de peluquería profesional a precios competitivos.
+            Ofrecemos una amplia gama de servicios de peluquería profesional.
         </p>
     </div>
 
@@ -40,7 +40,7 @@
                         [class.selected]="selectedService?.name === service.name"
                         (click)="selectService(service)"
                         tabindex="0" role="button"
-                        [attr.aria-label]="'Ver detalles del servicio ' + service.name + ', duración ' + service.totalTime + ' minutos, precio ' + service.price + ' euros'"
+                        [attr.aria-label]="'Ver detalles del servicio ' + service.name + ', duración ' + service.totalTime + ' minutos'"
                     >
                         <div class="service-info">
                             <h4 class="service-name">{{ service.name }}</h4>
@@ -49,7 +49,6 @@
                                     <i class="bi bi-clock"></i>
                                     {{ service.totalTime() }} min
                                 </span>
-                                <span class="price">{{ service.price }}€</span>
                             </div>
                         </div>
 
@@ -77,10 +76,6 @@
                 <div class="service-content">
                     <div class="service-header-details">
                         <h2 class="service-title">{{ selectedService.name }}</h2>
-                        <div class="service-pricing">
-                            <span class="price-amount">{{ selectedService.price }}</span>
-                            <span class="currency">€</span>
-                        </div>
                     </div>
 
                     <div class="service-description">
@@ -100,8 +95,8 @@
 
                     <div class="service-actions">
                       <button class="btn-primary"
-                              [attr.aria-label]="'Reservar el servicio {{ selectedService.name }} online'"
-                              (click)="scrollToSection('appointments'); $event.preventDefault()">
+                              [attr.aria-label]="'Reservar el servicio ' + selectedService.name + ' online'"
+                              (click)="bookService(selectedService); $event.preventDefault()">
                         <i class="bi bi-calendar-check"></i>
                         Reservar este servicio
                       </button>

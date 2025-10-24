@@ -221,8 +221,7 @@
                             <select id="editService" formControlName="serviceId" required>
                                 <option value="">Seleccionar servicio</option>
                                 <option *ngFor="let service of services" [value]="service.name">
-                                    {{ service.name }} ({{ this.getServiceDuration(service) }} min) - {{ service.price
-                                    }}€
+                                    {{ service.name }} ({{ this.getServiceDuration(service) }} min)
                                 </option>
                             </select>
                             <div class="error-message"

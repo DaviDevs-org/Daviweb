@@ -5,6 +5,7 @@ import { Barber } from "../admin-panel/types/admin.types";
 import { Subscription } from "rxjs";
 import { Auth } from '@angular/fire/auth';
 import { CommonModule, ViewportScroller } from '@angular/common';
+import { BookingPreselectionService } from "../services/booking-preselection.service";
 
 // Interfaz extendida para mostrar información adicional del peluquero
 interface BarberDisplay extends Barber {
@@ -28,6 +29,7 @@ export class BarbersInfoComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private injector = inject(Injector);
   private viewportScroller = inject(ViewportScroller);
+  private preselectionService = inject(BookingPreselectionService);
 
   private subscriptions: Subscription[] = [];
 
@@ -82,6 +84,13 @@ export class BarbersInfoComponent implements OnInit, OnDestroy {
       this.loading = false;
       this.cdr.detectChanges();
     }
+  }
+
+  bookWithBarber(barber: BarberDisplay) {
+    // Guardar el peluquero preseleccionado
+    this.preselectionService.setBarber(barber.name);
+    // Navegar a la sección de citas
+    this.viewportScroller.scrollToAnchor('appointments');
   }
 
   scrollToSection(elementId: string) {
