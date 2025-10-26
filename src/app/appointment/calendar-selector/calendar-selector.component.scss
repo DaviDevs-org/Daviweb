@@ -9,7 +9,7 @@
   margin: 0 auto;
   font-family: $font-primary;
   user-select: none;
-  background: $background-primary !important;
+  background: #F1A5D0 !important;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 24px 32px;
@@ -40,7 +40,7 @@
   width: 100%;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 2px solid $primary;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   color: $white;
 
   @include mobile {
@@ -52,8 +52,8 @@
 
 /* Botones flecha */
 .arrow-btn {
-  background: transparent;
-  border: 2px solid $primary;
+  background: $white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   font-size: 16px;
   cursor: pointer;
   color: $primary;
@@ -63,12 +63,14 @@
   border-radius: 8px;
   flex-shrink: 0;
   font-weight: $font-weight-bold;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
   &:hover {
-    background: $primary-light;
+    background: $primary-dark;
     color: $white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px $primary-light;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    border-color: $primary-dark;
   }
 
   &:active {
@@ -88,9 +90,9 @@
 
 /* Botón mes y año */
 .month-year-btn {
-  background: $primary-light;
-  border: none;
-  color: $secondary;
+  background: $white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: $text-dark;
   font-weight: $font-weight-bold;
   padding: 12px 20px;
   border-radius: 12px;
@@ -105,17 +107,23 @@
   transition: all $transition-normal;
   font-family: $font-primary;
   font-size: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
   &:hover {
-    background: $primary;
+    background: $primary-dark;
     color: $white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px $primary-light;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    border-color: $primary-dark;
+
+    .arrow {
+      color: $white;
+    }
   }
 
   .arrow {
-    transition: transform 0.3s ease;
-    color: $secondary;
+    transition: transform 0.3s ease, color 0.3s ease;
+    color: $primary;
     font-size: 12px;
   }
 
@@ -140,8 +148,8 @@
 /* Contenedor del dropdown del selector mes/año */
 .picker-dropdown {
   margin: 16px auto 20px;
-  background: $background-secondary;
-  border: 1px solid $primary-light;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   padding: 16px 20px;
   border-radius: 20px;
   display: flex;
@@ -151,7 +159,7 @@
   user-select: none;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 6px 15px $shadow-md;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(6px);
 
   @include mobile {
@@ -171,16 +179,16 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background: $primary-light;
-  border: 1.8px solid $primary;
+  background: $white;
+  border: 2px solid $primary;
   border-radius: 14px;
   padding: 10px 16px;
   font-size: 14px;
-  color: $secondary;
+  color: $text-dark;
   font-weight: $font-weight-bold;
   cursor: pointer;
   transition: all $transition-normal;
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   outline: none;
   width: 100%;
   max-width: 160px;
@@ -189,14 +197,14 @@
   font-family: $font-primary;
 
   &:hover {
-    background-color: $primary;
+    background-color: $primary-dark;
     color: $white;
-    border-color: $primary;
-    box-shadow: inset 0 0 8px $primary-light;
+    border-color: $primary-dark;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
   }
 
   &:focus {
-    box-shadow: 0 0 0 3px $primary-light;
+    box-shadow: 0 0 0 3px rgba(230, 115, 180, 0.3);
     border-color: $primary;
   }
 
@@ -223,8 +231,8 @@
   border-radius: 12px;
   overflow: hidden;
   user-select: none;
-  background: $background-grey;
-  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+  background: $background-calendar !important;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
   table-layout: fixed;
 
   @include mobile {
@@ -244,14 +252,16 @@
 
 .calendar-table th {
   font-weight: $font-weight-bold;
-  color: $primary-light;
+  color: $white;
   border-bottom: none;
   padding: 12px 4px;
   text-align: center;
   font-family: $font-primary;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  font-size: 14px;
+  font-size: 18px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-weight: bold !important;
 
   @include mobile {
     padding: 10px 2px;
@@ -282,7 +292,8 @@
   font-weight: $font-weight-bold;
   font-size: 18px; // Aumentado de 16px
   position: relative;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+  color: $white;
 
   .day-content {
     position: absolute;
@@ -315,18 +326,18 @@
 }
 
 .calendar-table td.disabled {
-  color: #ccc;
+  color: rgba(255, 255, 255, 0.3);
   cursor: default;
   background: transparent !important;
   box-shadow: none !important;
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
 .calendar-table td.selected {
-  background-color: $primary-light;
-  color: white;
+  background-color: $white;
+  color: $primary;
   font-weight: $font-weight-bold;
-  box-shadow: 0 0 12px 4px $primary-light;
+  box-shadow: 0 0 12px 4px rgba(255, 255, 255, 0.5);
   border-radius: 20%;
   transform: scale(1.05);
 
@@ -337,7 +348,8 @@
 
 .day-available {
   background-color: $white !important;
-  color: $secondary !important;
+  border: 1.5px solid $true-black;
+  color: $accent !important;
   font-weight: $font-weight-bold;
   cursor: pointer;
   border-radius: 12px;
@@ -347,10 +359,10 @@
     color 0.35s ease-in-out, box-shadow 0.35s ease-in-out;
 
   &:hover {
-  background-color: $primary-light !important;
-  color: $secondary !important;
+    background-color: $primary-dark !important;
+    color: $white !important;
     transform: scale(1.08);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   }
 
   @include mobile {
@@ -371,16 +383,17 @@
 }
 
 .day-unavailable {
-  background-color: $secondary !important;
-  color: $white !important;
+  background-color: $accent !important;
+  color: $light-gray !important;
+  border: 2px solid $primary-dark;
   font-weight: $font-weight-semibold;
   cursor: default;
   box-shadow: none !important;
   border-radius: 12px;
 
   &:hover {
-  background-color: $secondary-dark !important;
-  color: $primary-light !important;
+    background-color: rgba(61, 74, 86, 0.8) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
     cursor: default;
   }
 
@@ -404,9 +417,9 @@
     transform: translateX(-50%);
     width: 5px;
     height: 5px;
-  background: $primary;
+    background: $white;
     border-radius: 50%;
-  box-shadow: 0 0 4px $primary-light;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
   }
 
   @include small-mobile {
@@ -420,8 +433,8 @@
 
 .back-button {
   background-color: transparent;
-  border: 2px solid $background-accent;
-  color: $primary-light;
+  border: 2px solid $white;
+  color: $white;
   font-weight: $font-weight-bold;
   padding: 10px 18px;
   border-radius: 10px;
@@ -429,27 +442,27 @@
   transition: all $transition-normal;
   font-family: $font-primary;
   font-size: 14px;
-  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
   margin: 1% 0 2% 0.5%;
   display: inline-flex;
   align-items: center;
   gap: 8px;
 
   &:hover {
-    background-color: $primary;
-    color: $white;
-    box-shadow: 0 4px 12px rgba(212, 178, 88, 0.4);
+    background-color: $white;
+    color: $primary;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
     transform: translateY(-2px);
   }
 
   &:active {
     transform: scale(0.97);
-    box-shadow: 0 2px 6px rgba(212, 178, 88, 0.2);
+    box-shadow: 0 2px 6px rgba(255, 255, 255, 0.2);
   }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(212, 178, 88, 0.4);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
   }
 
   @include mobile {
@@ -468,7 +481,7 @@
   text-align: center;
   width: 100%;
   padding-bottom: 24px;
-  color: $white;
+  color: $true-black;
 
   .section-title {
     font-family: $font-primary;
@@ -511,7 +524,7 @@
 }
 
 #booking-form-div {
-  border-top: 2px solid $primary;
+  border-top: 2px solid rgba(255, 255, 255, 0.3);
   padding-top: 20px;
 }
 

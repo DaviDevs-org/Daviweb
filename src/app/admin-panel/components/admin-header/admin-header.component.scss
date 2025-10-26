@@ -4,11 +4,11 @@
 
 
 .admin-header {
-    background: $background-primary;
-    color: $white;
-    border-bottom: 2px solid $primary;
+    background: $white;
+    color: $text-dark;
+    border-bottom: 2px solid rgba($primary, 0.2);
     padding: 15px 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba($primary, 0.15);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -38,7 +38,7 @@
         .bi-scissors {
             font-size: 1.8rem;
             rotate: 180deg;
-            color: $primary-light;
+            color: $primary;
 
             @include mobile {
                 font-size: 1.5rem;
@@ -50,7 +50,7 @@
             font-weight: 700;
             margin: 0;
             letter-spacing: 0.5px;
-            color: $primary-light;
+            color: $text-dark;
 
             @include mobile {
                 font-size: 1.2rem;
@@ -83,6 +83,7 @@
 
         .welcome-text {
             font-weight: 500;
+            color: $text-dark;
 
             @include mobile {
                 display: none; // Ocultar texto de bienvenida en móvil
@@ -90,11 +91,11 @@
         }
 
         .logout-btn {
-            background: $background-primary;
-            border: 2px solid $primary;
-            color: $primary-light;
+            background: linear-gradient(135deg, $primary 0%, $accent 100%);
+            border: none;
+            color: $white;
             &:hover {
-                background: $primary;
+                background: linear-gradient(135deg, $accent 0%, $primary 100%);
                 color: $white;
             }
             padding: 8px 14px;
@@ -106,6 +107,7 @@
             align-items: center;
             gap: 6px;
             font-size: 0.9rem;
+            box-shadow: 0 2px 10px rgba($primary, 0.3);
 
             @include mobile {
                 padding: 6px 10px;
@@ -117,8 +119,8 @@
             }
 
             &:hover {
-                background: rgba($white, 0.2);
-                border-color: rgba($white, 0.5);
+                box-shadow: 0 4px 20px rgba($primary, 0.4);
+                transform: translateY(-1px);
             }
         }
     }

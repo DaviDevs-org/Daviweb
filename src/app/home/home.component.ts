@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, PLATFORM_ID, afterNextRender, signal } from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
 import { AboutUsComponent } from '../about-us/about-us.component';
 import { LocationAndContactComponent } from '../location-and-contact/location-and-contact.component';
@@ -10,6 +10,7 @@ import { PhotoOfTheDayComponent } from '../photo-of-the-day/photo-of-the-day.com
 import { ServicesInfoComponent } from '../services-info/services-info.component';
 import { BarbersInfoComponent } from '../barbers-info/barbers-info.component';
 import { Meta, Title } from '@angular/platform-browser';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-home',
@@ -22,6 +23,23 @@ import { Meta, Title } from '@angular/platform-browser';
 export class HomeComponent {
   private title = inject(Title);
   private meta = inject(Meta);
+  private platformId = inject(PLATFORM_ID);
+
+  // Signals para controlar la carga de cada sección
+  loadServices = signal(false);
+  loadBarbers = signal(false);
+  loadAppointments = signal(false);
+  loadLocation = signal(false);
+  loadAbout = signal(false);
+  loadOpinions = signal(false);
+  loadFaq = signal(false);
+  loadFooter = signal(false);
+
+  constructor() {
+    afterNextRender(() => {
+      this.setupSectionLoader();
+    });
+  }
 
   ngOnInit() {
     this.title.setTitle('Peluquería - Reserva tu cita online | Nombre Peluquería');
@@ -57,5 +75,84 @@ export class HomeComponent {
     
     // Theme color (color de la barra de navegador móvil)
     this.meta.updateTag({ name: 'theme-color', content: '#D4A574' });
+  }
+
+  private setupSectionLoader() {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    // Escuchar evento personalizado para forzar carga de secciones
+    window.addEventListener('force-load-section', ((event: CustomEvent) => {
+      const sectionId = event.detail.sectionId;
+      
+      // Orden de las secciones de arriba a abajo
+      const sectionOrder = [
+        'services',
+        'barbers', 
+        'appointments',
+        'location-and-contact',
+        'about',
+        'opinions',
+        'faq',
+        'footer'
+      ];
+
+      // Mapeo de IDs a signals
+      const sectionMap: { [key: string]: () => void } = {
+        'services': () => this.loadServices.set(true),
+        'appointments': () => this.loadAppointments.set(true),
+        'location-and-contact': () => this.loadLocation.set(true),
+        'about': () => this.loadAbout.set(true),
+        'opinions': () => this.loadOpinions.set(true),
+        'faq': () => this.loadFaq.set(true),
+        'barbers': () => this.loadBarbers.set(true),
+        'footer': () => this.loadFooter.set(true),
+      };
+
+      // Encontrar el índice de la sección objetivo
+      const targetIndex = sectionOrder.indexOf(sectionId);
+      
+      if (targetIndex !== -1) {
+        // Cargar TODAS las secciones desde el inicio hasta la sección objetivo (inclusive)
+        for (let i = 0; i <= targetIndex; i++) {
+          const section = sectionOrder[i];
+          if (sectionMap[section]) {
+            sectionMap[section]();
+          }
+        }
+      }
+    }) as EventListener);
+
+    // IntersectionObserver para carga lazy automática
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.getAttribute('data-section');
+          const sectionMap: { [key: string]: () => void } = {
+            'services': () => this.loadServices.set(true),
+            'appointments': () => this.loadAppointments.set(true),
+            'location-and-contact': () => this.loadLocation.set(true),
+            'about': () => this.loadAbout.set(true),
+            'opinions': () => this.loadOpinions.set(true),
+            'faq': () => this.loadFaq.set(true),
+            'barbers': () => this.loadBarbers.set(true),
+            'footer': () => this.loadFooter.set(true),
+          };
+          
+          if (sectionId && sectionMap[sectionId]) {
+            sectionMap[sectionId]();
+            observer.unobserve(entry.target);
+          }
+        }
+      });
+    }, { rootMargin: '50px' }); // Cargar solo 50px antes para evitar cambios de altura prematuros
+
+    // Observar todos los skeletons usando data-section
+    setTimeout(() => {
+      document.querySelectorAll('[data-section]').forEach(el => {
+        observer.observe(el);
+      });
+    }, 100);
   }
 }

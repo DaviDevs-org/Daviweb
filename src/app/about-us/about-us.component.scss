@@ -16,7 +16,7 @@
   box-shadow: $shadow-md;
   font-size: $font-size-lg;
   font-family: $font-primary;
-  color: $white;
+  color: $text-dark;
   overflow-x: hidden;
 
   @include mobile {
@@ -69,7 +69,7 @@
   line-height: 1.7;
   font-size: $font-size-lg;
   text-align: justify;
-  color: $white;
+  color: $text-dark;
   font-family: $font-primary;
 
   @include tablet {
@@ -93,7 +93,7 @@
   line-height: 2;
   margin: 0;
   text-align: justify;
-  color: $white;
+  color: $text-dark;
   font-family: $font-primary;
 
   @include tablet {

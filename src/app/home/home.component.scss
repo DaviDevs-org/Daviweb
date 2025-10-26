@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     gap: $spacing-2xl;
-    background-color: #9d9b9d !important;
+    background-color: $secondary !important;
 }
 
 /* Visually hidden but accessible text for screen readers */
@@ -49,7 +49,7 @@
     max-width: 1180px;
     width: 100%;
     margin: 0 auto;
-    background: #885B34;
+    background: $secondary;
     border-radius: 16px;
     display: flex;
     flex-direction: column;
@@ -57,7 +57,7 @@
 
     .skeleton-header {
         height: 100px;
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba($white, 0.15);
         border-radius: 8px;
         animation: pulse 1.5s ease-in-out infinite;
     }
@@ -98,7 +98,7 @@
         width: 100%;
         max-width: 600px;
         height: 120px;
-        background: rgba(0, 0, 0, 0.05);
+        background: $overlay-skeleton;
         border-radius: 8px;
         animation: pulse 1.5s ease-in-out infinite;
     }
@@ -107,7 +107,7 @@
         width: 100%;
         max-width: 1180px;
         height: 450px;
-        background: rgba(0, 0, 0, 0.05);
+        background: $overlay-skeleton;
         border-radius: 12px;
         animation: pulse 1.5s ease-in-out infinite;
         animation-delay: 0.2s;
@@ -117,7 +117,7 @@
         width: 100%;
         max-width: 800px;
         height: 60px;
-        background: rgba(0, 0, 0, 0.03);
+        background: $overlay-skeleton;
         border-radius: 8px;
         animation: pulse 1.5s ease-in-out infinite;
         animation-delay: 0.4s;
@@ -142,7 +142,7 @@
         max-width: 600px;
         height: 80px;
         margin: 0 auto;
-        background: rgba(0, 0, 0, 0.05);
+        background: $overlay-skeleton;
         border-radius: 12px;
         animation: pulse 1.5s ease-in-out infinite;
     }
@@ -152,7 +152,7 @@
         max-width: 850px;
         height: 500px;
         margin: 0 auto;
-        background: rgba(0, 0, 0, 0.05);
+        background: $overlay-skeleton;
         border-radius: 12px;
         animation: pulse 1.5s ease-in-out infinite;
         animation-delay: 0.2s;
@@ -175,7 +175,7 @@
     .skeleton-heading {
         width: 300px;
         height: 45px;
-        background: rgba(0, 0, 0, 0.05);
+        background: $overlay-skeleton;
         border-radius: 8px;
         animation: pulse 1.5s ease-in-out infinite;
     }
@@ -193,7 +193,7 @@
         .skeleton-map {
             flex: 1 1 55%;
             height: 384px;
-            background: rgba(0, 0, 0, 0.05);
+            background: $overlay-skeleton;
             border-radius: 12px;
             animation: pulse 1.5s ease-in-out infinite;
             animation-delay: 0.2s;
@@ -206,7 +206,7 @@
         .skeleton-info {
             flex: 1 1 40%;
             height: 384px;
-            background: rgba(0, 0, 0, 0.05);
+            background: $overlay-skeleton;
             border-radius: 12px;
             animation: pulse 1.5s ease-in-out infinite;
             animation-delay: 0.4s;
@@ -234,7 +234,7 @@
     .skeleton-heading {
         width: 250px;
         height: 45px;
-        background: rgba(0, 0, 0, 0.05);
+        background: $overlay-skeleton;
         border-radius: 8px;
         animation: pulse 1.5s ease-in-out infinite;
     }
@@ -253,7 +253,7 @@
         .skeleton-text {
             flex: 1 1 60%;
             height: 300px;
-            background: rgba(0, 0, 0, 0.05);
+            background: $overlay-skeleton;
             border-radius: 12px;
             animation: pulse 1.5s ease-in-out infinite;
             animation-delay: 0.2s;
@@ -262,7 +262,7 @@
         .skeleton-image {
             flex: 0 0 40%;
             height: 300px;
-            background: rgba(0, 0, 0, 0.05);
+            background: $overlay-skeleton;
             border-radius: 12px;
             animation: pulse 1.5s ease-in-out infinite;
             animation-delay: 0.4s;
@@ -287,7 +287,7 @@
         width: 250px;
         height: 45px;
         margin: 0 auto 12px;
-        background: rgba(0, 0, 0, 0.05);
+        background: $overlay-skeleton;
         border-radius: 8px;
         animation: pulse 1.5s ease-in-out infinite;
     }
@@ -296,7 +296,7 @@
         width: 400px;
         height: 24px;
         margin: 0 auto 36px;
-        background: rgba(0, 0, 0, 0.05);
+        background: $overlay-skeleton;
         border-radius: 6px;
         animation: pulse 1.5s ease-in-out infinite;
         animation-delay: 0.1s;
@@ -319,7 +319,7 @@
             max-width: 320px;
             min-width: 280px;
             height: 320px;
-            background: rgba(0, 0, 0, 0.05);
+            background: $overlay-skeleton;
             border-radius: 40px;
             animation: pulse 1.5s ease-in-out infinite;
 
@@ -353,7 +353,7 @@
     .skeleton-heading {
         width: 300px;
         height: 45px;
-        background: rgba(0, 0, 0, 0.05);
+        background: $overlay-skeleton;
         border-radius: 8px;
         animation: pulse 1.5s ease-in-out infinite;
     }
@@ -368,7 +368,7 @@
         .skeleton-item {
             width: 100%;
             height: 100px;
-            background: rgba(0, 0, 0, 0.05);
+            background: $overlay-skeleton;
             border-radius: 20px;
             animation: pulse 1.5s ease-in-out infinite;
 
@@ -393,7 +393,7 @@
 
 .skeleton-footer {
     width: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    background: $overlay-darkest;
     padding: 48px 24px 24px;
     box-sizing: border-box;
     min-height: 350px;

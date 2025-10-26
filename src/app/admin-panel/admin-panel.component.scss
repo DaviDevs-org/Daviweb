@@ -3,7 +3,7 @@
 
 .admin-container {
   height: 100vh;
-  background: linear-gradient(135deg, $background-accent 0%, $primary-light 100%);
+  background: linear-gradient(135deg, $primary-lighter 0%, rgba($primary-light, 0.2) 50%, rgba($white, 0.9) 100%);
   font-family: $font-primary;
   display: flex;
   flex-direction: column;
@@ -33,7 +33,7 @@
   margin-bottom: $spacing-xl;
 
   h2 {
-    color: $secondary-dark;
+    color: $text-dark;
     font-size: $font-size-3xl;
     font-weight: $font-weight-bold;
     font-family: $font-primary;
@@ -52,7 +52,7 @@
   }
 
   p {
-    color: $text-gray;
+    color: $text-dark;
     font-size: $font-size-lg;
     font-family: $font-primary;
     margin: 0;

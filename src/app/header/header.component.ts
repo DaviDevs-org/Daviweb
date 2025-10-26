@@ -4,6 +4,8 @@ import { InfoManager, BusinessStatus } from "../services/admin-panel/info-manage
 import { from, interval, Subscription } from "rxjs";
 import { switchMap, takeUntil } from "rxjs/operators";
 import { Subject } from "rxjs";
+import { Router, NavigationEnd } from "@angular/router";
+import { filter } from "rxjs/operators";
 
 @Component({
   selector: "app-header",
@@ -19,6 +21,7 @@ export class HeaderComponent implements OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private destroy$ = new Subject<void>();
   private ngZone = inject(NgZone);
+  private router = inject(Router);
 
   // Señal editable (WritableSignal) con toda la estructura de BusinessStatus
   safeBusinessInfo: WritableSignal<BusinessStatus> = signal({
@@ -58,11 +61,28 @@ export class HeaderComponent implements OnDestroy {
     }
   }
 
-  scrollToSection(elementId: string) {
-    // ✅ ViewportScroller es seguro en SSR, pero podemos protegerlo igualmente
-    if (isPlatformBrowser(this.platformId)) {
-      this.viewportScroller.scrollToAnchor(elementId);
+  scrollToSection(sectionId: string) {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
     }
+
+    // Disparar evento para forzar carga de la sección y todas las anteriores
+    window.dispatchEvent(new CustomEvent('force-load-section', { 
+      detail: { sectionId } 
+    }));
+
+    // Esperar a que los componentes se carguen (tiempo reducido porque ya no hay cambios de altura intermedios)
+    setTimeout(() => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        // Doble requestAnimationFrame para asegurar que el layout esté estable
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        });
+      }
+    }, 300); // Reducido a 300ms ya que todas las secciones anteriores están cargadas
   }
 
   // ✅ Método extraído para inicialización solo en navegador

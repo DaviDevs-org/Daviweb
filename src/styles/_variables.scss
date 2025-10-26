@@ -1,49 +1,107 @@
 // ============================================
-// COLORES PRINCIPALES (AJUSTADOS)
+// COLORES PRINCIPALES
 // ============================================
-$primary: #c94f93; // Rosa acento, menos chillón
-$primary-light: #e6a6cb; // Rosa claro, solo para detalles
-$secondary: #181818; // Negro principal
-$secondary-dark: #121212; // Negro profundo
-$accent: #c94f93; // Igual que primary, para compatibilidad
+$primary: #e673B4; // Rosa claro brillante - muy femenino
+$primary-light: #e673B4; // Rosa muy claro para hover
+$primary-lighter: #fce8ed; // Rosa pálido para fondos sutiles
+$primary-dark: #d4708f; // Rosa más intenso para hover de botones
+$accent: #ef51aA;
+// FONDOS - Sistema coherente de claro a oscuro
+$secondary: #aca7a3; // Azul grisáceo medio - para headers/nav
+$secondary-dark: #3d4a56; // Azul grisáceo más oscuro - solo detalles
+$secondary-light: #8a9ba8; // Azul grisáceo claro - para textos sobre oscuro
+
+
 
 // Compatibilidad con variables antiguas:
 $primary-gold: $primary;
 $secondary-gold: $primary-light;
 $dark-brown: $secondary;
 $light-gold: $primary-light;
-$background-gold: #ececec;
-
+$background-gold: #fdfcfc;
+$other: #739FE6;
 
 // ============================================
 // COLORES BASE
 // ============================================
-$white: #f5f5f5; // Gris muy claro, no blanco puro
-$black: #181818;
-$text-gray: #444444;
-$text-dark: #232323;
-$light-gray: #ececec; // Fondo de tarjetas y secciones
-$border-color: #c94f93; // Bordes en rosa acento
+$white: #ffffff; // Blanco puro para mejor contraste
+$black: #3d4a56; // Azul grisáceo oscuro - más suave que negro
+$true-black: #000000; // Negro puro
+$text-gray: #6b7a8a; // Gris azulado medio para textos secundarios
+$text-gray-light: #9ca3af; // Gris claro para textos menos importantes
+$text-dark: #3d4a56; // Azul grisáceo oscuro para textos importantes
+$light-gray: #e8eff5; // Azul grisáceo claro con personalidad
+$border-color: #cbd5e0; // Gris azulado para bordes sutiles
+$border-color-accent: #f5c5d4; // Rosa claro para bordes destacados
+$text-pink: #dc5b7d;
+
+// Colores adicionales para componentes específicos
+$color-disabled: #aaaaaa; // Color para elementos deshabilitados
+$color-placeholder: #999999; // Color para placeholders
+$color-muted: #6c757d; // Color para textos atenuados
+$color-info: #3b82f6; // Azul para información
+$color-purple: #8b5cf6; // Púrpura para variantes
+
+// Colores de overlays
+$overlay-dark: rgba(0, 0, 0, 0.5); // Overlay oscuro semi-transparente
+$overlay-darker: rgba(0, 0, 0, 0.7); // Overlay más oscuro
+$overlay-darkest: rgba(0, 0, 0, 0.9); // Overlay casi negro
+$overlay-light: rgba(255, 255, 255, 0.05); // Overlay blanco sutil
+$overlay-skeleton: rgba(0, 0, 0, 0.05); // Para skeleton loaders
 
 // ============================================
 // COLORES DE ESTADO
 // ============================================
-$success-green: #218838;
-$danger-red: #b02a37;
-$warning-orange: #fd7e14;
-$warning-yellow: #ffe066;
-$status-open: #218838;
-$status-closed: #b02a37;
+$success-green: #48bb78; // Verde más suave
+$success-green-bright: #22c55e; // Verde brillante para alertas
+$danger-red: #e53e3e; // Rojo más suave
+$danger-red-bright: #dc3545; // Rojo más intenso
+$danger-red-text: #ff6b6b; // Rojo para textos de error
+$warning-orange: #ed8936; // Naranja más suave
+$warning-orange-bright: #f59e0b; // Naranja brillante
+$warning-yellow: #f6e05e; // Amarillo más suave
+$warning-yellow-bright: #fbbf24; // Amarillo dorado
+$status-open: #48bb78;
+$status-closed: #e53e3e;
+
+// Colores sociales
+$social-instagram: #E4405F;
+$social-facebook: #1877F2;
+
+// Colores para estrellas/ratings
+$star-empty: #D1D5DB;
+$star-filled: #fbbf24;
+$star-filled-border: #f59e0b;
 
 // ============================================
-// COLORES DE FONDO
+// COLORES DE FONDO - SISTEMA EQUILIBRADO
 // ============================================
-$background-primary: #181818; // Fondo principal oscuro (cabecera, menús)
-$background-secondary: #ececec; // Fondo general, menos contraste
-$background-section: #232323; // Secciones destacadas
-$background-nav: #181818; // Menú y cabecera en negro
-$background-accent: #c94f93; // Solo para botones y detalles
-$background-grey: rgba(255, 255, 255, 0.28); // Fondo gris translúcido
+// Header y navegación - tono medio consistente
+$background-primary: #e673B4; // Azul grisáceo medio - header y nav
+$background-nav: #e673B4; // Igual que primary para consistencia
+$background-calendar: #EA76B8;
+// Fondo general de la página - con color suave
+$background-secondary: #f0f4f8; // Azul grisáceo muy claro - tiene personalidad
+
+// Secciones de contenido - con color pero suaves
+$background-section: #e8eff5; // Azul grisáceo claro - secciones destacadas
+$background-card: #ffffff; // Blanco puro para cards dentro de secciones
+
+// Solo para elementos que realmente necesitan ser oscuros
+$background-dark: #3d4a56; // Azul grisáceo oscuro - usar con moderación
+$background-overlay: rgba(61, 74, 86, 0.85); // Overlay oscuro para modales
+
+// Acentos
+$background-accent: #e88fa7; // Rosa para botones principales
+$background-accent-light: #fce8ed; // Rosa muy claro para fondos suaves
+$background-grey: rgba(232, 239, 245, 0.90); // Fondo azulado claro translúcido
+
+// Colores adicionales para fondos
+$background-skeleton: #917B78; // Fondo para skeleton loaders
+$background-footer: rgba(0, 0, 0, 0.9); // Fondo del footer
+$background-footer-loader: rgba(0, 0, 0, 0.4); // Fondo del loader en footer
+$background-progress: #e9ecef; // Fondo de barras de progreso
+$background-button-info: #c1b0c1; // Botón azul información
 // ============================================
 // TIPOGRAFÍA
 // ============================================
@@ -88,12 +146,12 @@ $border-radius-xl: 16px;
 $border-radius-full: 9999px;
 
 // ============================================
-// SOMBRAS
+// SOMBRAS (sutiles y consistentes)
 // ============================================
-$shadow-sm: 0 2px 4px rgba(232, 76, 166, 0.05); // Sombra rosa sutil
-$shadow-md: 0 4px 8px rgba(232, 76, 166, 0.10);
-$shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.15);
-$shadow-xl: 0 10px 30px rgba(0, 0, 0, 0.20);
+$shadow-sm: 0 1px 3px rgba(61, 74, 86, 0.08); // Sombra muy sutil
+$shadow-md: 0 2px 8px rgba(61, 74, 86, 0.10); // Sombra media para cards
+$shadow-lg: 0 4px 16px rgba(61, 74, 86, 0.12); // Sombra grande para hover
+$shadow-xl: 0 8px 24px rgba(61, 74, 86, 0.15); // Sombra extra grande para modales
 
 // ============================================
 // TRANSICIONES

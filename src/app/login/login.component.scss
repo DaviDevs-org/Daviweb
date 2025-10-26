@@ -4,7 +4,7 @@
 .login-container {
   min-height: 100svh;
   height: 100svh;
-  background: linear-gradient(135deg, $primary-light 60%, $white);
+  background: linear-gradient(135deg, $primary-lighter 0%, rgba($primary-light, 0.3) 50%, $white 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,14 +21,15 @@
 
 .login-card {
   background: $white;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba($primary, 0.15);
   width: 100%;
   max-width: 380px;
   min-width: 280px;
   overflow: hidden;
   position: relative;
   margin: auto;
+  border: 1px solid rgba($primary, 0.1);
 
   &::before {
     content: '';
@@ -37,23 +38,24 @@
     left: 0;
     right: 0;
     height: 4px;
+    background: linear-gradient(90deg, $primary 0%, $accent 100%);
   }
 }
 
 .login-header {
-  background: linear-gradient(135deg, $background-section);
+  background: linear-gradient(135deg, rgba($primary, 0.08) 0%, rgba($accent, 0.05) 100%);
   padding: 30px 25px 20px;
   text-align: center;
-  border-bottom: 1px solid rgba($primary, 0.2);
+  border-bottom: 2px solid rgba($primary, 0.15);
 
   .scissors-icon {
     font-size: 2rem;
     margin-bottom: 12px;
-    color: $white;
+    color: $primary;
   }
 
   h2 {
-    color: $white;
+    color: $text-dark;
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0 0 8px 0;
@@ -61,7 +63,7 @@
   }
 
   p {
-    color: $white;
+    color: $text-pink;
     font-size: 0.85rem;
     margin: 0;
     font-weight: 500;
@@ -81,7 +83,7 @@
 
   label {
     display: block;
-    color: $secondary-dark;
+    color: $text-dark;
     font-weight: 600;
     margin-bottom: 6px;
     font-size: 0.85rem;
@@ -98,13 +100,13 @@
   width: 100%;
   padding: 14px 16px;
   padding-right: 45px;
-  border: 2px solid #e8e8e8;
+  border: 2px solid $border-color;
   border-radius: 10px;
   font-size: 0.95rem;
   transition: all 0.3s ease;
   background: $white;
   box-sizing: border-box;
-  color: $black;
+  color: $text-dark;
 
   &:focus {
     outline: none;
@@ -113,13 +115,13 @@
   }
 
   &::placeholder {
-    color: #aaa;
+    color: $text-gray;
     font-size: 0.9rem;
   }
 
   &.error {
-    border-color: $status-closed;
-    box-shadow: 0 0 0 3px rgba($status-closed, 0.1);
+    border-color: $danger-red;
+    box-shadow: 0 0 0 3px rgba($danger-red, 0.1);
   }
 }
 
@@ -127,7 +129,7 @@
   position: absolute;
   right: 16px;
   font-size: 1.1rem;
-  color: $text-gray;
+  color: $text-dark;
   pointer-events: none;
 }
 
@@ -141,7 +143,7 @@
   padding: 4px;
   border-radius: 4px;
   transition: background-color 0.2s ease;
-  color: $text-gray;
+  color: $text-dark;
 
   &:hover {
     background-color: rgba($primary, 0.1);
@@ -149,7 +151,7 @@
 }
 
 .error-message {
-  color: $status-closed;
+  color: $danger-red;
   font-size: 0.75rem;
   margin-top: 6px;
   font-weight: 500;
@@ -158,9 +160,9 @@
 .login-btn {
   width: 100%;
   padding: 14px;
-  background: $background-section;
+  background: linear-gradient(135deg, $primary 0%, $accent 100%);
   color: $white;
-  border: 3px solid $primary;
+  border: none;
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
@@ -169,10 +171,12 @@
   margin-bottom: 15px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 15px rgba($primary, 0.3);
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba($primary, 0.3);
+    box-shadow: 0 6px 25px rgba($primary, 0.4);
+    background: linear-gradient(135deg, $accent 0%, $primary 100%);
   }
 
   &:active {
@@ -185,7 +189,7 @@
   }
 
   &.loading {
-    background: linear-gradient(135deg, $secondary, $secondary-dark);
+    background: linear-gradient(135deg, rgba($primary, 0.7) 0%, rgba($accent, 0.7) 100%);
   }
 }
 
@@ -224,18 +228,18 @@
   margin: 0 auto;
 
   &:hover {
-    color: $secondary-dark;
+    color: $primary-dark;
   }
 }
 
 .login-footer {
-  background: $background-section;
+  background: linear-gradient(135deg, rgba($primary, 0.08) 0%, rgba($accent, 0.05) 100%);
   padding: 15px 25px;
   text-align: center;
-  border-top: 1px solid rgba($primary, 0.2);
+  border-top: 2px solid rgba($primary, 0.15);
 
   p {
-    color: $white;
+    color: $text-pink;
     font-size: 0.75rem;
     margin: 0;
   }

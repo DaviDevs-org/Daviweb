@@ -11,7 +11,7 @@
   margin-top: 2%;
   @include section;
   background-color: $background-section !important;
-  color: $white;
+  color: $text-dark;
 
   .heading {
     font-family: $font-primary;
@@ -116,11 +116,11 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: $overlay-dark;
       padding: 16px;
 
       span {
-        color: #ffffff;
+        color: $white;
         font-size: 15.3px;
         font-family: Inter, sans-serif;
         line-height: 28px;
@@ -176,11 +176,11 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: $overlay-dark;
     padding: 16px;
 
     span {
-      color: #ffffff;
+      color: $white;
       font-size: 15.3px;
       font-family: Inter, sans-serif;
       line-height: 28px;

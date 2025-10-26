@@ -6,7 +6,7 @@
   box-sizing: border-box;
   background: $background-grey;
   font-family: 'Inter', sans-serif;
-  color: #0f172a;
+  color: $text-dark;
   width: 100%;
   margin: 0 auto;
   border-radius: 9px;
@@ -48,7 +48,7 @@
   font-weight: 500;
   font-size: 14px;
   line-height: 20px;
-  color: #0f172a;
+  color: $text-dark;
   text-align: left;
 }
 

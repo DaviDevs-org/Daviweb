@@ -101,9 +101,10 @@
     max-width: 1180px;
     margin: 0 auto;
     border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: $shadow-md;
     text-align: center;
     width: 100%;
+    color: $text-dark;
 }
 
 // ============================================
@@ -116,6 +117,8 @@
     border-radius: $border-radius-md;
     font-size: $font-size-base;
     font-family: $font-primary;
+    color: $text-dark;
+    background: $white;
     transition: all $transition-normal;
     box-sizing: border-box;
 
@@ -126,7 +129,7 @@
     }
 
     &:disabled {
-        background-color: $light-gray;
+        background-color: $background-section;
         cursor: not-allowed;
         opacity: 0.6;
     }
@@ -136,7 +139,7 @@
     display: block;
     font-weight: $font-weight-medium;
     font-size: $font-size-sm;
-    color: $secondary-dark;
+    color: $text-dark;
     margin-bottom: $spacing-xs;
     font-family: $font-primary;
 }

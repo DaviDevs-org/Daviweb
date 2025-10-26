@@ -32,7 +32,7 @@
     width: 100%;
 
     .section-title {
-        color: $white;
+        color: $text-dark;
         font-family: $font-primary;
         font-size: $font-size-3xl;
         font-weight: $font-weight-bold;
@@ -45,7 +45,7 @@
     }
 
     .section-subtitle {
-        color: $white;
+        color: $text-dark;
         font-family: $font-mono;
         font-size: $font-size-lg;
         font-weight: $font-weight-normal;
@@ -68,11 +68,12 @@
     align-items: center;
     justify-content: center;
     padding: 48px 32px;
-    color: $secondary-dark;
+    color: $text-dark;
     font-family: Inter;
-    background: $background-grey;
+    background: $white;
     border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid $border-color;
 
     .loading-spinner {
         width: 40px;
@@ -112,9 +113,10 @@
     gap: 12px;
     overflow-x: auto;
     padding: 22px;
-    background: $background-grey;
+    background: $white;
     border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid $border-color;
     width: 100%;
     max-width: 1180px;
     box-sizing: border-box;
@@ -143,15 +145,15 @@
         align-items: center;
         gap: 12px;
         padding: 12px 20px;
-        border: none;
-        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid $border-color;
+        background: $light-gray;
         border-radius: 8px;
         cursor: pointer;
         transition: all 0.3s ease;
         white-space: nowrap;
         font-family: Inter, sans-serif;
         font-weight: 600;
-        color: $black;
+        color: $text-dark;
         font-size: 14px;
         min-width: fit-content;
         flex-shrink: 0;
@@ -178,7 +180,8 @@
         }
 
         &:hover {
-            background: rgba(255, 255, 255, 0.8);
+            background: $white;
+            border-color: $primary;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
@@ -193,22 +196,24 @@
         }
 
         &.active {
-            background: $white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: $primary;
+            color: $white;
+            border-color: $primary;
+            box-shadow: 0 4px 12px rgba($primary, 0.3);
             transform: translateY(-1px);
 
             i {
-                color: $primary;
+                color: $white;
             }
 
             span {
-                color: $primary;
+                color: $white;
                 font-weight: 700;
             }
 
             .service-count {
-                background: $primary;
-                color: $white;
+                background: $white;
+                color: $primary;
             }
         }
 
@@ -250,10 +255,11 @@
 
 .services-panel {
     flex: 1 1 55%;
-    background: $background-grey;
+    background: $white;
     border-radius: 12px;
     padding: 24px 32px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid $border-color;
     box-sizing: border-box;
 
     .panel-header {
@@ -262,19 +268,19 @@
         align-items: center;
         margin-bottom: 16px;
         padding-bottom: 12px;
-        border-bottom: 2px solid $secondary-dark;
+        border-bottom: 2px solid $border-color;
 
         h3 {
             margin: 0;
-            color: $primary-light;
+            color: $text-dark;
             font-weight: 700;
             font-size: 18px;
             font-family: Inter, sans-serif;
         }
 
         .services-count {
-            background: rgba($primary, 0.2);
-            color: $primary-light;
+            background: $primary;
+            color: $white;
             padding: 6px 12px;
             border-radius: 12px;
             font-size: 14px;
@@ -324,16 +330,17 @@
             margin-bottom: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.5);
+            background: $light-gray;
+            border: 2px solid transparent;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 16px;
             width: 100%;
-            border: none;
 
             &:hover {
-                background: rgba(255, 255, 255, 0.8);
+                background: $white;
+                border-color: $primary;
                 transform: translateY(-2px);
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
@@ -344,17 +351,24 @@
             }
 
             &.selected {
-                background: $white;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                background: $primary;
+                border-color: $primary;
+                box-shadow: 0 4px 12px rgba($primary, 0.3);
                 transform: translateY(-1px);
 
                 .service-info .service-name {
-                    color: $primary;
+                    color: $white;
                     font-weight: 700;
                 }
 
+                .service-meta {
+                    .duration, .price {
+                        color: $white !important;
+                    }
+                }
+
                 .service-arrow {
-                    color: $primary;
+                    color: $white;
                 }
             }
 
@@ -368,7 +382,7 @@
                 .service-name {
                     font-weight: 600;
                     font-size: 16px;
-                    color: $secondary-dark;
+                    color: $text-dark;
                     transition: all 0.3s ease;
                     line-height: 1.3;
                     margin: 0;
@@ -447,10 +461,11 @@
 
 .service-details {
     flex: 1 1 40%;
-    background: $background-grey;
+    background: $white;
     border-radius: 12px;
     padding: 0;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid $border-color;
     box-sizing: border-box;
     overflow: hidden;
     min-width: 300px;
@@ -516,12 +531,12 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 16px;
-            border-bottom: 2px solid $secondary-dark;
+            border-bottom: 2px solid $border-color;
 
             .service-title {
                 font-size: 20px;
                 font-weight: 700;
-                color: $primary-light;
+                color: $text-dark;
                 font-family: Inter, sans-serif;
                 line-height: 1.3;
                 margin: 0;
@@ -575,7 +590,7 @@
                 align-items: center;
                 gap: 12px;
                 padding: 12px 16px;
-                background: rgba($white, 0.8);
+                background: $primary-lighter;
                 border-radius: 8px;
 
                 i {
@@ -597,6 +612,7 @@
                         font-family: Inter, sans-serif;
                         text-transform: uppercase;
                         letter-spacing: 0.5px;
+                        text-align: left;
                     }
 
                     .feature-value {
@@ -760,19 +776,20 @@
     width: 100%;
     max-width: 1180px;
     padding: 16px 24px;
-    background: $background-grey;
+    background: $white;
     border-radius: 12px;
+    border: 1px solid $border-color;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
 
     i {
-        color: $primary-light;
+        color: $text-gray;
         font-size: 18px;
         flex-shrink: 0;
     }
 
     p {
-        color: $primary-light;
+        color: $text-gray;
         font-size: 15px;
         font-family: Inter;
         line-height: 1.5;

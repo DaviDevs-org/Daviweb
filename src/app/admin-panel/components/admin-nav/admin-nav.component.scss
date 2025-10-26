@@ -2,13 +2,12 @@
 @use '../../../../styles/mixins' as *;
 
 .admin-nav {
-    background: $background-primary;
-    border-bottom: 2px solid $primary;
-    border-bottom: 1px solid $border-color;
+    background: $white;
+    border-bottom: 2px solid rgba($primary, 0.2);
     position: sticky;
     top: 73px;
     z-index: $z-index-sticky;
-    box-shadow: $shadow-sm;
+    box-shadow: 0 2px 15px rgba($primary, 0.1);
 
     @include mobile {
         top: 61px;
@@ -34,7 +33,7 @@
         font-weight: $font-weight-medium;
         font-family: $font-primary;
         font-size: $font-size-base;
-    color: $white;
+        color: $text-dark;
         border-bottom: 3px solid transparent;
         transition: all $transition-normal;
         display: flex;
@@ -46,13 +45,13 @@
         }
 
         &:hover {
-            color: $primary-light;
-            background: rgba($primary, 0.10);
+            color: $primary;
+            background: rgba($primary, 0.05);
         }
         &.active {
             color: $primary;
             border-bottom-color: $primary;
-            background: rgba($primary, 0.18);
+            background: rgba($primary, 0.08);
             font-weight: $font-weight-bold;
         }
     }
@@ -61,7 +60,7 @@
 .nav-mobile {
     display: none;
     padding: 0 $spacing-md;
-    background: $background-primary;
+    background: $background-section;
 
     @include mobile {
         display: block;
@@ -74,11 +73,11 @@
 
     .menu-toggle {
         width: 100%;
-        background: $primary;
+        background: linear-gradient(135deg, $primary 0%, $accent 100%);
         color: $white;
         &:hover {
-            background: $primary-light;
-            color: $background-primary;
+            background: linear-gradient(135deg, $accent 0%, $primary 100%);
+            color: $white;
         }
         border: none;
         padding: $spacing-sm $spacing-md;
@@ -92,9 +91,10 @@
         align-items: center;
         justify-content: space-between;
         transition: all $transition-normal;
+        box-shadow: 0 2px 10px rgba($primary, 0.3);
 
         &:hover {
-            background: $primary;
+            box-shadow: 0 4px 20px rgba($primary, 0.4);
         }
 
         .menu-icon {
@@ -165,7 +165,7 @@
             font-weight: $font-weight-medium;
             font-family: $font-primary;
             font-size: $font-size-base;
-            color: $text-gray;
+            color: $text-dark;
             border-bottom: 1px solid $border-color;
             transition: all $transition-normal;
             display: flex;

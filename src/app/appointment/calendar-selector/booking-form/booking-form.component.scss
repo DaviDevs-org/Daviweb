@@ -4,13 +4,13 @@
 .booking-form-container {
   max-width: 800px;
   margin: 0 auto;
-  background: $background-primary;
+  background: $background-calendar;
   padding: 30px;
   border-radius: 16px;
   font-family: 'Inter', sans-serif;
   color: $white;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  border: 1px solid $primary;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 
   @media (max-width: 768px) {
     padding: 24px;
@@ -25,10 +25,11 @@
 
 .form-title {
   text-align: center;
-  color: $primary-light;
+  color: $white;
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   @media (max-width: 768px) {
     font-size: 24px;
   }
@@ -36,10 +37,11 @@
 
 .form-subtitle {
   text-align: center;
-  color: $primary;
+  color: $white;
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 30px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   @media (max-width: 768px) {
     font-size: 14px;
     margin-bottom: 24px;
@@ -67,8 +69,9 @@
 label {
   font-weight: 700;
   margin-bottom: 8px;
-  color: $primary-light;
+  color: $white;
   font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 input,
@@ -78,9 +81,9 @@ select {
   border-radius: 12px;
   border: 2px solid $primary;
   font-size: 16px;
-  color: $secondary;
+  color: $text-dark;
   font-weight: 600;
-  background: $primary-light;
+  background: $white;
   transition: all 0.3s ease;
   width: 100%;
   box-sizing: border-box;
@@ -101,8 +104,8 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: $primary;
-  box-shadow: 0 0 0 3px $primary-light;
+  border-color: $primary-dark;
+  box-shadow: 0 0 0 3px rgba(230, 115, 180, 0.3);
   transform: translateY(-1px);
 }
 
@@ -129,10 +132,10 @@ textarea {
 }
 
 .contact-error {
-  background: rgba(220, 53, 69, 0.1);
+  background: rgba($danger-red, 0.1);
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid rgba(220, 53, 69, 0.3);
+  border: 1px solid rgba($danger-red, 0.3);
   margin-bottom: 20px;
 
   &.visible {
@@ -147,13 +150,13 @@ textarea {
   padding: 14px 16px;
   border-radius: 12px;
   border: 2px solid $primary;
-  background-color: $primary-light;
-  color: $secondary;
+  background-color: $white;
+  color: $text-dark;
   font-weight: 600;
   font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%23613523" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%233d4a56" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
   background-repeat: no-repeat;
   background-position: right 16px center;
   background-size: 18px 18px;
@@ -165,26 +168,26 @@ textarea {
 }
 
 .form-group select:hover {
-  border-color: $primary;
+  border-color: $primary-dark;
   transform: translateY(-1px);
 }
 
 .form-group select option {
-  color: $secondary;
-  background-color: $primary-light;
+  color: $text-dark;
+  background-color: $white;
   padding: 12px;
   font-size: 15px;
 }
 
 .form-group select option:disabled {
-  color: #999;
+  color: $color-placeholder;
   background-color: $light-gray;
 }
 
 .submit-btn {
-  background: linear-gradient(135deg, $primary, $primary-light);
-  border: none;
-  color: $white;
+  background: $white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: $primary;
   font-weight: 700;
   padding: 16px 24px;
   border-radius: 12px;
@@ -193,7 +196,7 @@ textarea {
   transition: all 0.3s ease;
   font-size: 18px;
   margin-top: 10px;
-  box-shadow: 0 4px 15px $primary-light;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 
   @media (max-width: 768px) {
     padding: 14px 20px;
@@ -203,8 +206,10 @@ textarea {
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 178, 88, 0.4);
-  background: linear-gradient(135deg, #b8953a, #a8842a);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background: $primary-dark;
+  color: $white;
+  border-color: $primary-dark;
 }
 
 .submit-btn:active:not(:disabled) {
@@ -212,11 +217,12 @@ textarea {
 }
 
 .submit-btn:disabled {
-  background: #cccccc;
+  background: rgba(170, 170, 170, 0.3);
+  color: rgba(61, 74, 86, 0.5);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
-  color: #666666;
+  border-color: transparent;
 }
 
 /* Mejoras específicas para móviles */
@@ -255,17 +261,18 @@ textarea {
     align-items: center;
     gap: 10px;
     font-size: 14px;
-    color: $background-accent;
+    color: $white;
     font-weight: 600;
     cursor: pointer;
 
     a {
-      color: $primary-light;
+      color: $white;
       text-decoration: underline;
       transition: color 0.3s ease;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 
       &:hover {
-        color: $primary;
+        color: $primary-dark;
       }
     }
 
@@ -273,8 +280,8 @@ textarea {
       width: 18px;
       height: 18px;
       border-radius: 4px;
-      border: 2px solid $background-accent;
-      accent-color: $primary-light; // cambia el tick
+      border: 2px solid $white;
+      accent-color: $primary-dark;
       cursor: pointer;
       flex-shrink: 0;
     }
@@ -283,7 +290,7 @@ textarea {
   .error {
     margin-top: 6px;
     font-size: 13px;
-    color: #ff6b6b;
+    color: $danger-red-text;
     font-weight: 600;
   }
 }

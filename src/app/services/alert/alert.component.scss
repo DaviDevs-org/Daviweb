@@ -1,15 +1,7 @@
 // alert.component.scss
 @use 'sass:color';
-// @use '../../admin-panel/styles/variables' as *;
-// @use '../../admin-panel/styles/mixins';
-
-// Variables temporales (reemplazar con las tuyas)
-$primary: #d4af37;
-$danger-red: #dc3545;
-$secondary-dark: #3e2723;
-$text-gray: #6c757d;
-$light-gray: #f8f9fa;
-$border-color: #dee2e6;
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
 
 .toast-notification {
     position: fixed;
@@ -85,10 +77,10 @@ $border-color: #dee2e6;
 
     // Colores según tipo
     &.toast-success {
-        border-left: 4px solid #22c55e;
+        border-left: 4px solid $success-green-bright;
 
         .toast-icon i {
-            color: #22c55e;
+            color: $success-green-bright;
         }
     }
 
@@ -101,18 +93,18 @@ $border-color: #dee2e6;
     }
 
     &.toast-warning {
-        border-left: 4px solid #f59e0b;
+        border-left: 4px solid $warning-orange-bright;
 
         .toast-icon i {
-            color: #f59e0b;
+            color: $warning-orange-bright;
         }
     }
 
     &.toast-info {
-        border-left: 4px solid #3b82f6;
+        border-left: 4px solid $color-info;
 
         .toast-icon i {
-            color: #3b82f6;
+            color: $color-info;
         }
     }
 
@@ -125,10 +117,10 @@ $border-color: #dee2e6;
     }
 
     &.toast-prompt {
-        border-left: 4px solid #8b5cf6;
+        border-left: 4px solid $color-purple;
 
         .toast-icon i {
-            color: #8b5cf6;
+            color: $color-purple;
         }
     }
 
@@ -181,12 +173,12 @@ $border-color: #dee2e6;
                 transition: border-color 0.2s ease;
 
                 &:focus {
-                    border-color: #3b82f6;
+                    border-color: $color-info;
                     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
                 }
 
                 &::placeholder {
-                    color: #9ca3af;
+                    color: $text-gray-light;
                 }
             }
         }
@@ -215,11 +207,11 @@ $border-color: #dee2e6;
                 }
 
                 &.toast-btn-secondary {
-                    background: #6b7280;
+                    background: $text-gray;
                     color: white;
 
                     &:hover {
-                        background: #4b5563;
+                        background: color.scale($text-gray, $lightness: -15%);
                     }
                 }
             }
@@ -241,7 +233,7 @@ $border-color: #dee2e6;
         transition: all 0.2s ease;
 
         &:hover {
-            background: rgba(0, 0, 0, 0.1);
+            background: $overlay-skeleton;
             color: $secondary-dark;
         }
 

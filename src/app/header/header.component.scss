@@ -6,19 +6,6 @@
   flex-direction: column;
   width: 100%;
 
-  .future-content {
-    background: #000;
-    color: white;
-    text-align: center;
-    padding: $spacing-sm;
-
-    .text-next {
-      font-size: $font-size-xs;
-      font-family: $font-primary;
-      font-weight: $font-weight-normal;
-    }
-  }
-
   .nav {
     display: flex;
     justify-content: space-between;
@@ -32,7 +19,8 @@
       font-size: $font-size-xl;
       font-weight: $font-weight-bold;
       font-family: $font-primary;
-      color: $primary-light;
+      color: $true-black;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
     }
 
     .anchors {
@@ -46,7 +34,12 @@
         align-items: center;
         gap: $spacing-xs;
         transition: transform $transition-fast;
-        color: $primary-light;
+        color: $true-black;
+
+        i {
+          color: $true-black;
+          filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.2));
+        }
 
         &:hover {
           transform: translateY(-2px);
@@ -55,14 +48,17 @@
         .anchor-text {
           font-size: $font-size-sm;
           font-family: $font-primary;
-          font-weight: $font-weight-medium;
-          color: $primary-light;
+          font-weight: $font-weight-semibold;
+          color: $true-black;
           cursor: pointer;
           text-decoration: none;
-          transition: color $transition-fast;
+          transition: all $transition-fast;
+          text-shadow: 0 1px 1px rgba(255, 255, 255, 0.2);
 
           &:hover {
-            color: $primary;
+            color: $true-black;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
+            text-decoration: underline;
           }
         }
       }

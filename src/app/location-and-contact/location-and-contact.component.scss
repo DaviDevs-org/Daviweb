@@ -14,7 +14,7 @@
   background: $background-section;
   border-radius: $border-radius-xl;
   box-shadow: $shadow-md;
-  color: #0f172a;
+  color: $text-dark;
   font-family: $font-primary;
   overflow-x: hidden;
 
@@ -34,7 +34,7 @@
   font-family: $font-primary;
   font-size: $font-size-3xl;
   font-weight: $font-weight-bold;
-  color: $white;
+  color: $text-dark;
   margin-bottom: $spacing-lg;
   text-align: center;
   width: 100%;
@@ -166,7 +166,7 @@
   font-weight: $font-weight-bold;
   font-family: $font-primary;
   font-size: $font-size-lg;
-  border-bottom: 2px solid #0f172a;
+  border-bottom: 2px solid $text-dark;
   padding-bottom: 6px;
   margin-bottom: $spacing-sm;
 
@@ -183,7 +183,7 @@
   font-family: $font-primary;
   font-size: $font-size-base;
   line-height: 1.5;
-  color: #0f172a;
+  color: $text-dark;
   word-break: break-word;
 
   @include small-mobile {
