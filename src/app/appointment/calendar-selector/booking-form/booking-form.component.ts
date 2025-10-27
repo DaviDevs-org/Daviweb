@@ -2,7 +2,14 @@ import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, injec
 import { FormsModule, NgForm } from '@angular/forms';
 import { AppointmentService } from '../../../services/appointments.service';
 import { isPlatformBrowser, NgForOf, NgIf } from '@angular/common';
-import { Barber, Service, ScheduleDay, ExceptionItem, Appointment } from '../../../admin-panel/types/admin.types';
+import {
+  Barber,
+  Service,
+  ScheduleDay,
+  ExceptionItem,
+  Appointment,
+  NewService, TimeSegment
+} from '../../../admin-panel/types/admin.types';
 import { ServiceManager } from '../../../services/admin-panel/services-management.service';
 import { AlertService } from '../../../services/alert/alert.service';
 import { InfoManager } from '../../../services/admin-panel/info-management.service';
@@ -42,6 +49,7 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
     description?: string;
     barber?: string;
     service: Service;
+    hairLength?: 'short' | 'medium' | 'long' | null;
   }>();
 
   submitted = false;
@@ -49,7 +57,8 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
   submitting = false;
   services: Service[] = [];
   availableServices: Service[] = [];
-  
+  hairLengthSelection: 'short' | 'medium' | 'long' | null = null;
+
   private preselectionSubscription?: Subscription;
 
   // Datos de horarios para validación
@@ -94,7 +103,7 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
       this.preselectionSubscription = this.preselectionService.preselection$.subscribe(preselection => {
         this.applyPreselection(preselection);
       });
-      
+
       // Aplicar preselección inicial si existe
       const initialPreselection = this.preselectionService.getPreselection();
       this.applyPreselection(initialPreselection);
@@ -399,6 +408,40 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
     return `${year}-${month}-${day}`;
   }
 
+  get selectedServiceRequiresHairLength(): boolean {
+    const serviceName = this.bookingFormRef?.value?.service;
+    if (!serviceName) return false;
+    const service = this.services.find(s => s.name === serviceName);
+    return !!service?.requiresHairLength;
+  }
+
+  getDisplayTime(service: Service | NewService): string {
+    // Si tiene segmentos y hairLength
+    if (service.requiresHairLength && service.hairLengthModifiers) {
+      // Calcula estimated time basado en los modifiers
+      const times = [
+        service.hairLengthModifiers.short?.time || 0,
+        service.hairLengthModifiers.medium?.time || 0,
+        service.hairLengthModifiers.long?.time || 0
+      ];
+      const minTime = Math.min(...times);
+      const maxTime = Math.max(...times);
+      return minTime === maxTime ? `${minTime} min` : `${minTime} - ${maxTime} min`;
+    }
+
+    // Si tiene segmentos y no requiere hairLength
+    if (service.timeSegments && service.timeSegments.length > 0) {
+      const total = service.timeSegments.reduce(
+        (sum, seg) => sum + seg.duration + (seg.breakAfter || 0),
+        0
+      );
+      return `${total} min`;
+    }
+
+    // Fallback
+    return '30 min';
+  }
+
   onSubmit(form: NgForm): void {
     this.submitted = true;
     this.formRef = form;
@@ -434,7 +477,18 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
     }
 
     const selectedService = this.services.find(s => s.name === form.value.service);
-    if (selectedService && this.date && this.time) {
+    if (!selectedService) {
+      this.toast.error('Error: servicio no encontrado');
+      return;
+    }
+
+    // Validar hairLength si el servicio lo requiere
+    if (selectedService.requiresHairLength && !this.hairLengthSelection) {
+      this.toast.error('Debes seleccionar la longitud de pelo (corto, medio o largo) para este servicio.');
+      return;
+    }
+
+    if (this.date && this.time) {
       const selectedDate = this.parseDate(this.date);
       if (selectedDate && !this.canScheduleService(selectedDate, this.time, selectedService)) {
         this.toast.error('La duración de este servicio es demasiada, colisiona con otra cita ya existente o el cierre del local.');
@@ -442,35 +496,32 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
       }
     }
 
-    if (!selectedService) {
-      this.toast.error('Error: servicio no encontrado');
-      return;
-    }
-
     const appointmentData = {
       name: form.value.name.trim(),
       phone: phone,
       description: form.value.description?.trim() || '',
       barber: form.value.barber || '',
-      service: selectedService // <-- instancia completa
+      service: selectedService,
+      hairLength: this.hairLengthSelection // <-- nuevo campo
     };
 
     this.submitting = true;
     this.formSubmitted.emit(appointmentData);
-    
+
     // Limpiar las preselecciones después de enviar el formulario
     this.preselectionService.clearPreselection();
   }
 
 
-    resetAll(): void {
+  resetAll(): void {
     if (this.formRef) {
       this.formRef.resetForm();
     }
     this.submitted = false;
-    // Limpiar las preselecciones al resetear
-    this.preselectionService.clearPreselection();
+    this.hairLengthSelection = null; // limpiar selección de longitud de pelo
+    this.preselectionService.clearPreselection(); // limpiar preselección
   }
+
 
   isPhoneValid(phone: string): boolean {
     const phoneRegex = /^[0-9]{9}$/;
@@ -488,8 +539,7 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
     return this.submitted && !!value && !this.isPhoneValid(value);
   }
 
-  getTotalTime(service: Service): number {
-    return service.timeSegments!.reduce((total, segment) =>
-      total + segment.duration + (segment.breakAfter || 0), 0);
+  getTotalTime(segments: TimeSegment[]): number {
+    return segments.reduce((total, segment) => total + segment.duration + (segment.breakAfter || 0), 0);
   }
 }

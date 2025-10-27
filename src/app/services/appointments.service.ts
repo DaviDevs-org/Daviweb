@@ -22,7 +22,6 @@ export class AppointmentService {
     const reservedCol = collection(this.firestore, 'pruebas', 'data', 'reservedSlots');
 
     try {
-      // Validación y construcción de datetime
       const datetime = this.buildDateTimeFrom(appointment.date, appointment.time);
 
       // Convertir service a objeto plano para Firestore
@@ -57,33 +56,43 @@ export class AppointmentService {
   // Calcula los Date/HH:mm de cada slot ACTIVO (30min) teniendo en cuenta los breaks
   private computeActiveSlotDateTimes(startDateTime: Date, appointment: Appointment): { time: string; datetime: Date }[] {
     const out: { time: string; datetime: Date }[] = [];
-
-    // Helper para formatear HH:mm
     const fmt = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
-    // Si hay estructura de segmentos en el servicio, respetarla
-    const segments = appointment?.service?.timeSegments;
-    if (segments && Array.isArray(segments) && segments.length > 0) {
-      let accumulated = 0; // minutos desde el inicio
-      segments.forEach((seg: any, idx: number) => {
-        const duration = Number(seg?.duration) || 0;
-        // Añadir slots activos cada 30min dentro del segmento
-        for (let m = 0; m < duration; m += 30) {
-          const dt = new Date(startDateTime.getTime() + (accumulated + m) * 60000);
+    const service = appointment.service;
+    const hairLength = appointment.hairLengthChoice;
+
+    if (service) {
+      // 1️⃣ Si el servicio requiere hairLength, usamos su duración real según hairLengthModifiers
+      if (service.requiresHairLength && hairLength) {
+        const totalMinutes = service.hairLengthModifiers[hairLength]?.time || 30;
+        for (let m = 0; m < totalMinutes; m += 30) {
+          const dt = new Date(startDateTime.getTime() + m * 60000);
           out.push({ time: fmt(dt), datetime: dt });
         }
-        accumulated += duration;
-        const breakAfter = Number(seg?.breakAfter) || 0;
-        // Sumar break al acumulado (pero no reservar esos slots) si no es el último segmento
-        if (breakAfter > 0 && idx < segments.length - 1) {
-          accumulated += breakAfter;
-        }
-      });
-      return out;
+        return out;
+      }
+
+      // 2️⃣ Si tiene timeSegments, respetarlos
+      const segments = service.timeSegments;
+      if (segments && segments.length > 0) {
+        let accumulated = 0;
+        segments.forEach((seg, idx) => {
+          const duration = seg.duration;
+          for (let m = 0; m < duration; m += 30) {
+            const dt = new Date(startDateTime.getTime() + (accumulated + m) * 60000);
+            out.push({ time: fmt(dt), datetime: dt });
+          }
+          accumulated += duration;
+          const breakAfter = seg.breakAfter || 0;
+          if (breakAfter > 0 && idx < segments.length - 1) accumulated += breakAfter;
+        });
+        return out;
+      }
     }
 
-    // Fallback: si no hay segmentos, reservar solo el slot inicial (30min)
+    // 3️⃣ Fallback: 30 min si no hay service ni timeSegments
     out.push({ time: fmt(startDateTime), datetime: startDateTime });
     return out;
   }
+
 }

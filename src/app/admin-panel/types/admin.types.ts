@@ -2,14 +2,14 @@ export class GalleryPhoto {
   name: string = "";
   url: string = "";
   lastModified: string = "";
-  id?:string
+  id?: string;
   public imageLoaded?: boolean = false;
 
-  constructor(name: string, url: string, lastModified: string, id:string){
+  constructor(name: string, url: string, lastModified: string, id: string){
     this.name = name;
     this.url = url;
     this.lastModified = lastModified;
-    this.id = id
+    this.id = id;
   }
 }
 
@@ -23,21 +23,21 @@ export interface Appointment {
   name?: string;
   phone?: string;
   time?: string;   // "13:00"
-  // campos normalizados usados internamente
   dateISO?: string;
   timeNormalized?: string;
   duration?: string;
   service?: Service;
   barber?: string;
+  hairLengthChoice?: 'short' | 'medium' | 'long';
 }
 
-// Primero, en types/admin.types.ts
 export interface ServiceDTO {
   name: string;
   description: string;
   timeSegments: TimeSegment[];
-  price: number;
   imageUrl?: string;
+  requiresHairLength?: boolean;
+  hairLengthModifiers?: HairLengthModifiers;
 }
 
 export interface AppointmentFirestore {
@@ -50,24 +50,50 @@ export interface AppointmentFirestore {
   service?: ServiceDTO;
   barber?: string;
   datetime?: { seconds: number; nanoseconds: number };
+  hairLengthChoice?: 'short' | 'medium' | 'long';
 }
 
-// Mantén tu Service con métodos para la app
+export interface TimeSegment {
+  duration: number; // Duración en minutos del segmento activo
+  breakAfter?: number; // Tiempo de descanso/pausa después de este segmento (opcional)
+}
+
+// Solo guardamos extraTime ahora
+export interface HairLengthModifiers {
+  short: { time: number };
+  medium: { time: number };
+  long: { time: number };
+}
+
 export class Service {
   constructor(
     public name: string,
     public description: string,
-    public timeSegments: TimeSegment[],
-    public price: number,
+    public timeSegments: TimeSegment[],   // Solo se usa si !requiresHairLength
+    public requiresHairLength: boolean = false,
+    public hairLengthModifiers: HairLengthModifiers = {
+      short: { time: 30 },
+      medium: { time: 45 },
+      long: { time: 60 }
+    },
     public imageUrl?: string,
     public id?: string
   ) {}
 
-  totalTime() {
-    return this.timeSegments.reduce((t, s) => t + s.duration + (s.breakAfter || 0), 0);
+  // Devuelve la duración real según hairLength
+  getDuration(hairLength?: 'short' | 'medium' | 'long'): number {
+    if (this.requiresHairLength && hairLength && this.hairLengthModifiers) {
+      return this.hairLengthModifiers[hairLength]?.time || 30;
+    }
+    // Si no requiere hairLength, suma timeSegments
+    if (this.timeSegments && this.timeSegments.length) {
+      return this.timeSegments.reduce((total, seg) => total + seg.duration + (seg.breakAfter || 0), 0);
+    }
+    return 30; // fallback
   }
 
-  activeTime() {
+  // Solo suma slots activos
+  getActiveTime(): number {
     return this.timeSegments.reduce((t, s) => t + s.duration, 0);
   }
 
@@ -76,41 +102,23 @@ export class Service {
       name: this.name,
       description: this.description,
       timeSegments: this.timeSegments,
-      price: this.price,
-      imageUrl: this.imageUrl
+      imageUrl: this.imageUrl,
+      requiresHairLength: this.requiresHairLength,
+      hairLengthModifiers: this.hairLengthModifiers
     };
   }
 }
 
-export interface TimeSegment {
-  duration: number; // Duración en minutos del segmento activo
-  breakAfter?: number; // Tiempo de descanso/pausa después de este segmento (opcional)
-}
 
 export interface NewService {
   name: string;
-  price: number;
   description: string;
-  timeSegments: TimeSegment[]; // Cambiar time por timeSegments
+  timeSegments: TimeSegment[];
+  requiresHairLength?: boolean;
+  hairLengthModifiers?: HairLengthModifiers;
 }
 
-export interface ExceptionItem {
-  date: string;
-  closed: boolean;
-  intervals: Interval[];
-  exceptionType: 'closed' | 'custom' | 'range';
-  isEditing?: boolean;
-  // Para excepciones de tipo 'range' (intervalo de fechas)
-  startDate?: string;
-  endDate?: string;
-}
-
-export type Interval = {
-  open: string;
-  close: string;
-  blocked?: boolean;
-};
-
+export type Interval = { open: string; close: string; blocked?: boolean };
 
 export interface ScheduleDay {
   day: string;
@@ -118,7 +126,6 @@ export interface ScheduleDay {
   closed: boolean;
   intervals: Interval[];
 }
-
 
 export interface ContactInfo {
   phone: string;
@@ -132,13 +139,19 @@ export interface Statistics {
   weeklyAppointments: number;
 }
 
+export interface ExceptionItem {
+  date: string;
+  closed: boolean;
+  intervals: Interval[];
+  exceptionType: 'closed' | 'custom' | 'range';
+  isEditing?: boolean;
+  startDate?: string; // para tipo 'range'
+  endDate?: string;   // para tipo 'range'
+}
+
 export type AdminTab = 'gallery' | 'services' | 'info' | 'stats';
 
-export interface NavTab {
-  id: AdminTab;
-  icon: string;
-  label: string;
-}
+export interface NavTab { id: AdminTab; icon: string; label: string; }
 
 export interface StatCard {
   icon: string;
@@ -155,10 +168,4 @@ export interface BarberSettings {
   }
 }
 
-export interface Barber {
-  id:string;
-  name: string;
-  visible?: boolean;
-  imageUrl?: string;
-}
-
+export interface Barber { id: string; name: string; visible?: boolean; imageUrl?: string; }

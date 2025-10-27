@@ -1,13 +1,12 @@
-// services-management.component.ts
-import { Component, ElementRef, inject, Injector, runInInjectionContext, signal, ViewChild, OnDestroy } from '@angular/core';
+import { Component, ElementRef, inject, Injector, runInInjectionContext, signal, ViewChild, OnDestroy, AfterViewInit, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { percentage } from '@angular/fire/storage';
-import { Subscription } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { ServiceManager } from '../../../services/admin-panel/services-management.service';
 import { GalleryService } from '../../../services/admin-panel/gallery-management.service';
-import { Service, NewService, TimeSegment } from '../../types/admin.types';
+import { Service, NewService, TimeSegment, HairLengthModifiers } from '../../types/admin.types';
 import { AlertService } from '../../../services/alert/alert.service';
 import { ImageProcessingService } from '../../../services/image-processing.service';
 
@@ -15,20 +14,23 @@ import { ImageProcessingService } from '../../../services/image-processing.servi
   selector: 'app-services-management',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: "./services-management.component.html",
+  templateUrl: './services-management.component.html',
   styleUrls: ['./services-management.component.scss']
 })
-export class ServicesManagementComponent implements OnDestroy {
+export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
+  private scrollSub: Subscription | null = null;
 
   private auth = inject(Auth);
   private injector = inject(Injector);
   private service = inject(ServiceManager);
   private galleryService = inject(GalleryService);
-  private toast = inject(AlertService)
+  private toast = inject(AlertService);
   private imageProcessor = inject(ImageProcessingService);
 
   services: Service[] = [];
+  lengths: ('short' | 'medium' | 'long')[] = ['short', 'medium', 'long'];
   selectedFile: File | null = null;
   imagePreviewUrl: string = '';
   processedBlob: Blob | null = null;
@@ -37,18 +39,29 @@ export class ServicesManagementComponent implements OnDestroy {
   uploadSubscription: Subscription | undefined = undefined;
   hasBreaks: boolean = false;
 
+  // Si no tienes estas observables, comenta ngAfterViewInit()
+  selectedAppointment$: any;
+  filteredForDay$: any;
+
+
   newService: NewService = {
     name: '',
-    price: 0,
     description: '',
-    timeSegments: [{ duration: 30, breakAfter: 0 }] // Inicializar con un segmento
+    timeSegments: [{ duration: 30, breakAfter: 0 }],
+    requiresHairLength: false,
+    hairLengthModifiers: {
+      short: { time: 30 },
+      medium: { time: 45 },
+      long: { time: 60 }
+    }
   };
+
 
   ngOnInit() {
     runInInjectionContext(this.injector, () => {
       onAuthStateChanged(this.auth, user => {
         if (user) {
-          user.getIdToken().then(token => {
+          user.getIdToken().then(() => {
             this.service.getServices().subscribe(service => {
               this.services = service;
             });
@@ -58,56 +71,75 @@ export class ServicesManagementComponent implements OnDestroy {
     });
   }
 
+  ngAfterViewInit() {
+    if (this.selectedAppointment$ && this.filteredForDay$) {
+      this.scrollSub = combineLatest<[any, any]>([
+        this.selectedAppointment$,
+        this.filteredForDay$
+      ]).subscribe(([appointment, dayList]) => {
+        if (
+          appointment &&
+          appointment.timeNormalized &&
+          Array.isArray(dayList) &&
+          dayList.some((a: any) => a.id === appointment.id)
+        ) {
+          this.scrollToAppointment(appointment.timeNormalized);
+        }
+      });
+    }
+  }
+
+
+  private scrollToAppointment(timeNormalized: string) {
+    // Implementa tu lógica real de scroll aquí
+    console.log('Scrolling to appointment:', timeNormalized);
+  }
+
+  ngOnDestroy() {
+    if (this.scrollSub) this.scrollSub.unsubscribe();
+    if (this.imagePreviewUrl) URL.revokeObjectURL(this.imagePreviewUrl);
+    this.uploadSubscription?.unsubscribe();
+  }
+
   async onFileSelected(event: Event): Promise<void> {
     const target = event.target as HTMLInputElement;
-    if (target.files && target.files.length > 0) {
-      const file = target.files[0];
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!target.files?.length) return;
 
-      if (!allowedTypes.includes(file.type)) {
-        this.toast.error('Por favor, selecciona una imagen JPG, PNG o WebP.');
-        return;
-      }
+    const file = target.files[0];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
-      if (file.size > 5 * 1024 * 1024) {
-        this.toast.error('El archivo es demasiado grande. Máximo 5MB.');
-        return;
-      }
+    if (!allowedTypes.includes(file.type)) {
+      this.toast.error('Por favor, selecciona una imagen JPG, PNG o WebP.');
+      return;
+    }
 
-      // Procesar genéricamente a WebP (reducción de tamaño)
-      try {
-        const { blob } = await this.imageProcessor.processGeneric(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.84 });
-        this.selectedFile = file;
-        this.processedBlob = blob;
-        // Limpiar URL anterior si existe
-        if (this.imagePreviewUrl) {
-          URL.revokeObjectURL(this.imagePreviewUrl);
-        }
-        this.imagePreviewUrl = URL.createObjectURL(blob);
-      } catch (e) {
-        this.toast.error('No se pudo procesar la imagen.');
-      }
+    if (file.size > 5 * 1024 * 1024) {
+      this.toast.error('El archivo es demasiado grande. Máximo 5MB.');
+      return;
+    }
+
+    try {
+      const { blob } = await this.imageProcessor.processGeneric(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.84 });
+      this.selectedFile = file;
+      this.processedBlob = blob;
+
+      if (this.imagePreviewUrl) URL.revokeObjectURL(this.imagePreviewUrl);
+      this.imagePreviewUrl = URL.createObjectURL(blob);
+    } catch (e) {
+      this.toast.error('No se pudo procesar la imagen.');
     }
   }
 
   private async uploadImageIfSelected(): Promise<string | null> {
-    if (!this.selectedFile) {
-      return null;
-    }
+    if (!this.selectedFile) return null;
 
     return new Promise((resolve, reject) => {
-  const task = this.galleryService.uploadServiceImage(this.processedBlob || this.selectedFile!, this.selectedFile!.name);
-      if (!task) {
-        reject('Error al iniciar la subida');
-        return;
-      }
+      const task = this.galleryService.uploadServiceImage(this.processedBlob || this.selectedFile!, this.selectedFile!.name);
+      if (!task) return reject('Error al iniciar la subida');
 
-      if (this.uploadSubscription) {
-        this.uploadSubscription.unsubscribe();
-        this.uploadSubscription = undefined;
-      }
-
+      this.uploadSubscription?.unsubscribe();
       this.isUploading = true;
+
       this.uploadSubscription = percentage(task).subscribe(({ progress }) => {
         this.uploadProgress.set(`${progress}%`);
       });
@@ -124,10 +156,7 @@ export class ServicesManagementComponent implements OnDestroy {
             const downloadURL = await this.galleryService.getUrl(task.snapshot.ref);
             this.isUploading = false;
             this.uploadProgress.set('0%');
-
-            // Limpiar la selección de archivo
             this.clearFileSelection();
-
             resolve(downloadURL);
           } catch (error) {
             this.isUploading = false;
@@ -147,200 +176,160 @@ export class ServicesManagementComponent implements OnDestroy {
       this.imagePreviewUrl = '';
     }
 
-    if (this.fileInput) {
-      this.fileInput.nativeElement.value = '';
-    }
+    if (this.fileInput) this.fileInput.nativeElement.value = '';
   }
 
-  async addService() {
-    if (!this.selectedFile) {
-      this.toast.error('Por favor, escoja una imagen.')
-      return
-    }
-    if (!this.newService.name.trim()) {
-      this.toast.error('Por favor, ingresa el nombre del servicio.');
-      return;
-    }
+  lengthMap: Record<'short' | 'medium' | 'long', string> = {
+    short: 'Corto',
+    medium: 'Medio',
+    long: 'Largo'
+  };
 
-    const hasValidSegment = this.newService.timeSegments.some(segment => segment.duration > 0);
-    if (!hasValidSegment) {
-      this.toast.error('Por favor, ingresa al menos un segmento de tiempo válido.');
-      return;
-    }
+  async addService(): Promise<void> {
+    if (!this.selectedFile) { this.toast.error('Por favor, escoja una imagen.'); return; }
+    if (!this.newService.name.trim()) { this.toast.error('Por favor, ingresa el nombre del servicio.'); return; }
+
+    const hasValidSegment = this.newService.timeSegments.some(seg => seg.duration > 0);
+    if (!hasValidSegment) { this.toast.error('Por favor, ingresa al menos un segmento de tiempo válido.'); return; }
 
     try {
-      // Subir imagen si está seleccionada
-      let imageUrl: string | undefined = undefined;
+      const imageUrl = await this.uploadImageIfSelected() || undefined;
 
-      if (this.selectedFile) {
-        imageUrl = await this.uploadImageIfSelected() || undefined;
-      }
-
-      // Crear el servicio con la URL de la imagen si existe
       const serviceNew = new Service(
         this.newService.name,
         this.newService.description,
         this.newService.timeSegments,
-        0, // Precio por defecto 0
-        imageUrl!
+        this.newService.requiresHairLength || false,
+        this.newService.hairLengthModifiers || {
+          short: { time: 0 },
+          medium: { time: 0 },
+          long: { time: 0 }
+        },
+        imageUrl
       );
 
-      const response = await this.service.addService(serviceNew);
-      console.log(response);
+      await this.service.addService(serviceNew);
 
-      // Resetear el formulario
       this.newService = {
         name: '',
-        price: 0,
         description: '',
-        timeSegments: [{ duration: 0, breakAfter: 0 }]
+        timeSegments: [{ duration: 0, breakAfter: 0 }],
+        requiresHairLength: false,
+        hairLengthModifiers: {
+          short: { time: 0 },
+          medium: { time: 0 },
+          long: { time: 0 }
+        }
       };
 
       this.clearFileSelection();
-
       this.toast.success('Servicio añadido correctamente!');
-
     } catch (error) {
       console.error('Error al añadir servicio:', error);
       this.toast.error('Error al añadir el servicio. Por favor, inténtalo de nuevo.');
     }
+    return;
   }
 
   async editService(index: number) {
     const serviceU = this.services[index];
 
-    const newName = await this.toast.prompt(
-      'Nuevo nombre del servicio:',
-      'Nombre del servicio...'
-    );
-    if (newName === null) {
-      this.toast.error('Por favor, introduzca un nombre')
-      return
-    };
-    if (newName == false) return;
+    const newName = await this.toast.prompt('Nuevo nombre del servicio:', 'Nombre del servicio...');
+    if (!newName) return this.toast.error('Por favor, introduzca un nombre válido');
 
     const timeSegments: TimeSegment[] = [];
     let addMoreSegments = true;
     while (addMoreSegments) {
-      const durationStr = await this.toast.promptNumber(
-        `Duración del segmento ${timeSegments.length + 1} (min):`,
-        'Ej: 30'
-      );
-      if (durationStr === null || durationStr === false) break;
+      const durationStr = await this.toast.promptNumber(`Duración del segmento ${timeSegments.length + 1} (min):`, 'Ej: 30');
+      if (!durationStr) break;
       const duration = parseInt(durationStr);
-      if (isNaN(duration) || duration <= 0) {
-        this.toast.error('Por favor, ingresa una duración válida.');
-        break;
-      }
+      if (isNaN(duration) || duration <= 0) return this.toast.error('Por favor, ingresa una duración válida.');
 
-      const breakAfterStr = await this.toast.promptNumber(
-        `Tiempo de pausa después de este segmento (min, 0 si no hay pausa):`,
-        'Ej: 15'
-      );
-      if (breakAfterStr === null || breakAfterStr === false) break;
-
+      const breakAfterStr = await this.toast.promptNumber('Tiempo de pausa después de este segmento (min, 0 si no hay pausa):', 'Ej: 15');
+      if (!breakAfterStr) break;
       const breakAfter = parseInt(breakAfterStr) || 0;
 
       timeSegments.push({ duration, breakAfter });
-
       addMoreSegments = await this.toast.confirm('¿Quieres añadir otro segmento de tiempo?');
     }
-    if (timeSegments.length === 0) {
-      this.toast.error('El servicio debe tener al menos un segmento de tiempo.');
-      return;
-    }
 
+    if (timeSegments.length === 0) return this.toast.error('El servicio debe tener al menos un segmento de tiempo.');
 
-    const newDescription = await this.toast.prompt(
-      'Nueva descripción:',
-      'Descripción del servicio...'
-    );
-    if (newDescription === null) {
-      this.toast.error('Por favor, introduzca una descripción válida');
-      return;
-    }
-    if (newDescription == false) return;
+    const newDescription = await this.toast.prompt('Nueva descripción:', 'Descripción del servicio...');
+    if (!newDescription) return this.toast.error('Por favor, introduzca una descripción válida');
 
     const updatedService = new Service(
       newName,
       newDescription,
       timeSegments,
-      0, // Precio por defecto 0
-      serviceU.imageUrl!
+      serviceU.requiresHairLength,
+      serviceU.hairLengthModifiers,
+      serviceU.imageUrl
     );
 
-    const response = await this.service.updateService(serviceU.id!, updatedService);
+    await this.service.updateService(serviceU.id!, updatedService);
     this.toast.success('Servicio actualizado correctamente!');
+
+    return;
   }
 
   async deleteService(index: number) {
     const service = this.services[index];
-
     if (await this.toast.confirm(`¿Estás seguro de que quieres eliminar "${service.name}"?`)) {
-      const response = await this.service.deleteService(service.id!);
+      await this.service.deleteService(service.id!);
       this.toast.success(`El servicio ${service.name} ha sido borrado con éxito`);
     }
   }
-
 
   addTimeSegment() {
     if (this.hasBreaks) {
       this.newService.timeSegments.push({ duration: 30, breakAfter: 0 });
     } else {
-      // Si no tiene breaks, simplemente aumentar la duración del único segmento
       this.newService.timeSegments[0].duration += 30;
     }
   }
 
-  // Modificar removeTimeSegment
   removeTimeSegment(index: number) {
     if (this.hasBreaks) {
-      if (this.newService.timeSegments.length > 1) {
-        this.newService.timeSegments.splice(index, 1);
-      }
+      if (this.newService.timeSegments.length > 1) this.newService.timeSegments.splice(index, 1);
     } else {
-      // Si no tiene breaks, reducir la duración pero mantener mínimo 15min
-      if (this.newService.timeSegments[0].duration > 15) {
-        this.newService.timeSegments[0].duration -= 15;
-      }
+      if (this.newService.timeSegments[0].duration > 15) this.newService.timeSegments[0].duration -= 15;
     }
-  }
-
-  ngOnDestroy() {
-    // Limpiar la URL de previsualización al destruir el componente
-    if (this.imagePreviewUrl) {
-      URL.revokeObjectURL(this.imagePreviewUrl);
-    }
-
-    // Limpiar suscripción si existe
-    if (this.uploadSubscription) {
-      this.uploadSubscription.unsubscribe();
-    }
-  }
-  getTotalTime(segments: TimeSegment[]): number {
-    return segments.reduce((total, segment) =>
-      total + segment.duration + (segment.breakAfter || 0), 0);
-  }
-
-  getActiveTime(segments: TimeSegment[]): number {
-    return segments.reduce((total, segment) => total + segment.duration, 0);
-  }
-
-  getBreakTime(segments: TimeSegment[]): number {
-    return segments.reduce((total, segment) => total + (segment.breakAfter || 0), 0);
   }
 
   toggleBreaks() {
     this.hasBreaks = !this.hasBreaks;
-    
-    if (this.hasBreaks) {
-      // Si activa breaks, asegurar que hay al menos 2 segmentos
-      if (this.newService.timeSegments.length === 1) {
-        this.newService.timeSegments.push({ duration: 30, breakAfter: 0 });
-      }
-    } else {
-      // Si desactiva breaks, eliminar todos los breaks y dejar solo un segmento
+    if (this.hasBreaks && this.newService.timeSegments.length === 1) {
+      this.newService.timeSegments.push({ duration: 30, breakAfter: 0 });
+    } else if (!this.hasBreaks) {
       this.newService.timeSegments = [{ duration: this.newService.timeSegments[0].duration, breakAfter: 0 }];
     }
+  }
+
+  getEstimatedTime(service: Service | NewService): string {
+    if (!service.requiresHairLength || !service.hairLengthModifiers) return '';
+
+    const times = [
+      service.hairLengthModifiers.short.time,
+      service.hairLengthModifiers.medium.time,
+      service.hairLengthModifiers.long.time
+    ];
+
+    const minTime = Math.min(...times);
+    const maxTime = Math.max(...times);
+
+    return `${minTime} - ${maxTime} min`;
+  }
+
+  getTotalTime(segments: TimeSegment[]): number {
+    return segments.reduce((total, seg) => total + seg.duration + (seg.breakAfter || 0), 0);
+  }
+
+  getActiveTime(segments: TimeSegment[]): number {
+    return segments.reduce((total, seg) => total + seg.duration, 0);
+  }
+
+  getBreakTime(segments: TimeSegment[]): number {
+    return segments.reduce((total, seg) => total + (seg.breakAfter || 0), 0);
   }
 }

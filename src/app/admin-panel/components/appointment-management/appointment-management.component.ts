@@ -9,7 +9,7 @@ import {
   AppointmentFirestore,
   ServiceDTO
 } from '../../types/admin.types';
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
+import {BehaviorSubject, Observable, combineLatest, firstValueFrom} from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ServiceManager } from '../../../services/admin-panel/services-management.service';
@@ -133,19 +133,18 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   }
 
   // Nuevo método para generar horas basado en schedule y exceptions
-  private generateHoursForSelectedDate() {
+  private generateHoursForSelectedDate(): void {
     if (!this.schedule || this.schedule.length === 0) {
-      this.hours = this.generateDefaultHours(); // Fallback al método anterior
+      this.hours = this.generateDefaultHours();
       return;
     }
 
     const selectedDate = this.selectedDate$.value;
     const dateKey = this.toISODate(selectedDate);
     const bookedHours = this.bookedSlotsByDate[dateKey] || [];
-
-    const availableHours = this.getAvailableHoursForDate(selectedDate, bookedHours);
-    this.hours = availableHours;
+    this.hours = this.getAvailableHoursForDate(selectedDate, bookedHours);
   }
+
 
   private getAvailableHoursForDate(date: Date, booked: string[]): string[] {
     const dateKey = this.toISODate(date);
@@ -254,14 +253,13 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     }
   }
 
-  private async loadBarbers() {
+  private async loadBarbers(): Promise<void> {
     try {
       const barberSettings = await this.infoManager.getBarberSettings();
-
-      if (barberSettings?.settings?.staff) {
+      if (Array.isArray(barberSettings?.settings.staff)) {
         this.barbers = barberSettings.settings.staff.filter((barber: Barber) => barber.visible);
-      } else if (Array.isArray(barberSettings?.settings.staff)) {
-        this.barbers = barberSettings.settings.staff.filter((barber: Barber) => barber.visible);
+      } else {
+        this.barbers = [];
       }
     } catch (error) {
       console.error('Error cargando peluqueros:', error);
@@ -269,8 +267,14 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     }
   }
 
+
   // NUEVA LÓGICA: Verificar si un servicio puede ser programado en un horario específico
-  canScheduleService(date: Date, time: string, service: Service | null, excludeAppointmentId?: string): boolean {
+  async canScheduleService(
+    date: Date,
+    time: string,
+    service: Service | null,
+    excludeAppointmentId?: string
+  ): Promise<boolean> {
     if (!service || !service.timeSegments) return true;
 
     const dateKey = this.toISODate(date);
@@ -298,15 +302,13 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     // Verificar que no se sobreponga con horarios de cierre
     const endTime = Math.max(...serviceSlots) + 30; // +30 porque cada slot es de 30 min
-    if (!this.isTimeWithinSchedule(date, endTime)) {
-      return false;
-    }
+    if (!this.isTimeWithinSchedule(date, endTime)) return false;
 
-    // Verificar que no se sobreponga con otras citas
-    const dayAppointments = this.getAppointmentsForDate(dateKey, excludeAppointmentId);
+    // Obtener las citas del día desde el observable
+    const resolvedAppointments = await firstValueFrom(this.appointments$);
 
-    for (const appointment of dayAppointments) {
-      if (!appointment.timeNormalized) continue;
+    for (const appointment of resolvedAppointments) {
+      if (!appointment.timeNormalized || appointment.id === excludeAppointmentId) continue;
 
       const appointmentSegments = this.getAppointmentTimeSegments(appointment);
       const occupiedSlots: number[] = [];
@@ -319,9 +321,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
       // Verificar solapamiento
       const hasOverlap = serviceSlots.some(slot => occupiedSlots.includes(slot));
-      if (hasOverlap) {
-        return false;
-      }
+      if (hasOverlap) return false;
     }
 
     return true;
@@ -350,15 +350,9 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     });
   }
 
-  private getAppointmentsForDate(dateKey: string, excludeId?: string): Appointment[] {
-    let appointments: Appointment[] = [];
-    this.appointments$.pipe(take(1)).subscribe(appts => {
-      appointments = appts.filter(a =>
-        a.dateISO === dateKey &&
-        (excludeId ? a.id !== excludeId : true)
-      );
-    });
-    return appointments;
+  private async getAppointmentsForDate(dateKey: string, excludeId?: string): Promise<Appointment[]> {
+    const appts = await firstValueFrom(this.appointments$);
+    return appts.filter(a => a.dateISO === dateKey && (excludeId ? a.id !== excludeId : true));
   }
 
   // Método mejorado para determinar si una hora está disponible
@@ -716,17 +710,15 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     }
   }
 
-  private validateSelectedAppointmentForCurrentDay() {
+  private async validateSelectedAppointmentForCurrentDay() {
     const selectedId = this.selectedAppointmentId$.value;
     if (!selectedId) return;
 
-    this.filteredForDay$.subscribe(dayAppointments => {
-      const appointmentExistsInDay = dayAppointments.some(a => a.id === selectedId);
-      if (!appointmentExistsInDay) {
-        this.selectedAppointmentId$.next(null);
-      }
-    }).unsubscribe();
+    const dayAppointments = await firstValueFrom(this.filteredForDay$);
+    const exists = dayAppointments.some(a => a.id === selectedId);
+    if (!exists) this.selectedAppointmentId$.next(null);
   }
+
 
   private scrollToAppointment(timeNormalized: string) {
     if (!this.calendarBody || !this.calendarBody.nativeElement) return;
@@ -794,6 +786,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     return out;
   }
+
 
   toISODate(d: Date) {
     return d.getFullYear() + '-' + this.pad(d.getMonth() + 1) + '-' + this.pad(d.getDate());
