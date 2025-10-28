@@ -5,36 +5,31 @@
 .opinions {
   padding: 48px 24px;
   box-sizing: border-box;
-  background: $background-primary;
-  color: $white;
+  background: $background-section; // igual que otras secciones
+  color: $text-dark;
   border-radius: $border-radius-xl;
   box-shadow: $shadow-md;
   @include section
 }
 
-.opinions-heading {
+// Título y subtítulo consistentes con otras secciones
+.section-title {
+  color: $text-dark;
   font-family: $font-primary;
   font-size: $font-size-3xl;
   font-weight: $font-weight-bold;
-  color: $primary-light;
-  margin-bottom: 12px;
+  text-align: center;
+  margin-bottom: 16px;
 }
-.subtitle{
-  color: $primary;
+
+.section-subtitle {
+  color: $text-dark;
   font-family: $font-mono;
   font-size: $font-size-lg;
   font-weight: $font-weight-normal;
-}
-
-.opinions-description {
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 1.4;
-  margin-bottom: 36px;
-  color: $primary-light;
+  text-align: center;
+  margin: 0 auto 28px auto;
   max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .opinions-list {
@@ -49,7 +44,7 @@
 }
 
 .opinion {
-  background-color: $background-secondary;
+  background-color: $white; // tarjeta clara legible
   border-radius: $border-radius-xl;
   padding: 20px 20px 12px 20px;
   box-shadow: $shadow-sm;
@@ -63,7 +58,8 @@
   transition: transform 0.2s ease;
   min-width: 280px;
   cursor: pointer;
-  color: $secondary;
+  color: $text-dark;
+  border: 1px solid $border-color;
 }
 
 .opinion:hover {

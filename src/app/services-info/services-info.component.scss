@@ -456,6 +456,7 @@
     @include mobile {
         flex: 1;
         padding: 20px 24px;
+        order: 1; // En móvil, primero lista de servicios tras categorías
     }
 }
 
@@ -472,7 +473,7 @@
 
     @include mobile {
         flex: 1;
-        order: -1;
+        order: 2; // En móvil, detalles después de la lista
     }
 
     .service-image {
