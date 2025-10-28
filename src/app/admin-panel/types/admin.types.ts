@@ -69,7 +69,7 @@ export class Service {
   constructor(
     public name: string,
     public description: string,
-    public timeSegments: TimeSegment[],   // Solo se usa si !requiresHairLength
+    public timeSegments: TimeSegment[] = [],
     public requiresHairLength: boolean = false,
     public hairLengthModifiers: HairLengthModifiers = {
       short: { time: 30 },
@@ -80,23 +80,57 @@ export class Service {
     public id?: string
   ) {}
 
-  // Devuelve la duración real según hairLength
-  getDuration(hairLength?: 'short' | 'medium' | 'long'): number {
-    if (this.requiresHairLength && hairLength && this.hairLengthModifiers) {
-      return this.hairLengthModifiers[hairLength]?.time || 30;
+  /**
+   * Calcula el tiempo total de servicio real teniendo en cuenta:
+   *  - Longitud del pelo (si aplica)
+   *  - Segmentos (si existen)
+   *  - Duración base
+   */
+  computeTotalTime(hairLength?: 'short' | 'medium' | 'long'): number {
+    // 1️⃣ Si requiere longitud y existe modificador → usa ese tiempo
+    if (this.requiresHairLength && hairLength && this.hairLengthModifiers?.[hairLength]) {
+      return this.hairLengthModifiers[hairLength].time;
     }
-    // Si no requiere hairLength, suma timeSegments
-    if (this.timeSegments && this.timeSegments.length) {
-      return this.timeSegments.reduce((total, seg) => total + seg.duration + (seg.breakAfter || 0), 0);
+
+    // 2️⃣ Si tiene segmentos → suma duraciones + descansos
+    if (this.timeSegments?.length) {
+      return this.timeSegments.reduce(
+        (total, seg) => total + (seg.duration || 0) + (seg.breakAfter || 0),
+        0
+      );
     }
-    return 30; // fallback
+
+    // 3️⃣ Fallback → 30 min por defecto
+    return 30;
   }
 
-  // Solo suma slots activos
+  totalTime(): number {
+    if (this.requiresHairLength && this.hairLengthModifiers) {
+      const values = Object.values(this.hairLengthModifiers).map(v => v.time);
+      const avg = values.reduce((a, b) => a + b, 0) / values.length;
+      return Math.round(avg);
+    }
+
+    if (this.timeSegments?.length) {
+      return this.timeSegments.reduce(
+        (total, seg) => total + (seg.duration || 0) + (seg.breakAfter || 0),
+        0
+      );
+    }
+
+    return 30;
+  }
+
+  /**
+   * Calcula solo el tiempo activo (sin pausas)
+   */
   getActiveTime(): number {
-    return this.timeSegments.reduce((t, s) => t + s.duration, 0);
+    return this.timeSegments?.reduce((t, s) => t + (s.duration || 0), 0) || 0;
   }
 
+  /**
+   * Exporta a JSON limpio para Firestore
+   */
   toJson(): ServiceDTO {
     return {
       name: this.name,
@@ -104,7 +138,7 @@ export class Service {
       timeSegments: this.timeSegments,
       imageUrl: this.imageUrl,
       requiresHairLength: this.requiresHairLength,
-      hairLengthModifiers: this.hairLengthModifiers
+      hairLengthModifiers: this.hairLengthModifiers,
     };
   }
 }
