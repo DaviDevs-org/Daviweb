@@ -261,11 +261,14 @@
   // Responsive adjustments
   @include mobile {
     .nav {
-      padding: $spacing-sm $spacing-md;
+      padding: $spacing-sm $spacing-md; // Un poco más de aire para que no se junten
       gap: $spacing-sm;
 
       .anchors {
-        gap: $spacing-md;
+        gap: $spacing-md; // Separación intermedia (sin ocupar demasiado)
+        flex-wrap: nowrap; // Una sola línea cuando sea posible
+        overflow-x: auto; // Permitimos scroll horizontal si no cabe
+        -webkit-overflow-scrolling: touch;
       }
 
       .status-container {
@@ -286,26 +289,27 @@
         }
       }
 
-      .heading-text {
-        font-size: $font-size-lg;
-      }
+  .heading-text { font-size: $font-size-base; }
 
-      .anchor-text {
-        font-size: $font-size-xs;
-      }
+      .anchor-text { font-size: $font-size-xs; }
+      .anchor { gap: $spacing-sm; }
+      .anchor i { font-size: 14px; }
     }
   }
 
   @include small-mobile {
     .nav {
+      // Mantener compacto también en pantallas muy pequeñas
       flex-direction: column;
-      gap: $spacing-md;
+      gap: $spacing-sm;
       text-align: center;
 
       .anchors {
         justify-content: center;
-        flex-wrap: wrap;
-        gap: $spacing-sm;
+        flex-wrap: nowrap; // evitar crecer en altura
+        gap: $spacing-md; // un poco más que antes para que no se junten
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
       .status-container {

@@ -168,6 +168,8 @@
     height: 100%; // Cambia auto por 100%
     object-fit: contain; // Para que llene sin deformar
     object-position: center;
+    position: relative;
+    z-index: 1;
   }
 
 
@@ -178,6 +180,7 @@
     right: 0;
     background: $overlay-dark;
     padding: 16px;
+    z-index: 2;
 
     span {
       color: $white;
@@ -276,8 +279,25 @@
     max-height: 300px;
   }
 
+  // Aumentamos el área visible del carrusel en móvil y evitamos cortes de botones
+  .photo-carousel {
+    padding: 0 8px; // margen interno para que los botones no rocen el borde
+  }
   .photo-carousel .carousel-container {
-    max-height: 300px;
+    aspect-ratio: 1 / 1; // cuadrado, da más altura en móvil
+    min-height: unset;
+    max-height: unset;
+  }
+  // Fondo difuminado que usa la misma imagen para rellenar huecos sin recortar
+  .photo-carousel .carousel-slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: center / cover no-repeat;
+    background-image: var(--bg);
+    filter: blur(18px);
+    transform: scale(1.1);
+    z-index: 0;
   }
 
   .single-image-container .single-image-wrapper .image-caption,
@@ -320,7 +340,7 @@
   }
 
   .photo-carousel .carousel-container {
-    max-height: 250px;
+    aspect-ratio: 4 / 5; // un poco más vertical en pantallas muy pequeñas
   }
 }
 
