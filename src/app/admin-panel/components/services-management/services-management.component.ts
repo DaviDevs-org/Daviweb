@@ -297,6 +297,56 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
     }
   }
 
+  addHairLengthSegment(length: 'short' | 'medium' | 'long') {
+    if (!this.newService.requiresHairLength) return;
+    if (!this.newService.hairLengthModifiers) {
+      this.newService.hairLengthModifiers = {
+        short: { time: 30, segments: [] },
+        medium: { time: 45, segments: [] },
+        long: { time: 60, segments: [] }
+      };
+    }
+
+    const modifier = this.newService.hairLengthModifiers[length];
+
+    if (!modifier.segments) modifier.segments = [];
+    modifier.segments.push({ duration: 30, breakAfter: 0 });
+  }
+
+
+  removeHairLengthSegment(length: 'short' | 'medium' | 'long', index: number) {
+    if (!this.newService.requiresHairLength) return;
+    if (!this.newService.hairLengthModifiers) return;
+
+    const modifier = this.newService.hairLengthModifiers[length];
+    if (!modifier?.segments) return;
+
+    modifier.segments.splice(index, 1);
+  }
+
+
+  addTwoHairLengthSegments(length: 'short' | 'medium' | 'long') {
+    if (!this.newService.requiresHairLength) return;
+    if (!this.newService.hairLengthModifiers) {
+      this.newService.hairLengthModifiers = {
+        short: { time: 30, segments: [] },
+        medium: { time: 45, segments: [] },
+        long: { time: 60, segments: [] }
+      };
+    }
+
+    const modifier = this.newService.hairLengthModifiers[length];
+    if (!modifier.segments) modifier.segments = [];
+
+    // Añadimos DOS segmentos de golpe
+    modifier.segments.push({ duration: modifier.time, breakAfter: 0 });
+    modifier.segments.push({ duration: modifier.time, breakAfter: 0 });
+  }
+
+
+
+
+
   toggleBreaks() {
     this.hasBreaks = !this.hasBreaks;
     if (this.hasBreaks && this.newService.timeSegments.length === 1) {
@@ -306,20 +356,65 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
     }
   }
 
-  getEstimatedTime(service: Service | NewService): string {
-    if (!service.requiresHairLength || !service.hairLengthModifiers) return '';
+  toggleHairLengthSegments(length: 'short' | 'medium' | 'long') {
+    if (!this.newService.requiresHairLength) return;
 
-    const times = [
-      service.hairLengthModifiers.short.time,
-      service.hairLengthModifiers.medium.time,
-      service.hairLengthModifiers.long.time
-    ];
+    if (!this.newService.hairLengthModifiers) {
+      // Inicializamos los modifiers si no existen
+      this.newService.hairLengthModifiers = {
+        short: { time: 30, segments: [] },
+        medium: { time: 45, segments: [] },
+        long: { time: 60, segments: [] }
+      };
+    }
 
-    const minTime = Math.min(...times);
-    const maxTime = Math.max(...times);
+    const modifier = this.newService.hairLengthModifiers[length];
+    if (!modifier) return;
 
-    return `${minTime} - ${maxTime} min`;
+    if (!modifier.segments) modifier.segments = [];
+
+    if (modifier.segments.length === 0) {
+      modifier.segments.push({ duration: modifier.time, breakAfter: 0 });
+    } else if (modifier.segments.length === 1) {
+      modifier.segments.push({ duration: modifier.time, breakAfter: 0 });
+    }
   }
+
+
+
+  getEstimatedTime(service: Service) {
+    if (!service.requiresHairLength || !service.hairLengthModifiers) return 0;
+
+    let minTime = Infinity;
+    let maxTime = 0;
+
+    for (let length of this.lengths) {
+      const modifier = service.hairLengthModifiers[length];
+      if (!modifier || !modifier.segments?.length) continue;
+
+      // Suma duración + pausas
+      let total = modifier.segments.reduce((acc, seg) => acc + seg.duration + (seg.breakAfter ?? 0), 0);
+
+      if (total < minTime) minTime = total;
+      if (total > maxTime) maxTime = total;
+    }
+
+    if (minTime === Infinity) return 0; // Por si no hay segmentos
+
+    return minTime === maxTime ? `${minTime} min` : `${minTime}-${maxTime} min`;
+  }
+
+  convertToService(newService: NewService): Service {
+    return new Service(
+      newService.name,
+      newService.description,
+      newService.timeSegments,
+      newService.requiresHairLength ?? false,
+      newService.hairLengthModifiers
+    );
+  }
+
+
 
   getTotalTime(segments: TimeSegment[]): number {
     return segments.reduce((total, seg) => total + seg.duration + (seg.breakAfter || 0), 0);

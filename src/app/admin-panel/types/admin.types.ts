@@ -58,11 +58,16 @@ export interface TimeSegment {
   breakAfter?: number; // Tiempo de descanso/pausa después de este segmento (opcional)
 }
 
+export interface HairLengthModifier {
+  time: number; // sigue valiendo para los casos simples
+  segments?: TimeSegment[]; // añadimos esto para los casos con segmentos específicos
+}
+
 // Solo guardamos extraTime ahora
-export interface HairLengthModifiers {
-  short: { time: number };
-  medium: { time: number };
-  long: { time: number };
+export type HairLengthModifiers = {
+  short: HairLengthModifier;
+  medium: HairLengthModifier;
+  long: HairLengthModifier;
 }
 
 export class Service {
@@ -80,57 +85,70 @@ export class Service {
     public id?: string
   ) {}
 
-  /**
-   * Calcula el tiempo total de servicio real teniendo en cuenta:
-   *  - Longitud del pelo (si aplica)
-   *  - Segmentos (si existen)
-   *  - Duración base
-   */
+  // Calcula el tiempo total (segmentos + descansos)
   computeTotalTime(hairLength?: 'short' | 'medium' | 'long'): number {
-    // 1️⃣ Si requiere longitud y existe modificador → usa ese tiempo
     if (this.requiresHairLength && hairLength && this.hairLengthModifiers?.[hairLength]) {
-      return this.hairLengthModifiers[hairLength].time;
+      const modifier = this.hairLengthModifiers[hairLength];
+      if (modifier.segments?.length) {
+        return modifier.segments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
+      }
+      return modifier.time;
     }
 
-    // 2️⃣ Si tiene segmentos → suma duraciones + descansos
     if (this.timeSegments?.length) {
-      return this.timeSegments.reduce(
-        (total, seg) => total + (seg.duration || 0) + (seg.breakAfter || 0),
-        0
-      );
+      return this.timeSegments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
     }
 
-    // 3️⃣ Fallback → 30 min por defecto
+    return 30; // fallback
+  }
+
+  // Calcula solo tiempo activo sin pausas
+  getActiveTime(hairLength?: 'short' | 'medium' | 'long'): number {
+    if (this.requiresHairLength && hairLength && this.hairLengthModifiers?.[hairLength]) {
+      const modifier = this.hairLengthModifiers[hairLength];
+      if (modifier.segments?.length) {
+        return modifier.segments.reduce((sum, seg) => sum + seg.duration, 0);
+      }
+      return modifier.time;
+    }
+
+    if (this.timeSegments?.length) {
+      return this.timeSegments.reduce((sum, seg) => sum + seg.duration, 0);
+    }
+
     return 30;
   }
 
-  totalTime(): number {
+  // Devuelve el rango estimado de tiempo de un servicio
+  getEstimatedTimeRange(): string {
     if (this.requiresHairLength && this.hairLengthModifiers) {
-      const values = Object.values(this.hairLengthModifiers).map(v => v.time);
-      const avg = values.reduce((a, b) => a + b, 0) / values.length;
-      return Math.round(avg);
+      const times: number[] = [];
+      for (const length of ['short', 'medium', 'long'] as const) {
+        const modifier = this.hairLengthModifiers[length];
+        if (modifier.segments?.length) {
+          const total = modifier.segments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
+          times.push(total);
+        } else if (modifier.time) {
+          times.push(modifier.time);
+        }
+      }
+      if (times.length) {
+        const min = Math.min(...times);
+        const max = Math.max(...times);
+        return min === max ? `${min} min` : `${min}-${max} min`;
+      }
+      return '—';
     }
 
     if (this.timeSegments?.length) {
-      return this.timeSegments.reduce(
-        (total, seg) => total + (seg.duration || 0) + (seg.breakAfter || 0),
-        0
-      );
+      const total = this.timeSegments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
+      return `${total} min`;
     }
 
-    return 30;
+    return '30 min'; // fallback
   }
 
-  /**
-   * Calcula solo el tiempo activo (sin pausas)
-   */
-  getActiveTime(): number {
-    return this.timeSegments?.reduce((t, s) => t + (s.duration || 0), 0) || 0;
-  }
-
-  /**
-   * Exporta a JSON limpio para Firestore
-   */
+  // Exporta a JSON limpio para Firestore
   toJson(): ServiceDTO {
     return {
       name: this.name,
@@ -142,6 +160,7 @@ export class Service {
     };
   }
 }
+
 
 
 export interface NewService {

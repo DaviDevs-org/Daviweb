@@ -6,7 +6,8 @@ import { Appointment } from '../admin-panel/types/admin.types';
   providedIn: 'root'
 })
 export class AppointmentService {
-  constructor(private firestore: Firestore) {}
+  constructor(private firestore: Firestore) {
+  }
 
   private buildDateTimeFrom(yyyyMmDd: string | undefined, hhMm: string | undefined): Date {
     if (!yyyyMmDd || !hhMm) throw new Error('Faltan date o time');
@@ -28,12 +29,16 @@ export class AppointmentService {
       const servicePlain = appointment.service ? appointment.service.toJson() : undefined;
 
       // Guardar appointment
+      const totalDuration = appointment.service?.computeTotalTime(appointment.hairLengthChoice) || 30;
+      const { service, ...rest } = appointment;
       const docRef = await addDoc(appointmentsCol, {
-        ...appointment,
+        ...rest,
         service: servicePlain,
         datetime,
+        totalDuration,
         createdAt: serverTimestamp()
       });
+
 
       // Guardar reserved slots por cada segmento ACTIVO de 30min
       const slots = this.computeActiveSlotDateTimes(datetime, appointment);
@@ -45,7 +50,7 @@ export class AppointmentService {
         createdAt: serverTimestamp()
       })));
 
-      return { success: true, appointmentId: docRef.id };
+      return {success: true, appointmentId: docRef.id};
     } catch (err: any) {
       console.error('AppointmentService.addAppointment error:', err);
       throw new Error(err?.message || 'Error añadiendo la cita');
@@ -61,37 +66,66 @@ export class AppointmentService {
     const service = appointment.service;
     const hairLength = appointment.hairLengthChoice;
 
-    if (service) {
-      // 1️⃣ Si el servicio requiere hairLength, usamos su duración real según hairLengthModifiers
-      if (service.requiresHairLength && hairLength) {
-        const totalMinutes = service.hairLengthModifiers[hairLength]?.time || 30;
-        for (let m = 0; m < totalMinutes; m += 30) {
-          const dt = new Date(startDateTime.getTime() + m * 60000);
-          out.push({ time: fmt(dt), datetime: dt });
-        }
-        return out;
-      }
-
-      // 2️⃣ Si tiene timeSegments, respetarlos
-      const segments = service.timeSegments;
-      if (segments && segments.length > 0) {
-        let accumulated = 0;
-        segments.forEach((seg, idx) => {
-          const duration = seg.duration;
-          for (let m = 0; m < duration; m += 30) {
-            const dt = new Date(startDateTime.getTime() + (accumulated + m) * 60000);
-            out.push({ time: fmt(dt), datetime: dt });
-          }
-          accumulated += duration;
-          const breakAfter = seg.breakAfter || 0;
-          if (breakAfter > 0 && idx < segments.length - 1) accumulated += breakAfter;
-        });
-        return out;
-      }
+    // Si no hay servicio, reserva el slot base (30min)
+    if (!service) {
+      out.push({ time: fmt(startDateTime), datetime: startDateTime });
+      return out;
     }
 
-    // 3️⃣ Fallback: 30 min si no hay service ni timeSegments
-    out.push({ time: fmt(startDateTime), datetime: startDateTime });
+    const segments = service.timeSegments || [];
+
+    // Duración extra por hairLength (0 si no aplica)
+    const extraFromHair = (service.requiresHairLength && hairLength && service.hairLengthModifiers?.[hairLength])
+      ? Number(service.hairLengthModifiers[hairLength].time) || 0
+      : 0;
+
+    // 1) Si hay segmentos: respetamos segmentos (creamos slots por cada bloque activo)
+    if (segments.length > 0) {
+      let accumulated = 0;
+
+      segments.forEach((seg, idx) => {
+        const duration = Number(seg.duration) || 0;
+
+        // Añadir slots activos (cada 30min) dentro del segmento
+        for (let m = 0; m < duration; m += 30) {
+          const dt = new Date(startDateTime.getTime() + (accumulated + m) * 60000);
+          out.push({ time: fmt(dt), datetime: dt });
+        }
+
+        accumulated += duration;
+
+        // Añadir breakAfter al acumulado (no se reservan slots para el break)
+        const breakAfter = Number(seg.breakAfter) || 0;
+        if (breakAfter > 0 && idx < segments.length - 1) {
+          accumulated += breakAfter;
+        }
+      });
+
+      // 1.a) Si además hay extra por hairLength, lo añadimos como SLOTS EXTRA al final
+      if (extraFromHair > 0) {
+        // Calculamos cuánto ya cubre la suma de segmentos (activ+breaks)
+        const segmentsTotal = segments.reduce((t, s) => t + (Number(s.duration) || 0) + (Number(s.breakAfter) || 0), 0);
+
+        // Añadimos los minutos extra que no estén ya cubiertos por los segmentos.
+        // En este diseño consideramos que hairLength añade minutos adicionales (no sustituye segmentos).
+        const extraMinutes = Math.max(0, extraFromHair);
+        // Añadimos slots por cada 30min de esos extraMinutes
+        for (let m = 0; m < extraMinutes; m += 30) {
+          const dt = new Date(startDateTime.getTime() + (accumulated + m) * 60000);
+          out.push({ time: fmt(dt), datetime: dt });
+        }
+      }
+
+      return out;
+    }
+
+    // 2) Si NO hay segmentos: usamos directamente el tiempo total según hairLength o fallback 30
+    const totalMinutes = extraFromHair > 0 ? extraFromHair : 30;
+    for (let m = 0; m < totalMinutes; m += 30) {
+      const dt = new Date(startDateTime.getTime() + m * 60000);
+      out.push({ time: fmt(dt), datetime: dt });
+    }
+
     return out;
   }
 

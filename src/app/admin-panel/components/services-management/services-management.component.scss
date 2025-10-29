@@ -211,7 +211,7 @@ select {
     font-size: 1.1rem;
     padding: 14px 24px;
     font-weight: 600;
-    
+
     i {
         margin-right: 8px;
         font-size: 1.2rem;
@@ -543,7 +543,7 @@ select {
         cursor: pointer;
         flex-shrink: 0;
     }
-    
+
     .checkmark {
         font-weight: 600;
         color: $text-dark;
@@ -616,6 +616,29 @@ select {
         font-weight: 500;
     }
 }
+
+/* Breaks en longitud de pelo */
+.modifier-inputs .btn-add-segment {
+  background: $primary;
+  color: $white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: $shadow-sm;
+
+  &:hover {
+    background: $primary-dark;
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+}
+
 
 /* Modo avanzado (con breaks) */
 .advanced-time {

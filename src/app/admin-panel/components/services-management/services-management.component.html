@@ -7,12 +7,11 @@
     <p>Gestiona los servicios ofrecidos</p>
   </div>
 
-  <!-- Añadir nuevo servicio -->
   <div class="add-service-section">
     <form class="service-form" (ngSubmit)="addService()">
       <h3>Añadir Nuevo Servicio</h3>
 
-      <!-- Sección de imagen -->
+      <!-- Imagen del servicio -->
       <div class="image-upload-section">
         <label>Imagen del Servicio</label>
         <div class="upload-area" (click)="fileInput.click()" [class.has-image]="selectedFile"
@@ -22,27 +21,23 @@
             <p>{{ selectedFile ? 'Cambiar imagen' : 'Haz clic para añadir imagen' }}</p>
             <small>{{ selectedFile ? selectedFile.name : 'Formatos: JPG, PNG, WebP (máx. 5MB)' }}</small>
           </div>
-          <label for="service-file" class="sr-only">Seleccionar imagen del servicio</label>
-          <input id="service-file" #fileInput type="file" accept="image/*" (change)="onFileSelected($event)"
-                 class="visually-hidden" aria-label="Seleccionar imagen del servicio">
+          <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" class="visually-hidden">
         </div>
 
-        <!-- Progress bar para upload -->
         <div class="progress" *ngIf="uploadProgress() !== '0%'">
           <div class="progress-bar progress-bar-striped progress-bar-animated"
                [style.width]="uploadProgress()"></div>
         </div>
       </div>
 
-      <!-- Fila con nombre y checkbox -->
+      <!-- Nombre y checkboxes -->
       <div class="form-row-inline">
         <div class="form-group">
           <label>Nombre del Servicio</label>
-          <input type="text" [(ngModel)]="newService.name" name="serviceName"
-                 placeholder="Ej: Corte de Pelo Masculino" class="form-input">
+          <input type="text" [(ngModel)]="newService.name" name="serviceName" placeholder="Ej: Corte de Pelo Masculino" class="form-input">
         </div>
 
-        <div class="form-group">
+        <div class="form-group" *ngIf="!newService.requiresHairLength">
           <label class="checkbox-label">
             <input type="checkbox" [(ngModel)]="hasBreaks" (click)="toggleBreaks()" name="hasBreaks">
             <span class="checkmark">Segmentos de Tiempo (avanzado)</span>
@@ -57,24 +52,22 @@
         </div>
       </div>
 
-      <!-- Configuración de tiempo -->
+      <!-- Tiempo del servicio -->
       <div class="form-group time-configuration">
         <label>Tiempo del Servicio</label>
 
-        <!-- Modo simple (sin breaks) -->
+        <!-- Modo simple -->
         <div class="simple-time" *ngIf="!hasBreaks && !newService.requiresHairLength">
           <div class="time-input-simple">
             <div class="input-with-buttons">
               <label>Duración total del servicio</label>
               <div class="number-controls">
-                <button type="button" class="btn-decrease" (click)="removeTimeSegment(0)"
-                        [disabled]="newService.timeSegments[0].duration <= 15" aria-label="Disminuir duración">
-                  <i class="bi bi-dash" aria-hidden="true"></i>
+                <button type="button" class="btn-decrease" (click)="removeTimeSegment(0)" [disabled]="newService.timeSegments[0].duration <= 15">
+                  <i class="bi bi-dash"></i>
                 </button>
-                <input type="number" [(ngModel)]="newService.timeSegments[0].duration"
-                       name="totalDuration" min="15" step="15" class="form-input duration-input">
-                <button type="button" class="btn-increase" (click)="addTimeSegment()" aria-label="Aumentar duración">
-                  <i class="bi bi-plus" aria-hidden="true"></i>
+                <input type="number" [(ngModel)]="newService.timeSegments[0].duration" name="totalDuration" min="15" step="15" class="form-input duration-input">
+                <button type="button" class="btn-increase" (click)="addTimeSegment()">
+                  <i class="bi bi-plus"></i>
                 </button>
                 <span class="input-suffix">minutos</span>
               </div>
@@ -83,8 +76,8 @@
           <small class="help-text">Tiempo total que ocupará la cita en el calendario</small>
         </div>
 
-        <!-- Modo avanzado (con breaks) -->
-        <div class="advanced-time" *ngIf="hasBreaks">
+        <!-- Modo avanzado -->
+        <div class="advanced-time" *ngIf="hasBreaks && !newService.requiresHairLength">
           <div class="segments-header">
             <h4>Segmentos del servicio</h4>
             <button type="button" class="btn-add-segment" (click)="addTimeSegment()">
@@ -93,40 +86,29 @@
           </div>
 
           <div class="time-segments">
-            <div class="time-segment-card"
-                 *ngFor="let segment of newService.timeSegments; let i = index; let last = last">
+            <div class="time-segment-card" *ngFor="let segment of newService.timeSegments; let i = index; let last = last">
               <div class="segment-header">
-                <div class="segment-number">
-                  <i class="bi bi-clock"></i>
-                  <span>Segmento {{ i + 1 }}</span>
-                </div>
-                <button type="button" class="btn-remove-segment" (click)="removeTimeSegment(i)"
-                        *ngIf="newService.timeSegments.length > 1" title="Eliminar segmento">
+                <div class="segment-number"><i class="bi bi-clock"></i> Segmento {{ i + 1 }}</div>
+                <button type="button" class="btn-remove-segment" (click)="removeTimeSegment(i)" *ngIf="newService.timeSegments.length > 1">
                   <i class="bi bi-x"></i>
                 </button>
               </div>
-
               <div class="segment-fields">
                 <div class="form-group compact">
                   <label>Duración</label>
                   <div class="number-input">
-                    <input type="number" [(ngModel)]="segment.duration"
-                           [name]="'segmentDuration' + i" min="15" step="5"
-                           class="form-input small">
+                    <input type="number" [(ngModel)]="segment.duration" [name]="'segmentDuration' + i" min="15" step="5" class="form-input small">
                     <span class="suffix">min</span>
                   </div>
                 </div>
-
                 <div class="form-group compact" *ngIf="!last">
                   <label>Pausa después</label>
                   <div class="number-input">
-                    <input type="number" [(ngModel)]="segment.breakAfter"
-                           [name]="'segmentBreak' + i" min="0" step="5" class="form-input small">
+                    <input type="number" [(ngModel)]="segment.breakAfter" [name]="'segmentBreak' + i" min="0" step="5" class="form-input small">
                     <span class="suffix">min</span>
                   </div>
                   <small>Tiempo de espera para otros clientes</small>
                 </div>
-
                 <div class="form-group compact" *ngIf="last">
                   <label>Pausa final</label>
                   <div class="number-input disabled">
@@ -136,33 +118,24 @@
                   <small>No hay pausa después del último segmento</small>
                 </div>
               </div>
-
-              <div class="segment-visual" *ngIf="!last">
-                <div class="active-time">{{ segment.duration }}min activo</div>
-                <div class="break-arrow" *ngIf="segment.breakAfter! > 0">
-                  <i class="bi bi-arrow-right"></i>
-                  <span class="break-time">{{ segment.breakAfter }}min pausa</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
 
-        <!-- Resumen del tiempo -->
-        <div class="time-summary" *ngIf="getTotalTime(newService.timeSegments) > 0">
+        <!-- Resumen de tiempo -->
+        <div class="time-summary" *ngIf="(!newService?.requiresHairLength && (newService?.timeSegments?.length ?? 0) <= 1) || getTotalTime(newService?.timeSegments ?? []) > 0">
           <div class="summary-card">
-            <div class="summary-item" *ngIf="!newService.requiresHairLength">
+            <div class="summary-item" *ngIf="!newService?.requiresHairLength && (!hasBreaks || (newService?.timeSegments?.length ?? 0) <= 1)">
               <span class="label">Tiempo total:</span>
               <span class="value">{{ getTotalTime(newService.timeSegments) }} min</span>
             </div>
 
             <div class="summary-item" *ngIf="newService.requiresHairLength">
               <span class="label">Tiempo estimado:</span>
-              <span class="value">{{ getEstimatedTime(newService) }}</span>
+              <span class="value">{{ getEstimatedTime(convertToService(newService)) }}</span>
             </div>
 
-
-            <div class="summary-item" *ngIf="hasBreaks">
+            <div class="summary-item" *ngIf="getBreakTime(newService.timeSegments) > 0 && !newService.requiresHairLength">
               <span class="label">Tiempo de pausas:</span>
               <span class="value">{{ getBreakTime(newService.timeSegments) }} min</span>
             </div>
@@ -170,36 +143,89 @@
         </div>
       </div>
 
-      <!-- Sección de modificadores por longitud de pelo -->
-      <div class="hair-length-modifiers" *ngIf="newService.requiresHairLength">
+      <!-- Modificadores por longitud -->
+      <div class="hair-length-modifiers" *ngIf="newService.requiresHairLength && newService.hairLengthModifiers">
         <h4>Tiempos según longitud de pelo</h4>
+        <div *ngFor="let length of lengths">
+          <ng-container *ngIf="newService.hairLengthModifiers[length]">
+            <div class="hair-length-row">
+              <label class="hair-length-label">{{ lengthMap[length] }}</label>
 
-        <div *ngFor="let length of lengths" class="hair-length-row">
-          <label class="hair-length-label">
-            {{ lengthMap[length] }}
-          </label>
+              <div class="modifier-inputs">
+                <!-- Tiempo total -->
+                <div class="form-group compact" *ngIf="!((newService.hairLengthModifiers?.[length]?.segments?.length ?? 0) > 1)">
+                  <label>Tiempo total (min)</label>
+                  <input type="number" [(ngModel)]="newService.hairLengthModifiers[length].time"
+                         [name]="'time_' + length" min="15" step="5" class="form-input small">
+                </div>
 
-          <div class="modifier-inputs">
-            <div class="form-group compact">
-              <label>Tiempo total (min)</label>
-              <input type="number"
-                     [(ngModel)]="newService.hairLengthModifiers![length].time"
-                     [name]="'time_' + length"
-                     min="15"
-                     step="5"
-                     class="form-input small">
+                <!-- Segmentos -->
+                <div class="time-segments">
+                  <div class="time-segment-card" *ngFor="let seg of newService.hairLengthModifiers[length].segments ?? []; let i = index; let last = last">
+                    <div class="segment-header">
+                      <div class="segment-number"><i class="bi bi-clock"></i> Segmento {{ i + 1 }}</div>
+                      <button type="button" class="btn-remove-segment" (click)="removeHairLengthSegment(length, i)" *ngIf="newService.hairLengthModifiers[length].segments?.length ?? 1">
+                        <i class="bi bi-x"></i>
+                      </button>
+                    </div>
+                    <div class="segment-fields">
+                      <div class="form-group compact">
+                        <label>Duración</label>
+                        <div class="number-input">
+                          <input type="number" [(ngModel)]="seg.duration" [name]="'hairSegment' + length + i" min="5" step="5" class="form-input small">
+                          <span class="suffix">min</span>
+                        </div>
+                      </div>
+                      <div class="form-group compact" *ngIf="!last">
+                        <label>Pausa después</label>
+                        <div class="number-input">
+                          <input type="number" [(ngModel)]="seg.breakAfter" [name]="'hairSegmentBreak' + length + i" min="0" step="5" class="form-input small">
+                          <span class="suffix">min</span>
+                        </div>
+                        <small>Tiempo de espera para otros clientes</small>
+                      </div>
+                      <div class="form-group compact" *ngIf="last">
+                        <label>Pausa final</label>
+                        <div class="number-input disabled">
+                          <input type="number" value="0" disabled class="form-input small">
+                          <span class="suffix">min</span>
+                        </div>
+                        <small>No hay pausa después del último segmento</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Botón para añadir segmento -->
+                <button type="button" class="btn-add-segment" (click)="addTwoHairLengthSegments(length)">
+                  <i class="bi bi-plus-circle"></i> Añadir segmento
+                </button>
+
+
+                <!-- Resumen de tiempo -->
+                <div class="time-summary" *ngIf="newService.hairLengthModifiers[length].segments?.length">
+                  <div class="summary-card">
+                    <div class="summary-item">
+                      <span class="label">Tiempo total:</span>
+                      <span class="value">{{ getTotalTime(newService.hairLengthModifiers[length].segments ?? []) }} min</span>
+                    </div>
+                    <div class="summary-item" *ngIf="getBreakTime(newService.hairLengthModifiers[length].segments ?? []) > 0">
+                      <span class="label">Tiempo de pausas:</span>
+                      <span class="value">{{ getBreakTime(newService.hairLengthModifiers[length].segments ?? []) }} min</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
             </div>
-          </div>
+          </ng-container>
         </div>
       </div>
-
-
 
       <!-- Descripción -->
       <div class="form-group">
         <label>Descripción</label>
-        <textarea [(ngModel)]="newService.description" name="serviceDescription"
-                  placeholder="Descripción del servicio..." class="form-textarea"></textarea>
+        <textarea [(ngModel)]="newService.description" name="serviceDescription" placeholder="Descripción del servicio..." class="form-textarea"></textarea>
       </div>
 
       <button type="submit" class="add-service-btn" [disabled]="isUploading">
@@ -209,7 +235,6 @@
       </button>
     </form>
   </div>
-
   <!-- Lista de servicios actuales -->
   <div class="services-list">
     <h3>Servicios Actuales</h3>
@@ -231,7 +256,7 @@
             <div class="time-segment-item"
                  *ngFor="let segment of service.timeSegments; let segIndex = index">
               <span class="segment-duration">{{ segment.duration }}min</span>
-              <span *ngIf="segment.breakAfter! > 0" class="segment-break">+ {{ segment.breakAfter }}min pausa</span>
+              <span *ngIf="segment.breakAfter ?? 0" class="segment-break">+ {{ segment.breakAfter }}min pausa</span>
               <span *ngIf="segIndex < service.timeSegments.length - 1" class="segment-separator">→</span>
             </div>
           </div>

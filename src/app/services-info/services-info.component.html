@@ -1,124 +1,124 @@
 <div class="services-section" id="services">
-    <div class="services-header">
-        <h2 class="section-title">Servicios</h2>
-        <p class="section-subtitle">
-            Ofrecemos una amplia gama de servicios de peluquería profesional.
-        </p>
-    </div>
+  <div class="services-header">
+    <h2 class="section-title">Servicios</h2>
+    <p class="section-subtitle">
+      Ofrecemos una amplia gama de servicios de peluquería profesional.
+    </p>
+  </div>
 
-    @if (loading) {
+  @if (loading) {
     <div class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Cargando servicios...</p>
+      <div class="loading-spinner"></div>
+      <p>Cargando servicios...</p>
     </div>
-    } @else {
+  } @else {
     <div class="services-content">
-        <!-- Navigation de categorías -->
-        <nav class="categories-nav">
-            @for (category of categories; track category.id) {
-            <button class="category-tab" [class.active]="selectedCategory?.id === category.id"
-                (click)="selectCategory(category)">
-                <i [class]="category.icon"></i>
-                <span>{{ category.name }}</span>
-                <div class="service-count">{{ category.services.length }}</div>
-            </button>
+      <!-- Navigation de categorías -->
+      <nav class="categories-nav">
+        @for (category of categories; track category.id) {
+          <button class="category-tab" [class.active]="selectedCategory?.id === category.id"
+                  (click)="selectCategory(category)">
+            <i [class]="category.icon"></i>
+            <span>{{ category.name }}</span>
+            <div class="service-count">{{ category.services.length }}</div>
+          </button>
+        }
+      </nav>
+
+      <!-- Contenido principal -->
+      <div class="main-content">
+        <!-- Panel izquierdo: Lista de servicios -->
+        <div class="services-panel">
+          <div class="panel-header">
+            <h3>{{ selectedCategory?.name }}</h3>
+            <span class="services-count">{{ selectedCategory?.services!.length }} servicios</span>
+          </div>
+
+          <div class="services-list">
+            @for (service of selectedCategory?.services; track service.name) {
+              <button class="service-item"
+                      [class.selected]="selectedService?.name === service.name"
+                      (click)="selectService(service)"
+                      tabindex="0"
+                      role="button"
+                      [attr.aria-label]="'Ver detalles del servicio ' + service.name + ', duración ' + service.computeTotalTime() + ' minutos'">
+                <div class="service-info">
+                  <h4 class="service-name">{{ service.name }}</h4>
+                  <div class="service-meta">
+                    <span class="duration">
+                      <i class="bi bi-clock"></i>
+                      {{ service.computeTotalTime() }} min
+                    </span>
+                  </div>
+                </div>
+
+                <div class="service-arrow">
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </button>
             }
-        </nav>
-
-        <!-- Contenido principal -->
-        <div class="main-content">
-            <!-- Panel izquierdo: Lista de servicios -->
-            <div class="services-panel">
-                <div class="panel-header">
-                    <h3>{{ selectedCategory?.name }}</h3>
-                    <span class="services-count">{{ selectedCategory?.services!.length }} servicios</span>
-                </div>
-
-                <div class="services-list">
-                    @for (service of selectedCategory?.services; track service.name) {
-                    <button class="service-item"
-                        [class.selected]="selectedService?.name === service.name"
-                        (click)="selectService(service)"
-                        tabindex="0" role="button"
-                        [attr.aria-label]="'Ver detalles del servicio ' + service.name + ', duración ' + service.totalTime + ' minutos'"
-                    >
-                        <div class="service-info">
-                            <h4 class="service-name">{{ service.name }}</h4>
-                            <div class="service-meta">
-                                <span class="duration">
-                                    <i class="bi bi-clock"></i>
-                                    {{ service.totalTime() }} min
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="service-arrow">
-                            <i class="bi bi-chevron-right"></i>
-                        </div>
-                    </button>
-                    }
-                </div>
-            </div>
-
-            <!-- Panel derecho: Detalles del servicio -->
-            <div class="service-details">
-                @if (selectedService) {
-                <div class="service-image">
-                    <img [src]="selectedService.imageUrl || '/assets/images/default-service.jpg'"
-                         [alt]="selectedService.name + ' realizado en peluquería moderna en Madrid | RO\'S PELUQUEROS'"
-                         class="service-photo">
-
-                    <div class="image-overlay">
-                        <div class="service-badge">{{ selectedCategory?.name }}</div>
-                    </div>
-                </div>
-
-                <div class="service-content">
-                    <div class="service-header-details">
-                        <h2 class="service-title">{{ selectedService.name }}</h2>
-                    </div>
-
-                    <div class="service-description">
-                        <p>{{ selectedService.description }}</p>
-                    </div>
-
-                    <div class="service-features">
-                        <div class="feature">
-                            <i class="bi bi-clock"></i>
-                            <div>
-                                <span class="feature-label">Duración</span>
-                                <span class="feature-value">Aprox. {{ selectedService.totalTime() }} minutos</span>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="service-actions">
-                      <button class="btn-primary"
-                              [attr.aria-label]="'Reservar el servicio ' + selectedService.name + ' online'"
-                              (click)="bookService(selectedService); $event.preventDefault()">
-                        <i class="bi bi-calendar-check"></i>
-                        Reservar este servicio
-                      </button>
-
-                    </div>
-                </div>
-                } @else {
-                <div class="no-service-selected">
-                    <div class="placeholder-icon">
-                        <i class="bi bi-arrow-left"></i>
-                    </div>
-                    <h3>Selecciona un servicio</h3>
-                    <p>Elige un servicio de la lista para ver los detalles completos</p>
-                </div>
-                }
-            </div>
+          </div>
         </div>
 
-        <div class="services-note">
-            <i class="bi bi-info-circle"></i>
-            <p>* Los tiempos pueden variar según tipo de cabello. Consulta si necesitas un servicio personalizado.</p>
+        <!-- Panel derecho: Detalles del servicio -->
+        <div class="service-details">
+          @if (selectedService) {
+            <div class="service-image">
+              <img [src]="selectedService.imageUrl || '/assets/images/default-service.jpg'"
+                   [alt]="selectedService.name + ' realizado en peluquería moderna en Madrid | RO\'S PELUQUEROS'"
+                   class="service-photo">
+
+              <div class="image-overlay">
+                <div class="service-badge">{{ selectedCategory?.name }}</div>
+              </div>
+            </div>
+
+            <div class="service-content">
+              <div class="service-header-details">
+                <h2 class="service-title">{{ selectedService.name }}</h2>
+              </div>
+
+              <div class="service-description">
+                <p>{{ selectedService.description }}</p>
+              </div>
+
+              <div class="service-features">
+                <div class="feature">
+                  <i class="bi bi-clock"></i>
+                  <div>
+                    <span class="feature-label">Duración</span>
+                    <span class="feature-value">
+                      Aprox. {{ selectedService.getEstimatedTimeRange() }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="service-actions">
+                <button class="btn-primary"
+                        [attr.aria-label]="'Reservar el servicio ' + selectedService.name + ' online'"
+                        (click)="bookService(selectedService); $event.preventDefault()">
+                  <i class="bi bi-calendar-check"></i>
+                  Reservar este servicio
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="no-service-selected">
+              <div class="placeholder-icon">
+                <i class="bi bi-arrow-left"></i>
+              </div>
+              <h3>Selecciona un servicio</h3>
+              <p>Elige un servicio de la lista para ver los detalles completos</p>
+            </div>
+          }
         </div>
+      </div>
+
+      <div class="services-note">
+        <i class="bi bi-info-circle"></i>
+        <p>* Los tiempos pueden variar según tipo de cabello. Consulta si necesitas un servicio personalizado.</p>
+      </div>
     </div>
-    }
+  }
 </div>
