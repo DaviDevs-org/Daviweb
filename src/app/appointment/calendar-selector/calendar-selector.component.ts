@@ -199,12 +199,6 @@ export class CalendarSelectorComponent implements OnDestroy {
 
       await this.loadBarbers();
       this.computeAvailableHoursForCurrentMatrix();
-
-      console.log('Datos cargados:', {
-        schedule: this.schedule,
-        exceptions: this.exceptions,
-        bookedSlots: this.bookedSlotsByDate
-      });
     } catch (error) {
       console.error('Error cargando datos del calendario:', error);
       this.toast.error('Error al cargar los datos del calendario');
@@ -409,12 +403,7 @@ export class CalendarSelectorComponent implements OnDestroy {
     const dateKey = this.formatDate(date);
     const bookedHours = this.bookedSlotsByDate[dateKey] || [];
 
-    console.log('--- Seleccionando fecha ---');
-    console.log('Fecha:', dateKey);
-    console.log('Reservas existentes (solo slots activos):', bookedHours);
-
     const hoursWithStatus = this.getAvailableHoursForDate(date, bookedHours);
-    console.log('Horas calculadas para este día:', hoursWithStatus);
 
     if (!hoursWithStatus.length) {
       this.toast.error('No hay horas disponibles para este día');

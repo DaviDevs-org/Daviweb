@@ -224,11 +224,6 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       const barberSettings = await this.infoManager.getBarberSettings();
       this.barberSelectionEnabled = barberSettings?.settings?.barberSelection ?? false;
       await this.loadBarbers();
-
-      console.log('Datos cargados en appointment-management:', {
-        schedule: this.schedule,
-        exceptions: this.exceptions
-      });
     } catch (error) {
       console.error('Error cargando datos de horario:', error);
       this.hours = this.generateDefaultHours(); // Fallback

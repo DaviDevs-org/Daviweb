@@ -14,6 +14,5 @@ export class AppointmentComponent {
 
   onDateSelected(date: Date) {
     this.selectedDate = date;
-    console.log('Fecha recibida del hijo:', date);
   }
 }

@@ -68,15 +68,12 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['date']) {
-      console.log('BookingFormComponent recibió date:', this.date);
       this.updateAvailableServices();
     }
     if (changes['time']) {
-      console.log('BookingFormComponent recibió time:', this.time);
       this.updateAvailableServices();
     }
     if (changes['barbers']) {
-      console.log('BookingFormComponent recibió barbers:', this.barbers);
     }
   }
 
@@ -199,8 +196,6 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
     this.availableServices = this.services.filter(service =>
       this.canScheduleService(selectedDate, this.time!, service)
     );
-
-    console.log('Servicios disponibles para', this.date, this.time, ':', this.availableServices.length, 'de', this.services.length);
   }
 
   private parseDate(dateStr: string): Date | null {

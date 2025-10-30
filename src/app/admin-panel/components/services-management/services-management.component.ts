@@ -17,7 +17,7 @@ import { ImageProcessingService } from '../../../services/image-processing.servi
   templateUrl: './services-management.component.html',
   styleUrls: ['./services-management.component.scss']
 })
-export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ServicesManagementComponent implements OnInit, OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('formTop') formTop!: ElementRef<HTMLDivElement>;
 
@@ -45,10 +45,6 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
   private editServiceId: string | null = null;
   private existingImageUrl: string | undefined;
 
-  // Si no tienes estas observables, comenta ngAfterViewInit()
-  selectedAppointment$: any;
-  filteredForDay$: any;
-
 
   newService: NewService = {
     name: '',
@@ -75,30 +71,6 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
         }
       });
     });
-  }
-
-  ngAfterViewInit() {
-    if (this.selectedAppointment$ && this.filteredForDay$) {
-      this.scrollSub = combineLatest<[any, any]>([
-        this.selectedAppointment$,
-        this.filteredForDay$
-      ]).subscribe(([appointment, dayList]) => {
-        if (
-          appointment &&
-          appointment.timeNormalized &&
-          Array.isArray(dayList) &&
-          dayList.some((a: any) => a.id === appointment.id)
-        ) {
-          this.scrollToAppointment(appointment.timeNormalized);
-        }
-      });
-    }
-  }
-
-
-  private scrollToAppointment(timeNormalized: string) {
-    // Implementa tu lógica real de scroll aquí
-    console.log('Scrolling to appointment:', timeNormalized);
   }
 
   ngOnDestroy() {
