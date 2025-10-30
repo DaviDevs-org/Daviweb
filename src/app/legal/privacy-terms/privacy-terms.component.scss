@@ -1,0 +1,118 @@
+@use "sass:color";
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+
+:host {
+	display: block;
+}
+
+.legal-page {
+	max-width: 920px;
+	margin: 0 auto;
+	padding: 2rem;
+	background: $white;
+	border: 1px solid rgba($primary, 0.08);
+	border-radius: 16px;
+	box-shadow: 0 8px 30px rgba($primary, 0.06);
+
+	@include mobile {
+		padding: 1.25rem;
+		border-radius: 12px;
+	}
+
+	header {
+		margin-bottom: 1.5rem;
+		border-bottom: 1px solid rgba($primary, 0.12);
+		padding-bottom: 1rem;
+
+		h1 {
+			margin: 0 0 .25rem 0;
+			font-size: 2rem;
+			font-weight: 800;
+			color: $text-dark;
+
+			@include mobile { font-size: 1.6rem; }
+		}
+
+		.meta {
+			margin: 0;
+			color: rgba($text-dark, .6);
+			font-size: .95rem;
+		}
+	}
+
+	section {
+		margin: 1.25rem 0 1.5rem;
+		line-height: 1.75;
+		color: $text-dark;
+
+		h2 {
+			font-size: 1.35rem;
+			font-weight: 700;
+			margin: 0 0 .75rem 0;
+			padding-left: .75rem;
+			border-left: 4px solid $primary;
+
+			@include mobile { font-size: 1.2rem; }
+		}
+
+		p {
+			margin: .5rem 0 .75rem;
+			font-size: 1rem;
+		}
+
+		ul, ol {
+			margin: .5rem 0 .75rem 1.25rem;
+			padding: 0;
+			li { margin: .35rem 0; }
+		}
+
+		a {
+			color: $primary;
+			text-decoration: underline;
+			text-underline-offset: 2px;
+			transition: color .2s ease;
+			&:hover { color: color.mix($primary, #000, 80%); }
+		}
+
+		pre, code, kbd {
+			font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+		}
+
+		pre {
+			background: rgba($primary, .05);
+			border: 1px solid rgba($primary, .12);
+			border-radius: 10px;
+			padding: .75rem 1rem;
+			overflow-x: auto;
+			code { background: transparent; padding: 0; }
+		}
+
+		code {
+			background: rgba($primary, .06);
+			border: 1px solid rgba($primary, .12);
+			border-radius: 6px;
+			padding: .15rem .35rem;
+			font-size: .95em;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: .75rem 0 1rem;
+			font-size: .95rem;
+			th, td { border: 1px solid rgba($primary, .12); padding: .6rem .75rem; }
+			th { background: rgba($primary, .06); text-align: left; font-weight: 700; }
+			tr:nth-child(even) { background: rgba($primary, .03); }
+		}
+	}
+
+	.legal-footer {
+		margin-top: 1.25rem;
+		padding-top: 1rem;
+		border-top: 1px solid rgba($primary, 0.12);
+		color: rgba($text-dark, .7);
+		font-size: .95rem;
+		a { color: $primary; text-decoration: underline; }
+	}
+}

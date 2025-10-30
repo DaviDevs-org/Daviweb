@@ -78,7 +78,7 @@
         max-height: 50vh; // Limitar altura en móvil
         margin-top: 0;
         padding: 1rem;
-        order: 2; // Mover abajo en móvil
+        order: 1; // Debe ir primero en móvil
     }
 }
 
@@ -374,7 +374,9 @@
         gap: 1rem;
         padding: 0;
         min-width: 0;
-        order: 1; // Mover arriba en móvil
+        order: 2; // Debe ir después de la lista en móvil
+        display: flex;
+        flex-direction: column;
     }
 }
 
@@ -2552,5 +2554,29 @@
     .contact-item {
         word-break: break-word;
         overflow-wrap: break-word;
+    }
+}
+/* Reordenación móvil: citas -> información -> calendario */
+@media (max-width: 768px) {
+    .right-panel {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .right-panel .selected-detail {
+        order: 1;
+    }
+
+    .right-panel .edit-form-container {
+        order: 2;
+    }
+
+    .right-panel .calendar-header {
+        order: 3;
+    }
+
+    .right-panel .calendar-body,
+    .right-panel .empty-day {
+        order: 4;
     }
 }
