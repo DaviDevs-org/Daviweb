@@ -13,6 +13,11 @@
     top: 0;
     z-index: 1000;
 
+    @include mobile {
+        border-bottom: 0;
+        box-shadow: none;
+    }
+
     .header-content {
         max-width: 1200px;
         margin: 0 auto;
@@ -110,8 +115,8 @@
             box-shadow: 0 2px 10px rgba($primary, 0.3);
 
             @include mobile {
-                padding: 6px 10px;
-                font-size: 0.8rem;
+                padding: 8px 14px;
+                font-size: 1rem;
 
                 span {
                     display: none; // Ocultar texto, solo mostrar icono
@@ -124,18 +129,4 @@
             }
         }
     }
-    @media (max-width: 768px) {
-    .admin-header {
-        position: fixed; // Cambiar de sticky a fixed
-        width: 100%;
-        left: 0;
-        right: 0;
-        z-index: 1001; // Mayor que el nav
-        
-        .header-content {
-            padding: 0 10px; // Reducir padding
-        }
-    }
-}
-
 }
