@@ -680,7 +680,11 @@ select {
     border: 1px solid rgba($primary, 0.2);
     padding: 6px 10px;
     border-radius: 999px;
-    width: max-content;
+    // Evitar overflow horizontal en móviles: no forzar max-content
+    max-width: 100%;
+    width: auto;
+    white-space: normal;
+    word-break: break-word;
 }
 
 .modifier-inputs {
@@ -957,6 +961,19 @@ select {
     .checkbox-label {
         padding: 0.75rem;
         font-size: 0.9rem;
+    }
+    // Asegurar que todo el contenido se adapte al ancho de pantalla
+    .content-section,
+    :host,
+    :host > * {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .hair-length-label {
+        width: 100%;
+        display: block;
+        text-align: center;
     }
 
     .advanced-time .segments-header {

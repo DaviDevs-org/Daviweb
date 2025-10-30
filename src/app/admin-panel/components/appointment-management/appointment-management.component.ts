@@ -9,7 +9,7 @@ import {
   AppointmentFirestore,
   ServiceDTO
 } from '../../types/admin.types';
-import {BehaviorSubject, Observable, combineLatest, firstValueFrom} from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, firstValueFrom } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ServiceManager } from '../../../services/admin-panel/services-management.service';
@@ -27,6 +27,9 @@ import { Barber } from '../../types/admin.types';
 })
 export class AppointmentManagementComponent implements OnDestroy, AfterViewInit {
   @ViewChild('calendarBody', { static: false }) calendarBody!: ElementRef<HTMLElement>;
+  @ViewChild('selectedDetail', { static: false }) selectedDetail!: ElementRef<HTMLElement>;
+  @ViewChild('calendarHeader', { static: false }) calendarHeader!: ElementRef<HTMLElement>;
+  @ViewChild('editFormContainer', { static: false }) editFormContainer!: ElementRef<HTMLElement>;
 
   appointments$: Observable<Appointment[]>;
   selectedDate$ = new BehaviorSubject<Date>(new Date());
@@ -234,7 +237,12 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     // Observar cambios en la cita seleccionada Y que esté en el día actual para hacer scroll
     combineLatest([this.selectedAppointment$, this.filteredForDay$]).subscribe(([appointment, dayList]) => {
-      if (appointment && appointment.timeNormalized && dayList.some(a => a.id === appointment.id)) {
+      if (!appointment || !dayList.some(a => a.id === appointment.id)) return;
+
+      // En móvil: desplazamos hasta el bloque de detalles; en desktop: al slot horario
+      if (this.isMobileViewport()) {
+        this.scrollToSelectedDetail();
+      } else if (appointment.timeNormalized) {
         this.scrollToAppointment(appointment.timeNormalized);
       }
     });
@@ -326,7 +334,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const dateKey = this.toISODate(date);
     const exception = this.exceptions.find(ex => ex.date === dateKey);
 
-    let intervals: {open: string, close: string}[] = [];
+    let intervals: { open: string, close: string }[] = [];
 
     if (exception) {
       if (exception.closed) return false;
@@ -442,6 +450,11 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       date: formattedDate,
       time: timeSlot
     });
+
+    // En móvil: al crear desde un slot disponible, desplazamos al inicio del formulario
+    if (this.isMobileViewport()) {
+      this.scrollToEditForm();
+    }
   }
 
   startEdit(appointment: Appointment) {
@@ -458,6 +471,11 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       barberId: appointment.barber || '',
       description: appointment.description || ''
     });
+
+    // En móvil, al pulsar Modificar, desplazamos al formulario de edición
+    if (this.isMobileViewport()) {
+      this.scrollToEditForm();
+    }
   }
 
   cancelEdit() {
@@ -741,6 +759,58 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     }
   }
 
+  // Detecta si el viewport es móvil según breakpoint (alineado con clases mobile-only/desktop-only)
+  private isMobileViewport(): boolean {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 768px)').matches;
+  }
+
+  // Hace scroll suave a la sección de detalles seleccionada (para móvil)
+  private scrollToSelectedDetail(): void {
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+
+    this.scrollTimeout = setTimeout(() => {
+      // Preferimos el ViewChild si está disponible; si no, buscamos por clase
+      const el = this.selectedDetail?.nativeElement || (typeof document !== 'undefined'
+        ? (document.querySelector('.selected-detail') as HTMLElement)
+        : null);
+      if (el && typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  }
+
+  // Hace scroll al header del calendario (útil cuando se entra en modo edición en móvil)
+  private scrollToCalendarHeader(): void {
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+
+    this.scrollTimeout = setTimeout(() => {
+      const el = this.calendarHeader?.nativeElement || (typeof document !== 'undefined'
+        ? (document.querySelector('.calendar-header') as HTMLElement)
+        : null);
+      if (el && typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  }
+
+  // Hace scroll al contenedor del formulario de edición (móvil)
+  private scrollToEditForm(): void {
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+
+    this.scrollTimeout = setTimeout(() => {
+      const el = this.editFormContainer?.nativeElement || (typeof document !== 'undefined'
+        ? (document.querySelector('.edit-form-container') as HTMLElement)
+        : null);
+      if (el && typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Fallback: si no existe aún, intentamos el header del calendario
+        this.scrollToCalendarHeader();
+      }
+    }, 100);
+  }
+
   private extractHourFromTime(time: string): string {
     const [hour, minute] = time.split(':');
     const hourNum = parseInt(hour);
@@ -755,8 +825,8 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
   private isSameDay(date1: Date, date2: Date): boolean {
     return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate();
   }
 
   private normalize(a: Appointment): Appointment {
@@ -848,7 +918,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     if (concrete && concrete.timeSegments && concrete.timeSegments.length > 0) {
       let currentTime = startMinutes;
 
-      (concrete.timeSegments as {duration: number; breakAfter?: number}[]).forEach((segment, index) => {
+      (concrete.timeSegments as { duration: number; breakAfter?: number }[]).forEach((segment, index) => {
         segments.push({ start: currentTime, duration: segment.duration, type: 'active' });
         currentTime += segment.duration;
 
@@ -899,7 +969,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     const concrete = this.materializeService(appointment);
     const list = concrete?.timeSegments || [];
-    (list as {duration: number; breakAfter?: number}[]).forEach(segment => {
+    (list as { duration: number; breakAfter?: number }[]).forEach(segment => {
       segments.push({ start: currentTime, duration: segment.duration });
       currentTime += segment.duration + (segment.breakAfter || 0);
     });
@@ -915,7 +985,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     const concrete = this.materializeService(appointment);
     const list = concrete?.timeSegments || [];
-    (list as {duration: number; breakAfter?: number}[]).forEach((segment, index) => {
+    (list as { duration: number; breakAfter?: number }[]).forEach((segment, index) => {
       currentTime += segment.duration;
       if (segment.breakAfter && segment.breakAfter > 0 && index < list.length - 1) {
         breaks.push({ start: currentTime, duration: segment.breakAfter, belongsTo: appointment });

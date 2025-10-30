@@ -33,38 +33,15 @@
 }
 
 .opinions-list {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
   padding: 0 12px;
   box-sizing: border-box;
-  max-width: 100%;
-  overflow: visible;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.opinion {
-  background-color: $white; // tarjeta clara legible
-  border-radius: $border-radius-xl;
-  padding: 20px 20px 12px 20px;
-  box-shadow: $shadow-sm;
-  flex: 1 1 300px;
-  max-width: 320px;
-  box-sizing: border-box;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: transform 0.2s ease;
-  min-width: 280px;
-  cursor: pointer;
-  color: $text-dark;
-  border: 1px solid $border-color;
-}
-
-.opinion:hover {
-  transform: translateY(-4px);
-}
 
 .more-reviews {
   text-align: center;
