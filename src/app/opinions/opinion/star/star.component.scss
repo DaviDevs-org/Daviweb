@@ -5,7 +5,7 @@
   position: relative;
   box-sizing: border-box;
   overflow: visible; /* Para que las estrellas no se corten */
-  background: $white;
+  background: transparent; /* Evita fondos blancos detrás de las estrellas */
   display: flex;
   gap: 4px; /* Espacio entre estrellas */
   align-items: center;
@@ -32,4 +32,11 @@
     fill: $star-filled !important;
     stroke: $star-filled-border !important;
   }
+}
+
+/* Asegura que el SVG no deje huecos y herede bien tamaños */
+.vector svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
