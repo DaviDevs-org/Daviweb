@@ -9,7 +9,7 @@ import {
   AppointmentFirestore,
   ServiceDTO
 } from '../../types/admin.types';
-import {BehaviorSubject, Observable, combineLatest, firstValueFrom} from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, firstValueFrom } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ServiceManager } from '../../../services/admin-panel/services-management.service';
@@ -339,7 +339,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const dateKey = this.toISODate(date);
     const exception = this.exceptions.find(ex => ex.date === dateKey);
 
-    let intervals: {open: string, close: string}[] = [];
+    let intervals: { open: string, close: string }[] = [];
 
     if (exception) {
       if (exception.closed) return false;
@@ -455,6 +455,11 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       date: formattedDate,
       time: timeSlot
     });
+
+    // En móvil: al crear desde un slot disponible, desplazamos al inicio del formulario
+    if (this.isMobileViewport()) {
+      this.scrollToEditForm();
+    }
   }
 
   startEdit(appointment: Appointment) {
@@ -825,8 +830,8 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
   private isSameDay(date1: Date, date2: Date): boolean {
     return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate();
   }
 
   private normalize(a: Appointment): Appointment {
@@ -918,7 +923,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     if (concrete && concrete.timeSegments && concrete.timeSegments.length > 0) {
       let currentTime = startMinutes;
 
-      (concrete.timeSegments as {duration: number; breakAfter?: number}[]).forEach((segment, index) => {
+      (concrete.timeSegments as { duration: number; breakAfter?: number }[]).forEach((segment, index) => {
         segments.push({ start: currentTime, duration: segment.duration, type: 'active' });
         currentTime += segment.duration;
 
@@ -969,7 +974,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     const concrete = this.materializeService(appointment);
     const list = concrete?.timeSegments || [];
-    (list as {duration: number; breakAfter?: number}[]).forEach(segment => {
+    (list as { duration: number; breakAfter?: number }[]).forEach(segment => {
       segments.push({ start: currentTime, duration: segment.duration });
       currentTime += segment.duration + (segment.breakAfter || 0);
     });
@@ -985,7 +990,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     const concrete = this.materializeService(appointment);
     const list = concrete?.timeSegments || [];
-    (list as {duration: number; breakAfter?: number}[]).forEach((segment, index) => {
+    (list as { duration: number; breakAfter?: number }[]).forEach((segment, index) => {
       currentTime += segment.duration;
       if (segment.breakAfter && segment.breakAfter > 0 && index < list.length - 1) {
         breaks.push({ start: currentTime, duration: segment.breakAfter, belongsTo: appointment });
