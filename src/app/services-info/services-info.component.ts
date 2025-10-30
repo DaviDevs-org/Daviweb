@@ -58,7 +58,9 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
       s.description,
       s.timeSegments || [],
       s.requiresHairLength ?? false,
-      s.hairLengthModifiers
+      s.hairLengthModifiers,
+      s.imageUrl,
+      s.id
     ));
 
     const categoryMap = new Map<string, Service[]>();

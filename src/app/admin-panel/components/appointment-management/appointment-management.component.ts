@@ -813,9 +813,25 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     });
   }
 
+  private materializeService(appointment: Appointment): { timeSegments: { duration: number; breakAfter?: number }[] } | null {
+    const svc: any = appointment.service;
+    if (!svc) return null;
+    if (svc.requiresHairLength && appointment.hairLengthChoice) {
+      const mod = svc.hairLengthModifiers?.[appointment.hairLengthChoice];
+      if (mod) {
+        const segs = (mod.segments && mod.segments.length > 0)
+          ? mod.segments
+          : (mod.time && mod.time > 0 ? [{ duration: mod.time, breakAfter: 0 }] : []);
+        return { timeSegments: segs };
+      }
+    }
+    return { timeSegments: (svc.timeSegments || []) };
+  }
+
   getAppointmentDuration(appointment: Appointment): string {
-    if (appointment.service?.timeSegments) {
-      const totalTime = appointment.service.timeSegments.reduce((total, segment) =>
+    const concrete = this.materializeService(appointment);
+    if (concrete && concrete.timeSegments && concrete.timeSegments.length > 0) {
+      const totalTime = concrete.timeSegments.reduce((total, segment) =>
         total + segment.duration + (segment.breakAfter || 0), 0);
       return `${totalTime}min`;
     }
@@ -833,14 +849,15 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const startMinutes = this.timeToMinutes(appointment.timeNormalized);
     const segments: { start: number, duration: number, type: 'active' | 'break' }[] = [];
 
-    if (appointment.service?.timeSegments) {
+    const concrete = this.materializeService(appointment);
+    if (concrete && concrete.timeSegments && concrete.timeSegments.length > 0) {
       let currentTime = startMinutes;
 
-      appointment.service.timeSegments.forEach((segment, index) => {
+      (concrete.timeSegments as {duration: number; breakAfter?: number}[]).forEach((segment, index) => {
         segments.push({ start: currentTime, duration: segment.duration, type: 'active' });
         currentTime += segment.duration;
 
-        if (segment.breakAfter && segment.breakAfter > 0 && index < appointment.service!.timeSegments.length - 1) {
+        if (segment.breakAfter && segment.breakAfter > 0 && index < concrete.timeSegments.length - 1) {
           segments.push({ start: currentTime, duration: segment.breakAfter, type: 'break' });
           currentTime += segment.breakAfter;
         }
@@ -879,13 +896,15 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   }
 
   getActiveTimeSegments(appointment: Appointment): { start: number, duration: number }[] {
-    if (!appointment.timeNormalized || !appointment.service?.timeSegments) return [];
+    if (!appointment.timeNormalized) return [];
 
     const startMinutes = this.timeToMinutes(appointment.timeNormalized);
     const segments: { start: number, duration: number }[] = [];
     let currentTime = startMinutes;
 
-    appointment.service.timeSegments.forEach(segment => {
+    const concrete = this.materializeService(appointment);
+    const list = concrete?.timeSegments || [];
+    (list as {duration: number; breakAfter?: number}[]).forEach(segment => {
       segments.push({ start: currentTime, duration: segment.duration });
       currentTime += segment.duration + (segment.breakAfter || 0);
     });
@@ -894,14 +913,16 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   }
 
   getBreakSegments(appointment: Appointment): { start: number, duration: number, belongsTo: Appointment }[] {
-    if (!appointment.timeNormalized || !appointment.service?.timeSegments) return [];
+    if (!appointment.timeNormalized) return [];
 
     const breaks: { start: number, duration: number, belongsTo: Appointment }[] = [];
     let currentTime = this.timeToMinutes(appointment.timeNormalized);
 
-    appointment.service.timeSegments.forEach((segment, index) => {
+    const concrete = this.materializeService(appointment);
+    const list = concrete?.timeSegments || [];
+    (list as {duration: number; breakAfter?: number}[]).forEach((segment, index) => {
       currentTime += segment.duration;
-      if (segment.breakAfter && segment.breakAfter > 0 && index < appointment.service!.timeSegments.length - 1) {
+      if (segment.breakAfter && segment.breakAfter > 0 && index < list.length - 1) {
         breaks.push({ start: currentTime, duration: segment.breakAfter, belongsTo: appointment });
         currentTime += segment.breakAfter;
       }

@@ -63,8 +63,8 @@ export class AppointmentService {
     const out: { time: string; datetime: Date }[] = [];
     const fmt = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
-    const service = appointment.service;
-    const hairLength = appointment.hairLengthChoice;
+  const service = appointment.service;
+  const hairLength = appointment.hairLengthChoice;
 
     // Si no hay servicio, reserva el slot base (30min)
     if (!service) {
@@ -72,12 +72,12 @@ export class AppointmentService {
       return out;
     }
 
-    const segments = service.timeSegments || [];
-
-    // Duración extra por hairLength (0 si no aplica)
-    const extraFromHair = (service.requiresHairLength && hairLength && service.hairLengthModifiers?.[hairLength])
-      ? Number(service.hairLengthModifiers[hairLength].time) || 0
-      : 0;
+    // Preferir segmentos específicos por longitud si existen
+    // Materializar la longitud como un servicio normal si aplica
+    const concrete = (service.requiresHairLength && hairLength)
+      ? service.materializeForLength(hairLength)
+      : service;
+  const segments = concrete.timeSegments || [];
 
     // 1) Si hay segmentos: respetamos segmentos (creamos slots por cada bloque activo)
     if (segments.length > 0) {
@@ -101,26 +101,13 @@ export class AppointmentService {
         }
       });
 
-      // 1.a) Si además hay extra por hairLength, lo añadimos como SLOTS EXTRA al final
-      if (extraFromHair > 0) {
-        // Calculamos cuánto ya cubre la suma de segmentos (activ+breaks)
-        const segmentsTotal = segments.reduce((t, s) => t + (Number(s.duration) || 0) + (Number(s.breakAfter) || 0), 0);
-
-        // Añadimos los minutos extra que no estén ya cubiertos por los segmentos.
-        // En este diseño consideramos que hairLength añade minutos adicionales (no sustituye segmentos).
-        const extraMinutes = Math.max(0, extraFromHair);
-        // Añadimos slots por cada 30min de esos extraMinutes
-        for (let m = 0; m < extraMinutes; m += 30) {
-          const dt = new Date(startDateTime.getTime() + (accumulated + m) * 60000);
-          out.push({ time: fmt(dt), datetime: dt });
-        }
-      }
+  // No añadimos "extra" aquí: trabajamos siempre con segmentos materializados
 
       return out;
     }
 
-    // 2) Si NO hay segmentos: usamos directamente el tiempo total según hairLength o fallback 30
-    const totalMinutes = extraFromHair > 0 ? extraFromHair : 30;
+    // 2) Si NO hay segmentos: usamos directamente el tiempo total del servicio materializado
+    const totalMinutes = concrete.computeTotalTime();
     for (let m = 0; m < totalMinutes; m += 30) {
       const dt = new Date(startDateTime.getTime() + m * 60000);
       out.push({ time: fmt(dt), datetime: dt });

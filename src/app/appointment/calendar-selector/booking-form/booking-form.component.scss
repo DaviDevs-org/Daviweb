@@ -304,47 +304,83 @@ textarea {
 /* Estilos de botones de longitud de pelo */
 .hair-length-options {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   margin-top: 8px;
 
-  button {
+  .hair-length-card {
     flex: 1;
-    padding: 12px 0;
-    font-weight: 700;
-    text-transform: uppercase;
-    border-radius: 12px;
-    border: 2px solid $primary-dark; // contorno con más contraste
-    background: $light-gray; // mejor contraste con el fondo
-    color: $text-dark; // texto legible
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-
-    &:hover {
-      background: $white;
-      transform: translateY(-1px);
-    }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 14px;
+    padding: 10px;
+    transition: box-shadow 0.25s ease, transform 0.2s ease;
 
     &.active {
-      background: $primary-dark;
-      color: $white;
-      border-color: $black;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
     }
 
-    &:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba($primary, 0.35);
-      transform: translateY(-1px);
+    button {
+      width: 100%;
+      padding: 12px 0;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-radius: 10px;
+      border: 2px solid $primary-dark; // contorno con más contraste
+      background: $light-gray; // mejor contraste con el fondo
+      color: $text-dark; // texto legible
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+      &:hover {
+        background: $white;
+        transform: translateY(-1px);
+      }
+
+      &.active {
+        background: $primary-dark;
+        color: $white;
+        border-color: $black;
+      }
+
+      &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba($primary, 0.35);
+        transform: translateY(-1px);
+      }
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      max-width: 120px;
+      height: auto;
+      border-radius: 10px;
+      background: #f4f5f7;
+      border: 1px solid rgba(0,0,0,0.05);
     }
   }
 
   @media (max-width: 480px) {
-    gap: 6px;
+    gap: 8px;
 
-    button {
+    .hair-length-card button {
       font-size: 13px;
       padding: 10px 0;
     }
   }
+}
+
+.length-time-hint {
+  margin-top: 10px;
+  font-size: 14px;
+  color: $text-dark;
+  .time-label { font-weight: 600; margin-right: 6px; }
+  .time-value { font-weight: 700; color: $primary-dark; }
 }

@@ -209,28 +209,25 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
   }
 
   private canScheduleService(date: Date, time: string, service: Service): boolean {
-    if (!service.timeSegments || service.timeSegments.length === 0) {
+    const effService = (service.requiresHairLength && this.hairLengthSelection)
+      ? service.materializeForLength(this.hairLengthSelection)
+      : service;
+
+    const startMinutes = this.timeToMinutes(time);
+    if (!effService.timeSegments || effService.timeSegments.length === 0) {
       // Servicio sin timeSegments, asumir duración por defecto de 30 minutos
-      const startMinutes = this.timeToMinutes(time);
       const endTimeMinutes = startMinutes + 30;
-
-      // Verificar horarios de cierre
-      if (!this.isTimeWithinSchedule(date, endTimeMinutes)) {
-        return false;
-      }
-
-      // Verificar colisiones con otras citas
+      if (!this.isRangeWithinSchedule(date, startMinutes, endTimeMinutes)) return false;
       return !this.hasCollisionWithExistingAppointments(date, startMinutes, 30);
     }
 
-    const dateKey = this.formatDate(date);
-    const startMinutes = this.timeToMinutes(time);
+  const dateKey = this.formatDate(date);
 
     // Calcular todos los slots que ocupará el servicio
     const serviceSlots: number[] = [];
     let currentTime = startMinutes;
 
-    service.timeSegments.forEach((segment, index) => {
+  effService.timeSegments.forEach((segment, index) => {
       // Slots del servicio activo
       for (let i = 0; i < segment.duration; i += 30) {
         serviceSlots.push(currentTime + i);
@@ -238,7 +235,7 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
       currentTime += segment.duration;
 
       // Slots del break (si existe y no es el último segmento)
-      if (segment.breakAfter && segment.breakAfter > 0 && index < service.timeSegments.length - 1) {
+  if (segment.breakAfter && segment.breakAfter > 0 && index < effService.timeSegments.length - 1) {
         for (let i = 0; i < segment.breakAfter; i += 30) {
           serviceSlots.push(currentTime + i);
         }
@@ -246,11 +243,15 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
       }
     });
 
-    // Verificar que no se sobreponga con horarios de cierre
-    const endTime = Math.max(...serviceSlots) + 30; // +30 porque cada slot es de 30 min
-    if (!this.isTimeWithinSchedule(date, endTime)) {
-      return false;
-    }
+    // Calcular fin exacto (segmentos + breaks intermedios) y verificar que cabe en un intervalo abierto
+    let endExact = startMinutes;
+    effService.timeSegments.forEach((segment, index) => {
+      endExact += segment.duration;
+      if (segment.breakAfter && segment.breakAfter > 0 && index < effService.timeSegments.length - 1) {
+        endExact += segment.breakAfter;
+      }
+    });
+    if (!this.isRangeWithinSchedule(date, startMinutes, endExact)) return false;
 
     // Verificar que no se sobreponga con otras citas
     const dayAppointments = this.getAppointmentsForDate(dateKey);
@@ -271,7 +272,7 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
       });
 
       // Verificar solapamiento solo con slots activos del nuevo servicio
-      const activeServiceSlots = this.getActiveServiceSlots(service, startMinutes);
+  const activeServiceSlots = this.getActiveServiceSlots(effService, startMinutes);
       const hasOverlap = activeServiceSlots.some(slot => occupiedSlots.includes(slot));
       if (hasOverlap) {
         return false;
@@ -279,6 +280,29 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
     }
 
     return true;
+  }
+
+  // Verifica que [start, end) esté completamente dentro de un único intervalo abierto del día
+  private isRangeWithinSchedule(date: Date, startMinutes: number, endMinutes: number): boolean {
+    const dateKey = this.formatDate(date);
+    const exception = this.exceptions.find(ex => ex.date === dateKey);
+
+    let intervals: {open: string; close: string}[] = [];
+    if (exception) {
+      if (exception.closed) return false;
+      intervals = exception.intervals || [];
+    } else {
+      const dayName = this.getDayName(date);
+      const daySchedule = this.schedule.find(day => day.day === dayName);
+      if (!daySchedule || daySchedule.closed) return false;
+      intervals = daySchedule.intervals || [];
+    }
+
+    return intervals.some(interval => {
+      const openM = this.timeToMinutes(interval.open);
+      const closeM = this.timeToMinutes(interval.close);
+      return startMinutes >= openM && endMinutes <= closeM;
+    });
   }
 
   get privacyConsentInvalid(): boolean {
@@ -348,22 +372,36 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
     const startMinutes = this.timeToMinutes(appointment.timeNormalized);
     const segments: { start: number; duration: number; type: 'active' | 'break' }[] = [];
 
-    if (appointment.service?.timeSegments) {
-      let currentTime = startMinutes;
+    const svc = appointment.service as any;
+    if (!svc) return [];
 
-      appointment.service.timeSegments.forEach((segment, index) => {
+    const materialize = (s: any, length?: 'short' | 'medium' | 'long') => {
+      if (!s?.requiresHairLength || !length) return s;
+      const mod = s.hairLengthModifiers?.[length];
+      if (!mod) return s;
+      const segs = (mod.segments && mod.segments.length > 0)
+        ? mod.segments
+        : (mod.time && mod.time > 0 ? [{ duration: mod.time, breakAfter: 0 }] : []);
+      return { ...s, timeSegments: segs, requiresHairLength: false };
+    };
+
+    const concrete = materialize(svc, appointment.hairLengthChoice || undefined);
+
+    if (concrete.timeSegments && concrete.timeSegments.length > 0) {
+      let currentTime = startMinutes;
+      (concrete.timeSegments as {duration: number; breakAfter?: number}[]).forEach((segment, index) => {
         segments.push({ start: currentTime, duration: segment.duration, type: 'active' });
         currentTime += segment.duration;
-
-        if (segment.breakAfter && segment.breakAfter > 0 && index < appointment.service!.timeSegments.length - 1) {
+        if (segment.breakAfter && segment.breakAfter > 0 && index < concrete.timeSegments.length - 1) {
           segments.push({ start: currentTime, duration: segment.breakAfter, type: 'break' });
           currentTime += segment.breakAfter;
         }
       });
-    } else {
-      // Servicio sin timeSegments, asumir 30 minutos por defecto
-      segments.push({ start: startMinutes, duration: 30, type: 'active' });
+      return segments;
     }
+
+    // Fallback
+    segments.push({ start: startMinutes, duration: 30, type: 'active' });
 
     return segments;
   }
@@ -541,5 +579,25 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
 
   getTotalTime(segments: TimeSegment[]): number {
     return segments.reduce((total, segment) => total + segment.duration + (segment.breakAfter || 0), 0);
+  }
+
+  // Duración por longitud seleccionada (minutos)
+  getSelectedLengthTime(length: 'short' | 'medium' | 'long'): number {
+    const serviceName = this.bookingFormRef?.value?.service;
+    const svc = this.services.find(s => s.name === serviceName);
+    if (!svc || !svc.hairLengthModifiers) return 30;
+
+    const mod = svc.hairLengthModifiers[length];
+    if (!mod) return 30;
+
+    // Si hay segmentos, sumar duración + breaks
+    if (mod.segments && mod.segments.length > 0) {
+      return mod.segments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
+    }
+    // Si no hay segmentos, usar tiempo simple
+    if (mod.time && mod.time > 0) return mod.time;
+
+    // Fallback razonable
+    return 30;
   }
 }

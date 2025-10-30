@@ -85,6 +85,36 @@ export class Service {
     public id?: string
   ) {}
 
+  // Devuelve los timeSegments "materializados" para una longitud concreta
+  getTimeSegmentsForLength(length: 'short' | 'medium' | 'long'): TimeSegment[] {
+    if (!this.requiresHairLength) {
+      return this.timeSegments || [];
+    }
+    const mod = this.hairLengthModifiers?.[length];
+    if (!mod) return [];
+    if (mod.segments && mod.segments.length > 0) {
+      return mod.segments;
+    }
+    if (mod.time && mod.time > 0) {
+      return [{ duration: mod.time, breakAfter: 0 }];
+    }
+    return [];
+  }
+
+  // Crea una instancia equivalente a un "servicio normal" para esa longitud
+  materializeForLength(length: 'short' | 'medium' | 'long'): Service {
+    const segments = this.getTimeSegmentsForLength(length);
+    return new Service(
+      this.name,
+      this.description,
+      segments,
+      /* requiresHairLength */ false,
+      this.hairLengthModifiers,
+      this.imageUrl,
+      this.id
+    );
+  }
+
   // Calcula el tiempo total (segmentos + descansos)
   computeTotalTime(hairLength?: 'short' | 'medium' | 'long'): number {
     if (this.requiresHairLength && hairLength && this.hairLengthModifiers?.[hairLength]) {

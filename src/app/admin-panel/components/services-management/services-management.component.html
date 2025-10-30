@@ -46,8 +46,8 @@
 
         <div class="form-group">
           <label class="checkbox-label">
-            <input type="checkbox" [(ngModel)]="newService.requiresHairLength" name="requiresHairLength">
-            <span class="checkmark">¿Precio según longitud de pelo?</span>
+            <input type="checkbox" [(ngModel)]="newService.requiresHairLength" (change)="onRequireHairLengthChanged()" name="requiresHairLength">
+            <span class="checkmark">¿Tiempo según longitud de pelo?</span>
           </label>
         </div>
       </div>
@@ -153,7 +153,7 @@
 
               <div class="modifier-inputs">
                 <!-- Tiempo total -->
-                <div class="form-group compact" *ngIf="!((newService.hairLengthModifiers?.[length]?.segments?.length ?? 0) > 1)">
+                <div class="form-group compact" *ngIf="!((newService.hairLengthModifiers?.[length]?.segments?.length ?? 0) >= 1)">
                   <label>Tiempo total (min)</label>
                   <input type="number" [(ngModel)]="newService.hairLengthModifiers[length].time"
                          [name]="'time_' + length" min="15" step="5" class="form-input small">
@@ -164,7 +164,7 @@
                   <div class="time-segment-card" *ngFor="let seg of newService.hairLengthModifiers[length].segments ?? []; let i = index; let last = last">
                     <div class="segment-header">
                       <div class="segment-number"><i class="bi bi-clock"></i> Segmento {{ i + 1 }}</div>
-                      <button type="button" class="btn-remove-segment" (click)="removeHairLengthSegment(length, i)" *ngIf="newService.hairLengthModifiers[length].segments?.length ?? 1">
+                      <button type="button" class="btn-remove-segment" (click)="removeHairLengthSegment(length, i)" *ngIf="(newService.hairLengthModifiers[length].segments?.length || 0) > 0">
                         <i class="bi bi-x"></i>
                       </button>
                     </div>
@@ -197,7 +197,7 @@
                 </div>
 
                 <!-- Botón para añadir segmento -->
-                <button type="button" class="btn-add-segment" (click)="addTwoHairLengthSegments(length)">
+                <button type="button" class="btn-add-segment" (click)="addHairLengthSegment(length)">
                   <i class="bi bi-plus-circle"></i> Añadir segmento
                 </button>
 
@@ -248,11 +248,12 @@
           <div class="service-header">
             <h4>{{ service.name }}</h4>
             <div class="service-header-data">
-              <div class="service-time">{{ getTotalTime(service.timeSegments) }} min</div>
+              <div class="service-time" *ngIf="!service.requiresHairLength">{{ getTotalTime(service.timeSegments) }} min</div>
+              <div class="service-time" *ngIf="service.requiresHairLength">{{ service.getEstimatedTimeRange() }}</div>
             </div>
           </div>
 
-          <div class="time-segments-display" *ngIf="service.timeSegments && service.timeSegments.length > 0">
+          <div class="time-segments-display" *ngIf="!service.requiresHairLength && service.timeSegments && service.timeSegments.length > 0">
             <div class="time-segment-item"
                  *ngFor="let segment of service.timeSegments; let segIndex = index">
               <span class="segment-duration">{{ segment.duration }}min</span>

@@ -189,18 +189,60 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
     if (!this.selectedFile) { this.toast.error('Por favor, escoja una imagen.'); return; }
     if (!this.newService.name.trim()) { this.toast.error('Por favor, ingresa el nombre del servicio.'); return; }
 
-    const hasValidSegment = this.newService.timeSegments.some(seg => seg.duration > 0);
-    if (!hasValidSegment) { this.toast.error('Por favor, ingresa al menos un segmento de tiempo válido.'); return; }
+    // Validaciones según modo
+    if (this.newService.requiresHairLength) {
+      // Asegurar estructura inicial
+      if (!this.newService.hairLengthModifiers) {
+        this.newService.hairLengthModifiers = {
+          short: { time: 30 },
+          medium: { time: 45 },
+          long: { time: 60 }
+        };
+      }
+
+      // Validar que cada longitud tenga tiempo o segmentos con total > 0
+      const lengths: Array<'short' | 'medium' | 'long'> = ['short', 'medium', 'long'];
+      let allValid = true;
+      for (const l of lengths) {
+        const mod = this.newService.hairLengthModifiers[l];
+        const segsTotal = (mod.segments ?? []).reduce((a, s) => a + (s.duration || 0) + (s.breakAfter || 0), 0);
+        const total = segsTotal > 0 ? segsTotal : (mod.time || 0);
+        if (total <= 0) { allValid = false; break; }
+      }
+      if (!allValid) { this.toast.error('Configura un tiempo válido para cada longitud de pelo.'); return; }
+    } else {
+      const hasValidSegment = this.newService.timeSegments.some(seg => seg.duration > 0);
+      if (!hasValidSegment) { this.toast.error('Por favor, ingresa al menos un segmento de tiempo válido.'); return; }
+    }
 
     try {
       const imageUrl = await this.uploadImageIfSelected() || undefined;
 
+      // Si es por longitud, sincronizamos modifier.time con la suma de segmentos (si hay) y limpiamos timeSegments
+      let timeSegmentsToSave = this.newService.timeSegments;
+      let hairLengthModsToSave = this.newService.hairLengthModifiers;
+
+      if (this.newService.requiresHairLength) {
+        const mods = this.newService.hairLengthModifiers!;
+        (['short', 'medium', 'long'] as const).forEach(l => {
+          const segs = mods[l].segments ?? [];
+          if (segs.length > 0) {
+            const total = segs.reduce((a, s) => a + (s.duration || 0) + (s.breakAfter || 0), 0);
+            mods[l].time = total; // mantener compatibilidad con AppointmentService
+          } else {
+            mods[l].time = mods[l].time || 0;
+          }
+        });
+        hairLengthModsToSave = mods;
+        timeSegmentsToSave = []; // evitar confusiones aguas abajo
+      }
+
       const serviceNew = new Service(
         this.newService.name,
         this.newService.description,
-        this.newService.timeSegments,
+        timeSegmentsToSave,
         this.newService.requiresHairLength || false,
-        this.newService.hairLengthModifiers || {
+        hairLengthModsToSave || {
           short: { time: 0 },
           medium: { time: 0 },
           long: { time: 0 }
@@ -213,12 +255,12 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
       this.newService = {
         name: '',
         description: '',
-        timeSegments: [{ duration: 0, breakAfter: 0 }],
+        timeSegments: [{ duration: 30, breakAfter: 0 }],
         requiresHairLength: false,
         hairLengthModifiers: {
-          short: { time: 0 },
-          medium: { time: 0 },
-          long: { time: 0 }
+          short: { time: 30 },
+          medium: { time: 45 },
+          long: { time: 60 }
         }
       };
 
@@ -310,7 +352,8 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
     const modifier = this.newService.hairLengthModifiers[length];
 
     if (!modifier.segments) modifier.segments = [];
-    modifier.segments.push({ duration: 30, breakAfter: 0 });
+    // Añadir UN único segmento por interacción
+    modifier.segments.push({ duration: modifier.time || 30, breakAfter: 0 });
   }
 
 
@@ -325,22 +368,9 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
   }
 
 
+  // Mantener compatibilidad: alias que ahora añade un solo segmento
   addTwoHairLengthSegments(length: 'short' | 'medium' | 'long') {
-    if (!this.newService.requiresHairLength) return;
-    if (!this.newService.hairLengthModifiers) {
-      this.newService.hairLengthModifiers = {
-        short: { time: 30, segments: [] },
-        medium: { time: 45, segments: [] },
-        long: { time: 60, segments: [] }
-      };
-    }
-
-    const modifier = this.newService.hairLengthModifiers[length];
-    if (!modifier.segments) modifier.segments = [];
-
-    // Añadimos DOS segmentos de golpe
-    modifier.segments.push({ duration: modifier.time, breakAfter: 0 });
-    modifier.segments.push({ duration: modifier.time, breakAfter: 0 });
+    this.addHairLengthSegment(length);
   }
 
 
@@ -348,6 +378,7 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
 
 
   toggleBreaks() {
+    if (this.newService.requiresHairLength) return; // no aplica en modo por longitud
     this.hasBreaks = !this.hasBreaks;
     if (this.hasBreaks && this.newService.timeSegments.length === 1) {
       this.newService.timeSegments.push({ duration: 30, breakAfter: 0 });
@@ -380,27 +411,53 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
     }
   }
 
+  onRequireHairLengthChanged() {
+    if (this.newService.requiresHairLength) {
+      // Desactivar breaks del modo normal
+      this.hasBreaks = false;
+      // Simplificar segmentos globales
+      if (!this.newService.timeSegments || this.newService.timeSegments.length === 0) {
+        this.newService.timeSegments = [{ duration: 30, breakAfter: 0 }];
+      } else {
+        this.newService.timeSegments = [{ duration: this.newService.timeSegments[0].duration || 30, breakAfter: 0 }];
+      }
+      // Inicializar modifiers si hiciera falta
+      if (!this.newService.hairLengthModifiers) {
+        this.newService.hairLengthModifiers = {
+          short: { time: 30, segments: [] },
+          medium: { time: 45, segments: [] },
+          long: { time: 60, segments: [] }
+        };
+      }
+    }
+  }
+
 
 
   getEstimatedTime(service: Service) {
-    if (!service.requiresHairLength || !service.hairLengthModifiers) return 0;
+    if (!service.requiresHairLength || !service.hairLengthModifiers) return '—';
 
     let minTime = Infinity;
     let maxTime = 0;
 
     for (let length of this.lengths) {
       const modifier = service.hairLengthModifiers[length];
-      if (!modifier || !modifier.segments?.length) continue;
+      if (!modifier) continue;
 
-      // Suma duración + pausas
-      let total = modifier.segments.reduce((acc, seg) => acc + seg.duration + (seg.breakAfter ?? 0), 0);
+      let total = 0;
+      if (modifier.segments?.length) {
+        total = modifier.segments.reduce((acc, seg) => acc + (seg.duration || 0) + (seg.breakAfter || 0), 0);
+      } else if (modifier.time) {
+        total = modifier.time;
+      }
 
-      if (total < minTime) minTime = total;
-      if (total > maxTime) maxTime = total;
+      if (total > 0) {
+        if (total < minTime) minTime = total;
+        if (total > maxTime) maxTime = total;
+      }
     }
 
-    if (minTime === Infinity) return 0; // Por si no hay segmentos
-
+    if (minTime === Infinity) return '—';
     return minTime === maxTime ? `${minTime} min` : `${minTime}-${maxTime} min`;
   }
 

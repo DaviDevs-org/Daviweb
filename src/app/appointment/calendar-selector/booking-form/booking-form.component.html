@@ -52,23 +52,38 @@
   <!-- Bloque de selección de longitud de pelo -->
   <div class="form-group" *ngIf="selectedServiceRequiresHairLength">
     <label>Longitud de pelo *</label>
-    <div class="hair-length-options" style="display: flex; gap: 10px;">
-      <button type="button"
-              [class.active]="hairLengthSelection === 'short'"
-              (click)="hairLengthSelection = 'short'">
-        CORTO
-      </button>
-      <button type="button"
-              [class.active]="hairLengthSelection === 'medium'"
-              (click)="hairLengthSelection = 'medium'">
-        MEDIO
-      </button>
-      <button type="button"
-              [class.active]="hairLengthSelection === 'long'"
-              (click)="hairLengthSelection = 'long'">
-        LARGO
-      </button>
+    <div class="hair-length-options">
+      <div class="hair-length-card" [class.active]="hairLengthSelection === 'short'">
+        <button type="button"
+                [class.active]="hairLengthSelection === 'short'"
+                (click)="hairLengthSelection = 'short'">
+          CORTO
+        </button>
+        <img src="assets/hair-length/short.svg" alt="Ejemplo pelo corto" />
+      </div>
+      <div class="hair-length-card" [class.active]="hairLengthSelection === 'medium'">
+        <button type="button"
+                [class.active]="hairLengthSelection === 'medium'"
+                (click)="hairLengthSelection = 'medium'">
+          MEDIO
+        </button>
+        <img src="assets/hair-length/medium.svg" alt="Ejemplo pelo medio" />
+      </div>
+      <div class="hair-length-card" [class.active]="hairLengthSelection === 'long'">
+        <button type="button"
+                [class.active]="hairLengthSelection === 'long'"
+                (click)="hairLengthSelection = 'long'">
+          LARGO
+        </button>
+        <img src="assets/hair-length/long.svg" alt="Ejemplo pelo largo" />
+      </div>
     </div>
+
+    <div class="length-time-hint" *ngIf="hairLengthSelection as sel">
+      <span class="time-label">Duración estimada:</span>
+      <span class="time-value">{{ getSelectedLengthTime(sel) }} min</span>
+    </div>
+
     <div class="error" [class.visible]="submitted && !hairLengthSelection">
       Debes seleccionar la longitud de pelo (corto, medio o largo).
     </div>
