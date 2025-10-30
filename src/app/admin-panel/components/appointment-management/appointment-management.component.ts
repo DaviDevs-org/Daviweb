@@ -27,6 +27,9 @@ import { Barber } from '../../types/admin.types';
 })
 export class AppointmentManagementComponent implements OnDestroy, AfterViewInit {
   @ViewChild('calendarBody', { static: false }) calendarBody!: ElementRef<HTMLElement>;
+  @ViewChild('selectedDetail', { static: false }) selectedDetail!: ElementRef<HTMLElement>;
+  @ViewChild('calendarHeader', { static: false }) calendarHeader!: ElementRef<HTMLElement>;
+  @ViewChild('editFormContainer', { static: false }) editFormContainer!: ElementRef<HTMLElement>;
 
   appointments$: Observable<Appointment[]>;
   selectedDate$ = new BehaviorSubject<Date>(new Date());
@@ -239,7 +242,12 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
     // Observar cambios en la cita seleccionada Y que esté en el día actual para hacer scroll
     combineLatest([this.selectedAppointment$, this.filteredForDay$]).subscribe(([appointment, dayList]) => {
-      if (appointment && appointment.timeNormalized && dayList.some(a => a.id === appointment.id)) {
+      if (!appointment || !dayList.some(a => a.id === appointment.id)) return;
+
+      // En móvil: desplazamos hasta el bloque de detalles; en desktop: al slot horario
+      if (this.isMobileViewport()) {
+        this.scrollToSelectedDetail();
+      } else if (appointment.timeNormalized) {
         this.scrollToAppointment(appointment.timeNormalized);
       }
     });
@@ -463,6 +471,11 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       barberId: appointment.barber || '',
       description: appointment.description || ''
     });
+
+    // En móvil, al pulsar Modificar, desplazamos al formulario de edición
+    if (this.isMobileViewport()) {
+      this.scrollToEditForm();
+    }
   }
 
   cancelEdit() {
@@ -744,6 +757,58 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       reservation.classList.add('highlighted');
       setTimeout(() => reservation.classList.remove('highlighted'), 2000);
     }
+  }
+
+  // Detecta si el viewport es móvil según breakpoint (alineado con clases mobile-only/desktop-only)
+  private isMobileViewport(): boolean {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 768px)').matches;
+  }
+
+  // Hace scroll suave a la sección de detalles seleccionada (para móvil)
+  private scrollToSelectedDetail(): void {
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+
+    this.scrollTimeout = setTimeout(() => {
+      // Preferimos el ViewChild si está disponible; si no, buscamos por clase
+      const el = this.selectedDetail?.nativeElement || (typeof document !== 'undefined'
+        ? (document.querySelector('.selected-detail') as HTMLElement)
+        : null);
+      if (el && typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  }
+
+  // Hace scroll al header del calendario (útil cuando se entra en modo edición en móvil)
+  private scrollToCalendarHeader(): void {
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+
+    this.scrollTimeout = setTimeout(() => {
+      const el = this.calendarHeader?.nativeElement || (typeof document !== 'undefined'
+        ? (document.querySelector('.calendar-header') as HTMLElement)
+        : null);
+      if (el && typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  }
+
+  // Hace scroll al contenedor del formulario de edición (móvil)
+  private scrollToEditForm(): void {
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+
+    this.scrollTimeout = setTimeout(() => {
+      const el = this.editFormContainer?.nativeElement || (typeof document !== 'undefined'
+        ? (document.querySelector('.edit-form-container') as HTMLElement)
+        : null);
+      if (el && typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Fallback: si no existe aún, intentamos el header del calendario
+        this.scrollToCalendarHeader();
+      }
+    }, 100);
   }
 
   private extractHourFromTime(time: string): string {
