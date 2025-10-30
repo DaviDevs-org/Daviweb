@@ -1,15 +1,6 @@
 import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
-import {
-  Firestore,
-  collection,
-  collectionData,
-  addDoc,
-  deleteDoc,
-  doc,
-  updateDoc,
-  getDocs
-} from '@angular/fire/firestore';
-import { Service } from '../../admin-panel/types/admin.types';
+import { Firestore, collection, collectionData, addDoc, deleteDoc, doc, updateDoc, getDocs } from '@angular/fire/firestore';
+import { Service, ServiceDTO } from '../../admin-panel/types/admin.types';
 import { Storage, ref, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -44,11 +35,24 @@ export class ServiceManager {
   }
 
   private mapToServiceInstance(data: any): Service {
+    let segments = data.timeSegments || [];
+
+    if (data.requiresHairLength) {
+      const hl = data.hairLengthModifiers || {
+        short: { time: 30 },
+        medium: { time: 45 },
+        long: { time: 60 }
+      };
+      // Creamos un único segmento que tenga la duración máxima de hairLength (solo para mostrar y calcular slots)
+      segments = [{ duration: Math.max(hl.short.time, hl.medium.time, hl.long.time), breakAfter: 0 }];
+    }
+
     return new Service(
       data.name,
       data.description,
-      data.timeSegments || [],
-      data.price,
+      segments,
+      data.requiresHairLength || false,
+      data.hairLengthModifiers || { short: { time: 30 }, medium: { time: 45 }, long: { time: 60 } },
       data.imageUrl,
       data.id
     );
@@ -64,7 +68,6 @@ export class ServiceManager {
   async deleteService(id: string) {
     return runInInjectionContext(this.injector, async () => {
       const placeRef = doc(this.firestore, `${this.path}/${id}`);
-      // Leer el documento para obtener la imageUrl y borrar la imagen
       try {
         const { getDoc } = await import('@angular/fire/firestore');
         const snap = await getDoc(placeRef);
@@ -83,7 +86,6 @@ export class ServiceManager {
       } catch (e) {
         console.warn('No se pudo obtener el servicio antes de borrar para limpiar imagen:', e);
       }
-      // Borrar el documento del servicio
       return deleteDoc(placeRef);
     });
   }
@@ -95,4 +97,3 @@ export class ServiceManager {
     });
   }
 }
-

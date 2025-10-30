@@ -32,11 +32,10 @@
             border-color: $primary-dark;
 
             &:not(.has-image) {
-                background: rgba($primary, 0.05);
+                background: rgba($primary, 0.2);
             }
 
             .upload-content {
-                background: rgba($white, 0.95);
                 transform: scale(1.02);
             }
         }

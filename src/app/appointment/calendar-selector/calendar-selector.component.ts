@@ -270,18 +270,32 @@ export class CalendarSelectorComponent implements OnDestroy {
     const startMinutes = this.timeToMinutes(appointment.timeNormalized);
     const segments: { start: number, duration: number, type: 'active' | 'break' }[] = [];
 
-    if (appointment.service?.timeSegments) {
+    const svc = appointment.service as any;
+    if (!svc) return [];
+    const materialize = (s: any, length?: 'short' | 'medium' | 'long') => {
+      if (!s?.requiresHairLength || !length) return s;
+      const mod = s.hairLengthModifiers?.[length];
+      if (!mod) return s;
+      const segs = (mod.segments && mod.segments.length > 0)
+        ? mod.segments
+        : (mod.time && mod.time > 0 ? [{ duration: mod.time, breakAfter: 0 }] : []);
+      return { ...s, timeSegments: segs, requiresHairLength: false };
+    };
+    const concrete = materialize(svc, appointment.hairLengthChoice || undefined);
+
+    if (concrete.timeSegments && concrete.timeSegments.length > 0) {
       let currentTime = startMinutes;
 
-      appointment.service.timeSegments.forEach((segment, index) => {
+      (concrete.timeSegments as {duration: number; breakAfter?: number}[]).forEach((segment, index) => {
         segments.push({ start: currentTime, duration: segment.duration, type: 'active' });
         currentTime += segment.duration;
 
-        if (segment.breakAfter && segment.breakAfter > 0 && index < appointment.service!.timeSegments.length - 1) {
+        if (segment.breakAfter && segment.breakAfter > 0 && index < concrete.timeSegments.length - 1) {
           segments.push({ start: currentTime, duration: segment.breakAfter, type: 'break' });
           currentTime += segment.breakAfter;
         }
       });
+      return segments;
     } else {
       // Servicio sin timeSegments, asumir 30 minutos por defecto
       segments.push({ start: startMinutes, duration: 30, type: 'active' });
@@ -503,14 +517,19 @@ export class CalendarSelectorComponent implements OnDestroy {
     this.showForm = true;
   }
 
-  async handleFormSubmit(data: { name: string; phone: string; description?: string; barber?: string, service: Service }) {
+  async handleFormSubmit(data: { name: string; phone: string; description?: string; barber?: string, service: Service, hairLength?: 'short' | 'medium' | 'long' | null }) {
     if (!this.selectedDate || !this.selectedHour) {
       this.toast.error('Error: Fecha u hora no seleccionada');
       return;
     }
     if (this.isSubmitting) return;
 
-    const bookingData = { date: this.selectedDateString, time: this.selectedHour, ...data };
+    const bookingData = { 
+      date: this.selectedDateString, 
+      time: this.selectedHour, 
+      ...data,
+      hairLengthChoice: data.hairLength ?? null
+    } as any;
     this.isSubmitting = true;
     try {
       await this.appointmentService.addAppointment(bookingData);

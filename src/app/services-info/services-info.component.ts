@@ -52,35 +52,34 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
     });
   }
 
-  private organizeServicesByCategory(services: Service[]) {
-    // Agrupar servicios por categoría
+  private organizeServicesByCategory(services: any[]) {
+    const serviceInstances = services.map(s => new Service(
+      s.name,
+      s.description,
+      s.timeSegments || [],
+      s.requiresHairLength ?? false,
+      s.hairLengthModifiers,
+      s.imageUrl,
+      s.id
+    ));
+
     const categoryMap = new Map<string, Service[]>();
 
-    services.forEach(service => {
-      // Asumiendo que tienes un campo 'category' en tu Service type
-      // Si no lo tienes, puedes categorizar por nombre o añadir este campo
+    serviceInstances.forEach(service => {
       const category = this.getCategoryFromService(service);
-
       if (!categoryMap.has(category)) {
         categoryMap.set(category, []);
       }
       categoryMap.get(category)?.push(service);
     });
 
-    // Crear categorías con iconos
     this.categories = Array.from(categoryMap.entries()).map(([categoryName, services]) => ({
       id: categoryName.toLowerCase().replace(/\s+/g, '-'),
       name: categoryName,
       icon: this.getCategoryIcon(categoryName),
       services: services
     }));
-    this.categories.sort((a, b) => {
-      if (a.name === 'Otros') return 1;
-      if (b.name === 'Otros') return -1;
-      return a.name.localeCompare(b.name, "es", { sensitivity: "base" });
-    });
 
-    // Seleccionar la primera categoría por defecto
     if (this.categories.length > 0) {
       this.selectCategory(this.categories[0]);
     }
@@ -96,7 +95,7 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
   scrollToSection(elementId: string) {
     this.viewportScroller.scrollToAnchor(elementId);
   }
-  
+
   private getCategoryFromService(service: Service): string {
     // Lógica para determinar la categoría basada en el nombre del servicio
     const name = service.name.toLowerCase();

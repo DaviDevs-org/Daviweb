@@ -6,7 +6,8 @@ import { Appointment } from '../admin-panel/types/admin.types';
   providedIn: 'root'
 })
 export class AppointmentService {
-  constructor(private firestore: Firestore) {}
+  constructor(private firestore: Firestore) {
+  }
 
   private buildDateTimeFrom(yyyyMmDd: string | undefined, hhMm: string | undefined): Date {
     if (!yyyyMmDd || !hhMm) throw new Error('Faltan date o time');
@@ -22,19 +23,22 @@ export class AppointmentService {
     const reservedCol = collection(this.firestore, 'pruebas', 'data', 'reservedSlots');
 
     try {
-      // Validación y construcción de datetime
       const datetime = this.buildDateTimeFrom(appointment.date, appointment.time);
 
       // Convertir service a objeto plano para Firestore
       const servicePlain = appointment.service ? appointment.service.toJson() : undefined;
 
       // Guardar appointment
+      const totalDuration = appointment.service?.computeTotalTime(appointment.hairLengthChoice) || 30;
+      const { service, ...rest } = appointment;
       const docRef = await addDoc(appointmentsCol, {
-        ...appointment,
+        ...rest,
         service: servicePlain,
         datetime,
+        totalDuration,
         createdAt: serverTimestamp()
       });
+
 
       // Guardar reserved slots por cada segmento ACTIVO de 30min
       const slots = this.computeActiveSlotDateTimes(datetime, appointment);
@@ -46,7 +50,7 @@ export class AppointmentService {
         createdAt: serverTimestamp()
       })));
 
-      return { success: true, appointmentId: docRef.id };
+      return {success: true, appointmentId: docRef.id};
     } catch (err: any) {
       console.error('AppointmentService.addAppointment error:', err);
       throw new Error(err?.message || 'Error añadiendo la cita');
@@ -57,33 +61,59 @@ export class AppointmentService {
   // Calcula los Date/HH:mm de cada slot ACTIVO (30min) teniendo en cuenta los breaks
   private computeActiveSlotDateTimes(startDateTime: Date, appointment: Appointment): { time: string; datetime: Date }[] {
     const out: { time: string; datetime: Date }[] = [];
-
-    // Helper para formatear HH:mm
     const fmt = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
-    // Si hay estructura de segmentos en el servicio, respetarla
-    const segments = appointment?.service?.timeSegments;
-    if (segments && Array.isArray(segments) && segments.length > 0) {
-      let accumulated = 0; // minutos desde el inicio
-      segments.forEach((seg: any, idx: number) => {
-        const duration = Number(seg?.duration) || 0;
-        // Añadir slots activos cada 30min dentro del segmento
+  const service = appointment.service;
+  const hairLength = appointment.hairLengthChoice;
+
+    // Si no hay servicio, reserva el slot base (30min)
+    if (!service) {
+      out.push({ time: fmt(startDateTime), datetime: startDateTime });
+      return out;
+    }
+
+    // Preferir segmentos específicos por longitud si existen
+    // Materializar la longitud como un servicio normal si aplica
+    const concrete = (service.requiresHairLength && hairLength)
+      ? service.materializeForLength(hairLength)
+      : service;
+  const segments = concrete.timeSegments || [];
+
+    // 1) Si hay segmentos: respetamos segmentos (creamos slots por cada bloque activo)
+    if (segments.length > 0) {
+      let accumulated = 0;
+
+      segments.forEach((seg, idx) => {
+        const duration = Number(seg.duration) || 0;
+
+        // Añadir slots activos (cada 30min) dentro del segmento
         for (let m = 0; m < duration; m += 30) {
           const dt = new Date(startDateTime.getTime() + (accumulated + m) * 60000);
           out.push({ time: fmt(dt), datetime: dt });
         }
+
         accumulated += duration;
-        const breakAfter = Number(seg?.breakAfter) || 0;
-        // Sumar break al acumulado (pero no reservar esos slots) si no es el último segmento
+
+        // Añadir breakAfter al acumulado (no se reservan slots para el break)
+        const breakAfter = Number(seg.breakAfter) || 0;
         if (breakAfter > 0 && idx < segments.length - 1) {
           accumulated += breakAfter;
         }
       });
+
+  // No añadimos "extra" aquí: trabajamos siempre con segmentos materializados
+
       return out;
     }
 
-    // Fallback: si no hay segmentos, reservar solo el slot inicial (30min)
-    out.push({ time: fmt(startDateTime), datetime: startDateTime });
+    // 2) Si NO hay segmentos: usamos directamente el tiempo total del servicio materializado
+    const totalMinutes = concrete.computeTotalTime();
+    for (let m = 0; m < totalMinutes; m += 30) {
+      const dt = new Date(startDateTime.getTime() + m * 60000);
+      out.push({ time: fmt(dt), datetime: dt });
+    }
+
     return out;
   }
+
 }

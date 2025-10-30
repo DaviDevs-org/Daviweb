@@ -28,6 +28,16 @@
   justify-content: space-between;
   gap: $spacing-2xl;
 
+  // En escritorio: 4 columnas fijas, evitando que una sección caiga debajo
+  @media (min-width: $breakpoint-lg) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr) minmax(220px, 0.8fr); // más ancho para horario
+    align-items: start;
+    justify-content: stretch;
+    column-gap: $spacing-xl;
+    row-gap: $spacing-2xl;
+  }
+
   @include mobile {
     gap: $spacing-xl;
   }
@@ -44,18 +54,46 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-md;
+  min-width: 0; // permite que el contenido se encoja y el texto haga wrap
+
+  // Pequeño acolchado extra para separar horario visualmente de contacto
+  @media (min-width: $breakpoint-lg) {
+    &:nth-child(3) { padding-left: $spacing-xl; } // mantenemos separación extra con Horario
+  }
 }
 
 .container-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start; // icono no se mueve aunque el texto haga wrap
   gap: $spacing-sm;
+
+  i {
+    flex: 0 0 20px; // ancho fijo para el icono
+    line-height: 1;
+    margin-top: 2px; // óptico para alinear con primera línea
+  }
+
+  .text {
+    flex: 1 1 auto;
+  }
 }
 
 .text {
   color: $text-gray-light;
   font-size: $font-size-sm;
   font-family: $font-primary;
+  overflow-wrap: anywhere; // forzar salto si no cabe
+  word-break: break-word;
+  hyphens: auto;
+}
+
+// En la columna de horario, priorizamos no romper los bloques de horas
+@media (min-width: $breakpoint-lg) {
+  .container-column:nth-child(3) .text {
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: manual;
+  }
 }
 .button {
   background: none;

@@ -11,7 +11,7 @@ input[type="radio"] {
   cursor: pointer;
   width: 18px;
   height: 18px;
-  color: $primary-light
+    color: $primary-light;
 }
 
 select {
@@ -43,6 +43,7 @@ select {
             background: $white;
             border: 1px solid rgba($primary, 0.1);
             box-shadow: 0 4px 20px rgba($primary, 0.1);
+            padding-top: 16px; // un poco más de aire arriba
 }
 
 // Estilos para la sección de upload de imagen
@@ -145,7 +146,7 @@ select {
 }
 
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 28px; // ligeramente más espacio entre bloques
 
     label {
         display: block;
@@ -211,7 +212,7 @@ select {
     font-size: 1.1rem;
     padding: 14px 24px;
     font-weight: 600;
-    
+
     i {
         margin-right: 8px;
         font-size: 1.2rem;
@@ -468,6 +469,7 @@ select {
     border-left: 3px solid $primary;
     padding: 10px 15px;
     border-radius: 4px;
+    margin-top: 10px;
 
     small {
         display: block;
@@ -543,7 +545,7 @@ select {
         cursor: pointer;
         flex-shrink: 0;
     }
-    
+
     .checkmark {
         font-weight: 600;
         color: $text-dark;
@@ -616,6 +618,95 @@ select {
         font-weight: 500;
     }
 }
+
+/* Breaks en longitud de pelo */
+.modifier-inputs .btn-add-segment {
+  background: $primary;
+  color: $white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: $shadow-sm;
+
+  &:hover {
+    background: $primary-dark;
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+}
+
+/* Espaciado y estructura para longitudes de pelo */
+.hair-length-modifiers {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    > h4 {
+        margin: 0 0 8px 0;
+    }
+}
+
+.hair-length-row {
+    border: 2px solid rgba($primary, 0.2);
+    border-left: 5px solid $primary;
+    background: rgba($primary, 0.03);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 16px;
+    align-items: flex-start;
+
+    @include mobile {
+        grid-template-columns: 1fr;
+    }
+}
+
+.hair-length-label {
+    font-weight: 700;
+    color: $text-dark;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: $white;
+    border: 1px solid rgba($primary, 0.2);
+    padding: 6px 10px;
+    border-radius: 999px;
+    width: max-content;
+}
+
+.modifier-inputs {
+    display: grid;
+    gap: 12px;
+
+    .time-segments {
+        margin-top: 4px;
+    }
+
+    .time-summary {
+        margin-top: 10px;
+    }
+}
+
+/* Separación clara entre longitudes */
+.hair-length-row + .hair-length-row {
+    margin-top: 8px;
+}
+
+/* Ancla de scroll (no visible) */
+.form-scroll-anchor {
+    height: 0;
+    margin: 0;
+}
+
 
 /* Modo avanzado (con breaks) */
 .advanced-time {

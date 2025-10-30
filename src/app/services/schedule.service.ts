@@ -15,7 +15,9 @@ export class ScheduleService {
     for (const day of schedule) {
       const scheduleText = day.closed
         ? 'Cerrado'
-        : day.intervals.map(interval => `${interval.open}-${interval.close}`).join(' / ');
+        : day.intervals
+            .map(interval => `${interval.open}\u00A0-\u00A0${interval.close}`) // no cortar alrededor del guion
+            .join('\u00A0\u00B7\u00A0'); // separador «·» con no-break spaces
 
       const existingGroup = groups.find(group => group.schedule === scheduleText);
 
@@ -64,7 +66,9 @@ export class ScheduleService {
     return schedule.map(day => {
       const scheduleText = day.closed
         ? 'Cerrado'
-        : day.intervals.map(interval => `${interval.open}-${interval.close}`).join(' / ');
+        : day.intervals
+            .map(interval => `${interval.open}\u00A0-\u00A0${interval.close}`)
+            .join('\u00A0\u00B7\u00A0');
       return `${day.name}: ${scheduleText}`;
     }).join(' ');
   }

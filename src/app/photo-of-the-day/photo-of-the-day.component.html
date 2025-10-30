@@ -34,7 +34,8 @@
       <div class="carousel-track" [style.width]="(totalSlides() * 100) + '%'"
         [style.transform]="'translateX(-' + (currentSlide() * (100 / totalSlides())) + '%)'">
         <div class="carousel-slide" *ngFor="let item of carouselItems(); let i = index"
-          [style.width]="(100 / totalSlides()) + '%'">
+          [style.width]="(100 / totalSlides()) + '%'
+          " [style.--bg]="'url(' + item.image + ')'">
           <img [ngSrc]="item.image" [alt]="item.alt" fill class="carousel-image"
             [attr.priority]="i === currentSlide() ? '' : null" [attr.loading]="i === currentSlide() ? null : 'lazy'"
             decoding="async">
