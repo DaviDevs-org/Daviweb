@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, Injector, runInInjectionContext, signal, ViewChild, OnDestroy, AfterViewInit, OnInit } from '@angular/core';
+import { Component, ElementRef, inject, Injector, runInInjectionContext, signal, ViewChild, OnDestroy, AfterViewInit, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
@@ -19,6 +19,7 @@ import { ImageProcessingService } from '../../../services/image-processing.servi
 })
 export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('formTop') formTop!: ElementRef<HTMLDivElement>;
 
   private scrollSub: Subscription | null = null;
 
@@ -28,6 +29,7 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
   private galleryService = inject(GalleryService);
   private toast = inject(AlertService);
   private imageProcessor = inject(ImageProcessingService);
+  private cdr = inject(ChangeDetectorRef);
 
   services: Service[] = [];
   lengths: ('short' | 'medium' | 'long')[] = ['short', 'medium', 'long'];
@@ -38,6 +40,10 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
   isUploading: boolean = false;
   uploadSubscription: Subscription | undefined = undefined;
   hasBreaks: boolean = false;
+  // Estado de edición
+  isEditing: boolean = false;
+  private editServiceId: string | null = null;
+  private existingImageUrl: string | undefined;
 
   // Si no tienes estas observables, comenta ngAfterViewInit()
   selectedAppointment$: any;
@@ -237,6 +243,11 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
         timeSegmentsToSave = []; // evitar confusiones aguas abajo
       }
 
+      // Sanitizar modifiers para evitar undefined en Firestore
+      if (hairLengthModsToSave) {
+        hairLengthModsToSave = this.sanitizeHairLengthModifiers(hairLengthModsToSave);
+      }
+
       const serviceNew = new Service(
         this.newService.name,
         this.newService.description,
@@ -274,45 +285,213 @@ export class ServicesManagementComponent implements OnInit, AfterViewInit, OnDes
   }
 
   async editService(index: number) {
+    // Cargar el servicio seleccionado en el formulario para editarlo
     const serviceU = this.services[index];
+    this.populateFormFromService(serviceU);
+  }
 
-    const newName = await this.toast.prompt('Nuevo nombre del servicio:', 'Nombre del servicio...');
-    if (!newName) return this.toast.error('Por favor, introduzca un nombre válido');
+  private populateFormFromService(service: Service) {
+    // Marcar estado de edición y conservar id/imagen actual
+    this.isEditing = true;
+    this.editServiceId = service.id ?? null;
+    this.existingImageUrl = service.imageUrl;
 
-    const timeSegments: TimeSegment[] = [];
-    let addMoreSegments = true;
-    while (addMoreSegments) {
-      const durationStr = await this.toast.promptNumber(`Duración del segmento ${timeSegments.length + 1} (min):`, 'Ej: 30');
-      if (!durationStr) break;
-      const duration = parseInt(durationStr);
-      if (isNaN(duration) || duration <= 0) return this.toast.error('Por favor, ingresa una duración válida.');
+    // Limpiar selección de archivo previa y mostrar preview con la URL existente
+    this.selectedFile = null;
+    this.processedBlob = null;
+    if (this.imagePreviewUrl) URL.revokeObjectURL(this.imagePreviewUrl);
+    this.imagePreviewUrl = service.imageUrl || '';
+    if (this.fileInput) this.fileInput.nativeElement.value = '';
 
-      const breakAfterStr = await this.toast.promptNumber('Tiempo de pausa después de este segmento (min, 0 si no hay pausa):', 'Ej: 15');
-      if (!breakAfterStr) break;
-      const breakAfter = parseInt(breakAfterStr) || 0;
+    // Rellenar formulario
+    const mapSegments = (segs?: TimeSegment[]) => (segs && segs.length > 0)
+      ? segs.map(seg => ({ duration: seg.duration, breakAfter: seg.breakAfter || 0 }))
+      : undefined; // importante: no generar 'segments: undefined'
 
-      timeSegments.push({ duration, breakAfter });
-      addMoreSegments = await this.toast.confirm('¿Quieres añadir otro segmento de tiempo?');
+    this.newService = {
+      name: service.name,
+      description: service.description,
+      timeSegments: (service.timeSegments && service.timeSegments.length)
+        ? service.timeSegments.map(s => ({ duration: s.duration, breakAfter: s.breakAfter || 0 }))
+        : [{ duration: 30, breakAfter: 0 }],
+      requiresHairLength: service.requiresHairLength ?? false,
+      hairLengthModifiers: service.hairLengthModifiers
+        ? {
+            short: {
+              time: service.hairLengthModifiers.short?.time || 0,
+              ...(mapSegments(service.hairLengthModifiers.short?.segments) ? { segments: mapSegments(service.hairLengthModifiers.short?.segments)! } : {})
+            },
+            medium: {
+              time: service.hairLengthModifiers.medium?.time || 0,
+              ...(mapSegments(service.hairLengthModifiers.medium?.segments) ? { segments: mapSegments(service.hairLengthModifiers.medium?.segments)! } : {})
+            },
+            long: {
+              time: service.hairLengthModifiers.long?.time || 0,
+              ...(mapSegments(service.hairLengthModifiers.long?.segments) ? { segments: mapSegments(service.hairLengthModifiers.long?.segments)! } : {})
+            }
+          }
+        : { short: { time: 30 }, medium: { time: 45 }, long: { time: 60 } }
+    };
+
+    // Definir si mostrar modo segmentos
+    this.hasBreaks = !this.newService.requiresHairLength && ((this.newService.timeSegments?.length || 0) > 1);
+
+    // Hacer scroll suave al formulario
+    this.scrollToForm();
+  }
+
+  async onSubmit() {
+    if (this.isEditing) {
+      await this.updateServiceFromForm();
+    } else {
+      await this.addService();
+    }
+  }
+
+  private scrollToForm() {
+    try {
+      const doScroll = () => {
+        const el = this.formTop?.nativeElement;
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+        }
+      };
+
+      // Forzamos CD y esperamos a que el layout se estabilice antes de hacer scroll
+      this.cdr.detectChanges();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          // fallback mínimo por si aún no se ha terminado de pintar
+          setTimeout(doScroll, 0);
+        });
+      });
+    } catch {}
+  }
+
+  private async updateServiceFromForm(): Promise<void> {
+    if (!this.editServiceId) { this.toast.error('No se ha podido identificar el servicio a actualizar.'); return; }
+
+    if (!this.newService.name.trim()) { this.toast.error('Por favor, ingresa el nombre del servicio.'); return; }
+
+    // Validaciones según modo
+    if (this.newService.requiresHairLength) {
+      if (!this.newService.hairLengthModifiers) {
+        this.newService.hairLengthModifiers = {
+          short: { time: 30 },
+          medium: { time: 45 },
+          long: { time: 60 }
+        };
+      }
+
+      const lengths: Array<'short' | 'medium' | 'long'> = ['short', 'medium', 'long'];
+      let allValid = true;
+      for (const l of lengths) {
+        const mod = this.newService.hairLengthModifiers[l];
+        const segsTotal = (mod.segments ?? []).reduce((a, s) => a + (s.duration || 0) + (s.breakAfter || 0), 0);
+        const total = segsTotal > 0 ? segsTotal : (mod.time || 0);
+        if (total <= 0) { allValid = false; break; }
+      }
+      if (!allValid) { this.toast.error('Configura un tiempo válido para cada longitud de pelo.'); return; }
+    } else {
+      const hasValidSegment = this.newService.timeSegments.some(seg => seg.duration > 0);
+      if (!hasValidSegment) { this.toast.error('Por favor, ingresa al menos un segmento de tiempo válido.'); return; }
     }
 
-    if (timeSegments.length === 0) return this.toast.error('El servicio debe tener al menos un segmento de tiempo.');
+    try {
+      // Subir nueva imagen si el usuario ha seleccionado una, si no conservar la existente
+      const imageUrl = (this.selectedFile ? (await this.uploadImageIfSelected()) : this.existingImageUrl) || undefined;
 
-    const newDescription = await this.toast.prompt('Nueva descripción:', 'Descripción del servicio...');
-    if (!newDescription) return this.toast.error('Por favor, introduzca una descripción válida');
+      let timeSegmentsToSave = this.newService.timeSegments;
+      let hairLengthModsToSave = this.newService.hairLengthModifiers;
 
-    const updatedService = new Service(
-      newName,
-      newDescription,
-      timeSegments,
-      serviceU.requiresHairLength,
-      serviceU.hairLengthModifiers,
-      serviceU.imageUrl
-    );
+      if (this.newService.requiresHairLength) {
+        const mods = this.newService.hairLengthModifiers!;
+        (['short', 'medium', 'long'] as const).forEach(l => {
+          const segs = mods[l].segments ?? [];
+          if (segs.length > 0) {
+            const total = segs.reduce((a, s) => a + (s.duration || 0) + (s.breakAfter || 0), 0);
+            mods[l].time = total;
+          } else {
+            mods[l].time = mods[l].time || 0;
+          }
+        });
+        hairLengthModsToSave = mods;
+        timeSegmentsToSave = [];
+      }
 
-    await this.service.updateService(serviceU.id!, updatedService);
-    this.toast.success('Servicio actualizado correctamente!');
+      // Sanitizar modifiers para evitar undefined en Firestore
+      if (hairLengthModsToSave) {
+        hairLengthModsToSave = this.sanitizeHairLengthModifiers(hairLengthModsToSave);
+      }
 
-    return;
+      const updatedService = new Service(
+        this.newService.name,
+        this.newService.description,
+        timeSegmentsToSave,
+        this.newService.requiresHairLength || false,
+        hairLengthModsToSave || {
+          short: { time: 0 },
+          medium: { time: 0 },
+          long: { time: 0 }
+        },
+        imageUrl
+      );
+
+      await this.service.updateService(this.editServiceId, updatedService);
+
+      // Resetear estado
+      this.resetForm();
+      this.toast.success('Servicio actualizado correctamente!');
+    } catch (error) {
+      console.error('Error al actualizar servicio:', error);
+      this.toast.error('Error al actualizar el servicio. Por favor, inténtalo de nuevo.');
+    }
+  }
+
+  // Eliminar claves undefined y normalizar arrays/valores
+  private sanitizeHairLengthModifiers(mods: HairLengthModifiers): HairLengthModifiers {
+    const cleanSegs = (segs: TimeSegment[] | undefined): TimeSegment[] | undefined => {
+      if (!Array.isArray(segs)) return undefined;
+      const normalized = segs
+        .filter(s => s && typeof s.duration === 'number' && s.duration >= 0)
+        .map(s => ({ duration: s.duration, breakAfter: s.breakAfter ? s.breakAfter : 0 }));
+      return normalized.length > 0 ? normalized : undefined;
+    };
+
+    const build = (m: { time?: number; segments?: TimeSegment[] | undefined } | undefined) => {
+      const time = typeof m?.time === 'number' ? m!.time : 0;
+      const segs = cleanSegs(m?.segments);
+      return segs ? { time, segments: segs } : { time };
+    };
+
+    return {
+      short: build(mods.short),
+      medium: build(mods.medium),
+      long: build(mods.long)
+    } as HairLengthModifiers;
+  }
+
+  cancelEditing() {
+    this.resetForm();
+  }
+
+  private resetForm() {
+    this.newService = {
+      name: '',
+      description: '',
+      timeSegments: [{ duration: 30, breakAfter: 0 }],
+      requiresHairLength: false,
+      hairLengthModifiers: {
+        short: { time: 30 },
+        medium: { time: 45 },
+        long: { time: 60 }
+      }
+    };
+    this.hasBreaks = false;
+    this.isEditing = false;
+    this.editServiceId = null;
+    this.existingImageUrl = undefined;
+    this.clearFileSelection();
   }
 
   async deleteService(index: number) {

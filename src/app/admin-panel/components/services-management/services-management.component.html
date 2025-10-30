@@ -8,18 +8,21 @@
   </div>
 
   <div class="add-service-section">
-    <form class="service-form" (ngSubmit)="addService()">
-      <h3>Añadir Nuevo Servicio</h3>
+    <form class="service-form" (ngSubmit)="onSubmit()">
+      <div #formTop class="form-scroll-anchor" aria-hidden="true"></div>
+      <h3>{{ isEditing ? 'Editar Servicio' : 'Añadir Nuevo Servicio' }}</h3>
 
       <!-- Imagen del servicio -->
       <div class="image-upload-section">
         <label>Imagen del Servicio</label>
-        <div class="upload-area" (click)="fileInput.click()" [class.has-image]="selectedFile"
+        <div class="upload-area" (click)="fileInput.click()" [class.has-image]="selectedFile || imagePreviewUrl"
              [style.background-image]="imagePreviewUrl ? 'url(' + imagePreviewUrl + ')' : null">
           <div class="upload-content">
             <i class="bi bi-image"></i>
-            <p>{{ selectedFile ? 'Cambiar imagen' : 'Haz clic para añadir imagen' }}</p>
-            <small>{{ selectedFile ? selectedFile.name : 'Formatos: JPG, PNG, WebP (máx. 5MB)' }}</small>
+            <p>{{ (selectedFile || imagePreviewUrl) ? 'Cambiar imagen' : 'Haz clic para añadir imagen' }}</p>
+            <small>
+              {{ selectedFile ? selectedFile.name : (imagePreviewUrl ? 'Imagen actual' : 'Formatos: JPG, PNG, WebP (máx. 5MB)') }}
+            </small>
           </div>
           <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" class="visually-hidden">
         </div>
@@ -228,11 +231,21 @@
         <textarea [(ngModel)]="newService.description" name="serviceDescription" placeholder="Descripción del servicio..." class="form-textarea"></textarea>
       </div>
 
-      <button type="submit" class="add-service-btn" [disabled]="isUploading">
-        <i class="bi bi-plus-circle" *ngIf="!isUploading"></i>
-        <i class="bi bi-hourglass-split" *ngIf="isUploading"></i>
-        {{ isUploading ? 'Subiendo...' : 'Añadir Servicio' }}
-      </button>
+      <div class="form-actions" style="display:flex; gap:10px; align-items:center;">
+        <button type="submit" class="add-service-btn" [disabled]="isUploading">
+          <i class="bi" [ngClass]="{
+            'bi-plus-circle': !isEditing && !isUploading,
+            'bi-save': isEditing && !isUploading,
+            'bi-hourglass-split': isUploading
+          }"></i>
+          {{ isUploading ? 'Subiendo...' : (isEditing ? 'Guardar cambios' : 'Añadir Servicio') }}
+        </button>
+
+        <button type="button" class="action-btn delete-btn" *ngIf="isEditing && !isUploading" (click)="cancelEditing()">
+          <i class="bi bi-x-circle"></i>
+          Cancelar
+        </button>
+      </div>
     </form>
   </div>
   <!-- Lista de servicios actuales -->
