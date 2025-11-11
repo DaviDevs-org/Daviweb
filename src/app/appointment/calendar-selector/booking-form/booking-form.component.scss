@@ -301,38 +301,40 @@ textarea {
   }
 }
 
-/* Estilos de botones de longitud de pelo */
+/* Estilos de selector de longitud de pelo */
 .hair-length-options {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin-top: 8px;
 
   .hair-length-card {
-    flex: 1;
+    position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255,255,255,0.9);
-    border: 1px solid rgba(0,0,0,0.06);
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 14px;
     padding: 10px;
     transition: box-shadow 0.25s ease, transform 0.2s ease;
+    overflow: hidden;
 
     &.active {
-      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
       transform: translateY(-2px);
     }
 
+    /* Botón superior */
     button {
       width: 100%;
       padding: 12px 0;
       font-weight: 700;
       text-transform: uppercase;
       border-radius: 10px;
-      border: 2px solid $primary-dark; // contorno con más contraste
-      background: $light-gray; // mejor contraste con el fondo
-      color: $text-dark; // texto legible
+      border: 2px solid $primary-dark;
+      background: $light-gray;
+      color: $text-dark;
       font-size: 14px;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -356,24 +358,35 @@ textarea {
       }
     }
 
+    /* Imagen con tamaño uniforme independientemente de la resolución */
     img {
-      display: block;
       width: 100%;
-      max-width: 120px;
-      height: auto;
+      height: 220px; /* altura fija para un grid consistente en desktop */
+      object-fit: cover; /* recorta sin deformar */
+      object-position: center;
       border-radius: 10px;
       background: #f4f5f7;
-      border: 1px solid rgba(0,0,0,0.05);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      user-select: none;
+      -webkit-user-drag: none;
     }
+  }
+
+  @media (max-width: 768px) {
+    gap: 10px;
+    .hair-length-card img { height: 190px; }
   }
 
   @media (max-width: 480px) {
     gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 
     .hair-length-card button {
       font-size: 13px;
       padding: 10px 0;
     }
+
+    .hair-length-card img { height: 150px; }
   }
 }
 
