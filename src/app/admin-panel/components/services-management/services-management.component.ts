@@ -40,6 +40,8 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
   isUploading: boolean = false;
   uploadSubscription: Subscription | undefined = undefined;
   hasBreaks: boolean = false;
+  // Limitador por rango horario (opcional)
+  useHourRange: boolean = false;
   // Estado de edición
   isEditing: boolean = false;
   private editServiceId: string | null = null;
@@ -55,7 +57,8 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
       short: { time: 30 },
       medium: { time: 45 },
       long: { time: 60 }
-    }
+    },
+    hourRange: undefined
   };
 
 
@@ -220,6 +223,22 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
         hairLengthModsToSave = this.sanitizeHairLengthModifiers(hairLengthModsToSave);
       }
 
+      // Rango horario opcional
+      let hourRangeToSave = undefined as NewService['hourRange'] | undefined;
+      if (this.useHourRange) {
+        const start = this.newService.hourRange?.start || '';
+        const end = this.newService.hourRange?.end || '';
+        if (!start || !end) {
+          this.toast.error('Indica hora de inicio y fin del rango.');
+          return;
+        }
+        if (this.timeToMinutes(end) <= this.timeToMinutes(start)) {
+          this.toast.error('El fin del rango debe ser posterior al inicio.');
+          return;
+        }
+        hourRangeToSave = { start, end };
+      }
+
       const serviceNew = new Service(
         this.newService.name,
         this.newService.description,
@@ -230,7 +249,9 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
           medium: { time: 0 },
           long: { time: 0 }
         },
-        imageUrl
+        imageUrl,
+        undefined,
+        hourRangeToSave
       );
 
       await this.service.addService(serviceNew);
@@ -244,7 +265,8 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
           short: { time: 30 },
           medium: { time: 45 },
           long: { time: 60 }
-        }
+        },
+        hourRange: undefined
       };
 
       this.clearFileSelection();
@@ -302,11 +324,14 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
               ...(mapSegments(service.hairLengthModifiers.long?.segments) ? { segments: mapSegments(service.hairLengthModifiers.long?.segments)! } : {})
             }
           }
-        : { short: { time: 30 }, medium: { time: 45 }, long: { time: 60 } }
+        : { short: { time: 30 }, medium: { time: 45 }, long: { time: 60 } },
+      hourRange: service.hourRange ? { ...service.hourRange } : undefined
     };
 
     // Definir si mostrar modo segmentos
     this.hasBreaks = !this.newService.requiresHairLength && ((this.newService.timeSegments?.length || 0) > 1);
+  // Activar el toggle de rango horario si viene definido
+  this.useHourRange = !!service.hourRange;
 
     // Hacer scroll suave al formulario
     this.scrollToForm();
@@ -396,6 +421,22 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
         hairLengthModsToSave = this.sanitizeHairLengthModifiers(hairLengthModsToSave);
       }
 
+      // Rango horario opcional
+      let hourRangeToSave = undefined as NewService['hourRange'] | undefined;
+      if (this.useHourRange) {
+        const start = this.newService.hourRange?.start || '';
+        const end = this.newService.hourRange?.end || '';
+        if (!start || !end) {
+          this.toast.error('Indica hora de inicio y fin del rango.');
+          return;
+        }
+        if (this.timeToMinutes(end) <= this.timeToMinutes(start)) {
+          this.toast.error('El fin del rango debe ser posterior al inicio.');
+          return;
+        }
+        hourRangeToSave = { start, end };
+      }
+
       const updatedService = new Service(
         this.newService.name,
         this.newService.description,
@@ -406,7 +447,9 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
           medium: { time: 0 },
           long: { time: 0 }
         },
-        imageUrl
+        imageUrl,
+        this.editServiceId || undefined,
+        hourRangeToSave
       );
 
       await this.service.updateService(this.editServiceId, updatedService);
@@ -457,9 +500,11 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
         short: { time: 30 },
         medium: { time: 45 },
         long: { time: 60 }
-      }
+      },
+      hourRange: undefined
     };
     this.hasBreaks = false;
+    this.useHourRange = false;
     this.isEditing = false;
     this.editServiceId = null;
     this.existingImageUrl = undefined;
@@ -562,6 +607,14 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
     }
   }
 
+  onHourRangeToggle() {
+    if (this.useHourRange) {
+      if (!this.newService.hourRange) {
+        this.newService.hourRange = { start: '09:00', end: '21:00' };
+      }
+    }
+  }
+
   onRequireHairLengthChanged() {
     if (this.newService.requiresHairLength) {
       // Desactivar breaks del modo normal
@@ -618,7 +671,10 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
       newService.description,
       newService.timeSegments,
       newService.requiresHairLength ?? false,
-      newService.hairLengthModifiers
+      newService.hairLengthModifiers,
+      undefined,
+      undefined,
+      newService.hourRange
     );
   }
 
@@ -634,5 +690,10 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
 
   getBreakTime(segments: TimeSegment[]): number {
     return segments.reduce((total, seg) => total + (seg.breakAfter || 0), 0);
+  }
+
+  private timeToMinutes(time: string): number {
+    const [h, m] = (time || '0:0').split(':').map(Number);
+    return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
   }
 }

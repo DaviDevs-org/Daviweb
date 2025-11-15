@@ -209,9 +209,20 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
       : service;
 
     const startMinutes = this.timeToMinutes(time);
+    // Si el servicio tiene limitador horario, verificar que la hora de inicio caiga dentro
+    if (service.hourRange?.start && service.hourRange?.end) {
+      const s = this.timeToMinutes(service.hourRange.start);
+      const e = this.timeToMinutes(service.hourRange.end);
+      if (!(startMinutes >= s && startMinutes < e)) return false;
+    }
     if (!effService.timeSegments || effService.timeSegments.length === 0) {
       // Servicio sin timeSegments, asumir duración por defecto de 30 minutos
       const endTimeMinutes = startMinutes + 30;
+      // Verificar fin dentro del rango horario del servicio (si existe)
+      if (service.hourRange?.start && service.hourRange?.end) {
+        const e = this.timeToMinutes(service.hourRange.end);
+        if (endTimeMinutes > e) return false;
+      }
       if (!this.isRangeWithinSchedule(date, startMinutes, endTimeMinutes)) return false;
       return !this.hasCollisionWithExistingAppointments(date, startMinutes, 30);
     }
@@ -246,7 +257,14 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
         endExact += segment.breakAfter;
       }
     });
+    // Validar que el servicio cabe en el rango general del local
     if (!this.isRangeWithinSchedule(date, startMinutes, endExact)) return false;
+    // Validar que el servicio cabe en el rango horario del propio servicio (si existe)
+    if (service.hourRange?.start && service.hourRange?.end) {
+      const s = this.timeToMinutes(service.hourRange.start);
+      const e = this.timeToMinutes(service.hourRange.end);
+      if (!(startMinutes >= s && endExact <= e)) return false;
+    }
 
     // Verificar que no se sobreponga con otras citas
     const dayAppointments = this.getAppointmentsForDate(dateKey);

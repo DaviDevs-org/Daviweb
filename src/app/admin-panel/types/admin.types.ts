@@ -38,6 +38,7 @@ export interface ServiceDTO {
   imageUrl?: string;
   requiresHairLength?: boolean;
   hairLengthModifiers?: HairLengthModifiers;
+  hourRange?: HourRange;
 }
 
 export interface AppointmentFirestore {
@@ -70,6 +71,11 @@ export type HairLengthModifiers = {
   long: HairLengthModifier;
 }
 
+export interface HourRange {
+  start: string; // "HH:mm"
+  end: string;   // "HH:mm"
+}
+
 export class Service {
   constructor(
     public name: string,
@@ -82,7 +88,8 @@ export class Service {
       long: { time: 60 }
     },
     public imageUrl?: string,
-    public id?: string
+    public id?: string,
+    public hourRange?: HourRange
   ) {}
 
   // Devuelve los timeSegments "materializados" para una longitud concreta
@@ -111,7 +118,8 @@ export class Service {
       /* requiresHairLength */ false,
       this.hairLengthModifiers,
       this.imageUrl,
-      this.id
+      this.id,
+      this.hourRange
     );
   }
 
@@ -180,7 +188,7 @@ export class Service {
 
   // Exporta a JSON limpio para Firestore
   toJson(): ServiceDTO {
-    return {
+    const base: ServiceDTO = {
       name: this.name,
       description: this.description,
       timeSegments: this.timeSegments,
@@ -188,6 +196,10 @@ export class Service {
       requiresHairLength: this.requiresHairLength,
       hairLengthModifiers: this.hairLengthModifiers,
     };
+    if (this.hourRange) {
+      base.hourRange = { ...this.hourRange };
+    }
+    return base;
   }
 }
 
@@ -199,6 +211,7 @@ export interface NewService {
   timeSegments: TimeSegment[];
   requiresHairLength?: boolean;
   hairLengthModifiers?: HairLengthModifiers;
+  hourRange?: HourRange;
 }
 
 export type Interval = { open: string; close: string; blocked?: boolean };

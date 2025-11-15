@@ -54,7 +54,8 @@ export class ServiceManager {
       data.requiresHairLength || false,
       data.hairLengthModifiers || { short: { time: 30 }, medium: { time: 45 }, long: { time: 60 } },
       data.imageUrl,
-      data.id
+      data.id,
+      data.hourRange
     );
   }
 

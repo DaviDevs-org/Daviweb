@@ -283,6 +283,13 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const dateKey = this.toISODate(date);
     const startMinutes = this.timeToMinutes(time);
 
+    // Validar rango horario propio del servicio (si existe)
+    if (service.hourRange?.start && service.hourRange?.end) {
+      const s = this.timeToMinutes(service.hourRange.start);
+      const e = this.timeToMinutes(service.hourRange.end);
+      if (!(startMinutes >= s && startMinutes < e)) return false;
+    }
+
     // Calcular todos los slots que ocupará el servicio
     const serviceSlots: number[] = [];
     let currentTime = startMinutes;
@@ -303,9 +310,15 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       }
     });
 
-    // Verificar que no se sobreponga con horarios de cierre
+    // Verificar que no se sobreponga con horarios de cierre del local
     const endTime = Math.max(...serviceSlots) + 30; // +30 porque cada slot es de 30 min
     if (!this.isTimeWithinSchedule(date, endTime)) return false;
+
+    // También validar que cabe dentro del rango horario del servicio (si existe)
+    if (service.hourRange?.start && service.hourRange?.end) {
+      const endLimit = this.timeToMinutes(service.hourRange.end);
+      if (endTime > endLimit) return false;
+    }
 
     // Obtener las citas del día desde el observable
     const resolvedAppointments = await firstValueFrom(this.appointments$);

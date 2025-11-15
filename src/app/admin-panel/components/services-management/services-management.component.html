@@ -53,6 +53,13 @@
             <span class="checkmark">¿Tiempo según longitud de pelo?</span>
           </label>
         </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="useHourRange" (change)="onHourRangeToggle()" name="useHourRange">
+            <span class="checkmark">Limitar por horario</span>
+          </label>
+        </div>
       </div>
 
       <!-- Tiempo del servicio -->
@@ -225,6 +232,23 @@
         </div>
       </div>
 
+      <!-- Rango horario del servicio -->
+      <div class="form-group" *ngIf="useHourRange">
+        <label>Rango horario del servicio</label>
+        <div class="hour-range">
+          <div class="form-group compact">
+            <label>Desde</label>
+            <input type="time" class="form-input" [(ngModel)]="newService.hourRange!.start" name="hourRangeStart">
+          </div>
+          <span class="to-separator">a</span>
+          <div class="form-group compact">
+            <label>Hasta</label>
+            <input type="time" class="form-input" [(ngModel)]="newService.hourRange!.end" name="hourRangeEnd">
+          </div>
+        </div>
+        <small class="help-text">Las citas de este servicio deberán empezar y terminar dentro de este rango.</small>
+      </div>
+
       <!-- Descripción -->
       <div class="form-group">
         <label>Descripción</label>
@@ -263,6 +287,7 @@
             <div class="service-header-data">
               <div class="service-time" *ngIf="!service.requiresHairLength">{{ getTotalTime(service.timeSegments) }} min</div>
               <div class="service-time" *ngIf="service.requiresHairLength">{{ service.getEstimatedTimeRange() }}</div>
+              <div class="service-time" *ngIf="service.hourRange">{{ service.hourRange.start }}-{{ service.hourRange.end }}</div>
             </div>
           </div>
 
