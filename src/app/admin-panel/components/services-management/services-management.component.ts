@@ -46,6 +46,8 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
   isEditing: boolean = false;
   private editServiceId: string | null = null;
   private existingImageUrl: string | undefined;
+  // Estado de expansión de detalles por índice de servicio
+  expandedServiceIndexes: Set<number> = new Set();
 
 
   newService: NewService = {
@@ -255,21 +257,9 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
       );
 
       await this.service.addService(serviceNew);
-
-      this.newService = {
-        name: '',
-        description: '',
-        timeSegments: [{ duration: 30, breakAfter: 0 }],
-        requiresHairLength: false,
-        hairLengthModifiers: {
-          short: { time: 30 },
-          medium: { time: 45 },
-          long: { time: 60 }
-        },
-        hourRange: undefined
-      };
-
-      this.clearFileSelection();
+      // Importante: usar el reseteo centralizado para evitar estados inconsistentes
+      // (por ejemplo, dejar useHourRange=true pero hourRange undefined, lo que rompe el template)
+      this.resetForm();
       this.toast.success('Servicio añadido correctamente!');
     } catch (error) {
       console.error('Error al añadir servicio:', error);
@@ -695,5 +685,18 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
   private timeToMinutes(time: string): number {
     const [h, m] = (time || '0:0').split(':').map(Number);
     return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
+  }
+
+  // --- NUEVO: manejo de panel de detalles en la lista ---
+  toggleDetails(index: number): void {
+    if (this.expandedServiceIndexes.has(index)) {
+      this.expandedServiceIndexes.delete(index);
+    } else {
+      this.expandedServiceIndexes.add(index);
+    }
+  }
+
+  isDetailsExpanded(index: number): boolean {
+    return this.expandedServiceIndexes.has(index);
   }
 }

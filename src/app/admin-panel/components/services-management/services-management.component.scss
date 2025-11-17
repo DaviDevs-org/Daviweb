@@ -260,6 +260,7 @@ select {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
+    align-items: start; // evitar estirar las tarjetas a la altura de la fila
 
     @include mobile {
         grid-template-columns: 1fr;
@@ -273,6 +274,8 @@ select {
     transition: all 0.3s ease;
     background: $white;
     box-shadow: $shadow-sm;
+    display: flex;
+    flex-direction: column;
 
     &:hover {
         border-color: $primary;
@@ -298,6 +301,8 @@ select {
 
     .service-content {
         padding: 20px;
+        display: flex;
+        flex-direction: column;
     }
 
     .service-header {
@@ -336,6 +341,7 @@ select {
     .service-actions {
         display: flex;
         gap: 10px;
+        padding-top: 10px;
     }
 }
 
@@ -530,6 +536,204 @@ select {
 .segment-separator {
     color: $text-gray;
     font-weight: bold;
+}
+
+/* Nuevos estilos para chips/etiquetas en la lista de servicios */
+.service-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 14px 0;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $text-dark;
+    background: rgba($primary, 0.06);
+    border: 1px solid rgba($primary, 0.08);
+    white-space: nowrap;
+}
+
+.chip i {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.chip-duration {
+    background: $primary;
+    color: $white;
+    border: none;
+}
+
+.chip-estimated {
+    background: rgba($primary, 0.9);
+    color: $white;
+    border: none;
+}
+
+.chip-hour {
+    background: $background-section;
+    color: $text-dark;
+    border: 1px solid $border-color;
+}
+
+.chip-break {
+    background: $text-gray;
+    color: $white;
+    border: none;
+}
+
+.chip-hair {
+    background: rgba($primary, 0.08);
+    color: $text-dark;
+    border: 1px dashed rgba($primary, 0.12);
+}
+
+@include mobile {
+    .service-tags {
+        gap: 6px;
+    }
+
+    .chip {
+        font-size: 0.8rem;
+        padding: 6px 8px;
+    }
+}
+
+/* --- Nuevo diseño: fila de resumen y panel colapsable --- */
+.service-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; // alinear botón con la primera línea de chips
+    gap: 12px;
+    flex-wrap: nowrap; // no saltar a nueva línea en desktop
+    margin: 0px 0 12px 0;
+}
+
+.service-summary-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 1 1 auto; // que ocupe el ancho disponible y permita wrap interno
+}
+
+.details-toggle {
+    background: $primary;
+    color: $white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: $shadow-sm;
+    transition: background .25s ease, box-shadow .25s ease;
+
+    &:hover {
+        background: $primary-dark;
+        box-shadow: $shadow-md;
+    }
+}
+
+.service-details-collapsible {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height .35s ease, opacity .35s ease, padding .35s ease;
+    padding: 0 4px;
+    border-left: 2px solid transparent;
+}
+
+.service-details-collapsible.expanded {
+    max-height: 340px; // suficiente para contenido medio
+    opacity: 1;
+    padding: 8px 4px 4px 4px;
+    border-left-color: rgba($primary, 0.4);
+    background: rgba($primary, 0.03);
+    border-radius: 6px;
+}
+
+.details-section + .details-section {
+    margin-top: 12px;
+}
+
+.details-title {
+    margin: 0 0 6px 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $text-dark;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.segments-list, .hair-length-summary {
+    margin: 0 0 8px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.segments-list li {
+    font-size: 0.8rem;
+    background: $white;
+    border: 1px solid rgba($primary, 0.15);
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.hair-length-item {
+    font-size: 0.8rem;
+    background: $white;
+    border: 1px solid rgba($primary, 0.15);
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.length-label { font-weight: 600; }
+.length-time { font-weight: 500; }
+.length-segments { color: $text-gray; }
+
+.total-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 6px;
+    background: rgba($primary, 0.05);
+    border: 1px solid rgba($primary, 0.1);
+    border-radius: 6px;
+}
+
+.total-line.range { justify-content: flex-start; }
+
+.no-segments {
+    font-size: 0.75rem;
+    color: $text-gray;
+    margin-bottom: 6px;
+}
+
+@include mobile {
+    .service-summary-row { flex-direction: column; align-items: stretch; }
+    .details-toggle { width: 100%; justify-content: center; }
+    .total-line { font-size: 0.7rem; }
 }
 
 
