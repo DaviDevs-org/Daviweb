@@ -159,14 +159,16 @@ export class Service {
 
   // Devuelve el rango estimado de tiempo de un servicio
   getEstimatedTimeRange(): string {
+    // Caso con longitudes de pelo: rango entre los tiempos declarados/segmentados
     if (this.requiresHairLength && this.hairLengthModifiers) {
       const times: number[] = [];
       for (const length of ['short', 'medium', 'long'] as const) {
         const modifier = this.hairLengthModifiers[length];
+        if (!modifier) continue;
         if (modifier.segments?.length) {
           const total = modifier.segments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
-          times.push(total);
-        } else if (modifier.time) {
+          if (total > 0) times.push(total);
+        } else if (typeof modifier.time === 'number' && modifier.time > 0) {
           times.push(modifier.time);
         }
       }
@@ -175,15 +177,22 @@ export class Service {
         const max = Math.max(...times);
         return min === max ? `${min} min` : `${min}-${max} min`;
       }
-      return '—';
+      // Si por datos antiguos falta info, intentar usar timeSegments global como fallback
+      if (this.timeSegments?.length) {
+        const totalGlobal = this.timeSegments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
+        return `${totalGlobal} min`;
+      }
+      return '30 min';
     }
 
+    // Servicio normal (sin longitudes). Si tiene breaks, mostrar rango activo-total
     if (this.timeSegments?.length) {
+      const active = this.timeSegments.reduce((sum, seg) => sum + seg.duration, 0);
       const total = this.timeSegments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
-      return `${total} min`;
+      return active === total ? `${total} min` : `${active}-${total} min`;
     }
 
-    return '30 min'; // fallback
+    return '30 min'; // fallback para datos muy antiguos
   }
 
   // Exporta a JSON limpio para Firestore

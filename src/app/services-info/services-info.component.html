@@ -41,13 +41,18 @@
                       (click)="selectService(service)"
                       tabindex="0"
                       role="button"
-                      [attr.aria-label]="'Ver detalles del servicio ' + service.name + ', duración ' + service.computeTotalTime() + ' minutos'">
+                      [attr.aria-label]="'Ver detalles del servicio ' + service.name + ', duración ' + service.computeTotalTime() + ' minutos' + (service.hourRange ? ', horario ' + service.hourRange.start + '-' + service.hourRange.end : '')">
                 <div class="service-info">
                   <h4 class="service-name">{{ service.name }}</h4>
                   <div class="service-meta">
                     <span class="duration">
                       <i class="bi bi-clock"></i>
-                      {{ service.computeTotalTime() }} min
+                      <!-- Mostrar rango si existe, si no duración total -->
+                      {{ hasRange(service) ? (getMinTime(service) + '-' + getMaxTime(service) + ' min') : (service.computeTotalTime() + ' min') }}
+                    </span>
+                    <span class="hour-range" *ngIf="service.hourRange">
+                      <i class="bi bi-calendar-range"></i>
+                      {{ service.hourRange.start }} - {{ service.hourRange.end }}
                     </span>
                   </div>
                 </div>
@@ -90,6 +95,13 @@
                     <span class="feature-value">
                       Aprox. {{ selectedService.getEstimatedTimeRange() }}
                     </span>
+                  </div>
+                </div>
+                <div class="feature" *ngIf="selectedService.hourRange">
+                  <i class="bi bi-calendar-range"></i>
+                  <div>
+                    <span class="feature-label">Horario</span>
+                    <span class="feature-value">{{ selectedService.hourRange.start }} - {{ selectedService.hourRange.end }}</span>
                   </div>
                 </div>
               </div>
