@@ -139,6 +139,10 @@ export class CalendarSelectorComponent implements OnDestroy {
 
   monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  /** Días que sólo admiten reserva telefónica (por defecto: viernes=5 y sábado=6).
+   *  Se usa Date.getDay(): 0=Domingo ... 6=Sábado. Pueden cambiarse dinámicamente si se requiere.
+   */
+  phoneOnlyDays: number[] = [5, 6];
 
   years: number[] = [];
   selectedYear = new Date().getFullYear();
@@ -392,11 +396,25 @@ export class CalendarSelectorComponent implements OnDestroy {
     return !daySchedule.closed && daySchedule.intervals.length > 0;
   }
 
+  /** Indica si el día está marcado como de cita sólo telefónica.
+   *  No impide que aparezca como disponible; únicamente bloquea la reserva directa al seleccionar.
+   */
+  private isPhoneOnlyDay(date: Date | null): boolean {
+    if (!date) return false;
+    return this.phoneOnlyDays.includes(date.getDay());
+  }
+
   selectDate(date: Date | null) {
     if (!date) return;
 
     if (!this.isAvailable(date)) {
       this.toast.error('No hay horas disponibles para este día');
+      return;
+    }
+
+    // Bloquear días que sólo admiten reserva telefónica (manteniendo apariencia de disponibilidad)
+    if (this.isPhoneOnlyDay(date)) {
+      this.toast.error('Este día sólo admite reservas telefónicas. Por favor, llámanos para reservar.');
       return;
     }
 
