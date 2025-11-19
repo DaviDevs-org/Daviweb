@@ -53,6 +53,13 @@
             <span class="checkmark">¿Tiempo según longitud de pelo?</span>
           </label>
         </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="useHourRange" (change)="onHourRangeToggle()" name="useHourRange">
+            <span class="checkmark">Limitar por horario</span>
+          </label>
+        </div>
       </div>
 
       <!-- Tiempo del servicio -->
@@ -225,6 +232,23 @@
         </div>
       </div>
 
+      <!-- Rango horario del servicio -->
+      <div class="form-group" *ngIf="useHourRange">
+        <label>Rango horario del servicio</label>
+        <div class="hour-range">
+          <div class="form-group compact">
+            <label>Desde</label>
+            <input type="time" class="form-input" [(ngModel)]="newService.hourRange!.start" name="hourRangeStart">
+          </div>
+          <span class="to-separator">a</span>
+          <div class="form-group compact">
+            <label>Hasta</label>
+            <input type="time" class="form-input" [(ngModel)]="newService.hourRange!.end" name="hourRangeEnd">
+          </div>
+        </div>
+        <small class="help-text">Las citas de este servicio deberán empezar y terminar dentro de este rango.</small>
+      </div>
+
       <!-- Descripción -->
       <div class="form-group">
         <label>Descripción</label>
@@ -260,19 +284,62 @@
         <div class="service-content">
           <div class="service-header">
             <h4>{{ service.name }}</h4>
-            <div class="service-header-data">
-              <div class="service-time" *ngIf="!service.requiresHairLength">{{ getTotalTime(service.timeSegments) }} min</div>
-              <div class="service-time" *ngIf="service.requiresHairLength">{{ service.getEstimatedTimeRange() }}</div>
-            </div>
           </div>
 
-          <div class="time-segments-display" *ngIf="!service.requiresHairLength && service.timeSegments && service.timeSegments.length > 0">
-            <div class="time-segment-item"
-                 *ngFor="let segment of service.timeSegments; let segIndex = index">
-              <span class="segment-duration">{{ segment.duration }}min</span>
-              <span *ngIf="segment.breakAfter ?? 0" class="segment-break">+ {{ segment.breakAfter }}min pausa</span>
-              <span *ngIf="segIndex < service.timeSegments.length - 1" class="segment-separator">→</span>
+          <!-- Mini resumen con botón de detalles -->
+          <div class="service-summary-row">
+            <div class="service-summary-chips">
+              <span class="chip chip-duration" *ngIf="!service.requiresHairLength" title="Duración total (incluye pausas)">{{ getTotalTime(service.timeSegments) }} min</span>
+              <span class="chip chip-estimated" *ngIf="service.requiresHairLength" title="Rango estimado según longitud">{{ service.getEstimatedTimeRange() }}</span>
+              <span class="chip chip-hour" *ngIf="service.hourRange" title="Rango horario permitido"><i class="bi bi-clock"></i> {{ service.hourRange.start }}-{{ service.hourRange.end }}</span>
             </div>
+            <button type="button"
+                    class="details-toggle"
+                    (click)="toggleDetails(i)"
+                    [attr.aria-expanded]="isDetailsExpanded(i)"
+                    [attr.aria-controls]="'serviceDetails' + i">
+              <i class="bi" [ngClass]="{ 'bi-chevron-down': !isDetailsExpanded(i), 'bi-chevron-up': isDetailsExpanded(i) }"></i>
+              <span class="toggle-label">Detalles</span>
+            </button>
+          </div>
+
+          <!-- Panel colapsable de detalles -->
+          <div [id]="'serviceDetails' + i" class="service-details-collapsible" [class.expanded]="isDetailsExpanded(i)">
+            <ng-container *ngIf="isDetailsExpanded(i)">
+              <!-- Detalles para servicio normal (sin longitudes) -->
+              <div class="details-section" *ngIf="!service.requiresHairLength">
+                <h5 class="details-title">Segmentos</h5>
+                <ul class="segments-list" *ngIf="service.timeSegments.length">
+                  <li *ngFor="let segment of service.timeSegments; let segIndex = index">
+                    <strong>Segmento {{ segIndex + 1 }}:</strong>
+                    {{ segment.duration }} min
+                    <span *ngIf="segment.breakAfter"> + {{ segment.breakAfter }} min pausa</span>
+                  </li>
+                </ul>
+                <div class="no-segments" *ngIf="!service.timeSegments.length">Sin segmentos definidos.</div>
+                <div class="total-line">
+                  <span>Activo: {{ getActiveTime(service.timeSegments) }} min</span>
+                  <span *ngIf="getBreakTime(service.timeSegments) > 0">Pausas: {{ getBreakTime(service.timeSegments) }} min</span>
+                  <span>Total: {{ getTotalTime(service.timeSegments) }} min</span>
+                </div>
+              </div>
+              <!-- Detalles para servicio por longitud de pelo -->
+              <div class="details-section" *ngIf="service.requiresHairLength">
+                <h5 class="details-title">Longitudes</h5>
+                <div class="hair-length-summary">
+                  <div class="hair-length-item" *ngFor="let length of lengths">
+                    <ng-container *ngIf="service.hairLengthModifiers[length]">
+                      <span class="length-label">{{ lengthMap[length] }}:</span>
+                      <span class="length-time">{{ service.hairLengthModifiers[length].time }} min</span>
+                      <span class="length-segments" *ngIf="service.hairLengthModifiers[length].segments?.length">
+                        ({{ service.hairLengthModifiers[length].segments?.length }} segmentos)
+                      </span>
+                    </ng-container>
+                  </div>
+                </div>
+                <div class="total-line range" *ngIf="service.getEstimatedTimeRange() as rng">Rango estimado: {{ rng }}</div>
+              </div>
+            </ng-container>
           </div>
 
           <p class="service-description">{{ service.description }}</p>

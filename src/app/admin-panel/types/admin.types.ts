@@ -38,6 +38,7 @@ export interface ServiceDTO {
   imageUrl?: string;
   requiresHairLength?: boolean;
   hairLengthModifiers?: HairLengthModifiers;
+  hourRange?: HourRange;
 }
 
 export interface AppointmentFirestore {
@@ -70,6 +71,11 @@ export type HairLengthModifiers = {
   long: HairLengthModifier;
 }
 
+export interface HourRange {
+  start: string; // "HH:mm"
+  end: string;   // "HH:mm"
+}
+
 export class Service {
   constructor(
     public name: string,
@@ -82,7 +88,8 @@ export class Service {
       long: { time: 60 }
     },
     public imageUrl?: string,
-    public id?: string
+    public id?: string,
+    public hourRange?: HourRange
   ) {}
 
   // Devuelve los timeSegments "materializados" para una longitud concreta
@@ -111,7 +118,8 @@ export class Service {
       /* requiresHairLength */ false,
       this.hairLengthModifiers,
       this.imageUrl,
-      this.id
+      this.id,
+      this.hourRange
     );
   }
 
@@ -151,14 +159,16 @@ export class Service {
 
   // Devuelve el rango estimado de tiempo de un servicio
   getEstimatedTimeRange(): string {
+    // Caso con longitudes de pelo: rango entre los tiempos declarados/segmentados
     if (this.requiresHairLength && this.hairLengthModifiers) {
       const times: number[] = [];
       for (const length of ['short', 'medium', 'long'] as const) {
         const modifier = this.hairLengthModifiers[length];
+        if (!modifier) continue;
         if (modifier.segments?.length) {
           const total = modifier.segments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
-          times.push(total);
-        } else if (modifier.time) {
+          if (total > 0) times.push(total);
+        } else if (typeof modifier.time === 'number' && modifier.time > 0) {
           times.push(modifier.time);
         }
       }
@@ -167,20 +177,27 @@ export class Service {
         const max = Math.max(...times);
         return min === max ? `${min} min` : `${min}-${max} min`;
       }
-      return '—';
+      // Si por datos antiguos falta info, intentar usar timeSegments global como fallback
+      if (this.timeSegments?.length) {
+        const totalGlobal = this.timeSegments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
+        return `${totalGlobal} min`;
+      }
+      return '30 min';
     }
 
+    // Servicio normal (sin longitudes). Si tiene breaks, mostrar rango activo-total
     if (this.timeSegments?.length) {
+      const active = this.timeSegments.reduce((sum, seg) => sum + seg.duration, 0);
       const total = this.timeSegments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
-      return `${total} min`;
+      return active === total ? `${total} min` : `${active}-${total} min`;
     }
 
-    return '30 min'; // fallback
+    return '30 min'; // fallback para datos muy antiguos
   }
 
   // Exporta a JSON limpio para Firestore
   toJson(): ServiceDTO {
-    return {
+    const base: ServiceDTO = {
       name: this.name,
       description: this.description,
       timeSegments: this.timeSegments,
@@ -188,6 +205,10 @@ export class Service {
       requiresHairLength: this.requiresHairLength,
       hairLengthModifiers: this.hairLengthModifiers,
     };
+    if (this.hourRange) {
+      base.hourRange = { ...this.hourRange };
+    }
+    return base;
   }
 }
 
@@ -199,6 +220,7 @@ export interface NewService {
   timeSegments: TimeSegment[];
   requiresHairLength?: boolean;
   hairLengthModifiers?: HairLengthModifiers;
+  hourRange?: HourRange;
 }
 
 export type Interval = { open: string; close: string; blocked?: boolean };
