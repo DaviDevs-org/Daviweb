@@ -179,23 +179,38 @@ export class BookingFormComponent implements OnChanges, OnInit, OnDestroy, After
   }
 
   private async updateAvailableServices(): Promise<void> {
-    if (!this.date || !this.time || !this.services.length) {
+    // Filtrar ÚNICAMENTE por hourRange del servicio respecto a la hora seleccionada
+    if (!this.services.length) {
+      this.availableServices = [];
+      return;
+    }
+
+    if (!this.time) {
+      // Sin hora seleccionada mostramos todos
       this.availableServices = [...this.services];
       return;
     }
 
-    const selectedDate = this.parseDate(this.date);
-    if (!selectedDate) {
-      this.availableServices = [...this.services];
-      return;
+    const selectedStart = this.timeToMinutes(this.time);
+
+    this.availableServices = this.services.filter(service => {
+      const range = service.hourRange;
+      if (!range?.start || !range?.end) return true; // sin restricción -> visible
+      const startM = this.timeToMinutes(range.start);
+      const endM = this.timeToMinutes(range.end);
+      // Visible si la hora de inicio cae dentro del rango [start, end)
+      return selectedStart >= startM && selectedStart < endM;
+    });
+
+    // Si el servicio seleccionado ha quedado fuera del filtrado, limpiar el control
+    const control = this.bookingFormRef?.controls?.['service'];
+    if (control) {
+      const current = control.value;
+      if (current && !this.availableServices.some(s => s.name === current)) {
+        control.setValue('');
+        control.markAsUntouched();
+      }
     }
-
-    // Recargar citas existentes cuando cambie la fecha para tener datos actualizados
-    await this.loadExistingAppointments();
-
-    this.availableServices = this.services.filter(service =>
-      this.canScheduleService(selectedDate, this.time!, service)
-    );
   }
 
   private parseDate(dateStr: string): Date | null {

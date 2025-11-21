@@ -42,7 +42,7 @@
       <label for="service">Servicio *</label>
       <select name="service" id="service" ngModel required>
         <option value="" disabled selected>-- Selecciona servicio --</option>
-        <option *ngFor="let s of services" [value]="s.name">
+        <option *ngFor="let s of availableServices" [value]="s.name">
           {{s.name}} ({{this.getDisplayTime(s)}})
         </option>
       </select>
