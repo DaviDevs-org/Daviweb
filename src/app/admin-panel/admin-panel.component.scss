@@ -2,12 +2,15 @@
 @use '../../styles/mixins' as *;
 
 .admin-container {
-  height: 100vh;
+  // Evitar problemas de viewport móvil: usar min-height en vez de height fija
+  height: auto;
+  min-height: 100dvh;
   background: linear-gradient(135deg, $primary-lighter 0%, rgba($primary-light, 0.2) 50%, rgba($white, 0.9) 100%);
   font-family: $font-primary;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  // No ocultar overflow general, que el scroll lo maneje el contenedor natural
+  overflow: visible;
 }
 
 .admin-content {
@@ -15,12 +18,14 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: $spacing-xl $spacing-lg;
-  overflow-y: auto;
+  // Evitar scroll anidado que pueda dejar “huecos” con fondos del layout
+  overflow-y: visible;
   overflow-x: hidden;
   @include custom-scrollbar();
 
   @include mobile {
     padding: $spacing-lg $spacing-md;
+    overflow: visible; // que fluya de forma natural en móvil
   }
 }
 
