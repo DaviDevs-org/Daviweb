@@ -1,63 +1,4 @@
-export class GalleryPhoto {
-  name: string = "";
-  url: string = "";
-  lastModified: string = "";
-  id?: string;
-  public imageLoaded?: boolean = false;
-
-  constructor(name: string, url: string, lastModified: string, id: string){
-    this.name = name;
-    this.url = url;
-    this.lastModified = lastModified;
-    this.id = id;
-  }
-}
-
-export interface Appointment {
-  id?: string;
-  createdAt?: any; // Firestore Timestamp | string
-  date?: string;   // "YYYY-MM-DD"
-  datetime?: any;  // Firestore Timestamp
-  description?: string;
-  email?: string;
-  name?: string;
-  phone?: string;
-  time?: string;   // "13:00"
-  dateISO?: string;
-  timeNormalized?: string;
-  duration?: string;
-  service?: Service;
-  barber?: string;
-  hairLengthChoice?: 'short' | 'medium' | 'long';
-}
-
-/* REFACTORED service.types.ts
-export interface ServiceDTO {
-  name: string;
-  description: string;
-  timeSegments: TimeSegment[];
-  imageUrl?: string;
-  requiresHairLength?: boolean;
-  hairLengthModifiers?: HairLengthModifiers;
-  hourRange?: HourRange;
-}
-
- */
-
-export interface AppointmentFirestore {
-  name: string;
-  email?: string;
-  phone?: string;
-  description?: string;
-  date: string;
-  time: string;
-  service?: ServiceDTO;
-  barber?: string;
-  datetime?: { seconds: number; nanoseconds: number };
-  hairLengthChoice?: 'short' | 'medium' | 'long';
-}
-
-/* REFACTORED service.entity.ts
+import { ServiceDTO} from '@domain/services/service.types';
 
 export interface TimeSegment {
   duration: number; // Duración en minutos del segmento activo
@@ -68,6 +9,7 @@ export interface HairLengthModifier {
   time: number; // sigue valiendo para los casos simples
   segments?: TimeSegment[]; // añadimos esto para los casos con segmentos específicos
 }
+
 
 // Solo guardamos extraTime ahora
 export type HairLengthModifiers = {
@@ -120,7 +62,7 @@ export class Service {
       this.name,
       this.description,
       segments,
-       requiresHairLength false,
+      /* requiresHairLength */ false,
       this.hairLengthModifiers,
       this.imageUrl,
       this.id,
@@ -217,68 +159,3 @@ export class Service {
   }
 }
 
-*/
-
-
-/* REFACTORED service.types.ts
-export interface NewService {
-  name: string;
-  description: string;
-  timeSegments: TimeSegment[];
-  requiresHairLength?: boolean;
-  hairLengthModifiers?: HairLengthModifiers;
-  hourRange?: HourRange;
-}
-*/
-
-export type Interval = { open: string; close: string; blocked?: boolean };
-
-export interface ScheduleDay {
-  day: string;
-  name: string;
-  closed: boolean;
-  intervals: Interval[];
-}
-
-export interface ContactInfo {
-  phone: string;
-  address: string;
-}
-
-export interface Statistics {
-  monthlyClients: number;
-  monthlyRevenue: number;
-  averageRating: number;
-  weeklyAppointments: number;
-}
-
-export interface ExceptionItem {
-  date: string;
-  closed: boolean;
-  intervals: Interval[];
-  exceptionType: 'closed' | 'custom' | 'range';
-  isEditing?: boolean;
-  startDate?: string; // para tipo 'range'
-  endDate?: string;   // para tipo 'range'
-}
-
-export type AdminTab = 'gallery' | 'services' | 'info' | 'stats';
-
-export interface NavTab { id: AdminTab; icon: string; label: string; }
-
-export interface StatCard {
-  icon: string;
-  title: string;
-  value: string;
-  change: string;
-  changeType: 'positive' | 'negative' | 'neutral';
-}
-
-export interface BarberSettings {
-  settings: {
-    barberSelection: boolean;
-    staff: Barber[];
-  }
-}
-
-export interface Barber { id: string; name: string; visible?: boolean; imageUrl?: string; }

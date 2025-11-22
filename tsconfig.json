@@ -3,6 +3,12 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@domain/*": ["src/app/domain/*"],
+      "@application/*": ["src/app/application/*"],
+      "@infrastructure/*": ["src/app/infrastructure/*"]
+    },
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,

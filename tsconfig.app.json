@@ -6,7 +6,12 @@
     "outDir": "./out-tsc/app",
     "types": [
       "node"
-    ]
+    ],
+    "paths": {
+      "@domain/*": ["src/app/domain/*"],
+      "@application/*": ["src/app/application/*"],
+      "@infrastructure/*": ["src/app/infrastructure/*"]
+    }
   },
   "files": [
     "src/main.ts",
