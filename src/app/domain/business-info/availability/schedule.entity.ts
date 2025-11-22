@@ -1,10 +1,10 @@
-import { Interval, IntervalTDO } from './interval.entity';
+import { Interval, IntervalDTO } from './interval.entity';
 
-export interface ScheduleDayTDO {
+export interface ScheduleDayDTO {
   day: string;
   name: string;
   closed: boolean;
-  intervals: IntervalTDO[];
+  intervals: IntervalDTO[];
 }
 
 export class ScheduleDay {
@@ -30,7 +30,7 @@ export class ScheduleDay {
     return this.intervals.some(interval => {
       const [openHours, openMinutes] = interval.open.split(':').map(Number);
       const [closeHours, closeMinutes] = interval.close.split(':').map(Number);
-      
+
       const openTime = openHours * 60 + openMinutes;
       const closeTime = closeHours * 60 + closeMinutes;
 
@@ -67,17 +67,17 @@ export class ScheduleDay {
     return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
   }
 
-  toTDO(): ScheduleDayTDO {
+  toDTO(): ScheduleDayDTO {
     return {
       day: this.day,
       name: this.name,
       closed: this.closed,
-      intervals: this.intervals.map(interval => interval.toTDO())
+      intervals: this.intervals.map(interval => interval.toDTO())
     };
   }
 
-  static fromTDO(tdo: ScheduleDayTDO): ScheduleDay {
-    const intervals = tdo.intervals.map(i => new Interval(i.open, i.close));
-    return new ScheduleDay(tdo.day, tdo.name, tdo.closed, intervals);
+  static fromDTO(dto: ScheduleDayDTO): ScheduleDay {
+    const intervals = dto.intervals.map(i => new Interval(i.open, i.close));
+    return new ScheduleDay(dto.day, dto.name, dto.closed, intervals);
   }
 }

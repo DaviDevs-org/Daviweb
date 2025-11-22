@@ -1,7 +1,7 @@
 import { Phone } from "@domain/shared/value-objects";
 import { Email } from "@domain/shared/value-objects";
 
-export interface ContactInfoTDO {
+export interface ContactInfoDTO {
   phone: string;
   email: string;
   address: string;
@@ -35,7 +35,7 @@ export class ContactInfo {
     return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
   }
 
-  toTDO(): ContactInfoTDO {
+  toDTO(): ContactInfoDTO {
     return {
       phone: this.phone.toString(),
       email: this.email.toString(),
@@ -43,7 +43,7 @@ export class ContactInfo {
     };
   }
 
-  static fromTDO(tdo: ContactInfoTDO): ContactInfo {
+  static fromDTO(tdo: ContactInfoDTO): ContactInfo {
     return new ContactInfo(tdo.phone, tdo.email, tdo.address);
   }
 }

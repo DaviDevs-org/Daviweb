@@ -1,4 +1,4 @@
-import { AppointementService, ServiceDTO} from '@domain/services/service.types';
+import { AppointmentService, ServiceDTO} from '@domain/services/service.types';
 
 export interface TimeSegment {
   duration: number; // Duración en minutos del segmento activo
@@ -143,7 +143,7 @@ export class Service {
   }
 
   // Exporta a JSON limpio para Firestore
-  toTDO(): ServiceDTO {
+  toDTO(): ServiceDTO {
     const base: ServiceDTO = {
       name: this.name,
       description: this.description,
@@ -159,8 +159,8 @@ export class Service {
   }
 
   // Exporta al formato que guarda Appointment
-  toAppointmentService(): AppointementService {
-    const out: AppointementService = {
+  toAppointmentService(): AppointmentService {
+    const out: AppointmentService = {
       name: this.name,
       timeSegments: this.timeSegments,
     };

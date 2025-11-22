@@ -1,4 +1,4 @@
-import { GalleryPhotoTDO } from './gallery-photo.types';
+import { GalleryPhotoDTO } from './gallery-photo.types';
 export class GalleryPhoto {
   constructor(
     public name: string,
@@ -31,7 +31,7 @@ export class GalleryPhoto {
       .replace(/^-+|-+$/g, '');
   }
 
-  toTDO(): GalleryPhotoTDO {
+  toDTO(): GalleryPhotoDTO {
     return {
       name: this.name,
       url: this.url,
@@ -39,7 +39,7 @@ export class GalleryPhoto {
     };
   }
 
-  static fromTDO(tdo: GalleryPhotoTDO, id?: string): GalleryPhoto {
-    return new GalleryPhoto(tdo.name, tdo.url, id);
+  static fromDTO(dto: GalleryPhotoDTO, id?: string): GalleryPhoto {
+    return new GalleryPhoto(dto.name, dto.url, id);
   }
 }

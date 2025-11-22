@@ -1,4 +1,4 @@
-export interface IntervalTDO {
+export interface IntervalDTO {
   open: string;
   close: string;
   blocked?: boolean;
@@ -30,10 +30,10 @@ export class Interval {
   getDurationInMinutes(): number {
     const [openHours, openMinutes] = this.open.split(':').map(Number);
     const [closeHours, closeMinutes] = this.close.split(':').map(Number);
-    
+
     const openTime = openHours * 60 + openMinutes;
     const closeTime = closeHours * 60 + closeMinutes;
-    
+
     return closeTime - openTime;
   }
 
@@ -52,7 +52,7 @@ export class Interval {
 
     const [openHours, openMinutes] = this.open.split(':').map(Number);
     const [closeHours, closeMinutes] = this.close.split(':').map(Number);
-    
+
     const openTime = openHours * 60 + openMinutes;
     const closeTime = closeHours * 60 + closeMinutes;
 
@@ -91,20 +91,20 @@ export class Interval {
     return `${this.open} - ${this.close}${status}`;
   }
 
-  toTDO(): IntervalTDO {
-    const tdo: IntervalTDO = {
+  toDTO(): IntervalDTO {
+    const dto: IntervalDTO = {
       open: this.open,
       close: this.close
     };
-    
+
     if (this.blocked !== undefined) {
-      tdo.blocked = this.blocked;
+      dto.blocked = this.blocked;
     }
-    
-    return tdo;
+
+    return dto;
   }
 
-  static fromTDO(tdo: IntervalTDO): Interval {
-    return new Interval(tdo.open, tdo.close, tdo.blocked);
+  static fromDTO(dto: IntervalDTO): Interval {
+    return new Interval(dto.open, dto.close, dto.blocked);
   }
 }

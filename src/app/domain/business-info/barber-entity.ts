@@ -1,11 +1,11 @@
-export interface BarberTDO {
+export interface BarberDTO {
   name: string;
   photoUrl?: string;
 }
 
-export interface BarberSettingsTDO {
+export interface BarberSettingsDTO {
   barberSelection: boolean;
-  barbers: BarberTDO[];
+  barbers: BarberDTO[];
 }
 
 export class Barber {
@@ -35,8 +35,8 @@ export class Barber {
       .substring(0, 2);
   }
 
-  toTDO(): BarberTDO {
-    const tdo: BarberTDO = {
+  toDTO(): BarberDTO {
+    const tdo: BarberDTO = {
       name: this.name
     };
 
@@ -47,7 +47,7 @@ export class Barber {
     return tdo;
   }
 
-  static fromTDO(tdo: BarberTDO): Barber {
+  static fromDTO(tdo: BarberDTO): Barber {
     return new Barber(tdo.name, tdo.photoUrl);
   }
 }
@@ -70,7 +70,7 @@ export class BarberSettings {
    * Obtiene un barbero por su nombre
    */
   getBarberByName(name: string): Barber | undefined {
-    return this.barbers.find(barber => 
+    return this.barbers.find(barber =>
       barber.name.toLowerCase() === name.toLowerCase()
     );
   }
@@ -83,15 +83,15 @@ export class BarberSettings {
     return this.barbers.map(b => b.name);
   }
 
-  toTDO(): BarberSettingsTDO {
+  toDTO(): BarberSettingsDTO {
     return {
       barberSelection: this.barberSelection,
-      barbers: this.barbers.map(barber => barber.toTDO())
+      barbers: this.barbers.map(barber => barber.toDTO())
     };
   }
 
-  static fromTDO(tdo: BarberSettingsTDO): BarberSettings {
-    const barbers = tdo.barbers.map(b => Barber.fromTDO(b));
+  static fromDTO(tdo: BarberSettingsDTO): BarberSettings {
+    const barbers = tdo.barbers.map(b => Barber.fromDTO(b));
     return new BarberSettings(tdo.barberSelection, barbers);
   }
 }

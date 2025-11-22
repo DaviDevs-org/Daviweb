@@ -1,26 +1,26 @@
-import { AppointementService } from "@domain/services/service.types";
-import { AppointmentTDO } from "./appointment.types";
+import { AppointmentService } from "@domain/services/service.types";
+import { AppointmentDTO } from "./appointment.types";
 
 export class Appointment {
   date: string = "";
   time: string = "";
-  
+
   constructor(
     public datetime: Date,
-    public service: AppointementService,
+    public service: AppointmentService,
     public id?: string,
     public description?: string,
     public name?: string,
     public phone?: string,
     public barber?: string,
     public hairLengthChoice?: 'short' | 'medium' | 'long'
-  ) { 
+  ) {
     this.date = datetime.toISOString().split('T')[0];
     this.time = `${String(datetime.getHours()).padStart(2, '0')}:${String(datetime.getMinutes()).padStart(2, '0')}`;
   }
 
-  toTDO(): AppointmentTDO {
-    const base: AppointmentTDO = { 
+  toDTO(): AppointmentDTO {
+    const base: AppointmentDTO = {
       datetime: this.datetime,
       createdAt: new Date(),
       service: this.service,
@@ -33,7 +33,7 @@ export class Appointment {
     return base;
   }
 
-  static fromTDO(tdo: AppointmentTDO, id?: string): Appointment {
+  static fromDTO(tdo: AppointmentDTO, id?: string): Appointment {
     return new Appointment(
       tdo.datetime,
       tdo.service,

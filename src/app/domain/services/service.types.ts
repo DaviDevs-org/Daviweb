@@ -19,7 +19,7 @@ export interface NewService {
   hourRange?: HourRange;
 }
 
-export interface AppointementService {
+export interface AppointmentService {
   name: string;
   timeSegments: TimeSegment[];
   hairLengthModifiers?: HairLengthModifiers;

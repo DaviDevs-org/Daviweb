@@ -1,10 +1,10 @@
-import { AppointementService } from "@domain/services/service.types";
+import { AppointmentService } from "@domain/services/service.types";
 
 
-export interface AppointmentTDO {
+export interface AppointmentDTO {
     datetime: Date;
-    createdAt: Date;    
-    service: AppointementService;
+    createdAt: Date;
+    service: AppointmentService;
     description?: string;
     name?: string;
     phone?: string;

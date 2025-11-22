@@ -1,9 +1,9 @@
-import { Interval, IntervalTDO } from "./interval.entity";
+import { Interval, IntervalDTO } from "./interval.entity";
 
-export interface ExceptionItemTDO {
+export interface ExceptionItemDTO {
   date: string;
   closed: boolean;
-  intervals: IntervalTDO[];
+  intervals: IntervalDTO[];
   exceptionType: 'closed' | 'custom' | 'range';
   isEditing?: boolean;
   startDate?: string;
@@ -28,10 +28,10 @@ export class ExceptionItem {
       if (!this.startDate || !this.endDate) {
         throw new Error('Las excepciones de tipo "range" requieren startDate y endDate');
       }
-      
+
       const start = new Date(this.startDate);
       const end = new Date(this.endDate);
-      
+
       if (start > end) {
         throw new Error('La fecha de inicio no puede ser posterior a la fecha de fin');
       }
@@ -43,13 +43,13 @@ export class ExceptionItem {
       if (!this.startDate || !this.endDate) return false;
       return date >= this.startDate && date <= this.endDate;
     }
-    
+
     return this.date === date;
   }
-  
+
   isTimeWithinException(time: string): boolean {
     if (this.closed) return false;
-    
+
     return this.intervals.some(interval => interval.contains(time));
   }
 
@@ -70,7 +70,7 @@ export class ExceptionItem {
 
   getTotalAvailableMinutes(): number {
     if (this.closed) return 0;
-    
+
     return this.intervals.reduce((total, interval) => {
       return total + interval.getDurationInMinutes();
     }, 0);
@@ -87,22 +87,22 @@ export class ExceptionItem {
     return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
   }
 
-  toTDO(): ExceptionItemTDO {
-    const tdo: ExceptionItemTDO = {
+  toDTO(): ExceptionItemDTO {
+    const tdo: ExceptionItemDTO = {
       date: this.date,
       closed: this.closed,
-      intervals: this.intervals.map(interval => interval.toTDO()),
+      intervals: this.intervals.map(interval => interval.toDTO()),
       exceptionType: this.exceptionType
     };
 
     if (this.isEditing !== undefined) {
       tdo.isEditing = this.isEditing;
     }
-    
+
     if (this.startDate) {
       tdo.startDate = this.startDate;
     }
-    
+
     if (this.endDate) {
       tdo.endDate = this.endDate;
     }
@@ -110,8 +110,8 @@ export class ExceptionItem {
     return tdo;
   }
 
-  static fromTDO(tdo: ExceptionItemTDO): ExceptionItem {
-    const intervals = tdo.intervals.map(i => Interval.fromTDO(i));
+  static fromDTO(tdo: ExceptionItemDTO): ExceptionItem {
+    const intervals = tdo.intervals.map(i => Interval.fromDTO(i));
     return new ExceptionItem(
       tdo.date,
       tdo.closed,
