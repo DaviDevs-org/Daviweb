@@ -1,3 +1,5 @@
+
+/* REFACTORED gallery-photo.entity.ts
 export class GalleryPhoto {
   name: string = "";
   url: string = "";
@@ -12,7 +14,8 @@ export class GalleryPhoto {
     this.id = id;
   }
 }
-
+*/
+/* REFACTORED appointment.entity.ts
 export interface Appointment {
   id?: string;
   createdAt?: any; // Firestore Timestamp | string
@@ -30,7 +33,7 @@ export interface Appointment {
   barber?: string;
   hairLengthChoice?: 'short' | 'medium' | 'long';
 }
-
+*/
 /* REFACTORED service.types.ts
 export interface ServiceDTO {
   name: string;
@@ -44,6 +47,7 @@ export interface ServiceDTO {
 
  */
 
+/* REFACTORED appointment.types.ts
 export interface AppointmentFirestore {
   name: string;
   email?: string;
@@ -56,6 +60,7 @@ export interface AppointmentFirestore {
   datetime?: { seconds: number; nanoseconds: number };
   hairLengthChoice?: 'short' | 'medium' | 'long';
 }
+*/
 
 /* REFACTORED service.entity.ts
 
@@ -239,12 +244,12 @@ export interface ScheduleDay {
   closed: boolean;
   intervals: Interval[];
 }
-
+/* REFACTORED contact-info.types.ts
 export interface ContactInfo {
   phone: string;
   address: string;
 }
-
+*/
 export interface Statistics {
   monthlyClients: number;
   monthlyRevenue: number;
@@ -274,6 +279,7 @@ export interface StatCard {
   changeType: 'positive' | 'negative' | 'neutral';
 }
 
+/* REFACTORED barber.entity.ts
 export interface BarberSettings {
   settings: {
     barberSelection: boolean;
@@ -282,3 +288,4 @@ export interface BarberSettings {
 }
 
 export interface Barber { id: string; name: string; visible?: boolean; imageUrl?: string; }
+*/
