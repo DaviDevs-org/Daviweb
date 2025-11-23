@@ -9,6 +9,8 @@ import { getStorage, provideStorage } from '@angular/fire/storage';
 import { provideClientHydration } from '@angular/platform-browser';
 import { AppointmentRepository } from '@application/appointments';
 import { BusinessInfoRepository } from '@application/business-info';
+import { ServiceRepository } from '@application/services';
+import { GalleryRepository } from '@application/gallery';
 
 export const appConfig: ApplicationConfig = {
   providers: 
@@ -26,6 +28,8 @@ export const appConfig: ApplicationConfig = {
     provideStorage(() => getStorage()),
     provideClientHydration(),
     {provide: AppointmentRepository, useClass: FirebaseAppointmentRepository},
-    {provide: BusinessInfoRepository, useClass: FirebaseBusinessInfoRepository}
+    {provide: BusinessInfoRepository, useClass: FirebaseBusinessInfoRepository},
+    {provide: ServiceRepository, useClass: FirebaseServiceRepository},
+    {provide: GalleryRepository, useClass: FirebaseGalleryRepository}
   ]
 };
