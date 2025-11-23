@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Appointment } from '@domain/appointments/appointment.entity';
+import { Appointment } from '@domain/appointments';
 
 export abstract class AppointmentRepository {
   // Read operations (Observable for reactive data)

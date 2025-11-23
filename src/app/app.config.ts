@@ -7,6 +7,8 @@ import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 import { provideClientHydration } from '@angular/platform-browser';
+import { AppointmentRepository } from '@application/appointments';
+import { BusinessInfoRepository } from '@application/business-info';
 
 export const appConfig: ApplicationConfig = {
   providers: 
@@ -22,5 +24,8 @@ export const appConfig: ApplicationConfig = {
     provideAuth(() => getAuth()), 
     provideFirestore(() => getFirestore()), 
     provideStorage(() => getStorage()),
-    provideClientHydration()]
+    provideClientHydration(),
+    {provide: AppointmentRepository, useClass: FirebaseAppointmentRepository},
+    {provide: BusinessInfoRepository, useClass: FirebaseBusinessInfoRepository}
+  ]
 };

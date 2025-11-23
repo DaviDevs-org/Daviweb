@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Service } from '@domain/services/service.entity';
+import { Service } from '@domain/services';
 import { ServiceRepository } from './service.repository.interface';
 
 @Injectable({

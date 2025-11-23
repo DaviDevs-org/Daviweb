@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Service } from '@domain/services/service.entity';
+import { Service } from '@domain/services';
 
 export abstract class ServiceRepository {
   abstract getServices(): Observable<Service[]>;

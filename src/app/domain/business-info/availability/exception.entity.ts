@@ -16,6 +16,7 @@ export class ExceptionItem {
     public closed: boolean,
     public intervals: Interval[],
     public exceptionType: 'closed' | 'custom' | 'range',
+    public id?: string,
     public isEditing?: boolean,
     public startDate?: string, // para tipo 'range'
     public endDate?: string   // para tipo 'range'
@@ -108,18 +109,5 @@ export class ExceptionItem {
     }
 
     return tdo;
-  }
-
-  static fromDTO(tdo: ExceptionItemDTO): ExceptionItem {
-    const intervals = tdo.intervals.map(i => Interval.fromDTO(i));
-    return new ExceptionItem(
-      tdo.date,
-      tdo.closed,
-      intervals,
-      tdo.exceptionType,
-      tdo.isEditing,
-      tdo.startDate,
-      tdo.endDate
-    );
   }
 }
