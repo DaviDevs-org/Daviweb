@@ -1,18 +1,32 @@
 import { GalleryPhotoDTO } from './gallery-photo.types';
+
+export enum PhotoType {
+  GALLERY = 'gallery',
+  SERVICE = 'service',
+  BARBER = 'barber'
+}
 export class GalleryPhoto {
   constructor(
     public name: string,
     public url: string,
     public id?: string,
-    public imageLoaded: boolean = false
+    public imageLoaded: boolean = false,
+    public type: PhotoType = PhotoType.GALLERY
   ) {
     this.validateName();
     this.name = this.getSanitizedName();
+    this.validateType();
   }
 
   private validateName(): void {
     if (!this.name || this.name.trim().length === 0) {
       throw new Error('El nombre de la foto no puede estar vacío');
+    }
+  }
+
+  private validateType(): void {
+    if (!Object.values(PhotoType).includes(this.type)) {
+      throw new Error('El tipo de la foto no es válido');
     }
   }
 
