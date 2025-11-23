@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GalleryRepository } from './gallery.repository.interface';
-import { ProcessResult } from 'src/app/services/image-processing.service';
-import { PhotoType } from '@domain/gallery';
+import { ProcessResult, PhotoType } from '@domain/index';
 import { UploadTask } from '@angular/fire/storage';
 
 @Injectable({

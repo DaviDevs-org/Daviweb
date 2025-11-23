@@ -5,6 +5,12 @@ export enum PhotoType {
   SERVICE = 'service',
   BARBER = 'barber'
 }
+
+export interface ProcessResult {
+  blob: Blob;
+  width: number;
+  height: number;
+}
 export class GalleryPhoto {
   constructor(
     public name: string,
