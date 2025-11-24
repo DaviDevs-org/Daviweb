@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { GalleryRepository } from './gallery.repository.interface';
-import { ProcessResult, PhotoType } from '@domain/index';
+import { ProcessResult, PhotoType, GalleryPhoto } from '@domain/index';
 import { UploadTask } from '@angular/fire/storage';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,14 +10,14 @@ import { UploadTask } from '@angular/fire/storage';
 export class UploadPhotoUseCase {
   constructor(private readonly galleryRepository: GalleryRepository) {}
 
-  async execute(file: File, name: string, type: PhotoType): Promise<UploadTask> {
+  async execute(file: File, photo:GalleryPhoto): Promise<UploadTask> {
     // Validación: archivo requerido
     if (!file) {
       throw new Error('El archivo es requerido');
     }
 
     // Validación: nombre requerido
-    if (!name || name.trim().length === 0) {
+    if (!photo.name || photo.name.trim().length === 0) {
       throw new Error('El nombre de la foto es requerido');
     }
 
@@ -31,10 +32,10 @@ export class UploadPhotoUseCase {
       throw new Error('El archivo no puede superar los 5MB');
     }
 
-    if (Object.values(PhotoType).indexOf(type) === -1) {
+    if (Object.values(PhotoType).indexOf(photo.type) === -1) {
       throw new Error('Tipo de foto inválido');
     }
-    else if (type == PhotoType.GALLERY) {
+    else if (photo.type == PhotoType.GALLERY) {
       // Procesar imagen para galería (16:9, maxWidth 1600)
       const processed = await this.processForCarousel(file, { maxWidth: 1600 });
       file = new File([processed.blob], file.name, { type: 'image/webp', lastModified: file.lastModified });
@@ -44,7 +45,7 @@ export class UploadPhotoUseCase {
       const processed = await this.processGeneric(file, { maxWidth: 1024, maxHeight: 1024 });
       file = new File([processed.blob], file.name, { type: 'image/webp', lastModified: file.lastModified });
     }
-    return this.galleryRepository.uploadPhoto(file, name, type);
+    return this.galleryRepository.uploadPhoto(file, photo);
   }
 
   private async loadImage(file: File): Promise<HTMLImageElement> {

@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
-import { Service } from '@domain/services';
+import { Service, ServiceDTO } from '@domain/services';
 
 export abstract class ServiceRepository {
-  abstract getServices(): Observable<Service[]>;
-  abstract addService(service: Service): Promise<void>;
-  abstract updateService(id: string, service: Service): Promise<void>;
-  abstract deleteService(id: string): Promise<void>;
+  abstract getServices(): Observable<ServiceDTO[]>;
+  abstract addService(service: Service): Observable<string>;
+  abstract updateService(id: string, service: Service): Observable<void>;
+  abstract deleteService(id: string): Observable<void>;
 }
