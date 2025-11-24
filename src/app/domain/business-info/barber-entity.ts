@@ -1,6 +1,6 @@
 export interface BarberDTO {
   name: string;
-  photoUrl?: string;
+  imageUrl?: string;
 }
 
 export interface BarberSettingsDTO {
@@ -11,7 +11,7 @@ export interface BarberSettingsDTO {
 export class Barber {
   constructor(
     public name: string,
-    public photoUrl?: string
+    public imageUrl?: string
   ) {
     this.validateName();
   }
@@ -23,7 +23,7 @@ export class Barber {
   }
 
   hasPhoto(): boolean {
-    return !!this.photoUrl && this.photoUrl.trim().length > 0;
+    return !!this.imageUrl && this.imageUrl.trim().length > 0;
   }
 
   getInitials(): string {
@@ -40,15 +40,15 @@ export class Barber {
       name: this.name
     };
 
-    if (this.photoUrl) {
-      tdo.photoUrl = this.photoUrl;
+    if (this.imageUrl) {
+      tdo.imageUrl = this.imageUrl;
     }
 
     return tdo;
   }
 
   static fromDTO(tdo: BarberDTO): Barber {
-    return new Barber(tdo.name, tdo.photoUrl);
+    return new Barber(tdo.name, tdo.imageUrl);
   }
 }
 

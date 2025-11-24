@@ -3,7 +3,7 @@ import {AppointmentRepository} from '@application/appointments/appointment.repos
 import {Injectable} from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
-export class CreateAppointmentUseCase {
+export class AddAppointmentUseCase {
   constructor(private appointmentRepository: AppointmentRepository) {}
 
   async execute(appointment: Appointment): Promise<void> {
