@@ -6,10 +6,10 @@ import { AppointmentRepository } from './appointment.repository.interface';
 @Injectable({
   providedIn: 'root'
 })
-export class GetAppointmentsByDateRangeUseCase {
+export class GetAppointmentsByDateUseCase {
   constructor(private appointmentRepository: AppointmentRepository) {}
 
-  execute(startDate: Date, endDate: Date): Observable<Appointment[]> {
-    return this.appointmentRepository.getAppointmentsByDateRange(startDate,endDate);
+  execute(date: Date): Observable<Appointment[]> {
+    return this.appointmentRepository.getAppointmentsByDate(date);
   }
 }
