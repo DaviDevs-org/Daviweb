@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GalleryRepository } from './gallery.repository.interface';
-import { GalleryPhoto } from '@domain/index';
+import { GalleryPhoto, PhotoType } from '@domain/index';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,7 @@ import { GalleryPhoto } from '@domain/index';
 export class GetPhotosUseCase {
   constructor(private readonly galleryRepository: GalleryRepository) {}
 
-  execute(): Observable<GalleryPhoto[]> {
-    return this.galleryRepository.getPhotos();
+  execute(type: PhotoType): Observable<GalleryPhoto[]> {
+    return this.galleryRepository.getPhotos(type);
   }
 }

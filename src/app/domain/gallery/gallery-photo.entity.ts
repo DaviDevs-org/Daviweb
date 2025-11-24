@@ -14,11 +14,12 @@ export interface ProcessResult {
 export class GalleryPhoto {
   constructor(
     public name: string,
-    public url: string,
-    public id?: string,
+    public id: string,
+    public url?: string,
     public imageLoaded: boolean = false,
     public type: PhotoType = PhotoType.GALLERY
   ) {
+    this.id = crypto.randomUUID();
     this.validateName();
     this.name = this.getSanitizedName();
     this.validateType();
@@ -54,7 +55,7 @@ export class GalleryPhoto {
   toDTO(): GalleryPhotoDTO {
     return {
       name: this.name,
-      url: this.url,
+      url: this.url!,
       lastModified: new Date()
     };
   }

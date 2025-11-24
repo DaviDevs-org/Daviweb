@@ -169,5 +169,21 @@ export class Service {
     }
     return out;
   }
+  static fromDTO(dto: ServiceDTO, id?: string): Service {
+    return new Service(
+      dto.name,
+      dto.description,
+      dto.timeSegments || [],
+      dto.requiresHairLength || false,
+      dto.hairLengthModifiers || {
+        short: { time: 30 },
+        medium: { time: 45 },
+        long: { time: 60 }
+      },
+      dto.imageUrl,
+      id,
+      dto.hourRange
+    );
+  }
 }
 

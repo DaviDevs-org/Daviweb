@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ServiceRepository } from './service.repository.interface';
+import { Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -7,7 +8,7 @@ import { ServiceRepository } from './service.repository.interface';
 export class DeleteServiceUseCase {
     constructor(private serviceRepository: ServiceRepository) { }
 
-    execute(id: string): Promise<void> {
+    execute(id: string): Observable<void> {
         return this.serviceRepository.deleteService(id);
     }
 }
