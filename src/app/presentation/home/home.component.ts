@@ -2,9 +2,9 @@ import { Component, inject, PLATFORM_ID, afterNextRender, signal } from '@angula
 import { HeaderComponent } from '../header/header.component';
 import { AboutUsComponent } from '../about-us/about-us.component';
 import { LocationAndContactComponent } from '../location-and-contact/location-and-contact.component';
-import { OpinionsComponent } from '../presentation/opinions/opinions.component';
-import { AppointmentComponent } from '../presentation/appointment/appointment.component';
-import { FaqComponent } from '../presentation/faq/faq.component';
+import { OpinionsComponent } from '../opinions/opinions.component';
+import { AppointmentComponent } from '../appointment/appointment.component';
+import { FaqComponent } from '../faq/faq.component';
 import { FooterComponent } from '../footer/footer.component';
 import { PhotoOfTheDayComponent } from '../photo-of-the-day/photo-of-the-day.component';
 import { ServicesInfoComponent } from '../services-info/services-info.component';

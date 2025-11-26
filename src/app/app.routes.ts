@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './presentation/login/login.component';
-import { HomeComponent } from './home/home.component';
+import { HomeComponent } from './presentation/home/home.component';
 import { AdminPanelComponent } from './presentation/admin-panel/admin-panel.component';
 import { AuthenticationService } from './services/authentication.service';
 import { LegalAdviceComponent } from './presentation/legal/legal-advice/legal-advice.component';
