@@ -10,6 +10,7 @@ export class ReservedSlot {
   constructor(
     public appointmentId: string,
     public dateTime: Date,
+    public id?: string
   ) {
     this.date = dateTime.toISOString().split('T')[0];
     this.time = `${String(dateTime.getHours()).padStart(2, '0')}:${String(dateTime.getMinutes()).padStart(2, '0')}`;
@@ -24,7 +25,7 @@ export class ReservedSlot {
     return dto;
   }
 
-  static fromDTO(dto: ReservedSlotDTO): ReservedSlot {
-    return new ReservedSlot(dto.appointmentId, dto.dateTime);
+  static fromDTO(dto: ReservedSlotDTO & { id?: string }): ReservedSlot {
+    return new ReservedSlot(dto.appointmentId, dto.dateTime, dto.id);
   }
 }

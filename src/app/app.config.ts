@@ -8,7 +8,7 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 import { provideClientHydration } from '@angular/platform-browser';
 import { AppointmentRepository } from '@application/appointments';
-import { BusinessInfoRepository } from '@application/business-info';
+import { BusinessInfoRepository } from '@application/business';
 import { ServiceRepository } from '@application/services';
 import { GalleryRepository } from '@application/gallery';
 import {FirebaseAppointmentRepository} from '@infrastructure/firebase/appointments/firebase-appointment.repository';

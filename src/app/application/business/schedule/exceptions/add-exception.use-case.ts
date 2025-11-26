@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { BusinessInfoRepository } from '../business-info.repository.interface';
+import { ScheduleRepository } from '@application/business/schedule/schedule.repository.interface';
 import { ExceptionItem } from '@domain/index';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AddExceptionUseCase {
-  constructor(private readonly businessInfoRepository: BusinessInfoRepository) {}
+  constructor(private readonly scheduleRepository: ScheduleRepository) {}
 
   async execute(exception: ExceptionItem): Promise<void> {
     // Validación: fecha requerida
@@ -32,6 +32,6 @@ export class AddExceptionUseCase {
       }
     }
 
-    return this.businessInfoRepository.addException(exception);
+    return this.scheduleRepository.addException(exception);
   }
 }

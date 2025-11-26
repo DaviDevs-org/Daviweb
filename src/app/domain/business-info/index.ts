@@ -4,3 +4,4 @@ export * from './contact-info.entity';
 export * from './availability/interval.entity';
 export * from './availability/schedule.entity';
 export * from './availability/exception.entity';
+export * from './availability/reservedSlots.entity';

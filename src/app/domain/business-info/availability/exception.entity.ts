@@ -110,4 +110,17 @@ export class ExceptionItem {
 
     return tdo;
   }
+  static fromDTO(dto: ExceptionItemDTO & { id?: string }): ExceptionItem {
+    const intervals = dto.intervals.map(intervalDTO => Interval.fromDTO(intervalDTO));
+    return new ExceptionItem(
+      dto.date,
+      dto.closed,
+      intervals,
+      dto.exceptionType,
+      dto.id,
+      dto.isEditing,
+      dto.startDate,
+      dto.endDate
+    );
+  }
 }

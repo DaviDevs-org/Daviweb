@@ -1,14 +1,14 @@
 import { Injectable } from "@angular/core";
-import { BusinessInfoRepository } from "../business-info.repository.interface";
+import { ScheduleRepository } from "@application/business";
 import { ExceptionItem } from "@domain/index";
 
 @Injectable({
     providedIn: "root"
 })
 export class UpdateExceptionUseCase {
-    constructor(private readonly businessInfoRepository: BusinessInfoRepository) {}
+    constructor(private readonly scheduleRepository: ScheduleRepository) {}
 
     async execute(id:string, exception: ExceptionItem): Promise<void> {
-        return this.businessInfoRepository.updateException(id, exception);
+        return this.scheduleRepository.updateException(id, exception);
     }
 }

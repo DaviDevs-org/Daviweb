@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BusinessInfoRepository } from '@application/business-info';
+import { BusinessInfoRepository } from '@application/business';
 import {BarberSettings} from '@domain/index';
 
 @Injectable({

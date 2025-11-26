@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { BusinessInfoRepository } from '../business-info.repository.interface';
+import { BusinessInfoRepository } from '@application/business';
 import { BarberSettings } from '@domain/index';
 
 @Injectable({

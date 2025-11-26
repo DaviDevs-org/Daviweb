@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { BusinessInfoRepository } from '../business-info.repository.interface';
+import { ScheduleRepository } from '@application/business/schedule/schedule.repository.interface';
 import { ScheduleDay } from '@domain/business-info';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GetScheduleUseCase {
-  constructor(private readonly businessInfoRepository: BusinessInfoRepository) {}
+  constructor(private readonly scheduleRepository: ScheduleRepository) {}
 
   execute(): Observable<ScheduleDay[]> {
-    return this.businessInfoRepository.getSchedule();
+    return this.scheduleRepository.getSchedule();
   }
 }
