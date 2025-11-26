@@ -1,10 +1,10 @@
-import { Component, inject} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthenticationService } from '../services/authentication.service';
+import { AuthenticationService } from '../../services/authentication.service';
 import { Router } from '@angular/router';
-import { Firestore} from '@angular/fire/firestore';
-import { AlertService } from '../services/alert/alert.service';
+import { Firestore } from '@angular/fire/firestore';
+import { AlertService } from '../../shared/alert/alert.service';
 
 @Component({
   selector: 'app-login',
@@ -30,10 +30,10 @@ export class LoginComponent {
     if (this.loginData.email && this.loginData.password) {
       this.isLoading = true;
       const response = await this.auth.login(this.loginData.email, this.loginData.password);
-      if (response.success){
+      if (response.success) {
         this.router.navigate(['admin'])
       }
-      else{
+      else {
         this.toast.error("Email o contraseña incorrectos")
       }
       this.isLoading = false

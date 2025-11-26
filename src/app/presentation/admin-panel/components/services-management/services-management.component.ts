@@ -4,11 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { percentage } from '@angular/fire/storage';
 import { combineLatest, Subscription } from 'rxjs';
-import { ServiceManager } from '../../../services/admin-panel/services-management.service';
-import { GalleryService } from '../../../services/admin-panel/gallery-management.service';
-import { Service, NewService, TimeSegment, HairLengthModifiers } from '../../types/admin.types';
-import { AlertService } from '../../../services/alert/alert.service';
-import { ImageProcessingService } from '../../../services/image-processing.service';
+import { ServiceManager } from '../../../../services/admin-panel/services-management.service';
+import { GalleryService } from '../../../../services/admin-panel/gallery-management.service';
+import { Service, NewService, TimeSegment, HairLengthModifiers } from '../../../../admin-panel/types/admin.types';
+import { AlertService } from '../../../../shared/alert/alert.service';
+import { ImageProcessingService } from '../../../../services/image-processing.service';
 
 @Component({
   selector: 'app-services-management',
@@ -301,27 +301,27 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
       requiresHairLength: service.requiresHairLength ?? false,
       hairLengthModifiers: service.hairLengthModifiers
         ? {
-            short: {
-              time: service.hairLengthModifiers.short?.time || 0,
-              ...(mapSegments(service.hairLengthModifiers.short?.segments) ? { segments: mapSegments(service.hairLengthModifiers.short?.segments)! } : {})
-            },
-            medium: {
-              time: service.hairLengthModifiers.medium?.time || 0,
-              ...(mapSegments(service.hairLengthModifiers.medium?.segments) ? { segments: mapSegments(service.hairLengthModifiers.medium?.segments)! } : {})
-            },
-            long: {
-              time: service.hairLengthModifiers.long?.time || 0,
-              ...(mapSegments(service.hairLengthModifiers.long?.segments) ? { segments: mapSegments(service.hairLengthModifiers.long?.segments)! } : {})
-            }
+          short: {
+            time: service.hairLengthModifiers.short?.time || 0,
+            ...(mapSegments(service.hairLengthModifiers.short?.segments) ? { segments: mapSegments(service.hairLengthModifiers.short?.segments)! } : {})
+          },
+          medium: {
+            time: service.hairLengthModifiers.medium?.time || 0,
+            ...(mapSegments(service.hairLengthModifiers.medium?.segments) ? { segments: mapSegments(service.hairLengthModifiers.medium?.segments)! } : {})
+          },
+          long: {
+            time: service.hairLengthModifiers.long?.time || 0,
+            ...(mapSegments(service.hairLengthModifiers.long?.segments) ? { segments: mapSegments(service.hairLengthModifiers.long?.segments)! } : {})
           }
+        }
         : { short: { time: 30 }, medium: { time: 45 }, long: { time: 60 } },
       hourRange: service.hourRange ? { ...service.hourRange } : undefined
     };
 
     // Definir si mostrar modo segmentos
     this.hasBreaks = !this.newService.requiresHairLength && ((this.newService.timeSegments?.length || 0) > 1);
-  // Activar el toggle de rango horario si viene definido
-  this.useHourRange = !!service.hourRange;
+    // Activar el toggle de rango horario si viene definido
+    this.useHourRange = !!service.hourRange;
 
     // Hacer scroll suave al formulario
     this.scrollToForm();
@@ -352,7 +352,7 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
           setTimeout(doScroll, 0);
         });
       });
-    } catch {}
+    } catch { }
   }
 
   private async updateServiceFromForm(): Promise<void> {

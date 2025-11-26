@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
-import {ButtonComponent} from './button/button.component';
+import { ButtonComponent } from './button/button.component';
 @Component({
   selector: "app-faq",
   templateUrl: "./faq.component.html",
@@ -9,4 +9,4 @@ import {ButtonComponent} from './button/button.component';
     ButtonComponent
   ]
 })
-export class FaqComponent {}
+export class FaqComponent { }
