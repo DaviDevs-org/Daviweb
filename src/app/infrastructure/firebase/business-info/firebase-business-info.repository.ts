@@ -19,7 +19,7 @@ import {
   ContactInfo,
   BarberSettings, Barber, BarberSettingsDTO
 } from '@domain/business-info';
-import {deleteObject, ref, Storage} from '@angular/fire/storage';
+import { deleteObject, ref, Storage } from '@angular/fire/storage';
 
 @Injectable({
   providedIn: 'root'
@@ -111,7 +111,7 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
 
 
 
-// ============= CONTACT INFO =============
+  // ============= CONTACT INFO =============
 
   // Default contact info
   private getDefaultContactInfo() {
@@ -229,6 +229,10 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
     const docRef = doc(this.firestore, this.barberSettingsPath);
     await updateDoc(docRef, { barbers: arrayRemove(oldBarber.toDTO()) });
     await updateDoc(docRef, { barbers: arrayUnion(newBarber.toDTO()) });
+  }
+
+  async getAvailableSlots(date: Date, serviceDuration: number): Observable<string[]> {
+
   }
 
 }
