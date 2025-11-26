@@ -2,12 +2,12 @@
 import { Component, ElementRef, inject, signal, ViewChild, OnDestroy, Injector, runInInjectionContext, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GalleryPhoto } from '../../types/admin.types';
-import { GalleryService } from '../../../services/admin-panel/gallery-management.service';
+import { GalleryPhoto } from '../../../../admin-panel/types/admin.types';
+import { GalleryService } from '../../../../services/admin-panel/gallery-management.service';
 import { Subscription } from 'rxjs';
 import { percentage } from '@angular/fire/storage';
-import { AlertService } from '../../../services/alert/alert.service';
-import { ImageProcessingService } from '../../../services/image-processing.service';
+import { AlertService } from '../../../../shared/alert/alert.service';
+import { ImageProcessingService } from '../../../../services/image-processing.service';
 
 
 @Component({

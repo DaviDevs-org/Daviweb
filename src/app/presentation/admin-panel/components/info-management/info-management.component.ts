@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Barber, ContactInfo, ExceptionItem, Interval, ScheduleDay } from '../../types/admin.types';
-import { InfoManager } from '../../../services/admin-panel/info-management.service';
+import { Barber, ContactInfo, ExceptionItem, Interval, ScheduleDay } from '../../../../admin-panel/types/admin.types';
+import { InfoManager } from '../../../../services/admin-panel/info-management.service';
 import { ElementRef, ViewChild, inject, signal } from '@angular/core';
 import { percentage } from '@angular/fire/storage';
 import { Subscription } from 'rxjs';
-import { GalleryService } from '../../../services/admin-panel/gallery-management.service';
-import { AlertService } from '../../../services/alert/alert.service';
-import { ImageProcessingService } from '../../../services/image-processing.service';
+import { GalleryService } from '../../../../services/admin-panel/gallery-management.service';
+import { AlertService } from '../../../../shared/alert/alert.service';
+import { ImageProcessingService } from '../../../../services/image-processing.service';
 
 @Component({
   selector: 'app-info-management',
@@ -71,12 +71,12 @@ export class InfoManagementComponent implements OnInit {
     for (const ex of this.exceptions) {
       if (ex.exceptionType === 'range' && ex.startDate && ex.endDate) {
         const rangeKey = `${ex.startDate}-${ex.endDate}`;
-        
+
         // Si ya procesamos este rango, saltar
         if (processedRanges.has(rangeKey)) continue;
-        
+
         processedRanges.add(rangeKey);
-        
+
         // Añadir solo la primera excepción del rango (representa todo el rango)
         grouped.push(ex);
       } else {
@@ -298,7 +298,7 @@ export class InfoManagementComponent implements OnInit {
 
       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
         const dateKey = this.formatDateToISO(d);
-        
+
         // Verificar si ya existe una excepción para esta fecha
         if (this.exceptions.find(ex => ex.date === dateKey)) {
           this.toast.error(`Ya existe una excepción para el día ${dateKey}`);
@@ -414,7 +414,7 @@ export class InfoManagementComponent implements OnInit {
   async editException(index: number) {
     const groupedExceptions = this.getGroupedExceptions();
     const exceptionToEdit = groupedExceptions[index];
-    
+
     if (!exceptionToEdit) return;
 
     // Si es un rango, no permitir edición por ahora (sería complejo)
@@ -441,7 +441,7 @@ export class InfoManagementComponent implements OnInit {
   async removeException(index: number) {
     const groupedExceptions = this.getGroupedExceptions();
     const exceptionToRemove = groupedExceptions[index];
-    
+
     if (!exceptionToRemove) return;
 
     // Determinar mensaje de confirmación según el tipo
@@ -461,9 +461,9 @@ export class InfoManagementComponent implements OnInit {
     if (exceptionToRemove.exceptionType === 'range' && exceptionToRemove.startDate && exceptionToRemove.endDate) {
       this.exceptions = this.exceptions.filter(ex => {
         // Mantener excepciones que NO son parte de este rango
-        return !(ex.exceptionType === 'range' && 
-                 ex.startDate === exceptionToRemove.startDate && 
-                 ex.endDate === exceptionToRemove.endDate);
+        return !(ex.exceptionType === 'range' &&
+          ex.startDate === exceptionToRemove.startDate &&
+          ex.endDate === exceptionToRemove.endDate);
       });
     } else {
       // Eliminar excepción individual
@@ -676,7 +676,7 @@ export class InfoManagementComponent implements OnInit {
     }
 
     return new Promise((resolve, reject) => {
-  const task = this.galleryService.uploadBarberImage(this.processedBarberBlob || this.selectedBarberFile!, this.selectedBarberFile!.name);
+      const task = this.galleryService.uploadBarberImage(this.processedBarberBlob || this.selectedBarberFile!, this.selectedBarberFile!.name);
       if (!task) {
         reject('Error al iniciar la subida');
         return;

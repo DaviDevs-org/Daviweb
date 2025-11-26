@@ -1,6 +1,6 @@
 import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AppointmentManagerService } from '../../../services/admin-panel/appointment-management.service';
+import { AppointmentManagerService } from '../../../../services/admin-panel/appointment-management.service';
 import {
   Appointment,
   Service,
@@ -8,15 +8,15 @@ import {
   ExceptionItem,
   AppointmentFirestore,
   ServiceDTO
-} from '../../types/admin.types';
+} from '../../../../admin-panel/types/admin.types';
 import { BehaviorSubject, Observable, combineLatest, firstValueFrom } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ServiceManager } from '../../../services/admin-panel/services-management.service';
-import { AppointmentService } from '../../../services/appointments.service';
-import { InfoManager } from '../../../services/admin-panel/info-management.service';
-import { AlertService } from '../../../services/alert/alert.service';
-import { Barber } from '../../types/admin.types';
+import { ServiceManager } from '../../../../services/admin-panel/services-management.service';
+import { AppointmentService } from '../../../../services/appointments.service';
+import { InfoManager } from '../../../../services/admin-panel/info-management.service';
+import { AlertService } from '../../../../shared/alert/alert.service';
+import { Barber } from '../../../../admin-panel/types/admin.types';
 
 @Component({
   selector: 'app-appointment-management',

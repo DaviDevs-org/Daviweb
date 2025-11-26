@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
-import {OpinionComponent} from './opinion/opinion.component';
+import { OpinionComponent } from './opinion/opinion.component';
 @Component({
   selector: "app-opinions",
   templateUrl: "./opinions.component.html",
@@ -9,4 +9,4 @@ import {OpinionComponent} from './opinion/opinion.component';
     OpinionComponent
   ]
 })
-export class OpinionsComponent {}
+export class OpinionsComponent { }

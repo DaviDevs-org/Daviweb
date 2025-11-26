@@ -3,15 +3,15 @@ import { isPlatformBrowser, NgClass, NgForOf, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HourSelectorComponent } from './hour-selector/hour-selector.component';
 import { BookingFormComponent } from './booking-form/booking-form.component';
-import { ReservedSlotsService, ReservedSlot } from '../../services/reserved-slots.service';
-import { AppointmentService } from '../../services/appointments.service';
+import { ReservedSlotsService, ReservedSlot } from '../../../services/reserved-slots.service';
+import { AppointmentService } from '../../../services/appointments.service';
 import { Subject, firstValueFrom, combineLatest } from 'rxjs';
-import { InfoManager } from '../../services/admin-panel/info-management.service';
-import { Barber, Service, ScheduleDay, ExceptionItem } from '../../admin-panel/types/admin.types';
+import { InfoManager } from '../../../services/admin-panel/info-management.service';
+import { Barber, Service, ScheduleDay, ExceptionItem } from '../../../admin-panel/types/admin.types';
 import { ChangeDetectorRef } from '@angular/core';
-import { AlertService } from '../../services/alert/alert.service';
-import { AppointmentManagerService } from '../../services/admin-panel/appointment-management.service';
-import { Appointment } from '../../admin-panel/types/admin.types';
+import { AlertService } from '../../../shared/alert/alert.service';
+import { AppointmentManagerService } from '../../../services/admin-panel/appointment-management.service';
+import { Appointment } from '../../../admin-panel/types/admin.types';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -30,7 +30,7 @@ import { map } from 'rxjs/operators';
 export class CalendarSelectorComponent implements OnDestroy {
   // Día actualmente enfocado para navegación por teclado
   focusedDay: Date | null = null;
-  
+
 
   /** Cuando el calendario se renderiza, enfoca el día seleccionado o el primero disponible */
   ngAfterViewInit() {
@@ -284,7 +284,7 @@ export class CalendarSelectorComponent implements OnDestroy {
     if (concrete.timeSegments && concrete.timeSegments.length > 0) {
       let currentTime = startMinutes;
 
-      (concrete.timeSegments as {duration: number; breakAfter?: number}[]).forEach((segment, index) => {
+      (concrete.timeSegments as { duration: number; breakAfter?: number }[]).forEach((segment, index) => {
         segments.push({ start: currentTime, duration: segment.duration, type: 'active' });
         currentTime += segment.duration;
 
@@ -531,9 +531,9 @@ export class CalendarSelectorComponent implements OnDestroy {
     }
     if (this.isSubmitting) return;
 
-    const bookingData = { 
-      date: this.selectedDateString, 
-      time: this.selectedHour, 
+    const bookingData = {
+      date: this.selectedDateString,
+      time: this.selectedHour,
       ...data,
       hairLengthChoice: data.hairLength ?? null
     } as any;

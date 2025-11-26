@@ -13,7 +13,7 @@ import {
   updateMetadata
 } from '@angular/fire/storage';
 import { GalleryPhoto } from '../../admin-panel/types/admin.types';
-import { AlertService } from '../alert/alert.service';
+import { AlertService } from '../../shared/alert/alert.service';
 
 @Injectable({
   providedIn: 'root'
