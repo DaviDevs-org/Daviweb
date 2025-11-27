@@ -82,28 +82,34 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
     });
   }
 
-  async addAppointment(appointment: Appointment): Promise<string> {
-    const ref = collection(this.firestore, this.path);
-    const docRef = await addDoc(ref, appointment.toDTO());
-    return docRef.id;
+  addAppointment(appointment: Appointment): Promise<string> {
+    return runInInjectionContext(this.injector, async () => {
+      const ref = collection(this.firestore, this.path);
+      const docRef = await addDoc(ref, appointment.toDTO());
+      return docRef.id;
+    });
   }
 
-  async updateAppointment(id: string, appointment: Appointment): Promise<void> {
-    const d = doc(this.firestore, `${this.path}/${id}`);
-    return updateDoc(d, { ...appointment });
+  updateAppointment(id: string, appointment: Appointment): Promise<void> {
+    return runInInjectionContext(this.injector, async () => {
+      const d = doc(this.firestore, `${this.path}/${id}`);
+      return updateDoc(d, { ...appointment });
+    });
   }
 
-  async deleteAppointment(id: string) {
-    // Borrar la cita
-    const d = doc(this.firestore, `${this.path}/${id}`);
-    await deleteDoc(d);
+  deleteAppointment(id: string) {
+    return runInInjectionContext(this.injector, async () => {
+      // Borrar la cita
+      const d = doc(this.firestore, `${this.path}/${id}`);
+      await deleteDoc(d);
 
-    // Borrar slots reservados asociados
-    const reservedCol = collection(this.firestore, 'pruebas', 'data', 'reservedSlots');
-    const qSlots = query(reservedCol, where('appointmentId', '==', id));
-    const snaps = await getDocs(qSlots);
-    const deletions: Promise<void>[] = [];
-    snaps.forEach(s => deletions.push(deleteDoc(s.ref)));
-    await Promise.all(deletions);
+      // Borrar slots reservados asociados
+      const reservedCol = collection(this.firestore, 'pruebas', 'data', 'reservedSlots');
+      const qSlots = query(reservedCol, where('appointmentId', '==', id));
+      const snaps = await getDocs(qSlots);
+      const deletions: Promise<void>[] = [];
+      snaps.forEach(s => deletions.push(deleteDoc(s.ref)));
+      await Promise.all(deletions);
+    });
   }
   }

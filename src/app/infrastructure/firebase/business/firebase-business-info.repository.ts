@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import { BusinessInfoRepository } from '@application/business';
 import {
   arrayRemove, arrayUnion,
@@ -22,6 +22,7 @@ import { deleteObject, ref, Storage } from '@angular/fire/storage';
 export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
   private firestore = inject(Firestore);
   private storage = inject(Storage);
+  private injector = inject(Injector);
 
   private contactInfoPath = '/pruebas/data/info/contact-info';
   private barberSettingsPath = 'pruebas/data/barber-settings/config';
@@ -62,14 +63,16 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
     );
   }
 
-  async updateContactInfo(contactInfo: ContactInfo): Promise<void> {
-    const docRef = doc(this.firestore, this.contactInfoPath);
-    const contactDTO = {
-      phone: contactInfo.phone,
-      email: contactInfo.email,
-      address: contactInfo.address
-    };
-    await updateDoc(docRef, { ...contactDTO });
+  updateContactInfo(contactInfo: ContactInfo): Promise<void> {
+    return runInInjectionContext(this.injector, async () => {
+      const docRef = doc(this.firestore, this.contactInfoPath);
+      const contactDTO = {
+        phone: contactInfo.phone,
+        email: contactInfo.email,
+        address: contactInfo.address
+      };
+      await updateDoc(docRef, { ...contactDTO });
+    });
   }
 
   // ============= BARBER SETTINGS =============
@@ -101,49 +104,58 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
   }
 
 
-  async updateBarberSettings(barberSettings: BarberSettings): Promise<void> {
-    const docRef = doc(this.firestore, this.barberSettingsPath);
+  updateBarberSettings(barberSettings: BarberSettings): Promise<void> {
+    return runInInjectionContext(this.injector, async () => {
+      const docRef = doc(this.firestore, this.barberSettingsPath);
+      const dto = barberSettings.toDTO();
 
-    const dto = barberSettings.toDTO();
-
-    try {
-      await updateDoc(docRef, { ...dto });
-    } catch {
-      await setDoc(docRef, { ...dto }, { merge: true });
-    }
-  }
-
-
-  async updateBarberSelection(value: boolean): Promise<void> {
-    const docRef = doc(this.firestore, this.barberSettingsPath);
-    await updateDoc(docRef, { barberSelection: value });
-  }
-
-  async addBarber(barber: Barber): Promise<void> {
-    const docRef = doc(this.firestore, this.barberSettingsPath);
-    await updateDoc(docRef, { barbers: arrayUnion(barber.toDTO()) });
-  }
-
-  async removeBarber(barber: Barber): Promise<void> {
-    const docRef = doc(this.firestore, this.barberSettingsPath);
-
-    // Borrar imagen si existe
-    if (barber.imageUrl) {
       try {
-        const imageRef = ref(this.storage, barber.imageUrl);
-        await deleteObject(imageRef);
-      } catch (e) {
-        console.warn('No se pudo borrar la imagen del barber o no existe:', e);
+        await updateDoc(docRef, { ...dto });
+      } catch {
+        await setDoc(docRef, { ...dto }, { merge: true });
       }
-    }
-
-    await updateDoc(docRef, { barbers: arrayRemove(barber.toDTO()) });
+    });
   }
 
-  async editBarber(oldBarber: Barber, newBarber: Barber): Promise<void> {
-    const docRef = doc(this.firestore, this.barberSettingsPath);
-    await updateDoc(docRef, { barbers: arrayRemove(oldBarber.toDTO()) });
-    await updateDoc(docRef, { barbers: arrayUnion(newBarber.toDTO()) });
+
+  updateBarberSelection(value: boolean): Promise<void> {
+    return runInInjectionContext(this.injector, async () => {
+      const docRef = doc(this.firestore, this.barberSettingsPath);
+      await updateDoc(docRef, { barberSelection: value });
+    });
+  }
+
+  addBarber(barber: Barber): Promise<void> {
+    return runInInjectionContext(this.injector, async () => {
+      const docRef = doc(this.firestore, this.barberSettingsPath);
+      await updateDoc(docRef, { barbers: arrayUnion(barber.toDTO()) });
+    });
+  }
+
+  removeBarber(barber: Barber): Promise<void> {
+    return runInInjectionContext(this.injector, async () => {
+      const docRef = doc(this.firestore, this.barberSettingsPath);
+
+      // Borrar imagen si existe
+      if (barber.imageUrl) {
+        try {
+          const imageRef = ref(this.storage, barber.imageUrl);
+          await deleteObject(imageRef);
+        } catch (e) {
+          console.warn('No se pudo borrar la imagen del barber o no existe:', e);
+        }
+      }
+
+      await updateDoc(docRef, { barbers: arrayRemove(barber.toDTO()) });
+    });
+  }
+
+  editBarber(oldBarber: Barber, newBarber: Barber): Promise<void> {
+    return runInInjectionContext(this.injector, async () => {
+      const docRef = doc(this.firestore, this.barberSettingsPath);
+      await updateDoc(docRef, { barbers: arrayRemove(oldBarber.toDTO()) });
+      await updateDoc(docRef, { barbers: arrayUnion(newBarber.toDTO()) });
+    });
   }
 
 }

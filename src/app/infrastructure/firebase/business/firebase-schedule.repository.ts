@@ -47,7 +47,7 @@ export class FirebaseScheduleRepository implements ScheduleRepository {
         );
     }
 
-    async updateSchedule(schedule: ScheduleDay[]): Promise<void> {
+    updateSchedule(schedule: ScheduleDay[]): Promise<void> {
         const docRef = doc(this.firestore, this.schedulePath);
 
         // Convertir las entidades del domain a DTOs planos para Firebase

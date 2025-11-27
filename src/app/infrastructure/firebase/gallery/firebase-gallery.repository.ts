@@ -51,9 +51,11 @@ export class FirebaseGalleryRepository implements GalleryRepository {
         return uploadBytesResumable(fileRef, file, metadata);
     }
 
-    async deletePhoto(id: string, type: PhotoType): Promise<void> {
-        const photoRef: StorageReference = ref(this.storage, `${this.galleryPath}/${type}/${id}`);
-        await deleteObject(photoRef);
+    deletePhoto(id: string, type: PhotoType): Promise<void> {
+        return runInInjectionContext(this.injector, async () => {
+            const photoRef: StorageReference = ref(this.storage, `${this.galleryPath}/${type}/${id}`);
+            await deleteObject(photoRef);
+        });
     }
 
 }
