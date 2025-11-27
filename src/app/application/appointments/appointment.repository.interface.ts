@@ -9,7 +9,7 @@ export abstract class AppointmentRepository {
   abstract getAppointmentsByDateRange(startDate: Date, endDate: Date): Observable<Appointment[]>;
 
   // Write operations (Promise for one-time actions)
-  abstract addAppointment(appointment: Appointment): Promise<void>;
+  abstract addAppointment(appointment: Appointment): Promise<string>;
   abstract updateAppointment(id: string, appointment: Appointment): Promise<void>;
   abstract deleteAppointment(id: string): Promise<void>;
 }

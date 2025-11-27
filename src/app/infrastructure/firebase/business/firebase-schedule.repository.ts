@@ -1,8 +1,7 @@
 import { inject, Injectable, Injector, runInInjectionContext } from "@angular/core";
-import { addDoc, collection, deleteDoc, doc, Firestore, getDoc, getDocs, orderBy, updateDoc } from "@angular/fire/firestore";
+import { addDoc, collection, deleteDoc, doc, Firestore, getDoc, getDocs, updateDoc } from "@angular/fire/firestore";
 import { ScheduleRepository } from "@application/business";
 import { ExceptionItem, ExceptionItemDTO, ReservedSlot, ReservedSlotDTO, ScheduleDay, ScheduleDayDTO } from "@domain/business-info";
-import { query } from "express";
 import { catchError, from, map, Observable, of } from "rxjs";
 
 Injectable({

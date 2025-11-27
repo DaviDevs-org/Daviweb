@@ -3,16 +3,14 @@ import { isPlatformBrowser, NgClass, NgForOf, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HourSelectorComponent } from './hour-selector/hour-selector.component';
 import { BookingFormComponent } from './booking-form/booking-form.component';
-import { ReservedSlotsService, ReservedSlot } from '../../../services/reserved-slots.service';
-import { AppointmentService } from '../../../services/appointments.service';
-import { Subject, firstValueFrom, combineLatest } from 'rxjs';
-import { InfoManager } from '../../../services/admin-panel/info-management.service';
-import { Barber, Service, ScheduleDay, ExceptionItem } from '../../../admin-panel/types/admin.types';
+import { Subject, firstValueFrom } from 'rxjs';
+import { Barber, Service, ScheduleDay, ExceptionItem } from '@domain/index';
 import { ChangeDetectorRef } from '@angular/core';
 import { AlertService } from '../../../shared/alert/alert.service';
-import { AppointmentManagerService } from '../../../services/admin-panel/appointment-management.service';
-import { Appointment } from '../../../admin-panel/types/admin.types';
-import { map } from 'rxjs/operators';
+import { GetAvailableSlotsForDayUseCase } from '@application/business/schedule/slots/get-available-slots-for-day.use-case';
+import { GetScheduleUseCase, GetExceptionsUseCase, GetBarberSettingsUseCase } from '@application/business';
+import { AddAppointmentUseCase } from '@application/appointments/add-appointment.use-case';
+import { PastDateHandler, ExceptionHandler, WeeklyScheduleHandler, AvailabilityContext } from '@domain/index';
 
 @Component({
   selector: 'app-calendar-selector',
@@ -158,10 +156,7 @@ export class CalendarSelectorComponent implements OnDestroy {
   isSubmitting = false;
 
   availableHoursForSelectedDate: { value: string; disabled: boolean }[] = [];
-  availableHoursByDate: Record<string, string[]> = {};
-  bookedSlotsByDate: Record<string, string[]> = {};
 
-  // Nuevos datos desde InfoManager
   schedule: ScheduleDay[] = [];
   exceptions: ExceptionItem[] = [];
   barbers: Barber[] = [];
@@ -172,12 +167,13 @@ export class CalendarSelectorComponent implements OnDestroy {
   @ViewChild('monthYearBtn') monthYearBtn?: ElementRef<HTMLButtonElement>;
 
   constructor(
-    private reservedSlotsService: ReservedSlotsService,
-    private appointmentService: AppointmentService,
-    private infoManager: InfoManager,
+    private getAvailableSlotsUseCase: GetAvailableSlotsForDayUseCase,
+    private getScheduleUseCase: GetScheduleUseCase,
+    private getExceptionsUseCase: GetExceptionsUseCase,
+    private getBarberSettingsUseCase: GetBarberSettingsUseCase,
+    private addAppointmentUseCase: AddAppointmentUseCase,
     private cdr: ChangeDetectorRef,
-    private toast: AlertService,
-    private apptSvc: AppointmentManagerService
+    private toast: AlertService
   ) {
     const startYear = this.selectedYear - 2;
     const endYear = this.selectedYear + 2;
@@ -194,127 +190,22 @@ export class CalendarSelectorComponent implements OnDestroy {
 
   private async loadData() {
     try {
-      // Cargar horario semanal y excepciones desde InfoManager
-      this.schedule = await this.infoManager.getSchedule();
-      this.exceptions = await this.infoManager.getExceptions();
-
-      // Cargar slots reservados desde citas existentes
-      await this.loadBookedSlotsFromAppointments();
+      this.schedule = await firstValueFrom(this.getScheduleUseCase.execute());
+      this.exceptions = await firstValueFrom(this.getExceptionsUseCase.execute());
 
       await this.loadBarbers();
-      this.computeAvailableHoursForCurrentMatrix();
     } catch (error) {
       console.error('Error cargando datos del calendario:', error);
       this.toast.error('Error al cargar los datos del calendario');
     }
   }
 
-  private async loadBookedSlotsFromAppointments() {
-    // Usamos siempre los reservedSlots públicos
-    const slots = await firstValueFrom(this.reservedSlotsService.getReservedSlotsFromNow());
-    this.bookedSlotsByDate = {};
-    (slots ?? []).forEach((slot: ReservedSlot) => {
-      const dateKey = slot.date;
-      if (!this.bookedSlotsByDate[dateKey]) this.bookedSlotsByDate[dateKey] = [];
-      const norm = this.normalizeTime(slot.time);
-      if (!this.bookedSlotsByDate[dateKey].includes(norm)) {
-        this.bookedSlotsByDate[dateKey].push(norm);
-      }
-    });
-  }
-
-  private normalizeTime(t: string | undefined | null): string {
-    if (!t) return '00:00';
-    const [h, m] = t.split(':').map(v => Number(v));
-    const hh = isNaN(h) ? 0 : h;
-    const mm = isNaN(m) ? 0 : m;
-    return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
-  }
-
-  // Método helper para convertir tiempo a minutos
-  private timeToMinutes(timeStr: string): number {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    return hours * 60 + (minutes || 0);
-  }
-
-  // Normalizar cita (copiado de appointment-management)
-  private normalizeAppointment(a: Appointment): Appointment {
-    const out: Appointment = { ...a };
-
-    if (typeof a.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(a.date)) {
-      out.dateISO = a.date;
-    } else if (a.datetime?.seconds) {
-      out.dateISO = this.toISODate(new Date(a.datetime.seconds * 1000));
-    } else if (a.createdAt?.seconds) {
-      out.dateISO = this.toISODate(new Date(a.createdAt.seconds * 1000));
-    }
-
-    if (a.time) {
-      out.timeNormalized = a.time;
-    } else if (a.datetime?.seconds) {
-      const d = new Date(a.datetime.seconds * 1000);
-      out.timeNormalized = this.pad(d.getHours()) + ':' + this.pad(d.getMinutes());
-    } else {
-      out.timeNormalized = '—';
-    }
-
-    return out;
-  }
-
-  // Obtener segmentos de tiempo de una cita (copiado de appointment-management)
-  private getAppointmentTimeSegments(appointment: Appointment): { start: number, duration: number, type: 'active' | 'break' }[] {
-    if (!appointment.timeNormalized || appointment.timeNormalized === '—') return [];
-
-    const startMinutes = this.timeToMinutes(appointment.timeNormalized);
-    const segments: { start: number, duration: number, type: 'active' | 'break' }[] = [];
-
-    const svc = appointment.service as any;
-    if (!svc) return [];
-    const materialize = (s: any, length?: 'short' | 'medium' | 'long') => {
-      if (!s?.requiresHairLength || !length) return s;
-      const mod = s.hairLengthModifiers?.[length];
-      if (!mod) return s;
-      const segs = (mod.segments && mod.segments.length > 0)
-        ? mod.segments
-        : (mod.time && mod.time > 0 ? [{ duration: mod.time, breakAfter: 0 }] : []);
-      return { ...s, timeSegments: segs, requiresHairLength: false };
-    };
-    const concrete = materialize(svc, appointment.hairLengthChoice || undefined);
-
-    if (concrete.timeSegments && concrete.timeSegments.length > 0) {
-      let currentTime = startMinutes;
-
-      (concrete.timeSegments as { duration: number; breakAfter?: number }[]).forEach((segment, index) => {
-        segments.push({ start: currentTime, duration: segment.duration, type: 'active' });
-        currentTime += segment.duration;
-
-        if (segment.breakAfter && segment.breakAfter > 0 && index < concrete.timeSegments.length - 1) {
-          segments.push({ start: currentTime, duration: segment.breakAfter, type: 'break' });
-          currentTime += segment.breakAfter;
-        }
-      });
-      return segments;
-    } else {
-      // Servicio sin timeSegments, asumir 30 minutos por defecto
-      segments.push({ start: startMinutes, duration: 30, type: 'active' });
-    }
-
-    return segments;
-  }
-
-  private toISODate(d: Date): string {
-    return d.getFullYear() + '-' + this.pad(d.getMonth() + 1) + '-' + this.pad(d.getDate());
-  }
-
-  private pad(n: number): string {
-    return n < 10 ? '0' + n : '' + n;
-  }
-
   private async loadBarbers() {
     try {
-      const settings = await this.infoManager.getBarberSettings();
-      this.barbers = settings.settings.staff.filter(b => b.visible);
-      this.allowBarberSelection = settings.settings.barberSelection;
+      const settings = await firstValueFrom(this.getBarberSettingsUseCase.execute());
+      const config = (settings as any).settings || settings;
+      this.barbers = (config.staff || []).filter((b: any) => b.visible);
+      this.allowBarberSelection = config.barberSelection ?? false;
 
       this.cdr.detectChanges();
     } catch (err) {
@@ -327,7 +218,6 @@ export class CalendarSelectorComponent implements OnDestroy {
   onDateChange() {
     this.showPicker = false;
     this.generateCalendar();
-    this.computeAvailableHoursForCurrentMatrix();
     // Restaurar foco al cambiar de mes para mejorar la navegación por teclado
     this.restoreFocusAfterMonthChange();
   }
@@ -372,28 +262,20 @@ export class CalendarSelectorComponent implements OnDestroy {
 
   isAvailable(date: Date | null): boolean {
     if (!date) return false;
+    
+    const context: AvailabilityContext = {
+        date,
+        schedule: this.schedule,
+        exceptions: this.exceptions
+    };
 
-    // No permitir fechas pasadas
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (date < today) return false;
+    const pastDateHandler = new PastDateHandler();
+    const exceptionHandler = new ExceptionHandler();
+    const weeklyScheduleHandler = new WeeklyScheduleHandler();
 
-    const dateKey = this.formatDate(date);
+    pastDateHandler.setNext(exceptionHandler).setNext(weeklyScheduleHandler);
 
-    // Verificar si hay una excepción para esta fecha (PRIORIDAD)
-    const exception = this.exceptions.find(ex => ex.date === dateKey);
-    if (exception) {
-      // Si hay excepción, verificar si está cerrada o tiene horarios
-      return !exception.closed && exception.intervals.length > 0;
-    }
-
-    // Si no hay excepción, usar horario semanal normal
-    const dayName = this.getDayName(date);
-    const daySchedule = this.schedule.find(day => day.day === dayName);
-
-    if (!daySchedule) return false;
-
-    return !daySchedule.closed && daySchedule.intervals.length > 0;
+    return pastDateHandler.handle(context).isAvailable;
   }
 
   /** Indica si el día está marcado como de cita sólo telefónica.
@@ -418,77 +300,25 @@ export class CalendarSelectorComponent implements OnDestroy {
       return;
     }
 
-    const dateKey = this.formatDate(date);
-    const bookedHours = this.bookedSlotsByDate[dateKey] || [];
-
-    const hoursWithStatus = this.getAvailableHoursForDate(date, bookedHours);
-
-    if (!hoursWithStatus.length) {
-      this.toast.error('No hay horas disponibles para este día');
-      return;
-    }
-
-    this.availableHoursForSelectedDate = hoursWithStatus;
-
-    // Guardar solo los valores en availableHoursByDate
-    this.availableHoursByDate[dateKey] = hoursWithStatus.map(h => h.value);
-
-    this.selectedDate = date;
-    this.dateSelected.emit(date);
-    this.showHours = true;
-    this.showForm = false;
-  }
-
-  private getAvailableHoursForDate(date: Date, booked: string[]): { value: string; disabled: boolean }[] {
-    const dateKey = this.formatDate(date);
-
-    // Verificar si hay una excepción para esta fecha (PRIORIDAD)
-    const exception = this.exceptions.find(ex => ex.date === dateKey);
-
-    let hours: string[] = [];
-
-    if (exception) {
-      // Usar horarios de la excepción
-      if (!exception.closed && exception.intervals) {
-        exception.intervals.forEach(interval => {
-          hours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
-        });
-      }
-    } else {
-      // Usar horario semanal normal
-      const dayName = this.getDayName(date);
-      const daySchedule = this.schedule.find(day => day.day === dayName);
-
-      if (daySchedule && !daySchedule.closed && daySchedule.intervals) {
-        daySchedule.intervals.forEach(interval => {
-          hours.push(...this.hoursRangeFromOpenClose(interval.open, interval.close));
-        });
-      }
-    }
-
-    // Ahora solo marcar como disabled los slots que están realmente ocupados por servicios ACTIVOS
-    // Los breaks ya no cuentan como ocupados porque no se incluyen en bookedSlotsByDate
-    return hours.map(h => ({
-      value: h,
-      disabled: booked.includes(h)
-    }));
-  }
-
-  private hoursRangeFromOpenClose(open: string, close: string, step = 30): string[] {
-    if (!open || !close) return [];
-    const result: string[] = [];
-    const [openH, openM] = open.split(':').map(Number);
-    const [closeH, closeM] = close.split(':').map(Number);
-
-    let hour = openH;
-    let minute = openM;
-    while (hour < closeH || (hour === closeH && minute < closeM)) {
-      result.push(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`);
-      minute += step;
-      if (minute >= 60) { minute = 0; hour++; }
-    }
-
-    return result;
+    this.getAvailableSlotsUseCase.execute(date).subscribe({
+        next: (slots) => {
+            if (slots.length === 0) {
+                this.toast.error('No hay horas disponibles para este día');
+                return;
+            }
+            
+            this.availableHoursForSelectedDate = slots.map(s => ({ value: s, disabled: false }));
+            
+            this.selectedDate = date;
+            this.dateSelected.emit(date);
+            this.showHours = true;
+            this.showForm = false;
+        },
+        error: (err) => {
+            this.toast.error('Error al cargar horas disponibles');
+            console.error(err);
+        }
+    });
   }
 
   prevMonth() {
@@ -539,7 +369,7 @@ export class CalendarSelectorComponent implements OnDestroy {
     } as any;
     this.isSubmitting = true;
     try {
-      await this.appointmentService.addAppointment(bookingData);
+      await this.addAppointmentUseCase.execute(bookingData);
       this.toast.success('Cita guardada correctamente');
       this.resetAll();
       this.loadData();
@@ -560,19 +390,6 @@ export class CalendarSelectorComponent implements OnDestroy {
 
   get selectedDateString(): string {
     return this.selectedDate ? this.formatDate(this.selectedDate) : '';
-  }
-
-  private computeAvailableHoursForCurrentMatrix() {
-    this.availableHoursByDate = {};
-    for (const week of this.calendarMatrix) {
-      for (const d of week) {
-        if (!d) continue;
-        const dateKey = this.formatDate(d);
-        const booked = this.bookedSlotsByDate[dateKey] || [];
-        const hours = this.getAvailableHoursForDate(d, booked);
-        this.availableHoursByDate[dateKey] = hours.map(h => h.value);
-      }
-    }
   }
 
   // Implementación duplicada eliminada. Se mantiene la versión principal.

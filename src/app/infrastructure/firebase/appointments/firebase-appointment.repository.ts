@@ -82,9 +82,10 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
     });
   }
 
-  async addAppointment(appointment: Appointment) {
+  async addAppointment(appointment: Appointment): Promise<string> {
     const ref = collection(this.firestore, this.path);
-    await addDoc(ref, appointment);
+    const docRef = await addDoc(ref, appointment.toDTO());
+    return docRef.id;
   }
 
   async updateAppointment(id: string, appointment: Appointment): Promise<void> {
