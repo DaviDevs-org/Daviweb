@@ -1,5 +1,3 @@
-<!-- barbers-info.component.html -->
-<!-- Solo mostrar la sección si barberSelection está habilitado -->
 @if (barberSelectionEnabled) {
 <div class="barbers-section" id="barbers">
     <div class="barbers-header">
@@ -9,7 +7,7 @@
         </p>
     </div>
 
-    @if (loading) {
+    @if (loading()) {
     <div class="loading-container">
         <div class="loading-spinner"></div>
         <p>Cargando equipo...</p>
@@ -18,7 +16,7 @@
     <div class="barbers-content">
         @if (barbers.length > 0) {
         <div class="barbers-grid">
-            @for (barber of barbers; track barber.id) {
+            @for (barber of barbers; track barber.name) {
             <div class="barber-card" [class.featured]="barber.featured">
                 <!-- Imagen del peluquero -->
                 <div class="barber-image">

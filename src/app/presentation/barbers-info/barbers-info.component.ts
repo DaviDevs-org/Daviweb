@@ -1,89 +1,63 @@
 // barbers-info.component.ts
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Injector, OnDestroy, OnInit, runInInjectionContext } from "@angular/core";
-import { InfoManager } from "../services/admin-panel/info-management.service";
-import { Barber } from "../admin-panel/types/admin.types";
-import { Subscription } from "rxjs";
-import { Auth } from '@angular/fire/auth';
+import { Component, inject, Injector, OnInit, runInInjectionContext, signal } from "@angular/core";
+import { BarberDisplay, BarberSettings } from "@domain/index";
+import { firstValueFrom } from "rxjs";
 import { CommonModule, ViewportScroller } from '@angular/common';
-import { BookingPreselectionService } from "../services/booking-preselection.service";
-
-// Interfaz extendida para mostrar información adicional del peluquero
-interface BarberDisplay extends Barber {
-  featured?: boolean;
-  specialty?: string;
-  experience?: number;
-  description?: string;
-}
+import { BookingPreselectionService } from "../../services/booking-preselection.service";
+import { GetBarberSettingsUseCase } from "@application/business";
 
 @Component({
   selector: "app-barbers-info",
   templateUrl: "./barbers-info.component.html",
   styleUrls: ["./barbers-info.component.scss"],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule]
 })
-export class BarbersInfoComponent implements OnInit, OnDestroy {
-  private infoManager = inject(InfoManager);
-  private auth = inject(Auth);
-  private cdr = inject(ChangeDetectorRef);
+
+export class BarbersInfoComponent implements OnInit {
+  private getBarbers = inject(GetBarberSettingsUseCase);
   private injector = inject(Injector);
   private viewportScroller = inject(ViewportScroller);
   private preselectionService = inject(BookingPreselectionService);
 
-  private subscriptions: Subscription[] = [];
 
   barbers: BarberDisplay[] = [];
-  loading = true;
-  barberSelectionEnabled = false; // Nueva propiedad para controlar si la sección se muestra
+  loading = signal(true);
+  barberSelectionEnabled = false;
 
   ngOnInit() {
-    runInInjectionContext(this.injector, () => {
-      this.loadBarbers();
-    });
+    this.loadBarbers();
   }
 
-  private async loadBarbers() {
-    try {
-      const barberSettings = await this.infoManager.getBarberSettings();
-      
-      // Verificar si la selección de peluqueros está habilitada
-      this.barberSelectionEnabled = barberSettings?.settings?.barberSelection ?? false;
-      
-      // Si no está habilitada, no mostrar peluqueros
-      if (!this.barberSelectionEnabled) {
-        this.barbers = [];
-        this.loading = false;
-        this.cdr.detectChanges();
-        return;
-      }
-      
-      // Obtener solo los peluqueros visibles
-      let visibleBarbers: Barber[] = [];
-      
-      if (barberSettings?.settings?.staff) {
-        visibleBarbers = barberSettings.settings.staff.filter((barber: Barber) => barber.visible);
-      } else if (Array.isArray(barberSettings?.settings.staff)) {
-        visibleBarbers = barberSettings.settings.staff.filter((barber: Barber) => barber.visible);
-      }
+  private loadBarbers() {
+    runInInjectionContext(this.injector, async () => {
+      try {
+        const barberSettings: BarberSettings = await firstValueFrom(this.getBarbers.execute());
 
-      // Convertir a BarberDisplay con información adicional
-      this.barbers = visibleBarbers.map((barber, index) => ({
-        ...barber,
-        featured: index === 0, // El primero será destacado por defecto
-        specialty: this.getRandomSpecialty(),
-        experience: this.getRandomExperience(),
-        description: this.getRandomDescription(barber.name)
-      }));
+        this.barberSelectionEnabled = barberSettings?.barberSelection ?? false;
+        // Si no está habilitada, no mostrar peluqueros
+        if (!this.barberSelectionEnabled) {
+          this.loading.set(false);
+          return;
+        }
 
-      this.loading = false;
-      this.cdr.detectChanges();
-      
-    } catch (error) {
-      console.error('Error cargando peluqueros:', error);
-      this.loading = false;
-      this.cdr.detectChanges();
-    }
+        // Convertir a BarberDisplay con información adicional
+        this.barbers = barberSettings.barbers.map((barber, index) => new BarberDisplay(
+          barber.name,
+          barber.imageUrl,
+          index === 0, // featured
+          this.getRandomSpecialty(),
+          this.getRandomExperience(),
+          this.getRandomDescription(barber.name)
+        ));
+
+        this.loading.set(false);
+
+      } catch (error) {
+        console.error('Error cargando peluqueros:', error);
+        this.loading.set(false);
+      }
+    });
   }
 
   bookWithBarber(barber: BarberDisplay) {
@@ -123,9 +97,5 @@ export class BarbersInfoComponent implements OnInit, OnDestroy {
       `Apasionado por la peluquería, ${name.split(' ')[0]} está siempre actualizado con las nuevas técnicas y estilos.`
     ];
     return descriptions[Math.floor(Math.random() * descriptions.length)];
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(s => s.unsubscribe());
   }
 }

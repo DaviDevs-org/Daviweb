@@ -7,6 +7,7 @@ export interface BarberSettingsDTO {
   barberSelection: boolean;
   barbers: BarberDTO[];
 }
+// Interfaz extendida para mostrar información adicional del peluquero
 
 export class Barber {
   constructor(
@@ -93,5 +94,18 @@ export class BarberSettings {
   static fromDTO(tdo: BarberSettingsDTO): BarberSettings {
     const barbers = tdo.barbers.map(b => Barber.fromDTO(b));
     return new BarberSettings(tdo.barberSelection, barbers);
+  }
+}
+
+export class BarberDisplay extends Barber {
+  constructor(
+    name: string,
+    imageUrl?: string,
+    public featured?: boolean,
+    public specialty?: string,
+    public experience?: number,
+    public description?: string
+  ) {
+    super(name, imageUrl);
   }
 }
