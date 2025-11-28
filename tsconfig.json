@@ -5,9 +5,21 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@domain/*": ["src/app/domain/*"],
-      "@application/*": ["src/app/application/*"],
-      "@infrastructure/*": ["src/app/infrastructure/*"]
+      "@domain/*": [
+        "src/app/domain/*"
+      ],
+      "@application/*": [
+        "src/app/application/*"
+      ],
+      "@infrastructure/*": [
+        "src/app/infrastructure/*"
+      ],
+      "@presentation/*": [
+        "src/app/presentation/*"
+      ],
+      "@shared/*": [
+        "src/app/shared/*"
+      ]
     },
     "outDir": "./dist/out-tsc",
     "strict": true,

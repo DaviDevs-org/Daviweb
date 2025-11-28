@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { GalleryRepository } from './gallery.repository.interface';
 import { ProcessResult, PhotoType, GalleryPhoto } from '@domain/index';
-import { UploadTask } from '@angular/fire/storage';
+import { UploadTask, UploadTaskSnapshot } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UploadPhotoUseCase {
   constructor(private readonly galleryRepository: GalleryRepository) {}
 
-  async execute(file: File, photo:GalleryPhoto): Promise<UploadTask> {
+  async execute(file: File, photo: GalleryPhoto): Promise<UploadTask> {
     // Validación: archivo requerido
     if (!file) {
       throw new Error('El archivo es requerido');
@@ -32,20 +32,32 @@ export class UploadPhotoUseCase {
       throw new Error('El archivo no puede superar los 5MB');
     }
 
+    // Validación: tipo de foto válido
     if (Object.values(PhotoType).indexOf(photo.type) === -1) {
       throw new Error('Tipo de foto inválido');
-    }
-    else if (photo.type == PhotoType.GALLERY) {
+    } else if (photo.type == PhotoType.GALLERY) {
       // Procesar imagen para galería (16:9, maxWidth 1600)
       const processed = await this.processForCarousel(file, { maxWidth: 1600 });
-      file = new File([processed.blob], file.name, { type: 'image/webp', lastModified: file.lastModified });
-    }
-    else {
+      file = new File([processed.blob], file.name, {
+        type: 'image/webp',
+        lastModified: file.lastModified,
+      });
+    } else {
       // Procesar imagen genérica (max 1024x1024)
-      const processed = await this.processGeneric(file, { maxWidth: 1024, maxHeight: 1024 });
-      file = new File([processed.blob], file.name, { type: 'image/webp', lastModified: file.lastModified });
+      const processed = await this.processGeneric(file, {
+        maxWidth: 1024,
+        maxHeight: 1024,
+      });
+      file = new File([processed.blob], file.name, {
+        type: 'image/webp',
+        lastModified: file.lastModified,
+      });
     }
-    return this.galleryRepository.uploadPhoto(file, photo);
+
+    const task: UploadTask = this.galleryRepository.uploadPhoto(file, photo);
+
+    const snapshot = (await task) as UploadTaskSnapshot;
+    return snapshot;
   }
 
   private async loadImage(file: File): Promise<HTMLImageElement> {
@@ -68,7 +80,10 @@ export class UploadPhotoUseCase {
   }
 
   // Recorta a 16:9 centrado y redimensiona a un maxWidth (manteniendo 16:9), exporta WebP
-  async processForCarousel(file: File, options?: { maxWidth?: number; quality?: number }): Promise<ProcessResult> {
+  async processForCarousel(
+    file: File,
+    options?: { maxWidth?: number; quality?: number }
+  ): Promise<ProcessResult> {
     const maxWidth = options?.maxWidth ?? 1600;
     const quality = options?.quality ?? 0.82;
 
@@ -77,7 +92,10 @@ export class UploadPhotoUseCase {
     const targetRatio = 16 / 9;
     const imgRatio = img.width / img.height;
 
-    let sx = 0, sy = 0, sWidth = img.width, sHeight = img.height;
+    let sx = 0,
+      sy = 0,
+      sWidth = img.width,
+      sHeight = img.height;
     if (imgRatio > targetRatio) {
       // Imagen más ancha: recortar en ancho
       sWidth = Math.floor(img.height * targetRatio);
@@ -98,12 +116,17 @@ export class UploadPhotoUseCase {
     if (!ctx) throw new Error('No 2D context available');
     ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, outWidth, outHeight);
 
-    const blob = await new Promise<Blob>((resolve) => canvas.toBlob(b => resolve(b!), 'image/webp', quality));
+    const blob = await new Promise<Blob>((resolve) =>
+      canvas.toBlob((b) => resolve(b!), 'image/webp', quality)
+    );
     return { blob, width: outWidth, height: outHeight };
   }
 
   // Redimensiona manteniendo proporción a un ancho máximo, exporta WebP
-  async processGeneric(file: File, options?: { maxWidth?: number; maxHeight?: number; quality?: number }): Promise<ProcessResult> {
+  async processGeneric(
+    file: File,
+    options?: { maxWidth?: number; maxHeight?: number; quality?: number }
+  ): Promise<ProcessResult> {
     const maxWidth = options?.maxWidth ?? 1024;
     const maxHeight = options?.maxHeight ?? 1024;
     const quality = options?.quality ?? 0.84;
@@ -128,7 +151,9 @@ export class UploadPhotoUseCase {
     if (!ctx) throw new Error('No 2D context available');
     ctx.drawImage(img, 0, 0, outW, outH);
 
-    const blob = await new Promise<Blob>((resolve) => canvas.toBlob(b => resolve(b!), 'image/webp', quality));
+    const blob = await new Promise<Blob>((resolve) =>
+      canvas.toBlob((b) => resolve(b!), 'image/webp', quality)
+    );
     return { blob, width: outW, height: outH };
   }
 }

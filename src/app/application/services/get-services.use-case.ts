@@ -6,8 +6,8 @@ import { ServiceRepository } from './service.repository.interface';
 @Injectable({
   providedIn: 'root'
 })
-export class GetAllServicesUseCase {
-  constructor(private serviceRepository: ServiceRepository) {}
+export class GetServicesUseCase {
+  constructor(private serviceRepository: ServiceRepository) { }
 
   execute(): Observable<Service[]> {
     const dto = this.serviceRepository.getServices();
