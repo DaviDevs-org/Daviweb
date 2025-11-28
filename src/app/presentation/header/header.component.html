@@ -8,7 +8,7 @@
       <div class="anchor" id="location">
         <i class="bi bi-geo-alt-fill"></i>
         <a class="anchor-text" href="#"
-           (click)="scrollToSection('location-and-contact'); $event.preventDefault()">Ubicación</a>
+          (click)="scrollToSection('location-and-contact'); $event.preventDefault()">Ubicación</a>
       </div>
       <div class="anchor" id="service">
         <i class="bi bi-clock-fill"></i>
@@ -20,7 +20,7 @@
       </div>
 
       <div class="status">
-        <ng-container *ngIf="safeBusinessInfo() as status">
+        <ng-container *ngIf="state.businessStatus() as status">
           <!-- Abierto normal -->
           <div *ngIf="status.isOpen && !status.isWarning" class="status-container open">
             <span class="status-text">Abierto</span>
@@ -32,13 +32,15 @@
           </div>
 
           <!-- Cerrando pronto -->
-          <div *ngIf="status.isOpen && status.isWarning && status.warningType === 'closing'" class="status-container warning">
-            <span class="status-text">Cerrando en {{ formatRemainingTime(status.remainingSeconds ?? 0) }}</span>
+          <div *ngIf="status.isOpen && status.isWarning && status.warningType === 'closing'"
+            class="status-container warning">
+            <span class="status-text">Cerrando en {{ status.remainingMinutes }} min</span>
           </div>
 
           <!-- Abriendo pronto -->
-          <div *ngIf="!status.isOpen && status.isWarning && status.warningType === 'opening'" class="status-container warning">
-            <span class="status-text">Abriendo en {{ formatRemainingTime(status.remainingSeconds ?? 0) }}</span>
+          <div *ngIf="!status.isOpen && status.isWarning && status.warningType === 'opening'"
+            class="status-container warning">
+            <span class="status-text">Abriendo en {{ status.remainingMinutes }} min</span>
           </div>
 
         </ng-container>
@@ -47,13 +49,7 @@
   </nav>
 
   <div class="welcome-banner">
-    <img 
-      ngSrc="banner.webp" 
-      alt="Banner principal de Ro's Peluqueros" 
-      fill
-      priority
-      fetchpriority="high"
-      sizes="100vw">
+    <img ngSrc="banner.webp" alt="Banner principal de Ro's Peluqueros" fill priority fetchpriority="high" sizes="100vw">
     <div class="banner-overlay"></div>
     <div class="banner-content">
       <h1 class="banner-title">
@@ -65,7 +61,8 @@
         ¡Experta en cortes de pelo modernos, tintes, mechas, permanente y mucho más!
         <span class="banner-experience">+20 años de experiencia al servicio de tu imagen.</span>
       </h3>
-      <button class="banner-button" (click)="scrollToSection('appointments')" [attr.aria-label]="'Reservar cita online'">
+      <button class="banner-button" (click)="scrollToSection('appointments')"
+        [attr.aria-label]="'Reservar cita online'">
         <i class="bi bi-calendar-check"></i>
         Reservar Cita
       </button>
