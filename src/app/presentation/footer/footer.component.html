@@ -16,17 +16,17 @@
         <h3 class="heading">Contacto</h3>
         <div class="container-row">
           <i class="bi bi-geo-alt-fill" [attr.aria-hidden]="true"></i>
-          <div class="text">{{location}}</div>
+          <div class="text">{{state.contactInfo().address}}</div>
         </div>
         <div class="container-row">
           <i class="bi bi-telephone-fill" [attr.aria-hidden]="true"></i>
-          <div class="text">{{telephone}}</div>
+          <div class="text">{{state.contactInfo().phone}}</div>
         </div>
       </div>
       <div class="container-column">
         <h3 class="heading">Horario</h3>
         <div class="container-column">
-          @for (item of scheduleText; track $index) {
+          @for (item of state.formattedSchedule(); track $index) {
             <span class="text">{{item}}</span>
           }
         </div>
@@ -44,7 +44,7 @@
       <span class="text">© 2025 Ro's Peluqueros. Todos los derechos reservados.</span>
     </div>
   </div>
-  <div *ngIf="loading" class="loading-overlay">
+  <div *ngIf="state.rawSchedule()" class="loading-overlay">
     <div class="spinner"></div>
   </div>
 </footer>

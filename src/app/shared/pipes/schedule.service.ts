@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { ScheduleDay } from '../admin-panel/types/admin.types';
+import { ScheduleDay } from '@domain/business-info';
 
 @Injectable({
   providedIn: 'root'
