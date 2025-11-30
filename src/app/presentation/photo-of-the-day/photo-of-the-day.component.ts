@@ -1,13 +1,8 @@
 import { CommonModule, isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID, NgZone } from '@angular/core';
-import { GalleryService } from '../services/admin-panel/gallery-management.service';
-import { GalleryPhoto } from '../admin-panel/types/admin.types';
-
-interface CarouselItem {
-  image: string;
-  caption: string;
-  alt: string;
-}
+import { GetPhotosUseCase } from '../../application/gallery/get-photos.use-case';
+import { GalleryPhoto, PhotoType } from '../../domain';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-photo-of-the-day',
@@ -16,19 +11,19 @@ interface CarouselItem {
   imports: [CommonModule, NgOptimizedImage]
 })
 export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
-  private galleryService = inject(GalleryService);
+  private getPhotosUseCase = inject(GetPhotosUseCase);
   private platformId = inject(PLATFORM_ID);
   private ngZone = inject(NgZone);
 
-  carouselItems = signal<CarouselItem[]>([]);
+  carouselItems = signal<GalleryPhoto[]>([]);
   currentSlide = signal(0);
   totalSlides = signal(0);
   isLoading = signal(true);
 
   private intervalId?: number;
 
-  async ngOnInit() {
-    await this.loadGalleryImages();
+  ngOnInit() {
+    this.loadGalleryImages();
   }
 
   ngOnDestroy() {
@@ -37,63 +32,38 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async loadGalleryImages() {
-    try {
-      this.isLoading.set(true);
+  private loadGalleryImages() {
+    this.isLoading.set(true);
 
-      // Obtener las imágenes del storage
-      const imagesList = await this.galleryService.getImages();
-      const galleryPhotos = await this.galleryService.getImageInfo(imagesList);
+    this.getPhotosUseCase.execute(PhotoType.GALLERY)
+      .pipe(take(1))
+      .subscribe({
+        next: (galleryPhotos) => {
+          const items = galleryPhotos.filter(photo => !!photo.url);
 
-      // Convertir las fotos de la galería a elementos del carrusel, alt SEO optimizado
-      const items: CarouselItem[] = galleryPhotos.map(photo => {
-        const baseName = this.formatCaption(photo.name);
-        return {
-          image: photo.url,
-          caption: baseName,
-          alt: `${baseName} realizado en peluquería moderna en Madrid | RO'S PELUQUEROS`
-        };
+          this.carouselItems.set(items);
+          this.totalSlides.set(items.length);
+
+          if (items.length > 1 && isPlatformBrowser(this.platformId)) {
+            this.startAutoPlay();
+          }
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Error loading gallery images:', error);
+          this.loadFallbackImages();
+          this.isLoading.set(false);
+        }
       });
-
-      this.carouselItems.set(items);
-      this.totalSlides.set(items.length);
-
-      // Solo iniciar autoplay si hay imágenes
-      if (items.length > 1 && isPlatformBrowser(this.platformId)) {
-        this.startAutoPlay();
-      }
-
-    } catch (error) {
-      console.error('Error loading gallery images:', error);
-      this.loadFallbackImages();
-    } finally {
-      this.isLoading.set(false);
-    }
   }
 
 
   private loadFallbackImages() {
-    const fallbackItems: CarouselItem[] = [
-      {
-        image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
-        caption: 'Corte clásico fade – Cliente: Pedro L.',
-        alt: "Corte clásico fade realizado en peluquería moderna en Madrid | RO'S PELUQUEROS"
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
-        caption: 'Afeitado con navaja – Cliente: Marco S.',
-        alt: "Afeitado con navaja realizado en peluquería moderna en Madrid | RO'S PELUQUEROS"
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
-        caption: 'Corte texturizado – Cliente: Antonio G.',
-        alt: "Corte texturizado realizado en peluquería moderna en Madrid | RO'S PELUQUEROS"
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
-        caption: 'Estilo vintage – Cliente: Raúl M.',
-        alt: "Estilo vintage realizado en peluquería moderna en Madrid | RO'S PELUQUEROS"
-      }
+    const fallbackItems: GalleryPhoto[] = [
+      new GalleryPhoto('Corte clásico fade – Cliente: Pedro L.', 'fallback-1', 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80', true, PhotoType.GALLERY),
+      new GalleryPhoto('Afeitado con navaja – Cliente: Marco S.', 'fallback-2', 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80', true, PhotoType.GALLERY),
+      new GalleryPhoto('Corte texturizado – Cliente: Antonio G.', 'fallback-3', 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80', true, PhotoType.GALLERY),
+      new GalleryPhoto('Estilo vintage – Cliente: Raúl M.', 'fallback-4', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80', true, PhotoType.GALLERY)
     ];
 
     this.carouselItems.set(fallbackItems);
@@ -101,7 +71,7 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
     this.startAutoPlay();
   }
 
-  private formatCaption(filename: string): string {
+  formatCaption(filename: string): string {
     // Remover la extensión del archivo
     const nameWithoutExtension = filename.replace(/\.[^/.]+$/, '');
 
@@ -112,10 +82,17 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
 
     return formatted;
   }
+
+  getAltText(filename: string): string {
+    const baseName = this.formatCaption(filename);
+    return `${baseName} realizado en peluquería moderna en Madrid | RO'S PELUQUEROS`;
+  }
+
   onProgressInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.goToSlide(Number(input.value));
   }
+
   private startAutoPlay() {
     // Solo iniciar autoplay si hay más de una imagen
     if (this.totalSlides() <= 1) return;
@@ -129,7 +106,6 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
       });
     }
   }
-
 
   private stopAutoPlay() {
     if (this.intervalId) {
@@ -189,7 +165,7 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
   }
 
   // Método para actualizar las imágenes (útil si se llama desde el admin)
-  async refreshGallery() {
-    await this.loadGalleryImages();
+  refreshGallery() {
+    this.loadGalleryImages();
   }
 }
