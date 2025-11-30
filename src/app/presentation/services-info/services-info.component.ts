@@ -1,17 +1,9 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Injector, OnDestroy, OnInit, runInInjectionContext } from "@angular/core";
-import { ServiceManager } from "../services/admin-panel/services-management.service";
-import { Service } from "../admin-panel/types/admin.types";
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from "@angular/core";
+import { Service, ServiceCategory } from "@domain/services";
 import { Subscription } from "rxjs";
-import { Auth } from '@angular/fire/auth';
 import { CommonModule, ViewportScroller } from '@angular/common';
-import { BookingPreselectionService } from "../services/booking-preselection.service";
-
-interface ServiceCategory {
-  id: string;
-  name: string;
-  icon: string;
-  services: Service[];
-}
+import { BookingPreselectionService } from "@shared/booking-preselection.service";
+import { GetServicesUseCase } from "@application/services";
 
 @Component({
   selector: "app-services-info",
@@ -22,51 +14,36 @@ interface ServiceCategory {
   imports: [CommonModule]
 })
 export class ServicesInfoComponent implements OnInit, OnDestroy {
-  private service = inject(ServiceManager);
-  private auth = inject(Auth);
-  private cdr = inject(ChangeDetectorRef);
-  private injector = inject(Injector);
+  private getServicesUseCase = inject(GetServicesUseCase);
   private viewportScroller = inject(ViewportScroller);
   private preselectionService = inject(BookingPreselectionService);
 
   private subscriptions: Subscription[] = [];
 
-  categories: ServiceCategory[] = [];
-  selectedCategory: ServiceCategory | null = null;
-  selectedService: Service | null = null;
-  loading = true;
+  categories = signal<ServiceCategory[]>([]);
+  selectedCategory = signal<ServiceCategory | null>(null);
+  selectedService = signal<Service | null>(null);
+  loading = signal(true);
 
   ngOnInit() {
-    runInInjectionContext(this.injector, () => {
-      const s1 = this.service.getServices().subscribe(services => {
+    const s1 = this.getServicesUseCase.execute().subscribe({
+      next: (services) => {
         this.organizeServicesByCategory(services);
-        this.loading = false;
-        this.cdr.detectChanges();
-      }, err => {
+        this.loading.set(false);
+      },
+      error: (err) => {
         console.error('Error cargando servicios:', err);
-        this.loading = false;
-        this.cdr.detectChanges();
-      });
-
-      this.subscriptions.push(s1);
+        this.loading.set(false);
+      }
     });
+
+    this.subscriptions.push(s1);
   }
 
-  private organizeServicesByCategory(services: any[]) {
-    const serviceInstances = services.map(s => new Service(
-      s.name,
-      s.description,
-      s.timeSegments || [],
-      s.requiresHairLength ?? false,
-      s.hairLengthModifiers,
-      s.imageUrl,
-      s.id,
-      s.hourRange
-    ));
-
+  private organizeServicesByCategory(services: Service[]) {
     const categoryMap = new Map<string, Service[]>();
 
-    serviceInstances.forEach(service => {
+    services.forEach(service => {
       const category = this.getCategoryFromService(service);
       if (!categoryMap.has(category)) {
         categoryMap.set(category, []);
@@ -74,7 +51,7 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
       categoryMap.get(category)?.push(service);
     });
 
-    const unsorted = Array.from(categoryMap.entries()).map(([categoryName, services]) => ({
+    const unsorted: ServiceCategory[] = Array.from(categoryMap.entries()).map(([categoryName, services]) => ({
       id: categoryName.toLowerCase().replace(/\s+/g, '-'),
       name: categoryName,
       icon: this.getCategoryIcon(categoryName),
@@ -83,7 +60,7 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
 
     // Orden lógico deseado
     const desiredOrder = ['Cortes', 'Tintes', 'Lavado', 'Barba & Bigote', 'Cejas & Depilación', 'Otros'];
-    this.categories = unsorted.sort((a, b) => {
+    const sortedCategories = unsorted.sort((a, b) => {
       const ia = desiredOrder.indexOf(a.name);
       const ib = desiredOrder.indexOf(b.name);
       const av = ia === -1 ? Number.MAX_SAFE_INTEGER : ia;
@@ -91,8 +68,10 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
       return av - bv;
     });
 
-    if (this.categories.length > 0) {
-      this.selectCategory(this.categories[0]);
+    this.categories.set(sortedCategories);
+
+    if (sortedCategories.length > 0) {
+      this.selectCategory(sortedCategories[0]);
     }
   }
 
@@ -140,19 +119,17 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
   }
 
   selectCategory(category: ServiceCategory) {
-    this.selectedCategory = category;
+    this.selectedCategory.set(category);
     // Seleccionar el primer servicio de la categoría
     if (category.services.length > 0) {
-      this.selectedService = category.services[0];
+      this.selectedService.set(category.services[0]);
     } else {
-      this.selectedService = null;
+      this.selectedService.set(null);
     }
-    this.cdr.detectChanges();
   }
 
   selectService(service: Service) {
-    this.selectedService = service;
-    this.cdr.detectChanges();
+    this.selectedService.set(service);
   }
 
   // --- Calcular min y max posibles ---
