@@ -1,10 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector, runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthenticationService } from '../../services/authentication.service';
+import { AuthenticationService } from '@shared/authentication.service';
 import { Router } from '@angular/router';
-import { Firestore } from '@angular/fire/firestore';
-import { AlertService } from '../../shared/alert/alert.service';
+import { AlertService } from '@shared/alert/alert.service';
 
 @Component({
   selector: 'app-login',
@@ -16,8 +15,8 @@ import { AlertService } from '../../shared/alert/alert.service';
 export class LoginComponent {
   private auth = inject(AuthenticationService)
   private router = inject(Router);
-  private firestore = inject(Firestore);
   private toast = inject(AlertService);
+  private injector = inject(Injector);
   loginData = {
     email: '',
     password: ''
@@ -26,18 +25,20 @@ export class LoginComponent {
   showPassword = false;
   isLoading = false;
 
-  async onSubmit() {
-    if (this.loginData.email && this.loginData.password) {
-      this.isLoading = true;
-      const response = await this.auth.login(this.loginData.email, this.loginData.password);
-      if (response.success) {
-        this.router.navigate(['admin'])
+  onSubmit() {
+    return runInInjectionContext(this.injector, async () => {
+      if (this.loginData.email && this.loginData.password) {
+        this.isLoading = true;
+        const response = await this.auth.login(this.loginData.email, this.loginData.password);
+        if (response.success) {
+          this.router.navigate(['admin'])
+        }
+        else {
+          this.toast.error("Email o contraseña incorrectos")
+        }
+        this.isLoading = false
       }
-      else {
-        this.toast.error("Email o contraseña incorrectos")
-      }
-      this.isLoading = false
-    }
+    });
   }
 
   togglePasswordVisibility() {

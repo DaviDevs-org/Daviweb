@@ -1,7 +1,7 @@
 // admin-header.component.ts
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthenticationService } from '../../../../services/authentication.service';
+import { AuthenticationService } from '../../../../shared/authentication.service';
 import { AlertService } from '../../../../shared/alert/alert.service';
 
 @Component({

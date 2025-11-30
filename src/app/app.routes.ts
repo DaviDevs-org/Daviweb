@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './presentation/login/login.component';
 import { HomeComponent } from './presentation/home/home.component';
 import { AdminPanelComponent } from './presentation/admin-panel/admin-panel.component';
-import { AuthenticationService } from './services/authentication.service';
+import { AuthenticationService } from './shared/authentication.service';
 import { LegalAdviceComponent } from './presentation/legal/legal-advice/legal-advice.component';
 import { PrivacyTermsComponent } from './presentation/legal/privacy-terms/privacy-terms.component';
 

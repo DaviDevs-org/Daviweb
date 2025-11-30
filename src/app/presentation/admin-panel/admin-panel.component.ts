@@ -7,7 +7,7 @@ import { AdminNavComponent, AdminTab } from './components/admin-nav/admin-nav.co
 import { GalleryManagementComponent } from './components/gallery-management/gallery-management.component';
 import { ServicesManagementComponent } from './components/services-management/services-management.component';
 import { InfoManagementComponent } from './components/info-management/info-management.component';
-import { AuthenticationService } from '../../services/authentication.service';
+import { AuthenticationService } from '../../shared/authentication.service';
 import { AppointmentManagementComponent } from './components/appointment-management/appointment-management.component';
 
 @Component({
