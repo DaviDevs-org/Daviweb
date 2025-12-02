@@ -175,15 +175,80 @@ export class Service {
       dto.description,
       dto.timeSegments || [],
       dto.requiresHairLength || false,
-      dto.hairLengthModifiers || {
-        short: { time: 30 },
-        medium: { time: 45 },
-        long: { time: 60 }
-      },
+      dto.hairLengthModifiers || Service.defaultHairLengthModifiers(),
       dto.imageUrl,
       id,
       dto.hourRange
     );
+  }
+
+  static defaultHairLengthModifiers(): HairLengthModifiers {
+    return {
+      short: { time: 30 },
+      medium: { time: 45 },
+      long: { time: 60 }
+    };
+  }
+
+  static createEmpty(): Service {
+    return new Service(
+      '',
+      '',
+      [{ duration: 30, breakAfter: 0 }],
+      false,
+      Service.defaultHairLengthModifiers()
+    );
+  }
+
+  validate(): string | null {
+    if (!this.name.trim()) {
+      return 'Por favor, ingresa el nombre del servicio.';
+    }
+
+    if (this.requiresHairLength) {
+      if (!this.hairLengthModifiers) {
+        return 'Configuración de longitud de pelo inválida.';
+      }
+
+      const lengths: Array<'short' | 'medium' | 'long'> = ['short', 'medium', 'long'];
+      let allValid = true;
+      for (const l of lengths) {
+        const mod = this.hairLengthModifiers[l];
+        const segsTotal = (mod.segments ?? []).reduce((a, s) => a + (s.duration || 0) + (s.breakAfter || 0), 0);
+        const total = segsTotal > 0 ? segsTotal : (mod.time || 0);
+        if (total <= 0) {
+          allValid = false;
+          break;
+        }
+      }
+      if (!allValid) {
+        return 'Configura un tiempo válido para cada longitud de pelo.';
+      }
+    } else {
+      const hasValidSegment = this.timeSegments.some(seg => seg.duration > 0);
+      if (!hasValidSegment) {
+        return 'Por favor, ingresa al menos un segmento de tiempo válido.';
+      }
+    }
+
+    if (this.hourRange) {
+      const start = this.hourRange.start || '';
+      const end = this.hourRange.end || '';
+      if (!start || !end) {
+        return 'Indica hora de inicio y fin del rango.';
+      }
+      
+      const timeToMinutes = (time: string): number => {
+        const [h, m] = (time || '0:0').split(':').map(Number);
+        return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
+      };
+
+      if (timeToMinutes(end) <= timeToMinutes(start)) {
+        return 'El fin del rango debe ser posterior al inicio.';
+      }
+    }
+
+    return null;
   }
 }
 

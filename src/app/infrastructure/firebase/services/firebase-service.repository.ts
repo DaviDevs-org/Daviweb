@@ -19,37 +19,30 @@ export class FirebaseServiceRepository implements ServiceRepository {
         });
     }
 
-    addService(service: Service): Observable<string> {
+    addService(service: Service): Promise<string> {
         return runInInjectionContext(this.injector, () => {
             const servicesRef = collection(this.firestore, this.path);
-            return from(addDoc(servicesRef, service.toDTO())).pipe(
-                map(docRef => docRef.id),
-                catchError(err => {
-                    return throwError(() => err);
-                })
-            );
+            return addDoc(servicesRef, service.toDTO()).then(docRef => docRef.id).catch(error => {
+                return Promise.reject(error);
+            });
         });
     }
 
-    updateService(id: string, service: Service): Observable<void> {
+    updateService(id: string, service: Service): Promise<void> {
         return runInInjectionContext(this.injector, () => {
             const serviceRef = doc(this.firestore, `${this.path}/${id}`);
-            return from(updateDoc(serviceRef, { ...service })).pipe(
-                catchError(err => {
-                    return throwError(() => err);
-                })
-            );
+            return updateDoc(serviceRef, { ...service.toDTO() }).catch(error => {
+                return Promise.reject(error);
+            });
         });
     }
 
-    deleteService(serviceId: string): Observable<void> {
+    deleteService(serviceId: string): Promise<void> {
         return runInInjectionContext(this.injector, () => {
             const serviceRef = doc(this.firestore, `${this.path}/${serviceId}`);
-            return from(deleteDoc(serviceRef)).pipe(
-                catchError(err => {
-                    return throwError(() => err);
-                })
-            );
+            return deleteDoc(serviceRef).catch(error => {
+                return Promise.reject(error);
+            });
         });
     }
 }

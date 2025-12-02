@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 export class UploadPhotoUseCase {
   constructor(private readonly galleryRepository: GalleryRepository) {}
 
-  async execute(file: File, photo: GalleryPhoto): Promise<UploadTask> {
+  async execute(file: File, photo: GalleryPhoto): Promise<{ task: UploadTask }> {
     // Validación: archivo requerido
     if (!file) {
       throw new Error('El archivo es requerido');
@@ -55,9 +55,7 @@ export class UploadPhotoUseCase {
     }
 
     const task: UploadTask = this.galleryRepository.uploadPhoto(file, photo);
-
-    const snapshot = (await task) as UploadTaskSnapshot;
-    return snapshot;
+    return { task };
   }
 
   private async loadImage(file: File): Promise<HTMLImageElement> {

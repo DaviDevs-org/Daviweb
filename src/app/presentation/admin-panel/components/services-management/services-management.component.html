@@ -10,7 +10,7 @@
   <div class="add-service-section">
     <form class="service-form" (ngSubmit)="onSubmit()">
       <div #formTop class="form-scroll-anchor" aria-hidden="true"></div>
-      <h3>{{ isEditing ? 'Editar Servicio' : 'Añadir Nuevo Servicio' }}</h3>
+      <h3>{{ isEditing() ? 'Editar Servicio' : 'Añadir Nuevo Servicio' }}</h3>
 
       <!-- Imagen del servicio -->
       <div class="image-upload-section">
@@ -42,7 +42,7 @@
 
         <div class="form-group" *ngIf="!newService.requiresHairLength">
           <label class="checkbox-label">
-            <input type="checkbox" [(ngModel)]="hasBreaks" (click)="toggleBreaks()" name="hasBreaks">
+            <input type="checkbox" [ngModel]="hasBreaks()" (ngModelChange)="hasBreaks.set($event)" (click)="toggleBreaks()" name="hasBreaks">
             <span class="checkmark">Segmentos de Tiempo (avanzado)</span>
           </label>
         </div>
@@ -56,7 +56,7 @@
 
         <div class="form-group">
           <label class="checkbox-label">
-            <input type="checkbox" [(ngModel)]="useHourRange" (change)="onHourRangeToggle()" name="useHourRange">
+            <input type="checkbox" [ngModel]="useHourRange()" (ngModelChange)="useHourRange.set($event)" (change)="onHourRangeToggle()" name="useHourRange">
             <span class="checkmark">Limitar por horario</span>
           </label>
         </div>
@@ -67,7 +67,7 @@
         <label>Tiempo del Servicio</label>
 
         <!-- Modo simple -->
-        <div class="simple-time" *ngIf="!hasBreaks && !newService.requiresHairLength">
+        <div class="simple-time" *ngIf="!hasBreaks() && !newService.requiresHairLength">
           <div class="time-input-simple">
             <div class="input-with-buttons">
               <label>Duración total del servicio</label>
@@ -87,7 +87,7 @@
         </div>
 
         <!-- Modo avanzado -->
-        <div class="advanced-time" *ngIf="hasBreaks && !newService.requiresHairLength">
+        <div class="advanced-time" *ngIf="hasBreaks() && !newService.requiresHairLength">
           <div class="segments-header">
             <h4>Segmentos del servicio</h4>
             <button type="button" class="btn-add-segment" (click)="addTimeSegment()">
@@ -133,21 +133,21 @@
         </div>
 
         <!-- Resumen de tiempo -->
-        <div class="time-summary" *ngIf="(!newService?.requiresHairLength && (newService?.timeSegments?.length ?? 0) <= 1) || getTotalTime(newService?.timeSegments ?? []) > 0">
+        <div class="time-summary" *ngIf="(!newService.requiresHairLength && (newService.timeSegments.length) <= 1) || newService.computeTotalTime() > 0">
           <div class="summary-card">
-            <div class="summary-item" *ngIf="!newService?.requiresHairLength && (!hasBreaks || (newService?.timeSegments?.length ?? 0) <= 1)">
+            <div class="summary-item" *ngIf="!newService.requiresHairLength && (!hasBreaks() || (newService.timeSegments.length) <= 1)">
               <span class="label">Tiempo total:</span>
-              <span class="value">{{ getTotalTime(newService.timeSegments) }} min</span>
+              <span class="value">{{ newService.computeTotalTime() }} min</span>
             </div>
 
             <div class="summary-item" *ngIf="newService.requiresHairLength">
               <span class="label">Tiempo estimado:</span>
-              <span class="value">{{ getEstimatedTime(convertToService(newService)) }}</span>
+              <span class="value">{{ newService.getEstimatedTimeRange() }}</span>
             </div>
 
-            <div class="summary-item" *ngIf="getBreakTime(newService.timeSegments) > 0 && !newService.requiresHairLength">
+            <div class="summary-item" *ngIf="(newService.computeTotalTime() - newService.getActiveTime()) > 0 && !newService.requiresHairLength">
               <span class="label">Tiempo de pausas:</span>
-              <span class="value">{{ getBreakTime(newService.timeSegments) }} min</span>
+              <span class="value">{{ newService.computeTotalTime() - newService.getActiveTime() }} min</span>
             </div>
           </div>
         </div>
@@ -163,7 +163,7 @@
 
               <div class="modifier-inputs">
                 <!-- Tiempo total -->
-                <div class="form-group compact" *ngIf="!((newService.hairLengthModifiers?.[length]?.segments?.length ?? 0) >= 1)">
+                <div class="form-group compact" *ngIf="!((newService.hairLengthModifiers[length]?.segments?.length ?? 0) >= 1)">
                   <label>Tiempo total (min)</label>
                   <input type="number" [(ngModel)]="newService.hairLengthModifiers[length].time"
                          [name]="'time_' + length" min="15" step="5" class="form-input small">
@@ -217,11 +217,11 @@
                   <div class="summary-card">
                     <div class="summary-item">
                       <span class="label">Tiempo total:</span>
-                      <span class="value">{{ getTotalTime(newService.hairLengthModifiers[length].segments ?? []) }} min</span>
+                      <span class="value">{{ newService.computeTotalTime(length) }} min</span>
                     </div>
-                    <div class="summary-item" *ngIf="getBreakTime(newService.hairLengthModifiers[length].segments ?? []) > 0">
+                    <div class="summary-item" *ngIf="(newService.computeTotalTime(length) - newService.getActiveTime(length)) > 0">
                       <span class="label">Tiempo de pausas:</span>
-                      <span class="value">{{ getBreakTime(newService.hairLengthModifiers[length].segments ?? []) }} min</span>
+                      <span class="value">{{ newService.computeTotalTime(length) - newService.getActiveTime(length) }} min</span>
                     </div>
                   </div>
                 </div>
@@ -256,16 +256,16 @@
       </div>
 
       <div class="form-actions" style="display:flex; gap:10px; align-items:center;">
-        <button type="submit" class="add-service-btn" [disabled]="isUploading">
+        <button type="submit" class="add-service-btn" [disabled]="isUploading()">
           <i class="bi" [ngClass]="{
-            'bi-plus-circle': !isEditing && !isUploading,
-            'bi-save': isEditing && !isUploading,
-            'bi-hourglass-split': isUploading
+            'bi-plus-circle': !isEditing() && !isUploading(),
+            'bi-save': isEditing() && !isUploading(),
+            'bi-hourglass-split': isUploading()
           }"></i>
-          {{ isUploading ? 'Subiendo...' : (isEditing ? 'Guardar cambios' : 'Añadir Servicio') }}
+          {{ isUploading() ? 'Subiendo...' : (isEditing() ? 'Guardar cambios' : 'Añadir Servicio') }}
         </button>
 
-        <button type="button" class="action-btn delete-btn" *ngIf="isEditing && !isUploading" (click)="cancelEditing()">
+        <button type="button" class="action-btn delete-btn" *ngIf="isEditing() && !isUploading()" (click)="cancelEditing()">
           <i class="bi bi-x-circle"></i>
           Cancelar
         </button>
@@ -276,7 +276,7 @@
   <div class="services-list">
     <h3>Servicios Actuales</h3>
     <div class="services-grid">
-      <div class="service-card" *ngFor="let service of services; let i = index">
+      <div class="service-card" *ngFor="let service of services(); let i = index">
         <div class="service-image" *ngIf="service.imageUrl">
           <img [src]="service.imageUrl" [alt]="service.name">
         </div>
@@ -289,7 +289,7 @@
           <!-- Mini resumen con botón de detalles -->
           <div class="service-summary-row">
             <div class="service-summary-chips">
-              <span class="chip chip-duration" *ngIf="!service.requiresHairLength" title="Duración total (incluye pausas)">{{ getTotalTime(service.timeSegments) }} min</span>
+              <span class="chip chip-duration" *ngIf="!service.requiresHairLength" title="Duración total (incluye pausas)">{{ service.computeTotalTime() }} min</span>
               <span class="chip chip-estimated" *ngIf="service.requiresHairLength" title="Rango estimado según longitud">{{ service.getEstimatedTimeRange() }}</span>
               <span class="chip chip-hour" *ngIf="service.hourRange" title="Rango horario permitido"><i class="bi bi-clock"></i> {{ service.hourRange.start }}-{{ service.hourRange.end }}</span>
             </div>
@@ -318,9 +318,9 @@
                 </ul>
                 <div class="no-segments" *ngIf="!service.timeSegments.length">Sin segmentos definidos.</div>
                 <div class="total-line">
-                  <span>Activo: {{ getActiveTime(service.timeSegments) }} min</span>
-                  <span *ngIf="getBreakTime(service.timeSegments) > 0">Pausas: {{ getBreakTime(service.timeSegments) }} min</span>
-                  <span>Total: {{ getTotalTime(service.timeSegments) }} min</span>
+                  <span>Activo: {{ service.getActiveTime() }} min</span>
+                  <span *ngIf="(service.computeTotalTime() - service.getActiveTime()) > 0">Pausas: {{ service.computeTotalTime() - service.getActiveTime() }} min</span>
+                  <span>Total: {{ service.computeTotalTime() }} min</span>
                 </div>
               </div>
               <!-- Detalles para servicio por longitud de pelo -->

@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import { ServiceRepository } from "./service.repository.interface";
 import { Service } from "@domain/services";
-import { Observable } from "rxjs";
 
 @Injectable({
     providedIn: 'root'
@@ -9,7 +8,7 @@ import { Observable } from "rxjs";
 export class UpdateServiceUseCase {
     constructor(private serviceRepository: ServiceRepository) { }
 
-    execute(id: string, service: Service): Observable<void> {
+    execute(id: string, service: Service): Promise<void> {
         return this.serviceRepository.updateService(id, service);
     }
 }
