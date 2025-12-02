@@ -7,312 +7,361 @@
     <p>Configura la información básica de la peluquería</p>
   </div>
 
-  <div *ngIf="!isLoading; else loading" class="info-sections">
+  @if (!isLoading()) {
+    <div class="info-sections">
 
-    <!-- Horarios semanales -->
-    <div class="info-card">
-      <h3><i class="bi bi-clock"></i> Horarios de Apertura</h3>
-      <div class="schedule-container">
-        <div [class]="getScheduleRowClass(day)" *ngFor="let day of schedule">
-          <label class="day-label">{{ day.name }}</label>
+      <!-- Horarios semanales -->
+      <div class="info-card">
+        <h3><i class="bi bi-clock"></i> Horarios de Apertura</h3>
+        <div class="schedule-container">
+          @for (day of schedule(); track day.name) {
+            <div [class]="getScheduleRowClass(day)">
+              <label class="day-label">{{ day.name }}</label>
 
-          <div class="intervals-container">
-            <div class="time-inputs" *ngFor="let interval of day.intervals; let i=index">
-              <input type="time" [(ngModel)]="interval.open" class="time-input" [disabled]="day.closed"
-                (blur)="validateInterval(day, interval)" [attr.aria-label]="'Hora de apertura ' + day.name + ' intervalo ' + (i+1)">
-              <span class="time-separator">-</span>
-              <input type="time" [(ngModel)]="interval.close" class="time-input" [disabled]="day.closed"
-                (blur)="validateInterval(day, interval)" [attr.aria-label]="'Hora de cierre ' + day.name + ' intervalo ' + (i+1)">
-              <button type="button" class="danger-btn" (click)="removeInterval(day,i)"
-                [disabled]="day.intervals.length <= 1 || day.closed" title="Eliminar intervalo">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-            <button type="button" class="add-btn" (click)="addInterval(day)" [disabled]="day.closed">
-              <i class="bi bi-plus-circle"></i> Añadir intervalo
-            </button>
-          </div>
-
-          <label class="closed-checkbox">
-            <input type="checkbox" [(ngModel)]="day.closed" (change)="onToggleDayClosed(day)">
-            Cerrado
-          </label>
-        </div>
-      </div>
-      <div class="schedule-actions">
-        <button type="button" class="save-btn" (click)="saveSchedule()">
-          <i class="bi bi-check-circle"></i> Guardar Horario
-        </button>
-      </div>
-    </div>
-
-    <!-- Excepciones por fecha -->
-    <div class="info-card">
-      <h3><i class="bi bi-calendar-event"></i> Días especiales / Excepciones</h3>
-
-      <!-- Flujo de creación -->
-      <div class="exception-creation-flow" *ngIf="tempException">
-        <div class="creation-steps">
-          <div class="step" [class.active]="currentExceptionStep === 'type'"
-            [class.completed]="currentExceptionStep !== 'type'">
-            <span class="step-number">1</span>
-            <span class="step-label">Tipo</span>
-          </div>
-          <div class="step" 
-            *ngIf="tempException.exceptionType === 'closed' || tempException.exceptionType === 'custom'"
-            [class.active]="currentExceptionStep === 'date'"
-            [class.completed]="currentExceptionStep === 'hours'">
-            <span class="step-number">2</span>
-            <span class="step-label">Fecha</span>
-          </div>
-          <div class="step" [class.active]="currentExceptionStep === 'hours'">
-            <span class="step-number">{{ (tempException.exceptionType === 'closed' || tempException.exceptionType === 'custom') ? '3' : '2' }}</span>
-            <span class="step-label">{{ tempException.exceptionType === 'range' ? 'Período' : 'Horario' }}</span>
-          </div>
-        </div>
-
-        <!-- Paso 1: Tipo -->
-        <div class="creation-step" *ngIf="currentExceptionStep === 'type'">
-          <div class="step-content">
-            <h4>¿Qué tipo de excepción deseas crear?</h4>
-            <div class="exception-type-options">
-              <div class="type-option" *ngFor="let type of exceptionTypes"
-                [class.selected]="tempException.exceptionType === type.value" (click)="selectExceptionType(type.value)">
-                <i [class]="type.icon"></i>
-                <span>{{type.label}}</span>
-              </div>
-            </div>
-            <div class="step-actions">
-              <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Paso 2: Fecha (solo para closed y custom) -->
-        <div class="creation-step" *ngIf="currentExceptionStep === 'date'">
-          <div class="step-content">
-            <h4>Selecciona la fecha</h4>
-            <label class="sr-only" for="exception-date">Selecciona la fecha</label>
-            <input id="exception-date" type="date" [(ngModel)]="tempException.date" class="form-input" aria-label="Fecha de excepción">
-            <div class="step-actions">
-              <button type="button" class="cancel-btn" (click)="prevStep()">Atrás</button>
-              <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
-              <button type="button" class="next-btn" (click)="nextStepFromDate()"
-                [disabled]="!tempException.date">Siguiente</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Paso 3/2: Horarios -->
-        <div class="creation-step" *ngIf="currentExceptionStep === 'hours'">
-          <div class="step-content">
-            <h4>Configura los horarios especiales</h4>
-
-            <div class="intervals-container" *ngIf="tempException.exceptionType === 'custom'">
-              <div class="time-inputs" *ngFor="let interval of tempException.intervals; let i=index">
-                <label>Intervalo {{i + 1}}:</label>
-                <input type="time" [(ngModel)]="interval.open" class="time-input"
-                  (blur)="validateExInterval(interval, i)" required>
-                <span class="time-separator">-</span>
-                <input type="time" [(ngModel)]="interval.close" class="time-input"
-                  (blur)="validateExInterval(interval, i)" required>
-                <button type="button" class="danger-btn" (click)="removeExInterval(i)"
-                  [disabled]="tempException.intervals!.length <= 1">
-                  <i class="bi bi-trash"></i>
+              <div class="intervals-container">
+                @for (interval of day.intervals; track interval; let i = $index) {
+                  <div class="time-inputs">
+                    <input type="time" [(ngModel)]="interval.open" class="time-input" [disabled]="day.closed"
+                      (blur)="validateInterval(day, interval)" [attr.aria-label]="'Hora de apertura ' + day.name + ' intervalo ' + (i+1)">
+                    <span class="time-separator">-</span>
+                    <input type="time" [(ngModel)]="interval.close" class="time-input" [disabled]="day.closed"
+                      (blur)="validateInterval(day, interval)" [attr.aria-label]="'Hora de cierre ' + day.name + ' intervalo ' + (i+1)">
+                    <button type="button" class="danger-btn" (click)="removeInterval(day,i)"
+                      [disabled]="day.intervals.length <= 1 || day.closed" title="Eliminar intervalo">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                }
+                <button type="button" class="add-btn" (click)="addInterval(day)" [disabled]="day.closed">
+                  <i class="bi bi-plus-circle"></i> Añadir intervalo
                 </button>
               </div>
 
-              <button type="button" class="add-btn" (click)="addExInterval()">
-                <i class="bi bi-plus-circle"></i> Añadir intervalo
-              </button>
-            </div>
-
-            <div *ngIf="tempException.exceptionType === 'closed'" class="closed-message">
-              <i class="bi bi-x-circle"></i>
-              <p>La peluquería estará cerrada todo el día</p>
-              <small>No se permitirán reservas para esta fecha</small>
-            </div>
-
-            <div *ngIf="tempException.exceptionType === 'range'" class="range-selector">
-              <i class="bi bi-calendar-range"></i>
-              <p>Selecciona el intervalo de fechas a cerrar</p>
-              <div class="date-range-inputs">
-                <div class="form-group">
-                  <label for="start-date">Fecha de inicio</label>
-                  <input id="start-date" type="date" [(ngModel)]="tempException.startDate" class="form-input" required>
-                </div>
-                <div class="form-group">
-                  <label for="end-date">Fecha de fin</label>
-                  <input id="end-date" type="date" [(ngModel)]="tempException.endDate" class="form-input" required>
-                </div>
-              </div>
-              <small>La peluquería estará cerrada todos los días en este intervalo</small>
-            </div>
-
-            <div class="step-actions">
-              <button type="button" class="cancel-btn" (click)="prevStep()">Atrás</button>
-              <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
-              <button type="button" class="save-btn" (click)="finishException()">Guardar Excepción</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Lista de excepciones existentes -->
-      <div class="exceptions-list" *ngIf="!tempException">
-        <div class="exceptions-container">
-          <div class="exception-item" *ngFor="let ex of getGroupedExceptions(); let i=index">
-            <div class="exception-header">
-              <div class="exception-info">
-                <strong>{{ex.date | date:'fullDate'}}</strong>
-                <span class="exception-type" [class.closed]="ex.closed" [class.range]="ex.exceptionType === 'range'">
-                  {{ex.exceptionType === 'range' ? '📅 Cierre por intervalo' : (ex.closed ? '❌ Cerrado todo el día' : '🕒 Horario especial')}}
-                </span>
-                <span *ngIf="ex.exceptionType === 'range' && ex.startDate && ex.endDate" class="range-info">
-                  ({{ex.startDate | date:'shortDate'}} - {{ex.endDate | date:'shortDate'}})
-                </span>
-              </div>
-              <div class="exception-actions">
-                <button type="button" class="edit-btn" (click)="editException(i)">
-                  <i class="bi bi-pencil"></i> Editar
-                </button>
-                <button type="button" class="danger-btn" (click)="removeException(i)">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="exception-details" *ngIf="!ex.closed && ex.intervals.length > 0">
-              <span>Horarios:</span>
-              <div class="interval-tags">
-                <span class="interval-tag" *ngFor="let interval of ex.intervals">
-                  {{interval.open}} - {{interval.close}}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div class="no-exceptions" *ngIf="exceptions.length === 0">
-            <i class="bi bi-calendar-x"></i>
-            <p>No hay excepciones configuradas</p>
-          </div>
-        </div>
-
-        <div class="exception-add">
-          <button type="button" class="add-btn large" (click)="startNewException()">
-            <i class="bi bi-plus-circle"></i> Nueva Excepción
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Información de contacto -->
-    <div class="info-card">
-      <h3><i class="bi bi-telephone"></i> Información de Contacto</h3>
-      <div class="contact-container">
-        <div class="form-group">
-          <label>Teléfono</label>
-          <input type="tel" [(ngModel)]="contactInfo.phone" class="form-input" placeholder="+34 123 456 789">
-        </div>
-        <div class="form-group">
-          <label>Dirección</label>
-          <textarea [(ngModel)]="contactInfo.address" class="form-textarea"
-            placeholder="Calle Principal, 123..."></textarea>
-        </div>
-      </div>
-      <button type="button" class="save-btn" (click)="saveContactInfo()">
-        <i class="bi bi-check-circle"></i> Guardar Información
-      </button>
-    </div>
-
-    <!-- Bloque Peluqueros -->
-    <div class="info-card barber-set">
-      <h3><i class="bi bi-scissors"></i> Peluqueros</h3>
-      <div class="barbers-container" *ngIf="!isBarberLoading; else loadingBarbers">
-
-        <label class="barber-selection-toggle">
-          <input type="checkbox" [(ngModel)]="barberSettings.settings.barberSelection"
-            (change)="toggleBarberSelection()">
-          Permitir elección de peluquero en el formulario
-        </label>
-
-        <div class="staff-list" *ngIf="barberSettings.settings.barberSelection">
-          <div class="barber-item" *ngFor="let barber of barberSettings.settings.staff">
-            <!-- Imagen del peluquero -->
-            <div class="barber-avatar" *ngIf="barber.imageUrl">
-              <img [src]="barber.imageUrl" [alt]="barber.name">
-            </div>
-            <div class="barber-avatar no-image" *ngIf="!barber.imageUrl">
-              <i class="bi bi-person-circle"></i>
-            </div>
-
-            <!-- Resto del contenido -->
-            <div class="barber-info">
-              <input type="text" [(ngModel)]="barber.name" class="barber-name-input">
-              <label class="barber-visible">
-                <input type="checkbox" [ngModel]="barber.visible"
-                  (ngModelChange)="onToggleBarberVisible(barber, $event)">
-                Visible
+              <label class="closed-checkbox">
+                <input type="checkbox" [(ngModel)]="day.closed" (change)="onToggleDayClosed(day)">
+                Cerrado
               </label>
             </div>
-
-            <button type="button" class="danger-btn" (click)="removeBarber(barber)">
-              <i class="bi bi-trash"></i> Eliminar
-            </button>
-          </div>
-
-          <div class="add-barber">
-            <!-- Sección de imagen -->
-            <div class="barber-image-upload">
-              <label>Imagen del Peluquero</label>
-              <div class="barber-upload-area" (click)="barberFileInput.click()" [class.has-image]="selectedBarberFile"
-                [style.background-image]="barberImagePreviewUrl ? 'url(' + barberImagePreviewUrl + ')' : null">
-                <div class="barber-upload-content">
-                  <i class="bi bi-person-circle"></i>
-                  <p>{{ selectedBarberFile ? 'Cambiar imagen' : 'Añadir imagen' }}</p>
-                  <small>{{ selectedBarberFile ? selectedBarberFile.name : 'JPG, PNG, WebP (máx. 5MB)' }}</small>
-                </div>
-                  <label for="barber-file" class="sr-only">Seleccionar imagen del peluquero</label>
-                  <input id="barber-file" #barberFileInput type="file" accept="image/*" (change)="onBarberFileSelected($event)"
-                    class="visually-hidden" aria-label="Seleccionar imagen del peluquero">
-              </div>
-              <!-- Progress bar -->
-              <div class="barber-progress" *ngIf="barberUploadProgress() !== '0%'">
-                <div class="barber-progress-bar" [style.width]="barberUploadProgress()"></div>
-              </div>
-            </div>
-
-            <!-- Input de nombre y botón -->
-            <div class="barber-name-section">
-              <input type="text" placeholder="Nombre del nuevo peluquero" #newBarberInput aria-label="Nombre del nuevo peluquero">
-              <button type="button" class="add-btn" [disabled]="isBarberUploading"
-                (click)="addBarber(newBarberInput.value); newBarberInput.value=''">
-                <i class="bi bi-plus-circle" *ngIf="!isBarberUploading"></i>
-                <i class="bi bi-hourglass-split" *ngIf="isBarberUploading"></i>
-                {{ isBarberUploading ? 'Subiendo...' : 'Añadir peluquero' }}
-              </button>
-            </div>
-          </div>
-
-          <button type="button" class="save-btn" (click)="saveBarberSettings()">
-            <i class="bi bi-check-circle"></i> Guardar configuración
+          }
+        </div>
+        <div class="schedule-actions">
+          <button type="button" class="save-btn" (click)="saveSchedule()">
+            <i class="bi bi-check-circle"></i> Guardar Horario
           </button>
         </div>
       </div>
 
-      <ng-template #loadingBarbers>
-        <div class="loading-spinner">
-          <i class="bi bi-arrow-clockwise"></i>
-          Cargando peluqueros...
-        </div>
-      </ng-template>
-    </div>
-  </div>
+      <!-- Excepciones por fecha -->
+      <div class="info-card">
+        <h3><i class="bi bi-calendar-event"></i> Días especiales / Excepciones</h3>
 
-  <ng-template #loading>
+        <!-- Flujo de creación -->
+        @if (tempException()) {
+          <div class="exception-creation-flow">
+            <div class="creation-steps">
+              <div class="step" [class.active]="currentExceptionStep() === 'type'"
+                [class.completed]="currentExceptionStep() !== 'type'">
+                <span class="step-number">1</span>
+                <span class="step-label">Tipo</span>
+              </div>
+              @if (tempException()?.exceptionType === 'closed' || tempException()?.exceptionType === 'custom') {
+                <div class="step" 
+                  [class.active]="currentExceptionStep() === 'date'"
+                  [class.completed]="currentExceptionStep() === 'hours'">
+                  <span class="step-number">2</span>
+                  <span class="step-label">Fecha</span>
+                </div>
+              }
+              <div class="step" [class.active]="currentExceptionStep() === 'hours'">
+                <span class="step-number">{{ (tempException()?.exceptionType === 'closed' || tempException()?.exceptionType === 'custom' ) ? '3' : '2' }}</span>
+                <span class="step-label">{{ tempException()?.exceptionType === 'range' ? 'Período' : 'Horario' }}</span>
+              </div>
+            </div>
+
+            <!-- Paso 1: Tipo -->
+            @if (currentExceptionStep() === 'type') {
+              <div class="creation-step">
+                <div class="step-content">
+                  <h4>¿Qué tipo de excepción deseas crear?</h4>
+                  <div class="exception-type-options">
+                    @for (type of exceptionTypes; track type.value) {
+                      <div class="type-option"
+                        [class.selected]="tempException()?.exceptionType === type.value" (click)="selectExceptionType(type.value)">
+                        <i [class]="type.icon"></i>
+                        <span>{{type.label}}</span>
+                      </div>
+                    }
+                  </div>
+                  <div class="step-actions">
+                    <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Paso 2: Fecha (solo para closed y custom) -->
+            @if (currentExceptionStep() === 'date') {
+              <div class="creation-step">
+                <div class="step-content">
+                  <h4>Selecciona la fecha</h4>
+                  <label class="sr-only" for="exception-date">Selecciona la fecha</label>
+                  <input id="exception-date" type="date" [ngModel]="tempException()?.date" (ngModelChange)="tempException()!.date = $event" class="form-input" aria-label="Fecha de excepción">
+                  <div class="step-actions">
+                    <button type="button" class="cancel-btn" (click)="prevStep()">Atrás</button>
+                    <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
+                    <button type="button" class="next-btn" (click)="nextStepFromDate()"
+                      [disabled]="!tempException()?.date">Siguiente</button>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Paso 3/2: Horarios -->
+            @if (currentExceptionStep() === 'hours') {
+              <div class="creation-step">
+                <div class="step-content">
+                  <h4>Configura los horarios especiales</h4>
+
+                  @if (tempException()?.exceptionType === 'custom') {
+                    <div class="intervals-container">
+                      @for (interval of tempException()?.intervals; track interval; let i = $index) {
+                        <div class="time-inputs">
+                          <label>Intervalo {{i + 1}}:</label>
+                          <input type="time" [(ngModel)]="interval.open" class="time-input"
+                            (blur)="validateExInterval(interval, i)" required>
+                          <span class="time-separator">-</span>
+                          <input type="time" [(ngModel)]="interval.close" class="time-input"
+                            (blur)="validateExInterval(interval, i)" required>
+                          <button type="button" class="danger-btn" (click)="removeExInterval(i)"
+                            [disabled]="tempException()?.intervals!.length <= 1">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      }
+
+                      <button type="button" class="add-btn" (click)="addExInterval()">
+                        <i class="bi bi-plus-circle"></i> Añadir intervalo
+                      </button>
+                    </div>
+                  }
+
+                  @if (tempException()?.exceptionType === 'closed') {
+                    <div class="closed-message">
+                      <i class="bi bi-x-circle"></i>
+                      <p>La peluquería estará cerrada todo el día</p>
+                      <small>No se permitirán reservas para esta fecha</small>
+                    </div>
+                  }
+
+                  @if (tempException()?.exceptionType === 'range') {
+                    <div class="range-selector">
+                      <i class="bi bi-calendar-range"></i>
+                      <p>Selecciona el intervalo de fechas a cerrar</p>
+                      <div class="date-range-inputs">
+                        <div class="form-group">
+                          <label for="start-date">Fecha de inicio</label>
+                          <input id="start-date" type="date" [ngModel]="tempException()?.startDate" (ngModelChange)="tempException()!.startDate = $event" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                          <label for="end-date">Fecha de fin</label>
+                          <input id="end-date" type="date" [ngModel]="tempException()?.endDate" (ngModelChange)="tempException()!.endDate = $event" class="form-input" required>
+                        </div>
+                      </div>
+                      <small>La peluquería estará cerrada todos los días en este intervalo</small>
+                    </div>
+                  }
+
+                  <div class="step-actions">
+                    <button type="button" class="cancel-btn" (click)="prevStep()">Atrás</button>
+                    <button type="button" class="cancel-btn" (click)="cancelException()">Cancelar</button>
+                    <button type="button" class="save-btn" (click)="finishException()">Guardar Excepción</button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Lista de excepciones existentes -->
+        @if (!tempException()) {
+          <div class="exceptions-list">
+            <div class="exceptions-container">
+              @for (ex of groupedExceptions(); track ex.date; let i = $index) {
+                <div class="exception-item">
+                  <div class="exception-header">
+                    <div class="exception-info">
+                      <strong>{{ex.date | date:'fullDate'}}</strong>
+                      <span class="exception-type" [class.closed]="ex.closed" [class.range]="ex.exceptionType === 'range'">
+                        {{ex.exceptionType === 'range' ? '📅 Cierre por intervalo' : (ex.closed ? '❌ Cerrado todo el día' : '🕒 Horario especial')}}
+                      </span>
+                      @if (ex.exceptionType === 'range' && ex.startDate && ex.endDate) {
+                        <span class="range-info">
+                          ({{ex.startDate | date:'shortDate'}} - {{ex.endDate | date:'shortDate'}})
+                        </span>
+                      }
+                    </div>
+                    <div class="exception-actions">
+                      <button type="button" class="edit-btn" (click)="editException(i)">
+                        <i class="bi bi-pencil"></i> Editar
+                      </button>
+                      <button type="button" class="danger-btn" (click)="removeException(i)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  @if (!ex.closed && ex.intervals.length > 0) {
+                    <div class="exception-details">
+                      <span>Horarios:</span>
+                      <div class="interval-tags">
+                        @for (interval of ex.intervals; track interval) {
+                          <span class="interval-tag">
+                            {{interval.open}} - {{interval.close}}
+                          </span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (exceptions().length === 0) {
+                <div class="no-exceptions">
+                  <i class="bi bi-calendar-x"></i>
+                  <p>No hay excepciones configuradas</p>
+                </div>
+              }
+            </div>
+
+            <div class="exception-add">
+              <button type="button" class="add-btn large" (click)="startNewException()">
+                <i class="bi bi-plus-circle"></i> Nueva Excepción
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Información de contacto -->
+      @if (contactInfo()) {
+        <div class="info-card">
+          <h3><i class="bi bi-telephone"></i> Información de Contacto</h3>
+          <div class="contact-container">
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input type="tel" [(ngModel)]="contactInfo()!.phone" class="form-input" placeholder="+34 123 456 789">
+            </div>
+            <div class="form-group">
+              <label>Dirección</label>
+              <textarea [(ngModel)]="contactInfo()!.address" class="form-textarea"
+                placeholder="Calle Principal, 123..."></textarea>
+            </div>
+          </div>
+          <button type="button" class="save-btn" (click)="saveContactInfo()">
+            <i class="bi bi-check-circle"></i> Guardar Información
+          </button>
+        </div>
+      }
+
+      <!-- Bloque Peluqueros -->
+      @if (barberSettings()) {
+        <div class="info-card barber-set">
+          <h3><i class="bi bi-scissors"></i> Peluqueros</h3>
+          @if (!isBarberLoading()) {
+            <div class="barbers-container">
+
+              <label class="barber-selection-toggle">
+                <input type="checkbox" [ngModel]="barberSettings()!.barberSelection"
+                  (ngModelChange)="toggleBarberSelection()">
+                Permitir elección de peluquero en el formulario
+              </label>
+
+              @if (barberSettings()!.barberSelection) {
+                <div class="staff-list">
+                  @for (barber of barberSettings()!.barbers; track barber) {
+                    <div class="barber-item">
+                      <!-- Imagen del peluquero -->
+                      @if (barber.imageUrl) {
+                        <div class="barber-avatar">
+                          <img [src]="barber.imageUrl" [alt]="barber.name">
+                        </div>
+                      }
+                      @if (!barber.imageUrl) {
+                        <div class="barber-avatar no-image">
+                          <i class="bi bi-person-circle"></i>
+                        </div>
+                      }
+
+                      <!-- Resto del contenido -->
+                      <div class="barber-info">
+                        <input type="text" [(ngModel)]="barber.name" class="barber-name-input">
+                        <!-- Visible checkbox removed as it is not in domain -->
+                      </div>
+
+                      <button type="button" class="danger-btn" (click)="removeBarber(barber)">
+                        <i class="bi bi-trash"></i> Eliminar
+                      </button>
+                    </div>
+                  }
+
+                  <div class="add-barber">
+                    <!-- Sección de imagen -->
+                    <div class="barber-image-upload">
+                      <label>Imagen del Peluquero</label>
+                      <div class="barber-upload-area" (click)="barberFileInput.click()" [class.has-image]="selectedBarberFile"
+                        [style.background-image]="barberImagePreviewUrl() ? 'url(' + barberImagePreviewUrl() + ')' : null">
+                        <div class="barber-upload-content">
+                          <i class="bi bi-person-circle"></i>
+                          <p>{{ selectedBarberFile ? 'Cambiar imagen' : 'Añadir imagen' }}</p>
+                          <small>{{ selectedBarberFile ? selectedBarberFile.name : 'JPG, PNG, WebP (máx. 5MB)' }}</small>
+                        </div>
+                          <label for="barber-file" class="sr-only">Seleccionar imagen del peluquero</label>
+                          <input id="barber-file" #barberFileInput type="file" accept="image/*" (change)="onBarberFileSelected($event)"
+                            class="visually-hidden" aria-label="Seleccionar imagen del peluquero">
+                      </div>
+                      <!-- Progress bar -->
+                      @if (barberUploadProgress() !== '0%') {
+                        <div class="barber-progress">
+                          <div class="barber-progress-bar" [style.width]="barberUploadProgress()"></div>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Input de nombre y botón -->
+                    <div class="barber-name-section">
+                      <input type="text" placeholder="Nombre del nuevo peluquero" #newBarberInput aria-label="Nombre del nuevo peluquero">
+                      <button type="button" class="add-btn" [disabled]="isBarberUploading()"
+                        (click)="addBarber(newBarberInput.value); newBarberInput.value=''">
+                        @if (!isBarberUploading()) {
+                          <i class="bi bi-plus-circle"></i>
+                        }
+                        @if (isBarberUploading()) {
+                          <i class="bi bi-hourglass-split"></i>
+                        }
+                        {{ isBarberUploading() ? 'Subiendo...' : 'Añadir peluquero' }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button type="button" class="save-btn" (click)="saveBarberSettings()">
+                    <i class="bi bi-check-circle"></i> Guardar configuración
+                  </button>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="loading-spinner">
+              <i class="bi bi-arrow-clockwise"></i>
+              Cargando peluqueros...
+            </div>
+          }
+        </div>
+      }
+    </div>
+  } @else {
     <div class="loading-spinner">
       <i class="bi bi-arrow-clockwise"></i>
       Cargando información...
     </div>
-  </ng-template>
+  }
 </section>
