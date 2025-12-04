@@ -5,14 +5,10 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-appointment',
   standalone: true,
-  imports: [CalendarSelectorComponent, CommonModule], // Aquí solo CommonModule, que incluye NgIf y demás
+  imports: [CalendarSelectorComponent, CommonModule],
   templateUrl: './appointment.component.html',
   styleUrls: ['./appointment.component.scss']
 })
 export class AppointmentComponent {
-  selectedDate: Date | null = null;
-
-  onDateSelected(date: Date) {
-    this.selectedDate = date;
-  }
+  // Logic moved to CalendarSelectorComponent
 }

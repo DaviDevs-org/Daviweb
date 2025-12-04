@@ -1,80 +1,94 @@
 <div class="calendar-wrapper">
   <div id="appointments">
-    <div class="appointments-header" ngClass="if (showHours) { 'border' } else { '' }">
+    <div class="appointments-header" [class.border]="currentView() === 'hours'">
       <h2 class="section-title">Reserva tu Cita</h2>
       <p class="section-subtitle"> Selecciona el día y hora que mejor se adapte a tu agenda. </p>
       <div class="section-subtitle"> Te esperamos en nuestra peluquería. </div>
     </div>
   </div>
-  <!-- Mostrar calendario si no mostramos horas ni formulario -->
-  <div *ngIf="!showHours && !showForm">
-    <div class="header">
-      <button class="arrow-btn" (click)="prevMonth()" [attr.aria-label]="'Mes anterior'">&#9664;</button>
 
-      <button #monthYearBtn class="month-year-btn" (click)="togglePicker()" aria-label="Seleccionar mes y año">
-        {{ monthNames[selectedMonth] }} {{ selectedYear }}
-        <span class="arrow" [class.open]="showPicker">&#9662;</span>
-      </button>
+  @switch (currentView()) {
+    @case ('calendar') {
+      <div class="header">
+        <button class="arrow-btn" (click)="prevMonth()" aria-label="Mes anterior">&#9664;</button>
 
-      <button class="arrow-btn" (click)="nextMonth()" [attr.aria-label]="'Mes siguiente'">&#9654;</button>
-    </div>
+        <button #monthYearBtn class="month-year-btn" (click)="togglePicker()" aria-label="Seleccionar mes y año">
+          {{ monthNames[selectedMonth()] }} {{ selectedYear() }}
+          <span class="arrow" [class.open]="showPicker()">&#9662;</span>
+        </button>
 
-    <div *ngIf="showPicker" class="picker-dropdown">
-      <select [(ngModel)]="selectedMonth" (change)="onDateChange()">
-        <option *ngFor="let m of monthNames; let i = index" [value]="i">{{ m }}</option>
-      </select>
+        <button class="arrow-btn" (click)="nextMonth()" aria-label="Mes siguiente">&#9654;</button>
+      </div>
 
-      <select [(ngModel)]="selectedYear" (change)="onDateChange()">
-        <option *ngFor="let y of years" [value]="y">{{ y }}</option>
-      </select>
-    </div>
+      @if (showPicker()) {
+        <div class="picker-dropdown">
+          <select [ngModel]="selectedMonth()" (ngModelChange)="selectedMonth.set(+$event); onDateChange()">
+            @for (m of monthNames; track m; let i = $index) {
+              <option [value]="i">{{ m }}</option>
+            }
+          </select>
 
-    <table class="calendar-table" role="grid" aria-label="Calendario de citas">
-      <thead>
-        <tr role="row">
-          <th *ngFor="let wd of weekDays" role="columnheader">{{ wd }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let week of calendarMatrix" role="row">
-          <td *ngFor="let day of week"
-              role="gridcell"
-              [attr.tabindex]="day && isAvailable(day) && focusedDay && formatDate(day) === formatDate(focusedDay) ? 0 : -1"
-              [ngClass]="{
-                'day-available': day && isAvailable(day),
-                'day-unavailable': day && !isAvailable(day),
-                'today': isToday(day),
-                'selected': isSelected(day),
-                'disabled': !day,
-                'focused': focusedDay && day && formatDate(day) === formatDate(focusedDay)
-              }"
-              (click)="selectDate(day)"
-              (keydown)="onDayKeydown($event, day)"
-              [attr.aria-selected]="isSelected(day)"
-              [attr.aria-disabled]="!day || !isAvailable(day)"
-              [attr.data-day]="day ? formatDate(day) : null">
-            <span class="day-content">{{ day?.getDate() || '' }}</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+          <select [ngModel]="selectedYear()" (ngModelChange)="selectedYear.set(+$event); onDateChange()">
+            @for (y of years; track y) {
+              <option [value]="y">{{ y }}</option>
+            }
+          </select>
+        </div>
+      }
 
-  <!-- Mostrar selector de horas -->
-  <div *ngIf="showHours && !showForm" class="hour-selector-container">
-    <app-hour-selector [date]="selectedDate" [bookedHours]="bookedSlotsByDate[selectedDateString] || []"
-      [availableHours]="availableHoursForSelectedDate" (back)="backToCalendar()"
-      (hourSelected)="onHourSelected($event)">
-    </app-hour-selector>
-  </div>
+      <table class="calendar-table" role="grid" aria-label="Calendario de citas">
+        <thead>
+          <tr role="row">
+            @for (wd of weekDays; track wd) {
+              <th role="columnheader">{{ wd }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (week of calendarMatrix(); track $index) {
+            <tr role="row">
+              @for (day of week; track $index) {
+                <td role="gridcell"
+                    [class.day-available]="isAvailable(day)"
+                    [class.day-unavailable]="day && !isAvailable(day)"
+                    [class.today]="isToday(day)"
+                    [class.selected]="isSelected(day)"
+                    [class.disabled]="!day"
+                    (click)="selectDate(day)"
+                    [attr.aria-selected]="isSelected(day)"
+                    [attr.aria-disabled]="!day || !isAvailable(day)">
+                  <span class="day-content">{{ day?.getDate() || '' }}</span>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
 
-  <!-- Mostrar formulario de reserva -->
-  <div *ngIf="showForm" id="booking-form-div">
-    <button class="back-button" (click)="showForm = false; showHours = true;">← Cambiar hora</button>
-    <app-booking-form *ngIf="selectedDate && selectedHour" [date]="selectedDateString" [time]="selectedHour"
-      [barbers]="barbers" [allowBarberSelection]="allowBarberSelection"
-      (formSubmitted)="handleFormSubmit($event)"></app-booking-form>
+    @case ('hours') {
+      <div class="hour-selector-container">
+        <app-hour-selector 
+          [date]="selectedDate() ? formatDate(selectedDate()!) : null" 
+          [availableHours]="availableHours()"
+          (back)="onBackToCalendar()"
+          (hourSelected)="onHourSelected($event)">
+        </app-hour-selector>
+      </div>
+    }
 
-  </div>
-
+    @case ('booking') {
+      <div id="booking-form-div">
+        <button class="back-button" (click)="onBackToHours()">← Cambiar hora</button>
+        <app-booking-form 
+          [date]="selectedDate() ? formatDate(selectedDate()!) : null" 
+          [time]="selectedHour()"
+          [barbers]="barbers()" 
+          [allowBarberSelection]="allowBarberSelection()"
+          [availableSlots]="availableHours()"
+          (formSubmitted)="onBookingSubmit($event)">
+        </app-booking-form>
+      </div>
+    }
+  }
 </div>

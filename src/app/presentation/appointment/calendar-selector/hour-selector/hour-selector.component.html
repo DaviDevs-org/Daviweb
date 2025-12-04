@@ -1,18 +1,22 @@
 <div class="hour-selector-wrapper">
-  <h3 *ngIf="date">Horas disponibles para {{ date | date:'fullDate' }}</h3>
+  @if (date()) {
+    <h3>Horas disponibles para {{ date() | date:'fullDate' }}</h3>
+  }
 
   <ul class="hours-list">
-    <li *ngFor="let hour of hours"
-        (click)="selectHour(hour)"
-        (dblclick)="confirmDirect(hour)"
-        [class.selected]="hour.value === selectedHour"
-        [class.disabled]="hour.disabled">
-      {{ hour.value }}
-    </li>
+    @for (hour of hours(); track hour.value) {
+      <li 
+          (click)="selectHour(hour)"
+          (dblclick)="confirmDirect(hour)"
+          [class.selected]="hour.value === selectedHour()"
+          [class.disabled]="hour.disabled">
+        {{ hour.value }}
+      </li>
+    }
   </ul>
 
   <div class="buttons">
     <button (click)="goBack()">Volver</button>
-    <button [disabled]="!selectedHour" (click)="confirm()">Confirmar</button>
+    <button [disabled]="!selectedHour()" (click)="confirm()">Confirmar</button>
   </div>
 </div>

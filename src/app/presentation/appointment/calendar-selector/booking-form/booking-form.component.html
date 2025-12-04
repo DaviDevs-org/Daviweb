@@ -1,114 +1,127 @@
-<form #bookingForm="ngForm" (ngSubmit)="onSubmit(bookingForm)" novalidate class="booking-form-container">
+<form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" class="booking-form-container">
   <h3 class="form-title">Confirmar Reserva</h3>
-  <p class="form-subtitle">Para el {{ date }} a las {{ time }}</p>
+  <p class="form-subtitle">Para el {{ date() }} a las {{ time() }}</p>
 
   <div class="form-row">
     <div class="form-group">
       <label for="name">Nombre completo *</label>
-      <input id="name" name="name" ngModel required minlength="2" placeholder="Tu nombre completo" />
-      <div class="error" [class.visible]="nameInvalid">
-        Nombre es obligatorio (mínimo 2 caracteres).
-      </div>
+      <input id="name" formControlName="name" placeholder="Tu nombre completo" />
+      @if (bookingForm.get('name')?.invalid && bookingForm.get('name')?.touched) {
+        <div class="error visible">
+          Nombre es obligatorio (mínimo 2 caracteres).
+        </div>
+      }
     </div>
   </div>
 
   <div class="form-row">
     <div class="form-group">
       <label for="phone">Teléfono *</label>
-      <input id="phone" type="tel" name="phone" ngModel required placeholder="+34 123 456 789" />
-      <div class="error" [class.visible]="phoneInvalid">
-        Introduce un teléfono válido.
-      </div>
+      <input id="phone" type="tel" formControlName="phone" placeholder="+34 123 456 789" />
+      @if (bookingForm.get('phone')?.invalid && bookingForm.get('phone')?.touched) {
+        <div class="error visible">
+          Introduce un teléfono válido.
+        </div>
+      }
     </div>
   </div>
 
   <div class="form-group">
     <label for="description">Notas para el peluquero (Opcional)</label>
-    <textarea id="description" name="description" ngModel rows="4" placeholder="Algo a tener en cuenta sobre tu pelo o reserva"></textarea>
+    <textarea id="description" formControlName="description" rows="4" placeholder="Algo a tener en cuenta sobre tu pelo o reserva"></textarea>
   </div>
 
   <div class="form-row">
-    <div class="form-group" *ngIf="allowBarberSelection && barbers.length > 0">
-      <label for="barber">Peluquero</label>
-      <select id="barber" name="barber" ngModel required>
-        <option value="Cualquiera">-- Cualquiera --</option>
-        <option *ngFor="let b of barbers" [value]="b.name" [disabled]="!b.visible">
-          {{ b.name }}
-        </option>
-      </select>
-    </div>
+    @if (allowBarberSelection() && barbers().length > 0) {
+      <div class="form-group">
+        <label for="barber">Peluquero</label>
+        <select id="barber" formControlName="barberId">
+          <option value="">-- Cualquiera --</option>
+          @for (b of barbers(); track b.name) {
+            <option [value]="b.name">
+              {{ b.name }}
+            </option>
+          }
+        </select>
+      </div>
+    }
 
     <div class="form-group">
       <label for="service">Servicio *</label>
-      <select name="service" id="service" ngModel required>
+      <select id="service" formControlName="serviceId">
         <option value="" disabled selected>-- Selecciona servicio --</option>
-        <option *ngFor="let s of availableServices" [value]="s.name">
-          {{s.name}} ({{this.getDisplayTime(s)}})
-        </option>
+        @for (s of availableServices(); track s.name) {
+          <option [value]="s.name">
+            {{s.name}} ({{ getServiceDuration(s) }} min)
+          </option>
+        }
       </select>
+      @if (bookingForm.get('serviceId')?.invalid && bookingForm.get('serviceId')?.touched) {
+        <div class="error visible">
+          Debes seleccionar un servicio.
+        </div>
+      }
     </div>
   </div>
 
   <!-- Bloque de selección de longitud de pelo -->
-  <div class="form-group" *ngIf="selectedServiceRequiresHairLength">
-    <label>Longitud de pelo *</label>
-    <div class="hair-length-options">
-      <div class="hair-length-card" [class.active]="hairLengthSelection === 'short'">
-        <button type="button"
-                [class.active]="hairLengthSelection === 'short'"
-                (click)="hairLengthSelection = 'short'">
-          CORTO
-        </button>
-        <img src="short.jpeg" alt="Ejemplo pelo corto" />
+  @if (selectedServiceRequiresHairLength()) {
+    <div class="form-group">
+      <label>Longitud de pelo *</label>
+      <div class="hair-length-options">
+        <div class="hair-length-card" 
+             [class.active]="bookingForm.get('hairLength')?.value === 'short'"
+             (click)="bookingForm.get('hairLength')?.setValue('short')">
+          <button type="button">CORTO</button>
+          <img src="assets/hair-length/short.jpeg" alt="Ejemplo pelo corto" />
+        </div>
+        
+        <div class="hair-length-card" 
+             [class.active]="bookingForm.get('hairLength')?.value === 'medium'"
+             (click)="bookingForm.get('hairLength')?.setValue('medium')">
+          <button type="button">MEDIO</button>
+          <img src="assets/hair-length/medium.jpeg" alt="Ejemplo pelo medio" />
+        </div>
+        
+        <div class="hair-length-card" 
+             [class.active]="bookingForm.get('hairLength')?.value === 'long'"
+             (click)="bookingForm.get('hairLength')?.setValue('long')">
+          <button type="button">LARGO</button>
+          <img src="assets/hair-length/long.jpeg" alt="Ejemplo pelo largo" />
+        </div>
       </div>
-      <div class="hair-length-card" [class.active]="hairLengthSelection === 'medium'">
-        <button type="button"
-                [class.active]="hairLengthSelection === 'medium'"
-                (click)="hairLengthSelection = 'medium'">
-          MEDIO
-        </button>
-        <img src="medium.jpeg" alt="Ejemplo pelo medio" />
-      </div>
-      <div class="hair-length-card" [class.active]="hairLengthSelection === 'long'">
-        <button type="button"
-                [class.active]="hairLengthSelection === 'long'"
-                (click)="hairLengthSelection = 'long'">
-          LARGO
-        </button>
-        <img src="long.jpeg" alt="Ejemplo pelo largo" />
+      
+      <div class="length-time-hint">
+        <span class="time-label">Duración estimada:</span>
+        <span class="time-value">{{ currentDuration() }} min</span>
       </div>
     </div>
-
-    <div class="length-time-hint" *ngIf="hairLengthSelection as sel">
-      <span class="time-label">Duración estimada:</span>
-      <span class="time-value">{{ getSelectedLengthTime(sel) }} min</span>
-    </div>
-
-    <div class="error" [class.visible]="submitted && !hairLengthSelection">
-      Debes seleccionar la longitud de pelo (corto, medio o largo).
-    </div>
-  </div>
-
+  }
 
   <div class="form-group privacy-consent">
     <label class="checkbox-container">
-      <input
-        type="checkbox"
-        id="privacyConsent"
-        name="privacyConsent"
-        ngModel
-        required
-      />
-      He leído y acepto la
-      <a routerLink="/privacidad" target="_blank">Política de Privacidad</a>
+      <input type="checkbox" formControlName="privacyConsent" />
+      <span>
+        He leído y acepto la 
+        <a routerLink="/legal/politica-privacidad" target="_blank">Política de Privacidad</a>
+        y el 
+        <a routerLink="/legal/aviso-legal" target="_blank">Aviso Legal</a>.
+      </span>
     </label>
-    <div class="error" [class.visible]="privacyConsentInvalid" aria-live="polite">
-      Debes aceptar la política de privacidad para enviar la reserva.
-    </div>
+    @if (bookingForm.get('privacyConsent')?.invalid && bookingForm.get('privacyConsent')?.touched) {
+      <div class="error visible">
+        Debes aceptar la política de privacidad para continuar.
+      </div>
+    }
   </div>
 
-  <button type="submit" class="submit-btn" [disabled]="!date || !time || submitting" [attr.aria-label]="'Confirmar reserva en peluquería moderna Alcorcón'">
-    <span *ngIf="!submitting">Confirmar Reserva</span>
-    <span *ngIf="submitting">Procesando...</span>
-  </button>
+  <div class="form-actions">
+    <button type="submit" [disabled]="bookingForm.invalid || isSubmitting()" class="submit-btn">
+      @if (isSubmitting()) {
+        Confirmando...
+      } @else {
+        Confirmar Reserva
+      }
+    </button>
+  </div>
 </form>
