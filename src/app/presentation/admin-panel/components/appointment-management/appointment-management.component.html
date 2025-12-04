@@ -9,46 +9,56 @@
         <aside class="left-panel">
             <div class="panel-header">
                 <h3>Todas las citas</h3>
-                <small class="muted">{{ (appointments$ | async)?.length || 0 }} en total</small>
+                <small class="muted">{{ appointments().length || 0 }} en total</small>
             </div>
 
             <div class="list">
-                <div class="appointment-card" *ngFor="let a of appointments$ | async"
-                    [class.active]="(selectedAppointment$ | async)?.id === a.id" (click)="chooseAppointment(a.id)">
-                    <div class="card-top">
-                        <div class="card-title">{{ a.name }}</div>
-                        <div class="card-meta">
-                            <span class="date">{{ a.dateISO }}</span>
-                            <div class="hour-time">
-                                <span class="time">{{ a.timeNormalized }}</span>
-                                <span class="time">{{ getAppointmentDuration(a) }}</span>
+                @for (a of appointments(); track a.id) {
+                    <div class="appointment-card"
+                        [class.active]="selectedAppointment()?.id === a.id" (click)="chooseAppointment(a.id)">
+                        <div class="card-top">
+                            <div class="card-title">{{ a.name }}</div>
+                            <div class="card-meta">
+                                <span class="date">{{ a.dateISO }}</span>
+                                <div class="hour-time">
+                                    <span class="time">{{ a.timeNormalized }}</span>
+                                    <span class="time">{{ getAppointmentDuration(a) }}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="service-name" *ngIf="a.service">
-                        <i class="bi bi-scissors"></i>
-                        <span>{{ a.service.name }}</span>
-                    </div>
+                        @if (a.service) {
+                            <div class="service-name">
+                                <i class="bi bi-scissors"></i>
+                                <span>{{ a.service.name }}</span>
+                            </div>
+                        }
 
-                    <div class="card-body">
-                        <div><strong>Teléfono:</strong> {{ a.phone || '—' }}</div>
-                        <div *ngIf="barberSelectionEnabled"><strong>Peluquero:</strong> {{ a.barber }}</div>
-                        <div *ngIf="a.description"><strong>Nota:</strong> {{ a.description }}</div>
-                    </div>
+                        <div class="card-body">
+                            <div><strong>Teléfono:</strong> {{ a.phone || '—' }}</div>
+                            @if (barberSelectionEnabled) {
+                                <div><strong>Peluquero:</strong> {{ a.barber }}</div>
+                            }
+                            @if (a.description) {
+                                <div><strong>Nota:</strong> {{ a.description }}</div>
+                            }
+                        </div>
 
-                    <div class="card-indicator" *ngIf="a.dateISO === toISODate(selectedDate$.value)"
-                        title="Cita del día seleccionado">
-                        <i class="bi bi-calendar-event-fill"></i>
+                        @if (a.dateISO === toISODate(selectedDate())) {
+                            <div class="card-indicator" title="Cita del día seleccionado">
+                                <i class="bi bi-calendar-event-fill"></i>
+                            </div>
+                        }
                     </div>
-                </div>
+                }
             </div>
         </aside>
 
         <!-- Lado derecho: calendario por día y detalles -->
-            <section role="region" aria-labelledby="calendar-section-heading" class="right-panel">
-                <h3 id="calendar-section-heading" class="sr-only">Calendario y detalles</h3>
-            <!-- Header del calendario con navegación mejorada -->
+        <section role="region" aria-labelledby="calendar-section-heading" class="right-panel">
+            <h3 id="calendar-section-heading" class="sr-only">Calendario y detalles</h3>
+            
+            <!-- Header del calendario -->
             <div class="calendar-header" #calendarHeader>
                 <!-- Navegación por meses (Desktop) -->
                 <div class="calendar-nav month-nav desktop-only">
@@ -70,7 +80,7 @@
                 </div>
 
                 <!-- Título del día -->
-                <div class="calendar-title">{{ formatDateHeader(selectedDate$.value) }}</div>
+                <div class="calendar-title">{{ formatDateHeader(selectedDate()) }}</div>
 
                 <!-- Navegación por días (Desktop) -->
                 <div class="calendar-nav day-nav desktop-only">
@@ -109,7 +119,7 @@
 
                         <!-- Grupo central: título del día -->
                         <div class="nav-group center">
-                            <div class="calendar-title-mobile">{{ formatDateHeader(selectedDate$.value) }}</div>
+                            <div class="calendar-title-mobile">{{ formatDateHeader(selectedDate()) }}</div>
                         </div>
 
                         <!-- Grupo derecho: navegación por meses -->
@@ -157,282 +167,307 @@
                 </div>
             </div>
 
-            <div class="edit-form-container" #editFormContainer *ngIf="(isEditing && editedAppointment) || isCreating">
-                <div class="edit-form-header">
-                    <h3>
-                        <i class="bi bi-pencil-fill" *ngIf="isEditing"></i>
-                        <i class="bi bi-plus-circle" *ngIf="isCreating"></i>
-                        {{ isEditing ? 'Editando cita' : 'Nueva cita' }}
-                    </h3>
-                    <button class="btn back-btn" (click)="cancelEdit()" title="Volver al calendario">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-
-                <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form">
-                    <!-- Nombre completo -->
-                    <div class="form-group full-width" id="name-group">
-                        <label for="editName">Nombre completo *</label>
-                        <input type="text" id="editName" formControlName="name" required
-                            placeholder="Nombre del cliente">
-                        <div class="error-message"
-                            *ngIf="editForm.get('name')?.invalid && editForm.get('name')?.touched">
-                            El nombre es requerido (mínimo 2 caracteres)
-                        </div>
-                    </div>
-
-                    <!-- Contacto - Teléfono -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editPhone">Teléfono</label>
-                            <input type="tel" id="editPhone" formControlName="phone" placeholder="+34 123 456 789">
-                            <div class="error-message"
-                                *ngIf="editForm.get('phone')?.invalid && editForm.get('phone')?.touched">
-                                Formato de teléfono inválido
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Fecha y Hora -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editDate">Fecha *</label>
-                            <input type="date" id="editDate" formControlName="date" required>
-                            <div class="error-message"
-                                *ngIf="editForm.get('date')?.invalid && editForm.get('date')?.touched">
-                                La fecha es requerida
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="editTime">Hora *</label>
-                            <input type="time" id="editTime" formControlName="time" required>
-                            <div class="error-message"
-                                *ngIf="editForm.get('time')?.invalid && editForm.get('time')?.touched">
-                                La hora es requerida
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Servicio y Peluquero -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editService">Servicio *</label>
-                            <select id="editService" formControlName="serviceId" required>
-                                <option value="">Seleccionar servicio</option>
-                                <option *ngFor="let service of services" [value]="service.name">
-                                    {{ service.name }} ({{ this.getServiceDuration(service) }} min)
-                                </option>
-                            </select>
-                            <div class="error-message"
-                                *ngIf="editForm.get('serviceId')?.invalid && editForm.get('serviceId')?.touched">
-                                El servicio es requerido
-                            </div>
-                        </div>
-
-                        <div class="form-group" *ngIf="barberSelectionEnabled">
-                            <label for="editBarber">Peluquero</label>
-                            <select id="editBarber" formControlName="barberId">
-                                <option value="Cualquiera">Sin peluquero específico</option>
-                                <option *ngFor="let barber of barbers" [value]="barber.name">
-                                    {{ barber.name }}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Descripción -->
-                    <div class="form-group full-width">
-                        <label for="editDescription">Descripción (opcional)</label>
-                        <textarea id="editDescription" formControlName="description"
-                            placeholder="Notas adicionales sobre la cita..." rows="3"></textarea>
-                    </div>
-
-                    <!-- Acciones -->
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="isSaving">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || isSaving">
-                            {{ isSaving ? 'Guardando...' : (isEditing ? 'Actualizar cita' : 'Crear cita') }}
+            @if ((isEditing && editedAppointment) || isCreating) {
+                <div class="edit-form-container" #editFormContainer>
+                    <div class="edit-form-header">
+                        <h3>
+                            @if (isEditing) { <i class="bi bi-pencil-fill"></i> }
+                            @if (isCreating) { <i class="bi bi-plus-circle"></i> }
+                            {{ isEditing ? 'Editando cita' : 'Nueva cita' }}
+                        </h3>
+                        <button class="btn back-btn" (click)="cancelEdit()" title="Volver al calendario">
+                            <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
-                </form>
-            </div>
 
-            <!-- Calendario de horas (solo cuando NO está en modo edición) -->
-            <ng-container *ngIf="!isEditing && !isCreating">
-                <div class="calendar-body" #calendarBody *ngIf="filteredForDay$ | async as dayList">
-                    <div class="day-summary" *ngIf="dayList.length > 0">
-                        <i class="bi bi-bar-chart-line-fill"></i>
-                        <span class="summary-text">{{ dayList.length }} cita(s) programada(s)</span>
-                    </div>
+                    <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form">
+                        <!-- Nombre completo -->
+                        <div class="form-group full-width" id="name-group">
+                            <label for="editName">Nombre completo *</label>
+                            <input type="text" id="editName" formControlName="name" required
+                                placeholder="Nombre del cliente">
+                            @if (editForm.get('name')?.invalid && editForm.get('name')?.touched) {
+                                <div class="error-message">
+                                    El nombre es requerido (mínimo 2 caracteres)
+                                </div>
+                            }
+                        </div>
 
-                    <div class="hours">
-                        <div class="hour-row" *ngFor="let h of hours; let i = index" [attr.data-hour]="h"
-                            [class.has-appointment]="findReservation((filteredForDay$ | async) ?? [], h)"
-                            [class.has-break]="isBreakSlot((filteredForDay$ | async) ?? [], h)"
-                            [class.is-continuation]="isAppointmentContinuation((filteredForDay$ | async) ?? [], h)"
-                            [class.is-start]="isAppointmentStart((filteredForDay$ | async) ?? [], h)"
-                            [class.is-end]="isAppointmentEnd((filteredForDay$ | async) ?? [], h)">
-
-                            <div class="hour-label">{{ h }}</div>
-                            <div class="slot">
-                                <ng-container
-                                    *ngIf="findReservation((filteredForDay$ | async) ?? [], h) as res; else checkBreak">
-                                    <!-- Slot con cita activa -->
-                                    <div class="reservation"
-                                        [class.selected]="(selectedAppointment$ | async)?.id === res.id"
-                                        [class.is-main-slot]="isMainAppointmentSlot((filteredForDay$ | async) ?? [], h, res)"
-                                        [class.is-continuation-slot]="!isMainAppointmentSlot((filteredForDay$ | async) ?? [], h, res)"
-                                        [class.multi-slot]="getAppointmentSlotCount(res) > 1">
-
-                                        <!-- Contenido principal solo en el primer slot activo -->
-                                        <div class="reservation-content"
-                                            *ngIf="isMainAppointmentSlot((filteredForDay$ | async) ?? [], h, res)"
-                                            (click)="chooseAppointment(res.id)">
-                                            <div class="res-header">
-                                                <div class="res-time">{{ res.timeNormalized }}</div>
-                                                <div class="res-duration">{{ getAppointmentDuration(res) }}</div>
-                                            </div>
-                                            <div class="res-name">{{ res.name }}</div>
-
-                                            <div class="res-contact" *ngIf="res.phone || (barberSelectionEnabled && res.barber)">
-                                                <span *ngIf="res.phone" class="contact-item">
-                                                    <i class="bi bi-telephone-fill"></i> {{ res.phone }}
-                                                </span>
-                                                <span *ngIf="barberSelectionEnabled && res.barber" class="contact-item barber-info">
-                                                    <i class="bi bi-person-fill"></i> {{ res.barber }}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Indicador de continuación para slots adicionales activos -->
-                                        <div class="continuation-indicator"
-                                            *ngIf="!isMainAppointmentSlot((filteredForDay$ | async) ?? [], h, res)"
-                                            (click)="chooseAppointment(res.id)">
-                                            <div class="continuation-line"></div>
-                                            <div class="continuation-text">{{ res.name }}</div>
-                                        </div>
-
-                                        <!-- Acciones solo en el slot principal -->
-                                        <div class="appointment-actions"
-                                            *ngIf="isMainAppointmentSlot((filteredForDay$ | async) ?? [], h, res)">
-                                            <button class="action-btn" title="Ver detalles"
-                                                (click)="chooseAppointment(res.id); $event.stopPropagation()">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
-                                        </div>
+                        <!-- Contacto - Teléfono -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editPhone">Teléfono</label>
+                                <input type="tel" id="editPhone" formControlName="phone" placeholder="+34 123 456 789">
+                                @if (editForm.get('phone')?.invalid && editForm.get('phone')?.touched) {
+                                    <div class="error-message">
+                                        Formato de teléfono inválido
                                     </div>
-                                </ng-container>
+                                }
+                            </div>
+                        </div>
 
-                                <ng-template #checkBreak>
-                                    <ng-container
-                                        *ngIf="getBreakInfo((filteredForDay$ | async) ?? [], h) as breakData; else emptySlot">
-                                        <!-- Slot de break - disponible para otras citas -->
-                                        <div class="break-slot-available"
-                                            [class.connected-top]="isConnectedToPrevious(breakData.appointment, h)"
-                                            [class.connected-bottom]="isConnectedToNext(breakData.appointment, h)">
+                        <!-- Fecha y Hora -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editDate">Fecha *</label>
+                                <input type="date" id="editDate" formControlName="date" required>
+                                @if (editForm.get('date')?.invalid && editForm.get('date')?.touched) {
+                                    <div class="error-message">
+                                        La fecha es requerida
+                                    </div>
+                                }
+                            </div>
 
-                                            <div class="break-connection-info">
-                                                <div class="break-owner">
-                                                    <i class="bi bi-pause-circle"></i>
-                                                    <span>Pausa de {{ breakData.appointment.name }}</span>
+                            <div class="form-group">
+                                <label for="editTime">Hora *</label>
+                                <input type="time" id="editTime" formControlName="time" required>
+                                @if (editForm.get('time')?.invalid && editForm.get('time')?.touched) {
+                                    <div class="error-message">
+                                        La hora es requerida
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Servicio y Peluquero -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editService">Servicio *</label>
+                                <select id="editService" formControlName="serviceId" required>
+                                    <option value="">Seleccionar servicio</option>
+                                    @for (service of services(); track service.name) {
+                                        <option [value]="service.name">
+                                            {{ service.name }} ({{ this.getServiceDuration(service) }} min)
+                                        </option>
+                                    }
+                                </select>
+                                @if (editForm.get('serviceId')?.invalid && editForm.get('serviceId')?.touched) {
+                                    <div class="error-message">
+                                        El servicio es requerido
+                                    </div>
+                                }
+                            </div>
+
+                            @if (barberSelectionEnabled) {
+                                <div class="form-group">
+                                    <label for="editBarber">Peluquero</label>
+                                    <select id="editBarber" formControlName="barberId">
+                                        <option value="Cualquiera">Sin peluquero específico</option>
+                                        @for (barber of barbers; track barber.name) {
+                                            <option [value]="barber.name">
+                                                {{ barber.name }}
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="form-group full-width">
+                            <label for="editDescription">Descripción (opcional)</label>
+                            <textarea id="editDescription" formControlName="description"
+                                placeholder="Notas adicionales sobre la cita..." rows="3"></textarea>
+                        </div>
+
+                        <!-- Acciones -->
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="isSaving">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || isSaving">
+                                {{ isSaving ? 'Guardando...' : (isEditing ? 'Actualizar cita' : 'Crear cita') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            }
+
+            <!-- Calendario de horas -->
+            @if (!isEditing && !isCreating) {
+                @if (filteredForDay(); as dayList) {
+                    <div class="calendar-body" #calendarBody>
+                        @if (dayList.length > 0) {
+                            <div class="day-summary">
+                                <i class="bi bi-bar-chart-line-fill"></i>
+                                <span class="summary-text">{{ dayList.length }} cita(s) programada(s)</span>
+                            </div>
+                        }
+
+                        <div class="hours">
+                            @for (h of hours(); track h) {
+                                <div class="hour-row" [attr.data-hour]="h"
+                                    [class.has-appointment]="findReservation(dayList, h)"
+                                    [class.has-break]="isBreakSlot(dayList, h)"
+                                    [class.is-continuation]="isAppointmentContinuation(dayList, h)"
+                                    [class.is-start]="isAppointmentStart(dayList, h)"
+                                    [class.is-end]="isAppointmentEnd(dayList, h)">
+
+                                    <div class="hour-label">{{ h }}</div>
+                                    <div class="slot">
+                                        @if (findReservation(dayList, h); as res) {
+                                            <!-- Slot con cita activa -->
+                                            <div class="reservation"
+                                                [class.selected]="selectedAppointment()?.id === res.id"
+                                                [class.is-main-slot]="isMainAppointmentSlot(dayList, h, res)"
+                                                [class.is-continuation-slot]="!isMainAppointmentSlot(dayList, h, res)"
+                                                [class.multi-slot]="getAppointmentSlotCount(res) > 1">
+
+                                                <!-- Contenido principal solo en el primer slot activo -->
+                                                @if (isMainAppointmentSlot(dayList, h, res)) {
+                                                    <div class="reservation-content"
+                                                        (click)="chooseAppointment(res.id)">
+                                                        <div class="res-header">
+                                                            <div class="res-time">{{ res.timeNormalized }}</div>
+                                                            <div class="res-duration">{{ getAppointmentDuration(res) }}</div>
+                                                        </div>
+                                                        <div class="res-name">{{ res.name }}</div>
+
+                                                        @if (res.phone || (barberSelectionEnabled && res.barber)) {
+                                                            <div class="res-contact">
+                                                                @if (res.phone) {
+                                                                    <span class="contact-item">
+                                                                        <i class="bi bi-telephone-fill"></i> {{ res.phone }}
+                                                                    </span>
+                                                                }
+                                                                @if (barberSelectionEnabled && res.barber) {
+                                                                    <span class="contact-item barber-info">
+                                                                        <i class="bi bi-person-fill"></i> {{ res.barber }}
+                                                                    </span>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+
+                                                <!-- Indicador de continuación para slots adicionales activos -->
+                                                @if (!isMainAppointmentSlot(dayList, h, res)) {
+                                                    <div class="continuation-indicator"
+                                                        (click)="chooseAppointment(res.id)">
+                                                        <div class="continuation-line"></div>
+                                                        <div class="continuation-text">{{ res.name }}</div>
+                                                    </div>
+                                                }
+
+                                                <!-- Acciones solo en el slot principal -->
+                                                @if (isMainAppointmentSlot(dayList, h, res)) {
+                                                    <div class="appointment-actions">
+                                                        <button class="action-btn" title="Ver detalles"
+                                                            (click)="chooseAppointment(res.id); $event.stopPropagation()">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        } @else if (findBreakSlot(dayList, h); as breakData) {
+                                            <!-- Slot de break - disponible para otras citas -->
+                                            <div class="break-slot-available"
+                                                [class.connected-top]="isConnectedToPrevious(breakData.appointment, h)"
+                                                [class.connected-bottom]="isConnectedToNext(breakData.appointment, h)">
+
+                                                <div class="break-connection-info">
+                                                    <div class="break-owner">
+                                                        <i class="bi bi-pause-circle"></i>
+                                                        <span>Pausa de {{ breakData.appointment.name }}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="break-availability">
+                                                    <span class="availability-text">Disponible</span>
+                                                    <button class="btn create-appointment-btn"
+                                                        (click)="startCreateFromSlot(h)"
+                                                        title="Crear cita durante la pausa de {{ breakData.appointment.name }}">
+                                                        <i class="bi bi-plus-circle"></i>
+                                                        <span>Crear cita</span>
+                                                    </button>
                                                 </div>
                                             </div>
-
-                                            <div class="break-availability">
-                                                <span class="availability-text">Disponible</span>
-                                                <button class="btn create-appointment-btn"
-                                                    (click)="startCreateFromSlot(h)"
-                                                    title="Crear cita durante la pausa de {{ breakData.appointment.name }}">
-                                                    <i class="bi bi-plus-circle"></i>
-                                                    <span>Crear cita</span>
-                                                </button>
+                                        } @else {
+                                            <!-- Slot completamente libre -->
+                                            <div class="empty-slot" [class.disabled]="!isHourAvailable(h)">
+                                                @if (!isHourAvailable(h)) {
+                                                    <span class="availability-text">No disponible</span>
+                                                } @else {
+                                                    <span class="availability-text">Disponible</span>
+                                                    <button class="btn create-appointment-btn" (click)="startCreateFromSlot(h)"
+                                                        title="Crear nueva cita en {{ h }}">
+                                                        <i class="bi bi-plus-circle"></i>
+                                                        <span>Crear cita</span>
+                                                    </button>
+                                                }
                                             </div>
-                                        </div>
-                                    </ng-container>
-                                </ng-template>
-
-                                <ng-template #emptySlot>
-                                    <!-- Slot completamente libre -->
-                                    <div class="empty-slot" [class.disabled]="!isHourAvailable(h)">
-                                        <span class="availability-text" *ngIf="!isHourAvailable(h)">No disponible</span>
-                                        <ng-container *ngIf="isHourAvailable(h)">
-                                            <span class="availability-text">Disponible</span>
-                                            <button class="btn create-appointment-btn" (click)="startCreateFromSlot(h)"
-                                                title="Crear nueva cita en {{ h }}">
-                                                <i class="bi bi-plus-circle"></i>
-                                                <span>Crear cita</span>
-                                            </button>
-                                        </ng-container>
+                                        }
                                     </div>
-                                </ng-template>
-                            </div>
+                                </div>
+                            }
                         </div>
                     </div>
-                </div>
 
-                <!-- Estado vacío -->
-                <div class="empty-day" *ngIf="(filteredForDay$ | async)?.length === 0">
-                    <div class="empty-icon"><i class="bi bi-calendar2-x-fill"></i></div>
-                    <h3>No hay citas programadas</h3>
-                    <p>Este día no tiene citas programadas</p>
-                </div>
-            </ng-container>
+                    <!-- Estado vacío -->
+                    @if (dayList.length === 0) {
+                        <div class="empty-day">
+                            <div class="empty-icon"><i class="bi bi-calendar2-x-fill"></i></div>
+                            <h3>No hay citas programadas</h3>
+                            <p>Este día no tiene citas programadas</p>
+                        </div>
+                    }
+                }
+            }
 
             <!-- Detalle de la cita seleccionada -->
-            <div class="selected-detail" #selectedDetail *ngIf="selectedAppointment$ | async as selected">
-                <div class="detail-header">
-                    <h4><i class="bi bi-clipboard2-fill"></i> Detalle de la cita</h4>
-                    <button class="close-btn" (click)="selectedAppointmentId$.next(null)" title="Cerrar">×</button>
-                </div>
+            @if (selectedAppointment(); as selected) {
+                <div class="selected-detail" #selectedDetail>
+                    <div class="detail-header">
+                        <h4><i class="bi bi-clipboard2-fill"></i> Detalle de la cita</h4>
+                        <button class="close-btn" (click)="selectedAppointmentId.set(null)" title="Cerrar">×</button>
+                    </div>
 
-                <div class="detail-content">
-                    <div class="detail-item">
-                        <strong>Nombre:</strong>
-                        <span>{{ selected.name }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <strong>Fecha y hora:</strong>
-                        <span>{{ selected.dateISO }} a las {{ selected.timeNormalized }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <strong>Servicio:</strong>
-                        @if (selected.service){
-                        <span>{{ selected.service!.name + ' (' + this.getAppointmentDuration(selected) + ')'}}</span>
-                        } @else {
-                        <span>No especificado</span>
+                    <div class="detail-content">
+                        <div class="detail-item">
+                            <strong>Nombre:</strong>
+                            <span>{{ selected.name }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Fecha y hora:</strong>
+                            <span>{{ selected.dateISO }} a las {{ selected.timeNormalized }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Servicio:</strong>
+                            @if (selected.service) {
+                                <span>{{ selected.service!.name + ' (' + this.getAppointmentDuration(selected) + ')'}}</span>
+                            } @else {
+                                <span>No especificado</span>
+                            }
+                        </div>
+                        @if (barberSelectionEnabled) {
+                            <div class="detail-item">
+                                <strong>Peluquero:</strong>
+                                @if (selected.barber) {
+                                    <span>{{ selected.barber }}</span>
+                                } @else {
+                                    <span>Sin asignar</span>
+                                }
+                            </div>
+                        }
+                        <div class="detail-item">
+                            <strong>Teléfono:</strong>
+                            <span>{{ selected.phone || 'No especificado' }}</span>
+                        </div>
+                        @if (selected.description) {
+                            <div class="detail-item">
+                                <strong>Nota:</strong>
+                                <span>{{ selected.description }}</span>
+                            </div>
                         }
                     </div>
-                    @if (barberSelectionEnabled) {
-                    <div class="detail-item">
-                        <strong>Peluquero:</strong>
-                        @if (selected.barber) {
-                        <span>{{ selected.barber }}</span>
-                        } @else {
-                        <span>Sin asignar</span>
-                        }
-                    </div>
-                    }
-                    <div class="detail-item">
-                        <strong>Teléfono:</strong>
-                        <span>{{ selected.phone || 'No especificado' }}</span>
-                    </div>
-                    @if (selected.description) {
-                    <div class="detail-item">
-                        <strong>Nota:</strong>
-                        <span>{{ selected.description }}</span>
-                    </div>
-                    }
-                </div>
 
-                <div class="detail-actions">
-                    <button class="btn action-primary" (click)="startEdit(selected)">Modificar</button>
-                    <button class="btn action-secondary"
-                        (click)="deleteAppointment(selected.id || '')">Eliminar</button>
+                    <div class="detail-actions">
+                        <button class="btn action-primary" (click)="startEdit(selected)">Modificar</button>
+                        <button class="btn action-secondary"
+                            (click)="deleteAppointment(selected.id || '')">Eliminar</button>
+                    </div>
                 </div>
-            </div>
-    </section>
+            }
+        </section>
     </div>
 </section>
