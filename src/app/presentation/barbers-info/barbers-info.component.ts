@@ -3,7 +3,7 @@ import { Component, inject, Injector, OnInit, runInInjectionContext, signal } fr
 import { BarberDisplay, BarberSettings } from "@domain/index";
 import { firstValueFrom } from "rxjs";
 import { CommonModule, ViewportScroller } from '@angular/common';
-import { BookingPreselectionService } from "../../shared/booking-preselection.service";
+import { BookingPreselectionService } from "../shared/booking-preselection.service";
 import { GetBarberSettingsUseCase } from "@application/business";
 
 @Component({

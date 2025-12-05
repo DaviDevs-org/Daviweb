@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Injector, Input, runInInjectionContext } from "@angular/core";
 import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
-import { BusinessStateService } from "@application/state/business-state.service";
+import { BusinessStateService } from "@presentation/shared/business-state.service";
 @Component({
   selector: "app-location-and-contact",
   templateUrl: "./location-and-contact.component.html",

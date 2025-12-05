@@ -28,7 +28,7 @@ import {
   EditBarberUseCase
 } from "@application/business";
 import { UploadPhotoUseCase } from "@application/gallery";
-import { AlertService } from "@shared/alert/alert.service";
+import { AlertService } from "@presentation/shared/alert/alert.service";
 import { percentage } from "@angular/fire/storage";
 import { Subscription, combineLatest } from "rxjs";
 

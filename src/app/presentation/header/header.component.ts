@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, PLATFORM_ID } from "@angular/core";
 import { CommonModule, isPlatformBrowser, NgOptimizedImage } from "@angular/common";
-import { BusinessStateService } from "@application/state/business-state.service";
+import { BusinessStateService } from "@presentation/shared/business-state.service";
 
 @Component({
   selector: "app-header",

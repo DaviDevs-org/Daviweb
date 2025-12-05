@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, computed, runInInjectionContext, Injector, NgZone } from '@angular/core';
 import { GetContactInfoUseCase, GetScheduleUseCase } from '@application/business';
-import { ScheduleService } from '@shared/pipes/schedule.service';
+import { ScheduleService } from '@presentation/shared/pipes/schedule.service';
 import { ContactInfo, ScheduleDay } from '@domain/business-info';
 import { BusinessStatus } from '@domain/business-info/business-status.types';
 
@@ -17,7 +17,7 @@ export class BusinessStateService {
 
     // Estado para la información de contacto
     // Inicializamos con valores por defecto para evitar "undefined" en la UI
-    readonly contactInfo = signal<ContactInfo>(new ContactInfo("Cargando dirección...", "Cargando email...", "Cargando teléfono..."));
+    readonly contactInfo = signal<ContactInfo>(new ContactInfo("000000000", "loading@loading.com", "Cargando información..."));
 
     // Estado para el horario crudo (tal cual viene de la BBDD)
     readonly rawSchedule = signal<ScheduleDay[]>([]);

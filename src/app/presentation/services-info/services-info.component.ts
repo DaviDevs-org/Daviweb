@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal }
 import { Service, ServiceCategory } from "@domain/services";
 import { Subscription } from "rxjs";
 import { CommonModule, ViewportScroller } from '@angular/common';
-import { BookingPreselectionService } from "@shared/booking-preselection.service";
+import { BookingPreselectionService } from "@presentation/shared/booking-preselection.service";
 import { GetServicesUseCase } from "@application/services";
 
 @Component({

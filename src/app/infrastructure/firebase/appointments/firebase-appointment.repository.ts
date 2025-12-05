@@ -8,11 +8,13 @@ import {
   Firestore, getDocs,
   orderBy,
   query,
-  updateDoc, where
+  updateDoc, where,
+  Timestamp
 } from '@angular/fire/firestore';
 import {AppointmentRepository} from '@application/appointments';
 import {Observable} from 'rxjs';
-import {Appointment} from '@domain/appointments';
+import {map} from 'rxjs/operators';
+import {Appointment, AppointmentDTO} from '@domain/appointments';
 
 @Injectable({
   providedIn: 'root'
@@ -26,14 +28,18 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
     return runInInjectionContext(this.injector, () => {
       const ref = collection(this.firestore, this.path);
       const q = query(ref, orderBy('datetime', 'asc'));
-      return collectionData(q, { idField: 'id' }) as Observable<Appointment[]>;
+      return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
+        map(docs => docs.map(doc => this.mapToDomain(doc)))
+      );
     });
   }
 
   getAppointmentById(id: string): Observable<Appointment | null> {
     return runInInjectionContext(this.injector, () => {
       const docRef = doc(this.firestore, `${this.path}/${id}`);
-      return docData(docRef, { idField: 'id' }) as Observable<Appointment | null>;
+      return (docData(docRef, { idField: 'id' }) as Observable<any>).pipe(
+        map(doc => doc ? this.mapToDomain(doc) : null)
+      );
     });
   }
 
@@ -55,7 +61,9 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
         orderBy('datetime', 'asc')
       );
 
-      return collectionData(q, { idField: 'id' }) as Observable<Appointment[]>;
+      return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
+        map(docs => docs.map(doc => this.mapToDomain(doc)))
+      );
     });
   }
 
@@ -78,7 +86,9 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
         orderBy('datetime', 'asc')
       );
 
-      return collectionData(q, { idField: 'id' }) as Observable<Appointment[]>;
+      return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
+        map(docs => docs.map(doc => this.mapToDomain(doc)))
+      );
     });
   }
 
@@ -112,4 +122,22 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
       await Promise.all(deletions);
     });
   }
+
+  private mapToDomain(data: any): Appointment {
+    const datetime = data.datetime instanceof Timestamp 
+      ? data.datetime.toDate() 
+      : (typeof data.datetime === 'string' ? new Date(data.datetime) : data.datetime);
+
+    const createdAt = data.createdAt instanceof Timestamp
+      ? data.createdAt.toDate()
+      : (typeof data.createdAt === 'string' ? new Date(data.createdAt) : (data.createdAt || new Date()));
+
+    const dto: AppointmentDTO = {
+      ...data,
+      datetime,
+      createdAt
+    };
+
+    return Appointment.fromDTO(dto, data.id);
   }
+}

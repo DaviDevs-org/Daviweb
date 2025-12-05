@@ -24,4 +24,4 @@ export * from './schedule/exceptions/update-exception.use-case';
 export * from './schedule/exceptions/delete-exception.use-case';
 
 // Schedule - slots / computed data use cases
-export * from './schedule/slots/get-available-slots.use-case';
+export * from './schedule/slots/get-available-slots-for-day.use-case';

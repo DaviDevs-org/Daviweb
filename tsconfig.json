@@ -5,20 +5,41 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
+      "@domain": [
+        "src/app/domain/index.ts"
+      ],
       "@domain/*": [
         "src/app/domain/*"
+      ],
+      "@application": [
+        "src/app/application/index.ts"
       ],
       "@application/*": [
         "src/app/application/*"
       ],
+      "@infrastructure": [
+        "src/app/infrastructure/index.ts"
+      ],
       "@infrastructure/*": [
         "src/app/infrastructure/*"
+      ],
+      "@presentation": [
+        "src/app/presentation/index.ts"
       ],
       "@presentation/*": [
         "src/app/presentation/*"
       ],
+      "@shared": [
+        "src/app/shared/index.ts"
+      ],
       "@shared/*": [
         "src/app/shared/*"
+      ],
+      "@styles":[
+        "src/styles"
+      ],
+      "@styles/*": [
+        "src/styles/*"
       ]
     },
     "outDir": "./dist/out-tsc",

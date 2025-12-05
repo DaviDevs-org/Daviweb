@@ -1,7 +1,7 @@
 // alert.component.scss
 @use 'sass:color';
-@use '../../../styles/variables' as *;
-@use '../../../styles/mixins' as *;
+@use '@styles/_variables.scss' as *;
+@use '@styles/_mixins.scss' as *;
 
 .toast-notification {
     position: fixed;

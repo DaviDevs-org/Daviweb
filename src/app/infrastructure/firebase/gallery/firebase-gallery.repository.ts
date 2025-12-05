@@ -5,6 +5,7 @@ import {
     StorageReference,
     deleteObject,
     getDownloadURL,
+    getMetadata,
     listAll,
     ref,
     uploadBytesResumable,
@@ -28,25 +29,39 @@ export class FirebaseGalleryRepository implements GalleryRepository {
             const galleryRef = ref(this.storage, `${this.galleryPath}/${type}`);
             const loadPhotos = async (): Promise<GalleryPhoto[]> => {
                 const res: ListResult = await listAll(galleryRef);
-                const photos: GalleryPhoto[] = [];
+                
+                const photosPromises = res.items.map(async (itemRef) => {
+                    try {
+                        const [url, metadata] = await Promise.all([
+                            getDownloadURL(itemRef),
+                            getMetadata(itemRef)
+                        ]);
+                        
+                        const name = metadata.customMetadata?.['name'] || itemRef.name;
+                        const id = itemRef.name;
+                        
+                        return new GalleryPhoto(name, id, url, true, type);
+                    } catch (error) {
+                        console.error(`Error loading photo ${itemRef.name}:`, error);
+                        return null;
+                    }
+                });
 
-                for (const itemRef of res.items) {
-                    const url = await getDownloadURL(itemRef);
-                    photos.push(new GalleryPhoto(itemRef.name, url, type));
-                }
-
+                const photos = (await Promise.all(photosPromises)).filter((p): p is GalleryPhoto => p !== null);
                 return photos;
             };
-            // Convertimos la promesa en Observable (emite una vez y completa)
             return from(loadPhotos());
         });
     }
-    uploadPhoto(file: File, photo:GalleryPhoto): UploadTask {
-        const photoRef: StorageReference = ref(this.storage, `${this.galleryPath}/${photo.type}/${photo.id}`);
-        const fileRef: StorageReference = ref(photoRef, photo.name);
+
+    uploadPhoto(file: File, photo: GalleryPhoto): UploadTask {
+        const fileRef: StorageReference = ref(this.storage, `${this.galleryPath}/${photo.type}/${photo.id}`);
         
         const metadata = {
-            contentType: file.type
+            contentType: file.type,
+            customMetadata: {
+                name: photo.name
+            }
         };
         return uploadBytesResumable(fileRef, file, metadata);
     }

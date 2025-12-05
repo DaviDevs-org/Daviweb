@@ -25,42 +25,53 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
   private injector = inject(Injector);
 
   private contactInfoPath = '/pruebas/data/info/contact-info';
-  private barberSettingsPath = 'pruebas/data/barber-settings/config';
+  private barberSettingsPath = '/pruebas/data/barber-settings/barbers';
 
   // ============= CONTACT INFO =============
 
   // Default contact info
   private getDefaultContactInfo() {
     return {
-      phone: '+34 916 42 56 60',
+      phone: '+34 123 456 789',
       email: 'info@peluqueria.com',
       address: 'Calle Principal, 123\n28001 Madrid, España'
     };
   }
 
   getContactInfo(): Observable<ContactInfo> {
-    const docRef = doc(this.firestore, this.contactInfoPath);
+    return runInInjectionContext(this.injector, () => {
+      const docRef = doc(this.firestore, this.contactInfoPath);
 
-    return from(getDoc(docRef)).pipe(
-      map(snap => {
-        const data = snap.data() as any;
+      return from(getDoc(docRef)).pipe(
+        map(snap => {
+          const data = snap.data() as any;
+          if (!data) {
+            const defaults = this.getDefaultContactInfo();
+            return new ContactInfo(
+              defaults.phone,
+              defaults.email,
+              defaults.address
+            );
+          }
 
-        if (!data) {
+          const defaults = this.getDefaultContactInfo();
           return new ContactInfo(
-            this.getDefaultContactInfo().phone,
-            this.getDefaultContactInfo().email,
-            this.getDefaultContactInfo().address
+              data.contactInfo.phone || defaults.phone,
+              data.contactInfo.email || defaults.email,
+              data.contactInfo.address || defaults.address
           );
-        }
-
-        return new ContactInfo(data.phone, data.email, data.address);
-      }),
-      catchError(err => {
-        console.error('Error getting contact info:', err);
-        const defaults = this.getDefaultContactInfo();
-        return of(new ContactInfo(defaults.phone, defaults.email, defaults.address));
-      })
-    );
+        }),
+        catchError(err => {
+          if (err.code === 'permission-denied') {
+            console.warn('Permisos insuficientes para leer contacto. Usando datos por defecto.');
+          } else {
+            console.error('Error getting contact info:', err);
+          }
+          const defaults = this.getDefaultContactInfo();
+          return of(new ContactInfo(defaults.phone, defaults.email, defaults.address));
+        })
+      );
+    });
   }
 
   updateContactInfo(contactInfo: ContactInfo): Promise<void> {
@@ -85,22 +96,29 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
   }
 
   getBarberSettings(): Observable<BarberSettings> {
-    const docRef = doc(this.firestore, this.barberSettingsPath);
+    return runInInjectionContext(this.injector, () => {
+      const docRef = doc(this.firestore, this.barberSettingsPath);
 
-    return docData(docRef).pipe(
-      map((dto: any) => {
-        // Si el documento no existe, docData devuelve null
-        if (!dto) {
-          return new BarberSettings(false, []);
-        } else {
-          return BarberSettings.fromDTO(dto as BarberSettingsDTO);
-        }
-      }),
-      catchError(err => {
-        console.error('Error getting barber settings:', err);
-        return of(new BarberSettings(false, []));
-      })
-    );
+      return docData(docRef).pipe(
+        map((dto: any) => {
+          // Si el documento no existe, docData devuelve null
+          if (!dto) {
+            const defaults = this.getDefaultBarberSettings();
+            return new BarberSettings(defaults.barberSelection, defaults.staff);
+          } else {
+            return BarberSettings.fromDTO(dto as BarberSettingsDTO);
+          }
+        }),
+        catchError(err => {
+          if (err.code === 'permission-denied') {
+            console.warn('Permisos insuficientes para leer configuración de barberos. Usando configuración por defecto.');
+          } else {
+            console.error('Error getting barber settings:', err);
+          }
+          return of(new BarberSettings(false, []));
+        })
+      );
+    });
   }
 
 

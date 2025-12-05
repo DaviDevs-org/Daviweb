@@ -1,4 +1,5 @@
-import { Phone, Email } from "@domain";
+import { Phone } from "../shared/value-objects/phone.vo";
+import { Email } from "../shared/value-objects/email.vo";
 
 export interface ContactInfoDTO {
   phone: string;

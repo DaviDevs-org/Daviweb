@@ -1,7 +1,7 @@
 import { CommonModule, ViewportScroller } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 import { RouterLink } from "@angular/router";
-import { BusinessStateService } from "@application/state/business-state.service";
+import { BusinessStateService } from "@presentation/shared/business-state.service";
 @Component({
   selector: "app-footer",
   templateUrl: "./footer.component.html",

@@ -359,7 +359,8 @@
                                                     </div>
                                                 }
                                             </div>
-                                        } @else if (findBreakSlot(dayList, h); as breakData) {
+                                        } @else {
+                                            @if (findBreakSlot(dayList, h); as breakData) {
                                             <!-- Slot de break - disponible para otras citas -->
                                             <div class="break-slot-available"
                                                 [class.connected-top]="isConnectedToPrevious(breakData.appointment, h)"
@@ -382,7 +383,7 @@
                                                     </button>
                                                 </div>
                                             </div>
-                                        } @else {
+                                            } @else {
                                             <!-- Slot completamente libre -->
                                             <div class="empty-slot" [class.disabled]="!isHourAvailable(h)">
                                                 @if (!isHourAvailable(h)) {
@@ -396,6 +397,7 @@
                                                     </button>
                                                 }
                                             </div>
+                                        }
                                         }
                                     </div>
                                 </div>

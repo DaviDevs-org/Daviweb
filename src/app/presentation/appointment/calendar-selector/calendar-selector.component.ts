@@ -5,7 +5,7 @@ import { HourSelectorComponent } from './hour-selector/hour-selector.component';
 import { BookingFormComponent } from './booking-form/booking-form.component';
 import { Barber, Service, ScheduleDay, ExceptionItem, PastDateHandler, ExceptionHandler, WeeklyScheduleHandler, AvailabilityContext, Appointment } from '@domain/index';
 import { TimeUtils } from '@domain/shared/utils/time.utils';
-import { AlertService } from '../../../shared/alert/alert.service';
+import { AlertService } from '../../shared/alert/alert.service';
 import { GetAvailableSlotsForDayUseCase } from '@application/business/schedule/slots/get-available-slots-for-day.use-case';
 import { GetScheduleUseCase, GetExceptionsUseCase, GetBarberSettingsUseCase } from '@application/business';
 import { AddAppointmentUseCase } from '@application/appointments/add-appointment.use-case';

@@ -1,9 +1,9 @@
 import { Component, inject, Injector, runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthenticationService } from '@shared/authentication.service';
+import { AuthenticationService } from '@presentation/shared/authentication.service';
 import { Router } from '@angular/router';
-import { AlertService } from '@shared/alert/alert.service';
+import { AlertService } from '@presentation/shared/alert/alert.service';
 
 @Component({
   selector: 'app-login',

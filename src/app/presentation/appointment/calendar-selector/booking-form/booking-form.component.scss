@@ -1,5 +1,5 @@
-@use '../../../../styles/variables' as *;
-@use '../../../../styles/mixins' as *;
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
 
 .booking-form-container {
   max-width: 800px;
@@ -156,7 +156,7 @@ textarea {
   font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%233d4a56" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%233d4a56" height="24" viewBox="0 0 24 24" width="24" xmlns="http:/www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
   background-repeat: no-repeat;
   background-position: right 16px center;
   background-size: 18px 18px;

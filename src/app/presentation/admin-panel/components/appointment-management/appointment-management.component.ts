@@ -17,12 +17,12 @@ import {
   GetAppointmentsUseCase, 
   UpdateAppointmentUseCase 
 } from '@application/appointments';
-import { BusinessStateService } from '@application/state/business-state.service';
+import { BusinessStateService } from '@presentation/shared/business-state.service';
 import { GetServicesUseCase } from '@application/services';
 
 // Presentation Imports
 import { AppointmentView, toAppointmentView } from '@presentation/shared/models/appointment-view.model';
-import { AlertService } from '@shared/alert/alert.service';
+import { AlertService } from '@presentation/shared/alert/alert.service';
 
 type EditableAppointment = Partial<Appointment>;
 

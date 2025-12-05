@@ -20,7 +20,7 @@ import {
 } from '@application/gallery';
 
 // Shared
-import { AlertService } from '@shared/alert/alert.service';
+import { AlertService } from '@presentation/shared/alert/alert.service';
 
 @Component({
   selector: 'app-gallery-management',

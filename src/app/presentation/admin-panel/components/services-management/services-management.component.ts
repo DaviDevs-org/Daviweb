@@ -8,7 +8,7 @@ import { GetServicesUseCase, CreateServiceUseCase, UpdateServiceUseCase, DeleteS
 import { UploadPhotoUseCase } from '@application/gallery';
 import { Service} from '@domain/services';
 import { GalleryPhoto, PhotoType } from '@domain/gallery';
-import { AlertService } from '@shared/alert/alert.service';
+import { AlertService } from '@presentation/shared/alert/alert.service';
 
 @Component({
   selector: 'app-services-management',

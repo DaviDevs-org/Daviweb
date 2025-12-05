@@ -233,17 +233,17 @@
       </div>
 
       <!-- Rango horario del servicio -->
-      <div class="form-group" *ngIf="useHourRange">
+      <div class="form-group" *ngIf="useHourRange() && newService.hourRange">
         <label>Rango horario del servicio</label>
         <div class="hour-range">
           <div class="form-group compact">
             <label>Desde</label>
-            <input type="time" class="form-input" [(ngModel)]="newService.hourRange!.start" name="hourRangeStart">
+            <input type="time" class="form-input" [(ngModel)]="newService.hourRange.start" name="hourRangeStart">
           </div>
           <span class="to-separator">a</span>
           <div class="form-group compact">
             <label>Hasta</label>
-            <input type="time" class="form-input" [(ngModel)]="newService.hourRange!.end" name="hourRangeEnd">
+            <input type="time" class="form-input" [(ngModel)]="newService.hourRange.end" name="hourRangeEnd">
           </div>
         </div>
         <small class="help-text">Las citas de este servicio deberán empezar y terminar dentro de este rango.</small>
