@@ -1,15 +1,20 @@
-import { Component, inject, signal, computed, ViewChild, ElementRef, OnDestroy, DestroyRef } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Component, inject, signal, computed, ViewChild, ElementRef, OnDestroy, linkedSignal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { BusinessStateService } from "@presentation/shared/business-state.service";
 import {
   ScheduleDay,
+  ScheduleDayDTO,
   ContactInfo,
+  ContactInfoDTO,
   ExceptionItem,
+  ExceptionItemDTO,
   Barber,
+  BarberDTO,
   BarberSettings,
+  BarberSettingsDTO,
   Interval,
+  IntervalDTO,
   PhotoType,
   GalleryPhoto
 } from "@domain/index";
@@ -39,33 +44,38 @@ import { Subscription } from "rxjs";
 export class InfoManagementComponent implements OnDestroy {
   private businessState = inject(BusinessStateService);
 
-  // Signals for state
-  schedule = this.businessState.rawSchedule;
-  contactInfo = this.businessState.contactInfo;
-  exceptions = this.businessState.exceptions;
-  barberSettings = this.businessState.barberSettings;
-  
+  // Signals for local form state
+  schedule = linkedSignal(() => this.businessState.rawSchedule().map(day => day.toDTO()));
+
+  contactInfo = linkedSignal(() => {
+    const info = this.businessState.contactInfo();
+    // Filter out loading state
+    if (info.email.getValue() === 'loading@loading.com') return null;
+    return info.toDTO();
+  });
+
+  exceptions = linkedSignal(() => this.businessState.exceptions().map(ex => ex.toDTO()));
+
+  barberSettings = linkedSignal(() => this.businessState.barberSettings()?.toDTO() ?? null);
+
   // UI State signals
   isBarberUploading = signal(false);
   barberUploadProgress = signal("0%");
 
   // Computed signals for loading state
   isLoading = computed(() => {
-    // Consider loading if contact info is in initial state or schedule is empty
-    // Adjust logic based on your specific "loading" criteria
     const contact = this.contactInfo();
     const schedule = this.schedule();
-    return !contact || contact.email.toString() === 'loading@loading.com' || !schedule;
+    return !contact || !schedule || schedule.length === 0;
   });
 
   isBarberLoading = computed(() => {
-    // Consider loading if barberSettings is null
     return this.barberSettings() === null;
   });
-  
-  // Exception Wizard State
+
+    // Exception Wizard State
   currentExceptionStep = signal<"date" | "type" | "hours" | "complete">("complete");
-  tempException = signal<Partial<ExceptionItem> | null>(null);
+  tempException = signal<Partial<ExceptionItemDTO> | null>(null);
   
   exceptionTypes = [
     { value: "closed", label: "Cerrar todo el día", icon: "bi bi-x-circle" },
@@ -90,39 +100,36 @@ export class InfoManagementComponent implements OnDestroy {
   private removeBarberUC = inject(RemoveBarberUseCase);
   private editBarberUC = inject(EditBarberUseCase);
   private uploadPhotoUC = inject(UploadPhotoUseCase);
-  
-  private toast = inject(AlertService);
-  private destroyRef = inject(DestroyRef);
 
-  // ngOnInit removed as data is loaded via BusinessStateService
+  private toast = inject(AlertService);
 
   // ===== SCHEDULE =====
   
-  getScheduleRowClass(day: ScheduleDay): string {
+  getScheduleRowClass(day: ScheduleDayDTO): string {
     return day.closed ? "schedule-row closed-day" : "schedule-row";
   }
 
-  addInterval(day: ScheduleDay) {
+  addInterval(day: ScheduleDayDTO) {
     if (day.closed) return;
     const currentSchedule = this.schedule();
-    day.intervals.push({ open: "09:00", close: "14:00" } as Interval);
+    day.intervals.push({ open: "09:00", close: "14:00" });
     this.schedule.set([...currentSchedule]);
   }
 
-  removeInterval(day: ScheduleDay, i: number) {
+  removeInterval(day: ScheduleDayDTO, i: number) {
     const currentSchedule = this.schedule();
     day.intervals.splice(i, 1);
     this.schedule.set([...currentSchedule]);
   }
 
-  validateInterval(day: ScheduleDay, interval: Interval) {
+  validateInterval(day: ScheduleDayDTO, interval: IntervalDTO) {
     if (!day.closed && interval.open && interval.close && interval.open >= interval.close) {
       interval.close = "";
       this.schedule.set([...this.schedule()]);
     }
   }
 
-  onToggleDayClosed(day: ScheduleDay) {
+  onToggleDayClosed(day: ScheduleDayDTO) {
     const currentSchedule = this.schedule();
     if (day.closed) {
       (day as any).backupIntervals = [...day.intervals];
@@ -131,7 +138,7 @@ export class InfoManagementComponent implements OnDestroy {
       if ((day as any).backupIntervals?.length) {
         day.intervals = [...(day as any).backupIntervals];
       } else if (!day.intervals.length) {
-        day.intervals.push({ open: "09:00", close: "14:00" } as Interval);
+        day.intervals.push({ open: "09:00", close: "14:00" });
       }
       delete (day as any).backupIntervals;
     }
@@ -140,7 +147,9 @@ export class InfoManagementComponent implements OnDestroy {
 
   async saveSchedule() {
     try {
-      await this.updateScheduleUC.execute(this.schedule());
+      const scheduleDTOs = this.schedule();
+      const scheduleEntities = scheduleDTOs.map(dto => ScheduleDay.fromDTO(dto));
+      await this.updateScheduleUC.execute(scheduleEntities);
       this.toast.success("Horario semanal guardado correctamente!");
     } catch (err) {
       console.error(err);
@@ -152,7 +161,7 @@ export class InfoManagementComponent implements OnDestroy {
 
   groupedExceptions = computed(() => {
     const exList = this.exceptions();
-    const grouped: ExceptionItem[] = [];
+    const grouped: ExceptionItemDTO[] = [];
     const processedRanges = new Set<string>();
 
     for (const ex of exList) {
@@ -172,7 +181,7 @@ export class InfoManagementComponent implements OnDestroy {
     this.tempException.set({
       date: "",
       closed: false,
-      intervals: [{ open: "09:00", close: "14:00" } as Interval],
+      intervals: [{ open: "09:00", close: "14:00" }],
       exceptionType: undefined,
       startDate: undefined,
       endDate: undefined
@@ -194,7 +203,7 @@ export class InfoManagementComponent implements OnDestroy {
         temp.intervals = [];
       } else {
         if (!temp.intervals?.length) {
-          temp.intervals = [{ open: "09:00", close: "14:00" } as Interval];
+          temp.intervals = [{ open: "09:00", close: "14:00" }];
         }
       }
     } else if (validType === "range") {
@@ -255,7 +264,7 @@ export class InfoManagementComponent implements OnDestroy {
   addExInterval() {
     const temp = this.tempException();
     if (!temp?.intervals) return;
-    temp.intervals.push({ open: "09:00", close: "14:00" } as Interval);
+    temp.intervals.push({ open: "09:00", close: "14:00" });
     this.tempException.set({ ...temp });
   }
 
@@ -269,7 +278,7 @@ export class InfoManagementComponent implements OnDestroy {
     this.tempException.set({ ...temp });
   }
 
-  validateExInterval(interval: Interval, index: number) {
+  validateExInterval(interval: IntervalDTO, index: number) {
     if (interval.open && interval.close && interval.open >= interval.close) {
       this.toast.error("La hora de cierre debe ser posterior a la de apertura");
       interval.close = "";
@@ -300,10 +309,15 @@ export class InfoManagementComponent implements OnDestroy {
         const end = new Date(temp.endDate);
         const promises = [];
 
+        // If editing a range, we should probably delete old range first?
+        // But range editing is disabled in editException currently ("Elimina y crea de nuevo para rangos")
+        // So we assume this is always a new range or a replacement.
+
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
           const dateKey = d.toISOString().split("T")[0];
+          // Check if exists in local state (which reflects global)
           if (this.exceptions().find(ex => ex.date === dateKey)) {
-             continue; 
+            continue;
           }
           const ex = new ExceptionItem(
             dateKey,
@@ -317,7 +331,7 @@ export class InfoManagementComponent implements OnDestroy {
           );
           promises.push(this.addExceptionUC.execute(ex));
         }
-        
+
         await Promise.all(promises);
         this.toast.success("Rango de excepciones guardado");
 
@@ -326,19 +340,28 @@ export class InfoManagementComponent implements OnDestroy {
             this.toast.error("Falta la fecha");
             return;
         }
+        const intervals = (temp.intervals || []).map(i => new Interval(i.open, i.close));
         const ex = new ExceptionItem(
             temp.date,
             !!temp.closed,
-            temp.intervals as Interval[] || [],
+            intervals,
             temp.exceptionType,
-            undefined,
+            temp.id, // Pass ID if exists
             false
         );
-        await this.addExceptionUC.execute(ex);
-        this.toast.success("Excepción guardada");
-      }
 
-      // No need to manually refresh exceptions, the subscription will handle it
+        if (temp.id) {
+            // It's an update
+            await this.updateExceptionUC.execute(temp.id, ex);
+            this.toast.success("Excepción actualizada");
+        } else {
+            // It's a new one
+            // Check if date already exists to avoid duplicates/overwrite without warning?
+            // The validateExceptionDate() checks this for new ones.
+            await this.addExceptionUC.execute(ex);
+            this.toast.success("Excepción guardada");
+        }
+      }      // No need to manually refresh exceptions, the subscription will handle it
       this.cancelException();
 
     } catch (error) {
@@ -357,16 +380,16 @@ export class InfoManagementComponent implements OnDestroy {
     try {
       if (toRemove.exceptionType === "range" && toRemove.startDate && toRemove.endDate) {
         const allEx = this.exceptions();
-        const inRange = allEx.filter(ex => 
-            ex.exceptionType === "range" && 
-            ex.startDate === toRemove.startDate && 
-            ex.endDate === toRemove.endDate
+        const inRange = allEx.filter(ex =>
+          ex.exceptionType === "range" &&
+          ex.startDate === toRemove.startDate &&
+          ex.endDate === toRemove.endDate
         );
-        await Promise.all(inRange.map(ex => this.deleteExceptionUC.execute(ex.date)));
+        await Promise.all(inRange.map(ex => this.deleteExceptionUC.execute(ex.id || ex.date)));
       } else {
-        await this.deleteExceptionUC.execute(toRemove.date);
+        await this.deleteExceptionUC.execute(toRemove.id || toRemove.date);
       }
-      
+
       // No need to manually refresh exceptions
       this.toast.success("Excepción eliminada");
     } catch (e) {
@@ -384,19 +407,25 @@ export class InfoManagementComponent implements OnDestroy {
           return;
       }
       
-      this.tempException.set({...toEdit});
+      const intervalsDTO = toEdit.intervals.map(i => ({ open: i.open, close: i.close }));
+      this.tempException.set({
+        ...toEdit,
+        intervals: intervalsDTO
+      });
       this.currentExceptionStep.set("hours");
-  }
+  }  // ===== CONTACT INFO =====
 
-  // ===== CONTACT INFO =====
 
   async saveContactInfo() {
-    const info = this.contactInfo();
-    if (!info) return;
+    const infoDTO = this.contactInfo();
+    if (!infoDTO) return;
     try {
+      // Reconstruct domain object from DTO
+      const info = ContactInfo.fromDTO(infoDTO);
       await this.updateContactInfoUC.execute(info);
       this.toast.success("Información de contacto guardada");
     } catch (err) {
+      console.error(err);
       this.toast.error("Error al guardar contacto");
     }
   }
@@ -406,28 +435,29 @@ export class InfoManagementComponent implements OnDestroy {
   async toggleBarberSelection() {
     const settings = this.barberSettings();
     if (!settings) return;
-    
-    // Optimistic update
+
     settings.barberSelection = !settings.barberSelection;
-    this.barberSettings.set(settings);
-    
-    try {
-      await this.updateBarberSettingsUC.execute(settings);
-    } catch (err) {
-      // Revert on error
-      settings.barberSelection = !settings.barberSelection;
-      this.barberSettings.set(settings);
-      this.toast.error("Error al actualizar configuración");
-    }
+    this.barberSettings.set({ ...settings }); // Trigger UI update
+
+    // We don't auto-save on toggle anymore, user must click save
+    // Or if we want auto-save, we must reconstruct objects
   }
 
   async saveBarberSettings() {
     const settings = this.barberSettings();
     if (!settings) return;
     try {
-      await this.updateBarberSettingsUC.execute(settings);
+      // Reconstruct Barber objects from plain JSON
+      const barbers = settings.barbers.map(b => new Barber(b.name, b.imageUrl, b.id));
+      const domainSettings = new BarberSettings(
+        settings.barberSelection,
+        barbers
+      );
+
+      await this.updateBarberSettingsUC.execute(domainSettings);
       this.toast.success("Configuración de peluqueros guardada");
     } catch (err) {
+      console.error(err);
       this.toast.error("Error al guardar");
     }
   }
@@ -442,23 +472,36 @@ export class InfoManagementComponent implements OnDestroy {
 
     try {
       const imageUrl = await this.uploadBarberImage();
+      // Add to local state
+      const currentSettings = this.barberSettings();
+      if (currentSettings) {
+        // We use plain object for local state to match what JSON.parse gave us
+        const newBarberPlain: BarberDTO = { name: n, imageUrl: imageUrl || undefined };
+        currentSettings.barbers.push(newBarberPlain);
+        this.barberSettings.set({ ...currentSettings });
+      }
+
       const newBarber = new Barber(n, imageUrl || undefined);
-      
       await this.addBarberUC.execute(newBarber);
-      
-      // No need to manually refresh, subscription handles it
-      
+
       this.toast.success("Peluquero añadido");
       this.clearBarberFileSelection();
+
+      // Force refresh of local state from business state (which should update after UC execution)
+      // Actually, since we only init local state if empty, we might need to manually update local state here
+      // or rely on the user refreshing.
+      // Better: update local state to reflect the change.
+
     } catch (err) {
       console.error(err);
       this.toast.error("Error al añadir peluquero");
     }
   }
 
-  async removeBarber(barber: Barber) {
-    if (!await this.toast.confirm(`¿Eliminar a ${barber.name}?`)) return;
+  async removeBarber(barberDTO: BarberDTO) {
+    if (!await this.toast.confirm(`¿Eliminar a ${barberDTO.name}?`)) return;
     try {
+      const barber = new Barber(barberDTO.name, barberDTO.imageUrl, barberDTO.id);
       await this.removeBarberUC.execute(barber);
       // No need to manually refresh
     } catch (err) {
@@ -477,7 +520,7 @@ export class InfoManagementComponent implements OnDestroy {
 
   private async uploadBarberImage(): Promise<string | null> {
     if (!this.selectedBarberFile) return null;
-    
+
     return new Promise((resolve, reject) => {
       const photo = new GalleryPhoto(
         this.selectedBarberFile!.name,
@@ -489,21 +532,21 @@ export class InfoManagementComponent implements OnDestroy {
 
       this.uploadPhotoUC.execute(this.selectedBarberFile!, photo).then(({ task }) => {
         this.isBarberUploading.set(true);
-        
+
         this.barberUploadSubscription = percentage(task).subscribe(({ progress }) => {
           this.barberUploadProgress.set(`${progress}%`);
         });
 
         task.then(async (snapshot) => {
-             const { getDownloadURL } = await import("@angular/fire/storage");
-             const url = await getDownloadURL(snapshot.ref);
-             
-             this.isBarberUploading.set(false);
-             this.barberUploadProgress.set("0%");
-             resolve(url);
+          const { getDownloadURL } = await import("@angular/fire/storage");
+          const url = await getDownloadURL(snapshot.ref);
+
+          this.isBarberUploading.set(false);
+          this.barberUploadProgress.set("0%");
+          resolve(url);
         }).catch(err => {
-            this.isBarberUploading.set(false);
-            reject(err);
+          this.isBarberUploading.set(false);
+          reject(err);
         });
       });
     });

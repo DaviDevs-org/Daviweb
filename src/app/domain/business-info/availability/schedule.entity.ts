@@ -13,7 +13,25 @@ export class ScheduleDay {
     public name: string,
     public closed: boolean,
     public intervals: Interval[]
-  ) {}
+  ) {
+    this.validateIntervals();
+  }
+
+  private validateIntervals(): void {
+    if (this.closed || this.intervals.length <= 1) return;
+
+    // Ordenar intervalos por hora de apertura
+    const sortedIntervals = [...this.intervals].sort((a, b) => a.open.localeCompare(b.open));
+
+    for (let i = 0; i < sortedIntervals.length - 1; i++) {
+      const current = sortedIntervals[i];
+      const next = sortedIntervals[i + 1];
+
+      if (next.open < current.close) {
+        throw new Error(`Solapamiento detectado en ${this.day}: ${current.open}-${current.close} se solapa con ${next.open}-${next.close}`);
+      }
+    }
+  }
 
 
   isOpen(): boolean {

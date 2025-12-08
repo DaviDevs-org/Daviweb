@@ -19,7 +19,7 @@
               <label class="day-label">{{ day.name }}</label>
 
               <div class="intervals-container">
-                @for (interval of day.intervals; track interval; let i = $index) {
+                @for (interval of day.intervals; track $index; let i = $index) {
                   <div class="time-inputs">
                     <input type="time" [(ngModel)]="interval.open" class="time-input" [disabled]="day.closed"
                       (blur)="validateInterval(day, interval)" [attr.aria-label]="'Hora de apertura ' + day.name + ' intervalo ' + (i+1)">
@@ -124,7 +124,7 @@
 
                   @if (tempException()?.exceptionType === 'custom') {
                     <div class="intervals-container">
-                      @for (interval of tempException()?.intervals; track interval; let i = $index) {
+                      @for (interval of tempException()?.intervals; track $index; let i = $index) {
                         <div class="time-inputs">
                           <label>Intervalo {{i + 1}}:</label>
                           <input type="time" [(ngModel)]="interval.open" class="time-input"
@@ -214,7 +214,7 @@
                     <div class="exception-details">
                       <span>Horarios:</span>
                       <div class="interval-tags">
-                        @for (interval of ex.intervals; track interval) {
+                        @for (interval of ex.intervals; track $index) {
                           <span class="interval-tag">
                             {{interval.open}} - {{interval.close}}
                           </span>
@@ -278,7 +278,7 @@
 
               @if (barberSettings()!.barberSelection) {
                 <div class="staff-list">
-                  @for (barber of barberSettings()!.barbers; track barber) {
+                  @for (barber of barberSettings()!.barbers; track barber.name) {
                     <div class="barber-item">
                       <!-- Imagen del peluquero -->
                       @if (barber.imageUrl) {

@@ -1,4 +1,5 @@
 export interface BarberDTO {
+  id?: string; // Original ID (usually the name)
   name: string;
   imageUrl?: string;
 }
@@ -12,7 +13,8 @@ export interface BarberSettingsDTO {
 export class Barber {
   constructor(
     public name: string,
-    public imageUrl?: string
+    public imageUrl?: string,
+    public id?: string
   ) {
     this.validateName();
   }
@@ -41,6 +43,10 @@ export class Barber {
       name: this.name
     };
 
+    if (this.id) {
+      tdo.id = this.id;
+    }
+
     if (this.imageUrl) {
       tdo.imageUrl = this.imageUrl;
     }
@@ -49,7 +55,7 @@ export class Barber {
   }
 
   static fromDTO(tdo: BarberDTO): Barber {
-    return new Barber(tdo.name, tdo.imageUrl);
+    return new Barber(tdo.name, tdo.imageUrl, tdo.id);
   }
 }
 

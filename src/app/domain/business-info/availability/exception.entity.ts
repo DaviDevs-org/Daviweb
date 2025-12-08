@@ -1,6 +1,7 @@
 import { Interval, IntervalDTO } from "./interval.entity";
 
 export interface ExceptionItemDTO {
+  id?: string;
   date: string;
   closed: boolean;
   intervals: IntervalDTO[];
@@ -21,6 +22,23 @@ export class ExceptionItem {
     public endDate?: string   // para tipo 'range'
   ) {
     this.validateDates();
+    this.validateIntervals();
+  }
+
+  private validateIntervals(): void {
+    if (this.closed || !this.intervals || this.intervals.length <= 1) return;
+
+    // Ordenar intervalos por hora de apertura
+    const sortedIntervals = [...this.intervals].sort((a, b) => a.open.localeCompare(b.open));
+
+    for (let i = 0; i < sortedIntervals.length - 1; i++) {
+      const current = sortedIntervals[i];
+      const next = sortedIntervals[i + 1];
+
+      if (next.open < current.close) {
+        throw new Error(`Solapamiento de horarios en excepción ${this.date}: ${current.open}-${current.close} se solapa con ${next.open}-${next.close}`);
+      }
+    }
   }
 
   private validateDates(): void {
@@ -89,6 +107,7 @@ export class ExceptionItem {
 
   toDTO(): ExceptionItemDTO {
     const tdo: ExceptionItemDTO = {
+      id: this.id,
       date: this.date,
       closed: this.closed,
       intervals: this.intervals.map(interval => interval.toDTO()),

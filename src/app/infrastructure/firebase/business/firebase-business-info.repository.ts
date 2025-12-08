@@ -8,7 +8,8 @@ import {
   Firestore,
   setDoc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  addDoc
 } from '@angular/fire/firestore';
 import { Observable, of, catchError, map, combineLatest } from 'rxjs';
 
@@ -94,7 +95,8 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
     const settings$ = docData(settingsDocRef) as Observable<{ barberSelection: boolean } | undefined>;
 
     const barbersColRef = collection(this.firestore, this.barbersPath);
-    const barbers$ = collectionData(barbersColRef, { idField: 'name' }) as Observable<BarberDTO[]>;
+    // Map document ID to 'id' field in DTO
+    const barbers$ = collectionData(barbersColRef, { idField: 'id' }) as Observable<BarberDTO[]>;
 
     return combineLatest([settings$, barbers$]).pipe(
       map(([settingsData, barbersDtos]) => {
@@ -110,6 +112,34 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
     );
   }
 
+  async updateBarberSettings(settings: BarberSettings): Promise<void> {
+    try {
+      // 1. Update selection boolean
+      await this.updateBarberSelection(settings.barberSelection);
+
+      // 2. Update existing barbers (if any details changed)
+      // We only update barbers that have an ID (meaning they exist in DB)
+      const promises = settings.barbers.map(async (barber) => {
+        if (barber.id) {
+           const docRef = doc(this.firestore, `${this.barbersPath}/${barber.id}`);
+           // We use updateDoc to avoid overwriting if it doesn't exist (though it should)
+           // and to merge fields.
+           // Note: toDTO() might include 'id', but updateDoc ignores it or saves it as field.
+           // Ideally we strip 'id' from the data payload.
+           const data = barber.toDTO();
+           delete data.id; 
+           await updateDoc(docRef, { ...data });
+        }
+      });
+      
+      await Promise.all(promises);
+
+    } catch (error) {
+      console.error('Error updating barber settings:', error);
+      throw error;
+    }
+  }
+
   async updateBarberSelection(value: boolean): Promise<void> {
     try {
       const docRef = doc(this.firestore, this.barberSettingsPath);
@@ -122,8 +152,10 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
 
   async addBarber(barber: Barber): Promise<void> {
     try {
-      const docRef = doc(this.firestore, `${this.barbersPath}/${barber.name}`);
-      await setDoc(docRef, barber.toDTO());
+      const colRef = collection(this.firestore, this.barbersPath);
+      const data = barber.toDTO();
+      delete data.id; // Let Firestore generate ID
+      await addDoc(colRef, data);
     } catch (error) {
       console.error('Error adding barber:', error);
       throw error;
@@ -141,7 +173,16 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
         }
       }
       
-      const docRef = doc(this.firestore, `${this.barbersPath}/${barber.name}`);
+      if (!barber.id) {
+        console.warn('Intentando borrar barbero sin ID:', barber.name);
+        // Fallback to name if ID is missing (legacy support or error recovery)
+        // But with auto-IDs, name is not the ID.
+        // We'll try to find by name? No, that's dangerous.
+        // Just throw or return.
+        throw new Error('Cannot remove barber without ID');
+      }
+
+      const docRef = doc(this.firestore, `${this.barbersPath}/${barber.id}`);
       await deleteDoc(docRef);
     } catch (error) {
       console.error('Error removing barber:', error);
@@ -151,13 +192,14 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
 
   async editBarber(oldBarber: Barber, newBarber: Barber): Promise<void> {
     try {
-      if (oldBarber.name !== newBarber.name) {
-        const oldDocRef = doc(this.firestore, `${this.barbersPath}/${oldBarber.name}`);
-        await deleteDoc(oldDocRef);
+      if (!newBarber.id) {
+         throw new Error('Cannot edit barber without ID');
       }
       
-      const newDocRef = doc(this.firestore, `${this.barbersPath}/${newBarber.name}`);
-      await setDoc(newDocRef, newBarber.toDTO());
+      const docRef = doc(this.firestore, `${this.barbersPath}/${newBarber.id}`);
+      const data = newBarber.toDTO();
+      delete data.id;
+      await updateDoc(docRef, { ...data });
     } catch (error) {
       console.error('Error editing barber:', error);
       throw error;

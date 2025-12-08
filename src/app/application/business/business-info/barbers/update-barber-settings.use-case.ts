@@ -9,6 +9,6 @@ export class UpdateBarberSettingsUseCase {
   constructor(private readonly businessInfoRepository: BusinessInfoRepository) {}
 
   execute(barberSettings: BarberSettings): Promise<void> {
-    return this.businessInfoRepository.updateBarberSelection(barberSettings.barberSelection);
+    return this.businessInfoRepository.updateBarberSettings(barberSettings);
   }
 }

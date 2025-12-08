@@ -28,10 +28,22 @@ export class Phone {
       throw new Error('El teléfono no puede estar vacío');
     }
 
-    // Formato internacional: +[1-3 dígitos código país][9-15 dígitos]
-    const phoneRegex = /^\+?[0-9]{9,15}$/;
-    if (!phoneRegex.test(phone)) {
-      throw new Error(`Formato de teléfono inválido: ${phone}`);
+    // Validación más estricta según prefijo
+    const hasPrefix = phone.startsWith('+');
+    
+    if (hasPrefix) {
+      // Con prefijo: +[1-3 dígitos país][9-12 dígitos número] -> Total 11-16 caracteres aprox
+      // Ejemplo: +34 600 000 000 (12 chars)
+      const prefixRegex = /^\+\d{11,15}$/;
+      if (!prefixRegex.test(phone)) {
+        throw new Error(`Teléfono con prefijo inválido (debe tener entre 11 y 15 dígitos): ${phone}`);
+      }
+    } else {
+      // Sin prefijo: asume nacional (España 9 dígitos)
+      const nationalRegex = /^\d{9}$/;
+      if (!nationalRegex.test(phone)) {
+        throw new Error(`Teléfono nacional inválido (debe tener 9 dígitos): ${phone}`);
+      }
     }
 
     return phone;
