@@ -48,6 +48,20 @@ export class InfoManagementComponent implements OnDestroy {
   // UI State signals
   isBarberUploading = signal(false);
   barberUploadProgress = signal("0%");
+
+  // Computed signals for loading state
+  isLoading = computed(() => {
+    // Consider loading if contact info is in initial state or schedule is empty
+    // Adjust logic based on your specific "loading" criteria
+    const contact = this.contactInfo();
+    const schedule = this.schedule();
+    return !contact || contact.email.toString() === 'loading@loading.com' || !schedule;
+  });
+
+  isBarberLoading = computed(() => {
+    // Consider loading if barberSettings is null
+    return this.barberSettings() === null;
+  });
   
   // Exception Wizard State
   currentExceptionStep = signal<"date" | "type" | "hours" | "complete">("complete");
