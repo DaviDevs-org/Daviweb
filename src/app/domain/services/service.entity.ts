@@ -164,9 +164,6 @@ export class Service {
       name: this.name,
       timeSegments: this.timeSegments,
     };
-    if (this.requiresHairLength && this.hairLengthModifiers) {
-      out.hairLengthModifiers = this.hairLengthModifiers;
-    }
     return out;
   }
   static fromDTO(dto: ServiceDTO, id?: string): Service {
@@ -177,7 +174,7 @@ export class Service {
       dto.requiresHairLength || false,
       dto.hairLengthModifiers || Service.defaultHairLengthModifiers(),
       dto.imageUrl,
-      id,
+      id || dto.id,
       dto.hourRange
     );
   }

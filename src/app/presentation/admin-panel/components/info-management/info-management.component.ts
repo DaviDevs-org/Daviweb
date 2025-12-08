@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal, computed, ViewChild, ElementRef, OnDestroy, DestroyRef } from "@angular/core";
+import { Component, inject, signal, computed, ViewChild, ElementRef, OnDestroy, DestroyRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
+import { BusinessStateService } from "@presentation/shared/business-state.service";
 import {
   ScheduleDay,
   ContactInfo,
@@ -13,15 +14,11 @@ import {
   GalleryPhoto
 } from "@domain/index";
 import {
-  GetScheduleUseCase,
   UpdateScheduleUseCase,
-  GetContactInfoUseCase,
   UpdateContactInfoUseCase,
-  GetExceptionsUseCase,
   AddExceptionUseCase,
   DeleteExceptionUseCase,
   UpdateExceptionUseCase,
-  GetBarberSettingsUseCase,
   UpdateBarberSettingsUseCase,
   AddBarberUseCase,
   RemoveBarberUseCase,
@@ -30,7 +27,7 @@ import {
 import { UploadPhotoUseCase } from "@application/gallery";
 import { AlertService } from "@presentation/shared/alert/alert.service";
 import { percentage } from "@angular/fire/storage";
-import { Subscription, combineLatest } from "rxjs";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: "app-info-management",
@@ -39,16 +36,16 @@ import { Subscription, combineLatest } from "rxjs";
   templateUrl: "./info-management.component.html",
   styleUrls: ["./info-management.component.scss"]
 })
-export class InfoManagementComponent implements OnInit, OnDestroy {
+export class InfoManagementComponent implements OnDestroy {
+  private businessState = inject(BusinessStateService);
+
   // Signals for state
-  schedule = signal<ScheduleDay[]>([]);
-  contactInfo = signal<ContactInfo | null>(null);
-  exceptions = signal<ExceptionItem[]>([]);
-  barberSettings = signal<BarberSettings | null>(null);
+  schedule = this.businessState.rawSchedule;
+  contactInfo = this.businessState.contactInfo;
+  exceptions = this.businessState.exceptions;
+  barberSettings = this.businessState.barberSettings;
   
   // UI State signals
-  isLoading = signal(true);
-  isBarberLoading = signal(true);
   isBarberUploading = signal(false);
   barberUploadProgress = signal("0%");
   
@@ -69,15 +66,11 @@ export class InfoManagementComponent implements OnInit, OnDestroy {
   private barberUploadSubscription: Subscription | undefined;
 
   // Injected Use Cases
-  private getScheduleUC = inject(GetScheduleUseCase);
   private updateScheduleUC = inject(UpdateScheduleUseCase);
-  private getContactInfoUC = inject(GetContactInfoUseCase);
   private updateContactInfoUC = inject(UpdateContactInfoUseCase);
-  private getExceptionsUC = inject(GetExceptionsUseCase);
   private addExceptionUC = inject(AddExceptionUseCase);
   private deleteExceptionUC = inject(DeleteExceptionUseCase);
   private updateExceptionUC = inject(UpdateExceptionUseCase);
-  private getBarberSettingsUC = inject(GetBarberSettingsUseCase);
   private updateBarberSettingsUC = inject(UpdateBarberSettingsUseCase);
   private addBarberUC = inject(AddBarberUseCase);
   private removeBarberUC = inject(RemoveBarberUseCase);
@@ -87,39 +80,7 @@ export class InfoManagementComponent implements OnInit, OnDestroy {
   private toast = inject(AlertService);
   private destroyRef = inject(DestroyRef);
 
-  ngOnInit() {
-    this.loadAllData();
-  }
-
-  loadAllData() {
-    this.isLoading.set(true);
-    
-    // Subscribe to all data streams
-    combineLatest([
-      this.getScheduleUC.execute(),
-      this.getContactInfoUC.execute(),
-      this.getExceptionsUC.execute(),
-      this.getBarberSettingsUC.execute()
-    ]).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: ([schedule, contact, exceptions, barberSettings]) => {
-        this.schedule.set(schedule);
-        this.contactInfo.set(contact);
-        this.exceptions.set(exceptions);
-        this.barberSettings.set(barberSettings || null);
-        
-        this.isLoading.set(false);
-        this.isBarberLoading.set(false);
-      },
-      error: (error) => {
-        console.error("Error loading data:", error);
-        this.toast.error("Error al cargar la información");
-        this.isLoading.set(false);
-        this.isBarberLoading.set(false);
-      }
-    });
-  }
+  // ngOnInit removed as data is loaded via BusinessStateService
 
   // ===== SCHEDULE =====
   

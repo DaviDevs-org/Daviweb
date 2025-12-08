@@ -5,7 +5,8 @@
 // MIXINS DE BOTONES
 // ============================================
 @mixin button-style($bg-color, $hover-color: null) {
-    background: linear-gradient(135deg, $bg-color, color.adjust($bg-color, $lightness: -10%, $space: hsl));
+    // Usamos color-mix para compatibilidad con variables CSS
+    background: linear-gradient(135deg, $bg-color, color-mix(in srgb, $bg-color, black 10%));
     color: $white;
     border: none;
     padding: 12px 24px;
@@ -23,17 +24,17 @@
 
     @if $hover-color {
         &:hover:not(:disabled) {
-            background: linear-gradient(135deg, $hover-color, color.adjust($hover-color, $lightness: -10%, $space: hsl));
+            background: linear-gradient(135deg, $hover-color, color-mix(in srgb, $hover-color, black 10%));
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba($hover-color, 0.3);
+            box-shadow: 0 6px 20px color-mix(in srgb, $hover-color, transparent 70%);
         }
     }
 
     @else {
         &:hover:not(:disabled) {
-            background: linear-gradient(135deg, color.adjust($bg-color, $lightness: -5%, $space: hsl), color.adjust($bg-color, $lightness: -15%, $space: hsl));
+            background: linear-gradient(135deg, color-mix(in srgb, $bg-color, black 5%), color-mix(in srgb, $bg-color, black 15%));
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba($bg-color, 0.3);
+            box-shadow: 0 6px 20px color-mix(in srgb, $bg-color, transparent 70%);
         }
     }
 
@@ -68,8 +69,9 @@
         background: $color;
         color: $white;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba($color, 0.3);
+        box-shadow: 0 4px 12px color-mix(in srgb, $color, transparent 70%);
     }
+
 
     &:active:not(:disabled) {
         transform: translateY(0);
@@ -125,7 +127,7 @@
     &:focus {
         outline: none;
         border-color: $primary;
-        box-shadow: 0 0 0 3px rgba($primary, 0.1);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary), transparent 90%);
     }
 
     &:disabled {
@@ -211,7 +213,7 @@
 // ============================================
 // MIXINS DE SCROLLBAR
 // ============================================
-@mixin custom-scrollbar($track-color: rgba($primary, 0.1), $thumb-color: rgba($primary, 0.3)) {
+@mixin custom-scrollbar($track-color: color-mix(in srgb, var(--color-primary), transparent 90%), $thumb-color: color-mix(in srgb, var(--color-primary), transparent 70%)) {
     &::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -227,7 +229,7 @@
         border-radius: $border-radius-sm;
 
         &:hover {
-            background: rgba($primary, 0.5);
+            background: color-mix(in srgb, var(--color-primary), transparent 50%);
         }
     }
 }

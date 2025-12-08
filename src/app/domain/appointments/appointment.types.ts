@@ -5,9 +5,9 @@ export interface AppointmentDTO {
     datetime: Date;
     createdAt: Date;
     service: AppointmentService;
-    description?: string;
     name?: string;
     phone?: string;
+    description?: string;
     barber?: string;
     hairLengthChoice?: 'short' | 'medium' | 'long';
 }

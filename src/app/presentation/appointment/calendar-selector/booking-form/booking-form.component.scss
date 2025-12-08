@@ -373,7 +373,7 @@ textarea {
 
       &:focus-visible {
         outline: none;
-        box-shadow: 0 0 0 3px rgba($primary, 0.35);
+        box-shadow: 0 0 0 3px rgba($primary-rgb, 0.35);
         transform: translateY(-1px);
       }
     }

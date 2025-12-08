@@ -5,7 +5,6 @@ export interface ExceptionItemDTO {
   closed: boolean;
   intervals: IntervalDTO[];
   exceptionType: 'closed' | 'custom' | 'range';
-  isEditing?: boolean;
   startDate?: string;
   endDate?: string;
 }
@@ -96,10 +95,6 @@ export class ExceptionItem {
       exceptionType: this.exceptionType
     };
 
-    if (this.isEditing !== undefined) {
-      tdo.isEditing = this.isEditing;
-    }
-
     if (this.startDate) {
       tdo.startDate = this.startDate;
     }
@@ -118,7 +113,7 @@ export class ExceptionItem {
       intervals,
       dto.exceptionType,
       dto.id,
-      dto.isEditing,
+      false,
       dto.startDate,
       dto.endDate
     );

@@ -9,7 +9,7 @@ export abstract class BusinessInfoRepository {
 
   // Barber settings
   abstract getBarberSettings(): Observable<BarberSettings>;
-  abstract updateBarberSettings(barberSettings: BarberSettings): Promise<void>;
+  abstract updateBarberSelection(value: boolean): Promise<void>;
   abstract addBarber(barber: Barber): Promise<void>;
   abstract removeBarber(barber: Barber): Promise<void>;
   abstract editBarber(oldBarber: Barber, newBarber: Barber): Promise<void>;

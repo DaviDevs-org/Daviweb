@@ -11,9 +11,9 @@
 	margin: 0 auto;
 	padding: 2rem;
 	background: $white;
-	border: 1px solid rgba($primary, 0.08);
+	border: 1px solid rgba($primary-rgb, 0.08);
 	border-radius: 16px;
-	box-shadow: 0 8px 30px rgba($primary, 0.06);
+	box-shadow: 0 8px 30px rgba($primary-rgb, 0.06);
 
 	@include mobile {
 		padding: 1.25rem;
@@ -22,7 +22,7 @@
 
 	header {
 		margin-bottom: 1.5rem;
-		border-bottom: 1px solid rgba($primary, 0.12);
+		border-bottom: 1px solid rgba($primary-rgb, 0.12);
 		padding-bottom: 1rem;
 
 		h1 {
@@ -72,7 +72,7 @@
 			text-decoration: underline;
 			text-underline-offset: 2px;
 			transition: color .2s ease;
-			&:hover { color: color.mix($primary, #000, 80%); }
+			&:hover { color: color-mix(in srgb, var(--color-primary), #000 20%); }
 		}
 
 		pre, code, kbd {

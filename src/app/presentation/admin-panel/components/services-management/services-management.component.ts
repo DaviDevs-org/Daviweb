@@ -1,14 +1,14 @@
-import { Component, ElementRef, inject, signal, ViewChild, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, inject, signal, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { percentage, getDownloadURL } from '@angular/fire/storage';
 import { Subscription } from 'rxjs';
-import { GetServicesUseCase, CreateServiceUseCase, UpdateServiceUseCase, DeleteServiceUseCase } from '@application/services';
+import { CreateServiceUseCase, UpdateServiceUseCase, DeleteServiceUseCase } from '@application/services';
 import { UploadPhotoUseCase } from '@application/gallery';
 import { Service} from '@domain/services';
 import { GalleryPhoto, PhotoType } from '@domain/gallery';
 import { AlertService } from '@presentation/shared/alert/alert.service';
+import { BusinessStateService } from '@presentation/shared/business-state.service';
 
 @Component({
   selector: 'app-services-management',
@@ -17,7 +17,7 @@ import { AlertService } from '@presentation/shared/alert/alert.service';
   templateUrl: './services-management.component.html',
   styleUrls: ['./services-management.component.scss']
 })
-export class ServicesManagementComponent implements OnInit, OnDestroy {
+export class ServicesManagementComponent implements OnDestroy {
 
   // ==========================================================================
   // View Children
@@ -28,8 +28,7 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
   // ==========================================================================
   // Dependency Injection
   // ==========================================================================
-  private auth = inject(Auth);
-  private getServicesUseCase = inject(GetServicesUseCase);
+  private businessState = inject(BusinessStateService);
   private createServiceUseCase = inject(CreateServiceUseCase);
   private updateServiceUseCase = inject(UpdateServiceUseCase);
   private deleteServiceUseCase = inject(DeleteServiceUseCase);
@@ -39,7 +38,7 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
   // ==========================================================================
   // State Signals & Properties
   // ==========================================================================
-  services = signal<Service[]>([]);
+  services = this.businessState.services;
   uploadProgress = signal('0%');
   isUploading = signal(false);
   hasBreaks = signal(false);
@@ -67,17 +66,10 @@ export class ServicesManagementComponent implements OnInit, OnDestroy {
   private existingImageUrl: string | undefined;
 
   // ==========================================================================
+  // ==========================================================================
   // Lifecycle Hooks
   // ==========================================================================
-  ngOnInit() {
-    onAuthStateChanged(this.auth, user => {
-      if (user) {
-        this.getServicesUseCase.execute().subscribe(servicesData => {
-          this.services.set(servicesData);
-        });
-      }
-    });
-  }
+  // ngOnInit removed as services are loaded via BusinessStateService
 
   ngOnDestroy() {
     if (this.scrollSub) this.scrollSub.unsubscribe();

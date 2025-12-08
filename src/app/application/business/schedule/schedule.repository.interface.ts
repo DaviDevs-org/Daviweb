@@ -17,8 +17,4 @@ export abstract class ScheduleRepository {
     abstract getSlots(): Observable<ReservedSlot[]>;
     abstract addSlot(slot: ReservedSlot): Promise<void>;
     abstract deleteSlot(id: string): Promise<void>;
-
-
-    // Computed data (business logic)
-    abstract getAvailableSlots(date: Date, serviceDuration: number): Observable<string[]>;
 }

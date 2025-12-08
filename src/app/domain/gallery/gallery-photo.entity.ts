@@ -37,6 +37,20 @@ export class GalleryPhoto {
     }
   }
 
+  get displayName(): string {
+    // 1. Si tiene extensión con punto, la quitamos (case-insensitive explícito)
+    let clean = this.name.replace(/\.[^/.]+$/i, "");
+    
+    // 2. Si es un slug con extensión al final (ej: -webp, -JPG), la quitamos
+    clean = clean.replace(/-(webp|jpg|jpeg|png|gif|bmp|tiff|heic)$/i, '');
+    
+    // 3. Reemplazamos guiones, guiones bajos Y PUNTOS restantes por espacios
+    clean = clean.replace(/[-_.]+/g, ' ');
+    
+    // 4. Capitalizamos la primera letra de cada palabra
+    return clean.trim().replace(/\b\w/g, l => l.toUpperCase());
+  }
+
   isLoaded(): boolean {
     return this.imageLoaded;
   }

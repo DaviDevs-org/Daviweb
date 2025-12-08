@@ -202,7 +202,7 @@
                     color: white;
 
                     &:hover {
-                        background: color.scale($primary, $lightness: -10%);
+                        background: color-mix(in srgb, var(--color-primary), black 10%);
                     }
                 }
 

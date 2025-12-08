@@ -34,19 +34,19 @@
         <h3>Fotos Actuales</h3>
         <div class="gallery-grid">
             <div class="gallery-item" *ngFor="let photo of galleryPhotos(); let i = index">
-                <img [src]="photo.url" [alt]="photo.name" (load)="onImageLoad(i)" [class.loaded]="imageLoadStates[i]">
-                <div class="skeleton-loader" *ngIf="!imageLoadStates[i]"></div>
+                <img [src]="photo.url" [alt]="photo.name" (load)="onImageLoad(i)" [class.loaded]="imageLoadStates()[i]">
+                <div class="skeleton-loader" *ngIf="!imageLoadStates()[i]"></div>
                 <div class="photo-overlay">
                     <div class="photo-actions">
-                        <button class="action-btn edit-btn" (click)="updateImage(i)" [attr.aria-label]="'Editar imagen ' + photo.name">
+                        <button class="action-btn edit-btn" (click)="updateImage(i)" [attr.aria-label]="'Editar imagen ' + photo.displayName">
                             <i class="bi bi-pencil" aria-hidden="true"></i>
-                            <span class="sr-only">Editar imagen {{ photo.name }}</span>
+                            <span class="sr-only">Editar imagen {{ photo.displayName }}</span>
                         </button>
-                        <button class="action-btn delete-btn" (click)="deleteImage(i)" [attr.aria-label]="'Eliminar imagen ' + photo.name">
+                        <button class="action-btn delete-btn" (click)="deleteImage(i)" [attr.aria-label]="'Eliminar imagen ' + photo.displayName">
                             <i class="bi bi-trash" aria-hidden="true"></i>
-                            <span class="sr-only">Eliminar imagen {{ photo.name }}</span>
+                            <span class="sr-only">Eliminar imagen {{ photo.displayName }}</span>
                         </button>
-                        <div class="photo-info">{{photo.name}}</div>
+                        <div class="photo-info">{{photo.displayName}}</div>
                     </div>
                 </div>
             </div>

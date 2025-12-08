@@ -1,13 +1,30 @@
 // ============================================
-// COLORES PRINCIPALES
+// COLORES PRINCIPALES (DINÁMICOS)
 // ============================================
-$primary: #e673B4; // Rosa claro brillante - muy femenino
-$primary-light: #e673B4; // Rosa muy claro para hover
-$primary-lighter: #fce8ed; // Rosa pálido para fondos sutiles
-$primary-dark: #d4708f; // Rosa más intenso para hover de botones
-$accent: #ef51aA;
+// Definimos las variables CSS por defecto (fallback)
+:root {
+  --color-primary: #e673B4;
+  --color-primary-rgb: 230, 115, 180;
+  --color-primary-light: #e673B4;
+  --color-primary-lighter: #fce8ed;
+  --color-primary-dark: #d4708f;
+  --color-secondary: #aca7a3;
+  --color-accent: #ef51aA;
+  --color-background: #ffffff;
+  --color-text: #3d4a56;
+}
+
+$primary: var(--color-primary); 
+$primary-rgb: var(--color-primary-rgb); // Para uso en rgba()
+
+$primary-light: var(--color-primary-light); 
+$primary-lighter: var(--color-primary-lighter); 
+$primary-dark: var(--color-primary-dark); 
+
+$accent: var(--color-accent);
+
 // FONDOS - Sistema coherente de claro a oscuro
-$secondary: #aca7a3; // Azul grisáceo medio - para headers/nav
+$secondary: var(--color-secondary); 
 $secondary-dark: #3d4a56; // Azul grisáceo más oscuro - solo detalles
 $secondary-light: #8a9ba8; // Azul grisáceo claro - para textos sobre oscuro
 
@@ -25,11 +42,11 @@ $other: #739FE6;
 // COLORES BASE
 // ============================================
 $white: #ffffff; // Blanco puro para mejor contraste
-$black: #3d4a56; // Azul grisáceo oscuro - más suave que negro
+$black: var(--color-text); // Azul grisáceo oscuro - más suave que negro
 $true-black: #000000; // Negro puro
 $text-gray: #6b7a8a; // Gris azulado medio para textos secundarios
 $text-gray-light: #9ca3af; // Gris claro para textos menos importantes
-$text-dark: #3d4a56; // Azul grisáceo oscuro para textos importantes
+$text-dark: var(--color-text); // Azul grisáceo oscuro para textos importantes
 $light-gray: #e8eff5; // Azul grisáceo claro con personalidad
 $border-color: #cbd5e0; // Gris azulado para bordes sutiles
 $border-color-accent: #f5c5d4; // Rosa claro para bordes destacados
@@ -77,23 +94,23 @@ $star-filled-border: #f59e0b;
 // COLORES DE FONDO - SISTEMA EQUILIBRADO
 // ============================================
 // Header y navegación - tono medio consistente
-$background-primary: #e673B4; // Azul grisáceo medio - header y nav
-$background-nav: #e673B4; // Igual que primary para consistencia
-$background-calendar: #EA76B8;
+$background-primary: var(--color-primary); // Azul grisáceo medio - header y nav
+$background-nav: var(--color-primary); // Igual que primary para consistencia
+$background-calendar: var(--color-primary);
 // Fondo general de la página - con color suave
-$background-secondary: #f0f4f8; // Azul grisáceo muy claro - tiene personalidad
+$background-secondary: var(--color-background-secondary); // Azul grisáceo muy claro - tiene personalidad
 
 // Secciones de contenido - con color pero suaves
-$background-section: #e8eff5; // Azul grisáceo claro - secciones destacadas
-$background-card: #ffffff; // Blanco puro para cards dentro de secciones
+$background-section: var(--color-background-secondary); // Azul grisáceo claro - secciones destacadas
+$background-card: var(--color-background); // Blanco puro para cards dentro de secciones
 
 // Solo para elementos que realmente necesitan ser oscuros
-$background-dark: #3d4a56; // Azul grisáceo oscuro - usar con moderación
+$background-dark: var(--color-text); // Azul grisáceo oscuro - usar con moderación
 $background-overlay: rgba(61, 74, 86, 0.85); // Overlay oscuro para modales
 
 // Acentos
-$background-accent: #e88fa7; // Rosa para botones principales
-$background-accent-light: #fce8ed; // Rosa muy claro para fondos suaves
+$background-accent: var(--color-primary); // Rosa para botones principales
+$background-accent-light: var(--color-primary-lighter); // Rosa muy claro para fondos suaves
 $background-grey: rgba(232, 239, 245, 0.90); // Fondo azulado claro translúcido
 
 // Colores adicionales para fondos

@@ -1,14 +1,12 @@
 export interface IntervalDTO {
   open: string;
   close: string;
-  blocked?: boolean;
 }
 
 export class Interval {
   constructor(
     public open: string,
     public close: string,
-    public blocked?: boolean
   ) {
     this.validateTimeFormat(open);
     this.validateTimeFormat(close);
@@ -45,7 +43,6 @@ export class Interval {
   }
 
   contains(time: string): boolean {
-    if (this.blocked) return false;
 
     const [hours, minutes] = time.split(':').map(Number);
     const timeInMinutes = hours * 60 + minutes;
@@ -87,8 +84,7 @@ export class Interval {
    * Formatea el intervalo como texto legible
    */
   toString(): string {
-    const status = this.blocked ? ' (bloqueado)' : '';
-    return `${this.open} - ${this.close}${status}`;
+    return `${this.open} - ${this.close}`;
   }
 
   toDTO(): IntervalDTO {
@@ -97,14 +93,10 @@ export class Interval {
       close: this.close
     };
 
-    if (this.blocked !== undefined) {
-      dto.blocked = this.blocked;
-    }
-
     return dto;
   }
 
   static fromDTO(dto: IntervalDTO): Interval {
-    return new Interval(dto.open, dto.close, dto.blocked);
+    return new Interval(dto.open, dto.close);
   }
 }

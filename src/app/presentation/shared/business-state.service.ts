@@ -1,19 +1,28 @@
 import { Injectable, inject, signal, computed, runInInjectionContext, Injector, NgZone } from '@angular/core';
-import { GetContactInfoUseCase, GetScheduleUseCase } from '@application/business';
+import { GetContactInfoUseCase, GetScheduleUseCase, GetBarberSettingsUseCase } from '@application/business';
+import { GetServicesUseCase } from '@application/services';
+import { GetExceptionsUseCase } from '@application/business/schedule/exceptions/get-exceptions.use-case';
 import { ScheduleService } from '@presentation/shared/pipes/schedule.service';
-import { ContactInfo, ScheduleDay } from '@domain/business-info';
+import { ContactInfo, ScheduleDay, ExceptionItem, ReservedSlot, BarberSettings } from '@domain/business-info';
+import { Service } from '@domain/services';
 import { BusinessStatus } from '@domain/business-info/business-status.types';
+import { GetSlotsUseCase } from '@application/business/schedule/slots/get-slots.use-case';
+import { GalleryPhoto, PhotoType } from '@domain/index';
+import { GetPhotosUseCase } from '@application/gallery';
 
 @Injectable({
     providedIn: 'root'
 })
 export class BusinessStateService {
-
-    private injector = inject(Injector);
     private ngZone = inject(NgZone); // Inyectamos NgZone
     private getInfo = inject(GetContactInfoUseCase);
     private getSchedule = inject(GetScheduleUseCase);
+    private getServices = inject(GetServicesUseCase);
+    private getExceptions = inject(GetExceptionsUseCase);
+    private getBarberSettings = inject(GetBarberSettingsUseCase);
+    private getReservedSlots = inject(GetSlotsUseCase);
     private scheduleService = inject(ScheduleService);
+    private getImages = inject(GetPhotosUseCase);
 
     // Estado para la información de contacto
     // Inicializamos con valores por defecto para evitar "undefined" en la UI
@@ -22,6 +31,21 @@ export class BusinessStateService {
     // Estado para el horario crudo (tal cual viene de la BBDD)
     readonly rawSchedule = signal<ScheduleDay[]>([]);
 
+    // Estado para los servicios ofrecidos
+    readonly services = signal<Service[]>([]);
+
+    // Estado para las excepciones de horario (días festivos, vacaciones)
+    readonly exceptions = signal<ExceptionItem[]>([]);
+
+    // Estado para la configuración de barberos
+    readonly barberSettings = signal<BarberSettings | null>(null);
+
+    // Estado para los slots reservados
+    readonly reservedSlots = signal<ReservedSlot[]>([]); 
+
+    //Estado para las imágenes del carrousel
+    readonly galleryImages = signal<GalleryPhoto[]>([]);
+
     // Señal optimizada: El timer corre fuera de Angular para no disparar detecciones globales innecesarias
     readonly currentTime = signal(new Date());
 
@@ -29,6 +53,7 @@ export class BusinessStateService {
     readonly businessStatus = computed(() => {
         const schedule = this.rawSchedule();
         const now = this.currentTime(); // Dependencia reactiva del tiempo
+        const exceptions = this.exceptions(); // También dependemos de las excepciones
 
         if (!schedule || schedule.length === 0) {
             return {
@@ -38,7 +63,8 @@ export class BusinessStateService {
                 remainingMinutes: 0
             } as BusinessStatus;
         }
-        return this.calculateBusinessStatus(schedule, now);
+        // Pasamos las excepciones al cálculo del estado
+        return this.calculateBusinessStatus(schedule, now, exceptions);
     });
 
     // Esta señal se recalcula automáticamente cuando cambia 'rawSchedule'.
@@ -71,46 +97,119 @@ export class BusinessStateService {
     }
 
     private loadInitialData() {
-        runInInjectionContext(this.injector, async () => {
-            try {
-                // 1. Cargar Info de Contacto
-                const infoResponse = await this.getInfo.execute();
-                infoResponse.subscribe(info => {
-                    this.contactInfo.set(info);
-                });
+        // 1. Cargar Info de Contacto
+        this.getInfo.execute().subscribe({
+            next: (info) => this.contactInfo.set(info),
+            error: (err) => {
+                console.error('Error loading contact info:', err);
+                this.contactInfo.set(new ContactInfo("000000000", "error@loading.com", "Error cargando información"));
+            }
+        });
 
-                // 2. Cargar Horario
-                const scheduleResponse = await this.getSchedule.execute();
-                scheduleResponse.subscribe(schedule => {
-                    this.rawSchedule.set(schedule);
-                });
-
-            } catch (error) {
-                console.error('Error inicializando BusinessStateService:', error);
-                this.contactInfo.set(new ContactInfo("Error cargando dirección", "Error cargando email", "Error cargando teléfono"));
+        // 2. Cargar Horario
+        this.getSchedule.execute().subscribe({
+            next: (schedule) => this.rawSchedule.set(schedule),
+            error: (err) => {
+                console.error('Error loading schedule:', err);
                 this.rawSchedule.set([]);
             }
-        }
-        );
+        });
+
+        // 3. Cargar Servicios
+        this.getServices.execute().subscribe({
+            next: (services) => this.services.set(services),
+            error: (err) => {
+                console.error('Error loading services:', err);
+                this.services.set([]);
+            }
+        });
+
+        // 4. Cargar Excepciones
+        this.getExceptions.execute().subscribe({
+            next: (exceptions) => this.exceptions.set(exceptions),
+            error: (err) => {
+                console.error('Error loading exceptions:', err);
+                this.exceptions.set([]);
+            }
+        });
+
+        // 5. Cargar Configuración de Barberos
+        this.getBarberSettings.execute().subscribe({
+            next: (settings) => this.barberSettings.set(settings),
+            error: (err) => {
+                console.error('Error loading barber settings:', err);
+                this.barberSettings.set(null);
+            }
+        });
+
+        this.getReservedSlots.execute().subscribe({
+            next: (slots) => this.reservedSlots.set(slots),
+            error: (err) => {
+                console.error('Error loading reserved slots:', err);
+                this.reservedSlots.set([]);
+            }
+        });
     }
 
+    public loadGalleryImages(): Promise<void> {
+        return new Promise((resolve) => {
+            this.getImages.execute(PhotoType.GALLERY).subscribe({
+                next: (images) => {
+                    this.galleryImages.set(images);
+                    resolve();
+                },
+                error: (err) => {
+                    console.error('Error loading gallery images:', err);
+                    this.galleryImages.set([]);
+                    resolve();
+                }
+            });
+        });
+    }
     // --- HELPER METHODS FOR BUSINESS STATUS ---
 
-    private calculateBusinessStatus(schedule: ScheduleDay[], checkDate: Date): BusinessStatus {
+    private calculateBusinessStatus(schedule: ScheduleDay[], checkDate: Date, exceptions: ExceptionItem[] = []): BusinessStatus {
         const dayMap = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
         const dayIndex = checkDate.getDay();
         const currentTime = `${String(checkDate.getHours()).padStart(2, '0')}:${String(checkDate.getMinutes()).padStart(2, '0')}`;
-        const today = schedule.find(d => d.day === dayMap[dayIndex]);
+        
+        // 1. Buscar si hoy es una excepción
+        const checkDateStr = checkDate.toISOString().split('T')[0];
+        const exception = exceptions.find(ex => {
+            if (ex.exceptionType === 'range' && ex.startDate && ex.endDate) {
+                return checkDateStr >= ex.startDate && checkDateStr <= ex.endDate;
+            }
+            return ex.date === checkDateStr;
+        });
+
+        // 2. Determinar la configuración del día (Excepción o Horario Normal)
+        let todayConfig: { closed: boolean, intervals: any[], name: string };
+        
+        if (exception) {
+            todayConfig = {
+                closed: exception.closed,
+                intervals: exception.intervals,
+                name: exception.exceptionType === 'range' ? 'Vacaciones' : 'Horario Especial'
+            };
+        } else {
+            const regularDay = schedule.find(d => d.day === dayMap[dayIndex]);
+            todayConfig = {
+                closed: regularDay?.closed ?? true,
+                intervals: regularDay?.intervals ?? [],
+                name: regularDay?.name ?? dayMap[dayIndex]
+            };
+        }
 
         const status: BusinessStatus = {
             isOpen: false,
-            currentDay: today?.name ?? dayMap[dayIndex],
+            currentDay: todayConfig.name,
             isWarning: false,
             remainingMinutes: 0
         };
 
-        if (!today || today.closed || today.intervals.length === 0) {
-            const next = this.findNextOpenDay(schedule, dayIndex);
+        // 3. Si está cerrado hoy (por horario normal o excepción)
+        if (todayConfig.closed || todayConfig.intervals.length === 0) {
+            const next = this.findNextOpenDay(schedule, checkDate, exceptions);
             status.nextOpenDay = next.day;
             status.nextOpenTime = next.time;
             status.timeUntilChange = this.diffTimeString(checkDate, next.date);
@@ -125,7 +224,8 @@ export class BusinessStateService {
             return status;
         }
 
-        for (const interval of today.intervals) {
+        // 4. Si está abierto hoy, comprobar intervalos
+        for (const interval of todayConfig.intervals) {
             if (currentTime >= interval.open && currentTime < interval.close) {
                 status.isOpen = true;
                 status.openTime = interval.open;
@@ -143,7 +243,8 @@ export class BusinessStateService {
             }
         }
 
-        const nextInterval = today.intervals.find(i => currentTime < i.open);
+        // 5. Si hoy abre pero ahora mismo está cerrado (entre turnos o antes de abrir)
+        const nextInterval = todayConfig.intervals.find((i: any) => currentTime < i.open);
         if (nextInterval) {
             const openDt = this.createDateTimeFromTime(checkDate, nextInterval.open);
             const diffMinutes = Math.floor((openDt.getTime() - checkDate.getTime()) / 60000);
@@ -153,13 +254,14 @@ export class BusinessStateService {
                 status.remainingMinutes = diffMinutes;
                 status.remainingSeconds = diffMinutes * 60;
             }
-            status.nextOpenDay = today.name;
+            status.nextOpenDay = todayConfig.name;
             status.nextOpenTime = nextInterval.open;
             status.timeUntilChange = this.diffTimeString(checkDate, openDt);
             return status;
         }
 
-        const next = this.findNextOpenDay(schedule, dayIndex);
+        // 6. Si ya cerró por hoy
+        const next = this.findNextOpenDay(schedule, checkDate, exceptions);
         status.nextOpenDay = next.day;
         status.nextOpenTime = next.time;
         status.timeUntilChange = this.diffTimeString(checkDate, next.date);
@@ -174,23 +276,47 @@ export class BusinessStateService {
         return status;
     }
 
-    private findNextOpenDay(schedule: ScheduleDay[], currentDayIndex: number) {
+    private findNextOpenDay(schedule: ScheduleDay[], fromDate: Date, exceptions: ExceptionItem[]) {
         const dayMap = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-        const now = new Date();
+        
+        // Buscamos en los próximos 30 días para cubrir vacaciones largas
+        for (let i = 1; i <= 30; i++) {
+            const nextDate = new Date(fromDate);
+            nextDate.setDate(fromDate.getDate() + i);
+            const nextDateStr = nextDate.toISOString().split('T')[0];
+            const dayIndex = nextDate.getDay();
+            const dayKey = dayMap[dayIndex];
 
-        for (let i = 1; i <= 7; i++) {
-            const idx = (currentDayIndex + i) % 7;
-            const dayKey = dayMap[idx];
+            // Comprobar si es excepción
+            const exception = exceptions.find(ex => {
+                if (ex.exceptionType === 'range' && ex.startDate && ex.endDate) {
+                    return nextDateStr >= ex.startDate && nextDateStr <= ex.endDate;
+                }
+                return ex.date === nextDateStr;
+            });
+
+            if (exception) {
+                if (!exception.closed && exception.intervals.length > 0) {
+                    const openDate = this.createDateTimeFromTime(nextDate, exception.intervals[0].open);
+                    return { 
+                        day: exception.exceptionType === 'range' ? 'Fin de Vacaciones' : 'Horario Especial', 
+                        time: exception.intervals[0].open, 
+                        date: openDate 
+                    };
+                }
+                // Si es excepción cerrada, continuamos al siguiente día
+                continue;
+            }
+
+            // Si no es excepción, miramos horario normal
             const day = schedule.find(d => d.day === dayKey);
             if (day && !day.closed && day.intervals.length > 0) {
-                const nextDate = new Date(now);
-                nextDate.setDate(nextDate.getDate() + i);
                 const openDate = this.createDateTimeFromTime(nextDate, day.intervals[0].open);
                 return { day: day.name, time: day.intervals[0].open, date: openDate };
             }
         }
 
-        return { day: 'Lunes', time: '09:00', date: new Date() };
+        return { day: 'Desconocido', time: '??:??', date: new Date() };
     }
 
     private createDateTimeFromTime(date: Date, time: string): Date {

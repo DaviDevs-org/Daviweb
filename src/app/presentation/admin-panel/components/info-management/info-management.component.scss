@@ -313,7 +313,7 @@ select {
   }
 
   .add-btn {
-    @include button-style($primary, color.scale($primary, $lightness: -10%));
+    @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
     font-size: 0.8rem;
     padding: 8px 12px;
     min-width: 140px;
@@ -726,7 +726,7 @@ select {
       }
 
       .add-btn {
-        @include button-style($primary, color.scale($primary, $lightness: -10%));
+        @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
         font-size: 0.9rem;
         padding: 8px 14px;
         min-width: 140px;
@@ -750,7 +750,7 @@ select {
 // Botones generales
 // ------------------------
 .save-btn {
-  @include button-style($primary, color.scale($primary, $lightness: -10%));
+  @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
   font-size: 1rem;
   min-width: 160px;
   justify-content: center;
@@ -773,7 +773,7 @@ select {
 }
 
 .add-btn {
-  @include button-style($primary, color.scale($primary, $lightness: -10%));
+  @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
   font-size: 0.85rem;
   padding: 5px 10px;
   min-width: 120px;
@@ -1044,7 +1044,7 @@ select {
       }
 
       .add-btn {
-        @include button-style($primary, color.scale($primary, $lightness: -10%));
+        @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
         font-size: 0.8rem;
         padding: 6px 10px;
         align-self: flex-start;
@@ -1100,7 +1100,7 @@ select {
   }
 
   .add-btn {
-    @include button-style($primary, color.scale($primary, $lightness: -10%));
+    @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
     font-size: 1rem;
     padding: 12px 20px;
     min-width: 180px;
@@ -1186,7 +1186,7 @@ select {
 
     &.completed {
       .step-number {
-        background: color.adjust($primary, $lightness: 20%);
+        background: color-mix(in srgb, var(--color-primary), white 20%);
         border-color: $primary;
         color: $text-dark;
       }
@@ -1345,7 +1345,7 @@ select {
 }
 
 .edit-btn {
-  @include button-style($primary, color.scale($primary, $lightness: -10%));
+  @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
   font-size: 0.8rem;
   padding: 6px 12px;
 }
@@ -1355,7 +1355,7 @@ select {
 }
 
 .next-btn {
-  @include button-style($primary, color.scale($primary, $lightness: -10%));
+  @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
 }
 
 // Añadir estos estilos al final de info-management.component.scss
@@ -1454,7 +1454,7 @@ select {
 
     &.completed {
       .step-number {
-        background: color.adjust($primary, $lightness: 35%);
+        background: color-mix(in srgb, var(--color-primary), white 35%);
         border-color: $primary;
         color: $primary;
       }
@@ -1869,7 +1869,7 @@ select {
   }
 
   .add-btn.large {
-    @include button-style($primary, color.scale($primary, $lightness: -10%));
+    @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
     font-size: 1.1rem;
     padding: 14px 28px;
     min-width: 220px;
@@ -1889,7 +1889,7 @@ select {
 
 // Botones mejorados
 .edit-btn {
-  @include button-style($primary, color.scale($primary, $lightness: -10%));
+  @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
   font-size: 0.9rem;
   padding: 8px 16px;
 }
@@ -1901,13 +1901,13 @@ select {
 }
 
 .next-btn {
-  @include button-style($primary, color.scale($primary, $lightness: -10%));
+  @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
   font-size: 0.9rem;
   padding: 8px 16px;
 }
 
 .save-btn {
-  @include button-style($primary, color.scale($primary, $lightness: -10%));
+  @include button-style($primary, color-mix(in srgb, var(--color-primary), black 10%));
   font-size: 1rem;
   padding: 10px 20px;
 }

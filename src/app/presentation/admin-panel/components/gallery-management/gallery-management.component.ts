@@ -21,6 +21,7 @@ import {
 
 // Shared
 import { AlertService } from '@presentation/shared/alert/alert.service';
+import { BusinessStateService } from '@presentation/shared/business-state.service';
 
 @Component({
   selector: 'app-gallery-management',
@@ -35,11 +36,10 @@ export class GalleryManagementComponent implements OnDestroy {
   // ========================
   // DEPENDENCIAS - USE CASES
   // ========================
-  private getPhotosUseCase = inject(GetPhotosUseCase);
+  private state = inject(BusinessStateService);
   private uploadPhotoUseCase = inject(UploadPhotoUseCase);
   private deletePhotoUseCase = inject(DeletePhotoUseCase);
   private toast = inject(AlertService);
-  private cdr = inject(ChangeDetectorRef);
 
   // ========================
   // ESTADO DEL COMPONENTE
@@ -47,10 +47,9 @@ export class GalleryManagementComponent implements OnDestroy {
   selectedFile: File | null = null;
   imagePreviewUrl: string = '';
   progress = signal('0%');
-  subscription: Subscription | undefined = undefined;
-  galleryPhotos = signal<GalleryPhoto[]>([]);
+  galleryPhotos = this.state.galleryImages;
   isLoading = signal(true);
-  imageLoadStates: boolean[] = [];
+  imageLoadStates = signal<boolean[]>([]);
 
   // ========================
   // LIFECYCLE
@@ -65,11 +64,6 @@ export class GalleryManagementComponent implements OnDestroy {
     if (this.imagePreviewUrl) {
       URL.revokeObjectURL(this.imagePreviewUrl);
     }
-
-    // Limpiar suscripción si existe
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
   }
 
   // ========================
@@ -79,20 +73,8 @@ export class GalleryManagementComponent implements OnDestroy {
   private async loadGalleryPhotos() {
     try {
       this.isLoading.set(true);
-
-      // ✅ USAMOS EL USE CASE PARA OBTENER FOTOS
-      this.getPhotosUseCase.execute(PhotoType.GALLERY).subscribe({
-        next: (photos) => {
-          this.galleryPhotos.set(photos);
-          this.imageLoadStates = new Array(photos.length).fill(false);
-          this.isLoading.set(false);
-        },
-        error: (error) => {
-          console.error('Error cargando galería:', error);
-          this.toast.error('Error al cargar las fotos de la galería');
-          this.isLoading.set(false);
-        },
-      });
+      await this.state.loadGalleryImages();
+      this.isLoading.set(false);
     } catch (error) {
       console.error('Error en loadGalleryPhotos:', error);
       this.isLoading.set(false);
@@ -104,8 +86,11 @@ export class GalleryManagementComponent implements OnDestroy {
   // ========================
 
   onImageLoad(index: number) {
-    this.imageLoadStates[index] = true;
-    this.cdr.detectChanges();
+    this.imageLoadStates.update(states => {
+      const newStates = [...states];
+      newStates[index] = true;
+      return newStates;
+    });
   }
 
   onFileSelected(event: Event): void {
@@ -174,10 +159,18 @@ export class GalleryManagementComponent implements OnDestroy {
     const photoEntity = new GalleryPhoto(fileName, '', PhotoType.GALLERY);
 
     try {
-      this.isLoading.set(true);
       this.progress.set('0%');
 
-      await this.uploadPhotoUseCase.execute(this.selectedFile, photoEntity);
+      const { task } = await this.uploadPhotoUseCase.execute(this.selectedFile, photoEntity);
+      
+      // Monitorizar progreso
+      task.on('state_changed', (snapshot) => {
+        const percent = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        this.progress.set(`${Math.round(percent)}%`);
+      });
+
+      // Esperar a que la subida se complete
+      await task;
 
       this.toast.success('Foto subida con éxito');
 
@@ -188,12 +181,12 @@ export class GalleryManagementComponent implements OnDestroy {
         this.imagePreviewUrl = '';
       }
 
+      // Recargar la galería (ahora sí, con la nueva foto en el servidor)
       await this.loadGalleryPhotos();
     } catch (error) {
       console.error('Error al subir la imagen:', error);
       this.toast.error('Error al subir la imagen');
     } finally {
-      this.isLoading.set(false);
       this.progress.set('0%');
     }
   }
@@ -218,6 +211,11 @@ export class GalleryManagementComponent implements OnDestroy {
       // Actualizar estado local
       this.galleryPhotos.update((photos) =>
         photos.filter((_, i) => i !== index)
+      );
+
+      // Actualizar estado de carga de imágenes
+      this.imageLoadStates.update((states) => 
+        states.filter((_, i) => i !== index)
       );
 
       this.toast.success('Foto eliminada con éxito');
@@ -266,3 +264,4 @@ export class GalleryManagementComponent implements OnDestroy {
     this.toast.success('Nombre actualizado');
   }
 }
+

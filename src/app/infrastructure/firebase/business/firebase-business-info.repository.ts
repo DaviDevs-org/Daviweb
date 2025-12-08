@@ -1,35 +1,39 @@
-import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BusinessInfoRepository } from '@application/business';
 import {
-  arrayRemove, arrayUnion,
-  doc, docData,
+  collection,
+  collectionData,
+  doc,
+  docData,
   Firestore,
-  getDoc,
   setDoc,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from '@angular/fire/firestore';
-import { Observable, from, of, catchError, map } from 'rxjs';
+import { Observable, of, catchError, map, combineLatest } from 'rxjs';
 
 import {
   ContactInfo,
-  BarberSettings, Barber, BarberSettingsDTO,
+  BarberSettings, Barber,
+  BarberDTO,
 } from '@domain/business-info';
 import { deleteObject, ref, Storage } from '@angular/fire/storage';
+import { SaasConfigService } from 'src/app/config/saas-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
+  private pathConfig = inject(SaasConfigService).getDDBBPaths();
   private firestore = inject(Firestore);
   private storage = inject(Storage);
-  private injector = inject(Injector);
 
-  private contactInfoPath = '/pruebas/data/info/contact-info';
-  private barberSettingsPath = '/pruebas/data/barber-settings/barbers';
+  private contactInfoPath = this.pathConfig.contactInfo;
+  private barberSettingsPath = this.pathConfig.barberSelection;
+  private barbersPath = this.pathConfig.barbers;
 
   // ============= CONTACT INFO =============
 
-  // Default contact info
   private getDefaultContactInfo() {
     return {
       phone: '+34 123 456 789',
@@ -39,51 +43,41 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
   }
 
   getContactInfo(): Observable<ContactInfo> {
-    return runInInjectionContext(this.injector, () => {
-      const docRef = doc(this.firestore, this.contactInfoPath);
+    if (!this.firestore) {
+        console.error('Firebase Firestore is not initialized!');
+        const defaults = this.getDefaultContactInfo();
+        return of(new ContactInfo(defaults.phone, defaults.email, defaults.address));
+    }
+    const docRef = doc(this.firestore, this.contactInfoPath);
 
-      return from(getDoc(docRef)).pipe(
-        map(snap => {
-          const data = snap.data() as any;
-          if (!data) {
-            const defaults = this.getDefaultContactInfo();
-            return new ContactInfo(
-              defaults.phone,
-              defaults.email,
-              defaults.address
-            );
-          }
-
-          const defaults = this.getDefaultContactInfo();
-          return new ContactInfo(
-              data.contactInfo.phone || defaults.phone,
-              data.contactInfo.email || defaults.email,
-              data.contactInfo.address || defaults.address
-          );
-        }),
-        catchError(err => {
-          if (err.code === 'permission-denied') {
-            console.warn('Permisos insuficientes para leer contacto. Usando datos por defecto.');
-          } else {
-            console.error('Error getting contact info:', err);
-          }
-          const defaults = this.getDefaultContactInfo();
-          return of(new ContactInfo(defaults.phone, defaults.email, defaults.address));
-        })
-      );
-    });
+    return (docData(docRef) as Observable<any>).pipe(
+      map(data => {
+        const defaults = this.getDefaultContactInfo();
+        if (!data || !data.contactInfo) {
+          return new ContactInfo(defaults.phone, defaults.email, defaults.address);
+        }
+        return new ContactInfo(
+            data.contactInfo.phone || defaults.phone,
+            data.contactInfo.email || defaults.email,
+            data.contactInfo.address || defaults.address
+        );
+      }),
+      catchError(err => {
+        console.error('Error getting contact info:', err);
+        const defaults = this.getDefaultContactInfo();
+        return of(new ContactInfo(defaults.phone, defaults.email, defaults.address));
+      })
+    );
   }
 
-  updateContactInfo(contactInfo: ContactInfo): Promise<void> {
-    return runInInjectionContext(this.injector, async () => {
+  async updateContactInfo(contactInfo: ContactInfo): Promise<void> {
+    try {
       const docRef = doc(this.firestore, this.contactInfoPath);
-      const contactDTO = {
-        phone: contactInfo.phone,
-        email: contactInfo.email,
-        address: contactInfo.address
-      };
-      await updateDoc(docRef, { ...contactDTO });
-    });
+      await setDoc(docRef, { contactInfo: contactInfo.toDTO() }, { merge: true });
+    } catch (error) {
+      console.error('Error updating contact info:', error);
+      throw error;
+    }
   }
 
   // ============= BARBER SETTINGS =============
@@ -96,84 +90,77 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
   }
 
   getBarberSettings(): Observable<BarberSettings> {
-    return runInInjectionContext(this.injector, () => {
-      const docRef = doc(this.firestore, this.barberSettingsPath);
+    const settingsDocRef = doc(this.firestore, this.barberSettingsPath);
+    const settings$ = docData(settingsDocRef) as Observable<{ barberSelection: boolean } | undefined>;
 
-      return docData(docRef).pipe(
-        map((dto: any) => {
-          // Si el documento no existe, docData devuelve null
-          if (!dto) {
-            const defaults = this.getDefaultBarberSettings();
-            return new BarberSettings(defaults.barberSelection, defaults.staff);
-          } else {
-            return BarberSettings.fromDTO(dto as BarberSettingsDTO);
-          }
-        }),
-        catchError(err => {
-          if (err.code === 'permission-denied') {
-            console.warn('Permisos insuficientes para leer configuración de barberos. Usando configuración por defecto.');
-          } else {
-            console.error('Error getting barber settings:', err);
-          }
-          return of(new BarberSettings(false, []));
-        })
-      );
-    });
+    const barbersColRef = collection(this.firestore, this.barbersPath);
+    const barbers$ = collectionData(barbersColRef, { idField: 'name' }) as Observable<BarberDTO[]>;
+
+    return combineLatest([settings$, barbers$]).pipe(
+      map(([settingsData, barbersDtos]) => {
+        const barberSelection = settingsData?.barberSelection ?? false;
+        const staff = barbersDtos.map(dto => Barber.fromDTO(dto));
+        return new BarberSettings(barberSelection, staff);
+      }),
+      catchError(error => {
+        console.error('Error obteniendo BarberSettings:', error);
+        const defaults = this.getDefaultBarberSettings();
+        return of(new BarberSettings(defaults.barberSelection, defaults.staff));
+      })
+    );
   }
 
-
-  updateBarberSettings(barberSettings: BarberSettings): Promise<void> {
-    return runInInjectionContext(this.injector, async () => {
-      const docRef = doc(this.firestore, this.barberSettingsPath);
-      const dto = barberSettings.toDTO();
-
-      try {
-        await updateDoc(docRef, { ...dto });
-      } catch {
-        await setDoc(docRef, { ...dto }, { merge: true });
-      }
-    });
-  }
-
-
-  updateBarberSelection(value: boolean): Promise<void> {
-    return runInInjectionContext(this.injector, async () => {
+  async updateBarberSelection(value: boolean): Promise<void> {
+    try {
       const docRef = doc(this.firestore, this.barberSettingsPath);
       await updateDoc(docRef, { barberSelection: value });
-    });
+    } catch (error) {
+      console.error('Error updating barber selection:', error);
+      throw error;
+    }
   }
 
-  addBarber(barber: Barber): Promise<void> {
-    return runInInjectionContext(this.injector, async () => {
-      const docRef = doc(this.firestore, this.barberSettingsPath);
-      await updateDoc(docRef, { barbers: arrayUnion(barber.toDTO()) });
-    });
+  async addBarber(barber: Barber): Promise<void> {
+    try {
+      const docRef = doc(this.firestore, `${this.barbersPath}/${barber.name}`);
+      await setDoc(docRef, barber.toDTO());
+    } catch (error) {
+      console.error('Error adding barber:', error);
+      throw error;
+    }
   }
 
-  removeBarber(barber: Barber): Promise<void> {
-    return runInInjectionContext(this.injector, async () => {
-      const docRef = doc(this.firestore, this.barberSettingsPath);
-
-      // Borrar imagen si existe
+  async removeBarber(barber: Barber): Promise<void> {
+    try {
       if (barber.imageUrl) {
         try {
           const imageRef = ref(this.storage, barber.imageUrl);
           await deleteObject(imageRef);
         } catch (e) {
-          console.warn('No se pudo borrar la imagen del barber o no existe:', e);
+          console.warn('No se pudo borrar la imagen del barber:', e);
         }
       }
-
-      await updateDoc(docRef, { barbers: arrayRemove(barber.toDTO()) });
-    });
+      
+      const docRef = doc(this.firestore, `${this.barbersPath}/${barber.name}`);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.error('Error removing barber:', error);
+      throw error;
+    }
   }
 
-  editBarber(oldBarber: Barber, newBarber: Barber): Promise<void> {
-    return runInInjectionContext(this.injector, async () => {
-      const docRef = doc(this.firestore, this.barberSettingsPath);
-      await updateDoc(docRef, { barbers: arrayRemove(oldBarber.toDTO()) });
-      await updateDoc(docRef, { barbers: arrayUnion(newBarber.toDTO()) });
-    });
+  async editBarber(oldBarber: Barber, newBarber: Barber): Promise<void> {
+    try {
+      if (oldBarber.name !== newBarber.name) {
+        const oldDocRef = doc(this.firestore, `${this.barbersPath}/${oldBarber.name}`);
+        await deleteDoc(oldDocRef);
+      }
+      
+      const newDocRef = doc(this.firestore, `${this.barbersPath}/${newBarber.name}`);
+      await setDoc(newDocRef, newBarber.toDTO());
+    } catch (error) {
+      console.error('Error editing barber:', error);
+      throw error;
+    }
   }
-
 }

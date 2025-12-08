@@ -1133,8 +1133,8 @@
 
         &:hover {
             background: linear-gradient(135deg,
-                    color.adjust($primary, $lightness: -5%),
-                    color.adjust($secondary, $lightness: -5%));
+                    color-mix(in srgb, var(--color-primary), black 5%),
+                    color-mix(in srgb, var(--color-secondary), black 5%));
             transform: translateY(-1px);
             box-shadow: 0 5px 15px rgba($primary, 0.4);
 

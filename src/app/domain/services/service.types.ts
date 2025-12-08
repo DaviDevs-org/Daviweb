@@ -1,6 +1,7 @@
 import { TimeSegment, HairLengthModifier, HairLengthModifiers, HourRange } from './service.entity';
 
 export interface ServiceDTO {
+  id?: string;
   name: string;
   description: string;
   timeSegments: TimeSegment[];
@@ -22,5 +23,6 @@ export interface NewService {
 export interface AppointmentService {
   name: string;
   timeSegments: TimeSegment[];
+  requiresHairLength?: boolean;
   hairLengthModifiers?: HairLengthModifiers;
 }
