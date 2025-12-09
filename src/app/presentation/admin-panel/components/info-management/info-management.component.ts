@@ -33,6 +33,7 @@ import { UploadPhotoUseCase } from "@application/gallery";
 import { AlertService } from "@presentation/shared/alert/alert.service";
 import { percentage } from "@angular/fire/storage";
 import { Subscription } from "rxjs";
+import { getErrorMessage } from "@domain/shared/utils/error.utils";
 
 @Component({
   selector: "app-info-management",
@@ -153,7 +154,7 @@ export class InfoManagementComponent implements OnDestroy {
       this.toast.success("Horario semanal guardado correctamente!");
     } catch (err) {
       console.error(err);
-      this.toast.error("Error al guardar el horario semanal");
+      this.toast.error(getErrorMessage(err));
     }
   }
 
@@ -366,7 +367,7 @@ export class InfoManagementComponent implements OnDestroy {
 
     } catch (error) {
       console.error(error);
-      this.toast.error("Error al guardar excepción");
+      this.toast.error(getErrorMessage(error));
     }
   }
 
@@ -393,7 +394,7 @@ export class InfoManagementComponent implements OnDestroy {
       // No need to manually refresh exceptions
       this.toast.success("Excepción eliminada");
     } catch (e) {
-      this.toast.error("Error al eliminar");
+      this.toast.error(getErrorMessage(e));
     }
   }
 
@@ -426,7 +427,7 @@ export class InfoManagementComponent implements OnDestroy {
       this.toast.success("Información de contacto guardada");
     } catch (err) {
       console.error(err);
-      this.toast.error("Error al guardar contacto");
+      this.toast.error(getErrorMessage(err));
     }
   }
 
@@ -458,7 +459,7 @@ export class InfoManagementComponent implements OnDestroy {
       this.toast.success("Configuración de peluqueros guardada");
     } catch (err) {
       console.error(err);
-      this.toast.error("Error al guardar");
+      this.toast.error(getErrorMessage(err));
     }
   }
 
@@ -494,7 +495,7 @@ export class InfoManagementComponent implements OnDestroy {
 
     } catch (err) {
       console.error(err);
-      this.toast.error("Error al añadir peluquero");
+      this.toast.error(getErrorMessage(err));
     }
   }
 
@@ -505,7 +506,7 @@ export class InfoManagementComponent implements OnDestroy {
       await this.removeBarberUC.execute(barber);
       // No need to manually refresh
     } catch (err) {
-      this.toast.error("Error al eliminar");
+      this.toast.error(getErrorMessage(err));
     }
   }
 

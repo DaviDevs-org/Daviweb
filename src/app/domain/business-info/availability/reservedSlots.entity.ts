@@ -12,9 +12,18 @@ export class ReservedSlot {
     public dateTime: Date,
     public id?: string
   ) {
-    this.date = dateTime.toISOString().split('T')[0];
-    this.time = `${String(dateTime.getHours()).padStart(2, '0')}:${String(
-      dateTime.getMinutes()
+    // Defensive check: ensure dateTime is a valid Date object
+    if (!(this.dateTime instanceof Date)) {
+      this.dateTime = new Date(this.dateTime);
+    }
+    if (isNaN(this.dateTime.getTime())) {
+      console.error('ReservedSlot: Invalid dateTime, defaulting to now', dateTime);
+      this.dateTime = new Date();
+    }
+
+    this.date = this.dateTime.toISOString().split('T')[0];
+    this.time = `${String(this.dateTime.getHours()).padStart(2, '0')}:${String(
+      this.dateTime.getMinutes()
     ).padStart(2, '0')}`;
   }
 
@@ -30,12 +39,16 @@ export class ReservedSlot {
   static fromDTO(dto: ReservedSlotDTO & { id?: string }): ReservedSlot {
     const raw = dto.dateTime as any;
 
-    const dateTime: Date =
-      raw && typeof raw.toDate === 'function'
-        ? raw.toDate() // Timestamp -> Date
-        : raw instanceof Date
-        ? raw
-        : new Date(raw); // por si fuera string/number
+    let dateTime: Date;
+
+    if (raw && typeof raw.toDate === 'function') {
+      const result = raw.toDate();
+      dateTime = result instanceof Date ? result : new Date(result);
+    } else if (raw instanceof Date) {
+      dateTime = raw;
+    } else {
+      dateTime = new Date(raw);
+    }
 
     return new ReservedSlot(dto.appointmentId, dateTime, dto.id);
   }

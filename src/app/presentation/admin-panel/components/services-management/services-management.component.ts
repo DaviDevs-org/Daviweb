@@ -9,6 +9,7 @@ import { Service} from '@domain/services';
 import { GalleryPhoto, PhotoType } from '@domain/gallery';
 import { AlertService } from '@presentation/shared/alert/alert.service';
 import { BusinessStateService } from '@presentation/shared/business-state.service';
+import { getErrorMessage } from '@domain/shared/utils/error.utils';
 
 @Component({
   selector: 'app-services-management',
@@ -138,9 +139,11 @@ export class ServicesManagementComponent implements OnDestroy {
       this.toast.success('Servicio añadido correctamente!');
     } catch (error) {
       console.error('Error al añadir servicio:', error);
-      this.toast.error('Error al añadir el servicio. Por favor, inténtalo de nuevo.');
+      this.toast.error(getErrorMessage(error));
     }
+    return;
   }
+  
 
   async editService(index: number) {
     const serviceU = this.services()[index];
@@ -160,19 +163,23 @@ export class ServicesManagementComponent implements OnDestroy {
       this.toast.success('Servicio actualizado correctamente!');
     } catch (error) {
       console.error('Error al actualizar servicio:', error);
-      this.toast.error('Error al actualizar el servicio. Por favor, inténtalo de nuevo.');
+      this.toast.error(getErrorMessage(error));
     }
   }
 
   async deleteService(index: number) {
     const service = this.services()[index];
     if (await this.toast.confirm(`¿Estás seguro de que quieres eliminar "${service.name}"?`)) {
-      this.deleteServiceUseCase.execute(service.id!).subscribe({
-        next: () => this.toast.success(`El servicio ${service.name} ha sido borrado con éxito`),
-        error: (err) => console.error(err)
-      });
+      try {
+        await this.deleteServiceUseCase.execute(service.id!);
+        this.toast.success(`El servicio ${service.name} ha sido borrado con éxito`);
+      } catch (error) {
+        console.error('Error al eliminar servicio:', error);
+        this.toast.error(getErrorMessage(error));
+      }
     }
   }
+  
 
   private populateFormFromService(service: Service) {
     this.isEditing.set(true);

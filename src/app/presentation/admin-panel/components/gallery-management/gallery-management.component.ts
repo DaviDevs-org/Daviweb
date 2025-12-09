@@ -17,6 +17,7 @@ import { UploadPhotoUseCase, DeletePhotoUseCase } from '@application/gallery';
 // Shared
 import { AlertService } from '@presentation/shared/alert/alert.service';
 import { BusinessStateService } from '@presentation/shared/business-state.service';
+import { getErrorMessage } from '@domain/shared/utils/error.utils';
 
 @Component({
   selector: 'app-gallery-management',
@@ -183,7 +184,7 @@ export class GalleryManagementComponent implements OnDestroy {
       await this.loadGalleryPhotos();
     } catch (error) {
       console.error('Error al subir la imagen:', error);
-      this.toast.error('Error al subir la imagen');
+      this.toast.error(getErrorMessage(error));
     } finally {
       this.progress.set('0%');
     }
@@ -219,7 +220,7 @@ export class GalleryManagementComponent implements OnDestroy {
       this.toast.success('Foto eliminada con éxito');
     } catch (error) {
       console.error('Error eliminando foto:', error);
-      this.toast.error('Error al eliminar la foto');
+      this.toast.error(getErrorMessage(error));
     }
   }
 

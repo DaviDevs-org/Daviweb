@@ -43,6 +43,7 @@ import {
   toAppointmentView,
 } from '@presentation/shared/models/appointment-view.model';
 import { AlertService } from '@presentation/shared/alert/alert.service';
+import { getErrorMessage } from '@domain/shared/utils/error.utils';
 
 type EditableAppointment = Partial<Appointment>;
 
@@ -570,7 +571,7 @@ export class AppointmentManagementComponent
       this.editForm.reset();
     } catch (error: any) {
       console.error('Error guardando cita:', error);
-      this.toast.error(error.message || 'Error al guardar la cita');
+      this.toast.error(getErrorMessage(error));
     } finally {
       this.isSaving = false;
     }
@@ -584,7 +585,7 @@ export class AppointmentManagementComponent
       this.selectedAppointmentId.set(null);
       if (this.isEditing) this.cancelEdit();
     } catch (error) {
-      this.toast.error('Error al eliminar');
+      this.toast.error(getErrorMessage(error));
     }
   }
 
