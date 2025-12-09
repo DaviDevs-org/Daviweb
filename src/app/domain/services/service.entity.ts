@@ -1,4 +1,4 @@
-import { AppointmentService, ServiceDTO} from '@domain/services/service.types';
+import { AppointmentService, ServiceDTO } from '@domain/services/service.types';
 
 export interface TimeSegment {
   duration: number; // Duración en minutos del segmento activo
@@ -10,17 +10,16 @@ export interface HairLengthModifier {
   segments?: TimeSegment[]; // añadimos esto para los casos con segmentos específicos
 }
 
-
 // Solo guardamos extraTime ahora
 export type HairLengthModifiers = {
   short: HairLengthModifier;
   medium: HairLengthModifier;
   long: HairLengthModifier;
-}
+};
 
 export interface HourRange {
   start: string; // "HH:mm"
-  end: string;   // "HH:mm"
+  end: string; // "HH:mm"
 }
 
 export class Service {
@@ -32,7 +31,7 @@ export class Service {
     public hairLengthModifiers: HairLengthModifiers = {
       short: { time: 30 },
       medium: { time: 45 },
-      long: { time: 60 }
+      long: { time: 60 },
     },
     public imageUrl?: string,
     public id?: string,
@@ -72,16 +71,26 @@ export class Service {
 
   // Calcula el tiempo total (segmentos + descansos)
   computeTotalTime(hairLength?: 'short' | 'medium' | 'long'): number {
-    if (this.requiresHairLength && hairLength && this.hairLengthModifiers?.[hairLength]) {
+    if (
+      this.requiresHairLength &&
+      hairLength &&
+      this.hairLengthModifiers?.[hairLength]
+    ) {
       const modifier = this.hairLengthModifiers[hairLength];
       if (modifier.segments?.length) {
-        return modifier.segments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
+        return modifier.segments.reduce(
+          (sum, seg) => sum + seg.duration + (seg.breakAfter || 0),
+          0
+        );
       }
       return modifier.time;
     }
 
     if (this.timeSegments?.length) {
-      return this.timeSegments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
+      return this.timeSegments.reduce(
+        (sum, seg) => sum + seg.duration + (seg.breakAfter || 0),
+        0
+      );
     }
 
     return 30; // fallback
@@ -89,7 +98,11 @@ export class Service {
 
   // Calcula solo tiempo activo sin pausas
   getActiveTime(hairLength?: 'short' | 'medium' | 'long'): number {
-    if (this.requiresHairLength && hairLength && this.hairLengthModifiers?.[hairLength]) {
+    if (
+      this.requiresHairLength &&
+      hairLength &&
+      this.hairLengthModifiers?.[hairLength]
+    ) {
       const modifier = this.hairLengthModifiers[hairLength];
       if (modifier.segments?.length) {
         return modifier.segments.reduce((sum, seg) => sum + seg.duration, 0);
@@ -113,7 +126,10 @@ export class Service {
         const modifier = this.hairLengthModifiers[length];
         if (!modifier) continue;
         if (modifier.segments?.length) {
-          const total = modifier.segments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
+          const total = modifier.segments.reduce(
+            (sum, seg) => sum + seg.duration + (seg.breakAfter || 0),
+            0
+          );
           if (total > 0) times.push(total);
         } else if (typeof modifier.time === 'number' && modifier.time > 0) {
           times.push(modifier.time);
@@ -126,7 +142,10 @@ export class Service {
       }
       // Si por datos antiguos falta info, intentar usar timeSegments global como fallback
       if (this.timeSegments?.length) {
-        const totalGlobal = this.timeSegments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
+        const totalGlobal = this.timeSegments.reduce(
+          (sum, seg) => sum + seg.duration + (seg.breakAfter || 0),
+          0
+        );
         return `${totalGlobal} min`;
       }
       return '30 min';
@@ -134,8 +153,14 @@ export class Service {
 
     // Servicio normal (sin longitudes). Si tiene breaks, mostrar rango activo-total
     if (this.timeSegments?.length) {
-      const active = this.timeSegments.reduce((sum, seg) => sum + seg.duration, 0);
-      const total = this.timeSegments.reduce((sum, seg) => sum + seg.duration + (seg.breakAfter || 0), 0);
+      const active = this.timeSegments.reduce(
+        (sum, seg) => sum + seg.duration,
+        0
+      );
+      const total = this.timeSegments.reduce(
+        (sum, seg) => sum + seg.duration + (seg.breakAfter || 0),
+        0
+      );
       return active === total ? `${total} min` : `${active}-${total} min`;
     }
 
@@ -166,6 +191,7 @@ export class Service {
     };
     return out;
   }
+
   static fromDTO(dto: ServiceDTO, id?: string): Service {
     return new Service(
       dto.name,
@@ -183,7 +209,7 @@ export class Service {
     return {
       short: { time: 30 },
       medium: { time: 45 },
-      long: { time: 60 }
+      long: { time: 60 },
     };
   }
 
@@ -207,12 +233,19 @@ export class Service {
         return 'Configuración de longitud de pelo inválida.';
       }
 
-      const lengths: Array<'short' | 'medium' | 'long'> = ['short', 'medium', 'long'];
+      const lengths: Array<'short' | 'medium' | 'long'> = [
+        'short',
+        'medium',
+        'long',
+      ];
       let allValid = true;
       for (const l of lengths) {
         const mod = this.hairLengthModifiers[l];
-        const segsTotal = (mod.segments ?? []).reduce((a, s) => a + (s.duration || 0) + (s.breakAfter || 0), 0);
-        const total = segsTotal > 0 ? segsTotal : (mod.time || 0);
+        const segsTotal = (mod.segments ?? []).reduce(
+          (a, s) => a + (s.duration || 0) + (s.breakAfter || 0),
+          0
+        );
+        const total = segsTotal > 0 ? segsTotal : mod.time || 0;
         if (total <= 0) {
           allValid = false;
           break;
@@ -222,7 +255,7 @@ export class Service {
         return 'Configura un tiempo válido para cada longitud de pelo.';
       }
     } else {
-      const hasValidSegment = this.timeSegments.some(seg => seg.duration > 0);
+      const hasValidSegment = this.timeSegments.some((seg) => seg.duration > 0);
       if (!hasValidSegment) {
         return 'Por favor, ingresa al menos un segmento de tiempo válido.';
       }
@@ -234,7 +267,7 @@ export class Service {
       if (!start || !end) {
         return 'Indica hora de inicio y fin del rango.';
       }
-      
+
       const timeToMinutes = (time: string): number => {
         const [h, m] = (time || '0:0').split(':').map(Number);
         return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
@@ -248,4 +281,3 @@ export class Service {
     return null;
   }
 }
-

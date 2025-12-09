@@ -1,9 +1,23 @@
-import { Component, input, output, inject, computed, signal, effect } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import {
+  Component,
+  input,
+  output,
+  inject,
+  computed,
+  signal,
+  effect,
+} from '@angular/core';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+} from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 
+import { BusinessStateService } from '@presentation/shared/business-state.service';
 import { Barber, Service } from '@domain/index';
 import { GetServicesUseCase } from '@application/services';
 import { TimeUtils } from '@domain/shared/utils/time.utils';
@@ -13,7 +27,7 @@ import { TimeUtils } from '@domain/shared/utils/time.utils';
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './booking-form.component.html',
-  styleUrls: ['./booking-form.component.scss']
+  styleUrls: ['./booking-form.component.scss'],
 })
 export class BookingFormComponent {
   // Inputs
@@ -38,7 +52,8 @@ export class BookingFormComponent {
   private getServicesUseCase = inject(GetServicesUseCase);
 
   // State
-  public services = toSignal(this.getServicesUseCase.execute(), { initialValue: [] as Service[] });
+  private businessState = inject(BusinessStateService);
+  public services = this.businessState.services;
   public isSubmitting = signal(false);
 
   // Form
@@ -49,11 +64,17 @@ export class BookingFormComponent {
     barberId: [''],
     description: [''],
     hairLength: ['medium'], // Default
-    privacyConsent: [false, Validators.requiredTrue]
+    privacyConsent: [false, Validators.requiredTrue],
   });
 
-  public selectedServiceId = toSignal(this.bookingForm.controls.serviceId.valueChanges, { initialValue: '' });
-  public hairLength = toSignal(this.bookingForm.controls.hairLength.valueChanges, { initialValue: 'medium' });
+  public selectedServiceId = toSignal(
+    this.bookingForm.controls.serviceId.valueChanges,
+    { initialValue: '' }
+  );
+  public hairLength = toSignal(
+    this.bookingForm.controls.hairLength.valueChanges,
+    { initialValue: 'medium' }
+  );
 
   // Computed
   public availableServices = computed(() => {
@@ -63,19 +84,21 @@ export class BookingFormComponent {
 
     if (!startTime || !slots.length || !allServices.length) return [];
 
-    return allServices.filter(service => this.doesServiceFit(service, startTime, slots));
+    return allServices.filter((service) =>
+      this.doesServiceFit(service, startTime, slots)
+    );
   });
 
   public selectedServiceRequiresHairLength = computed(() => {
     const id = this.selectedServiceId();
-    const service = this.services().find(s => s.name === id);
+    const service = this.services().find((s) => s.name === id);
     return service?.requiresHairLength ?? false;
   });
 
   public currentDuration = computed(() => {
     const id = this.selectedServiceId();
     const length = this.hairLength();
-    const service = this.services().find(s => s.name === id);
+    const service = this.services().find((s) => s.name === id);
     if (!service) return 0;
     return service.computeTotalTime(length as any);
   });
@@ -91,38 +114,42 @@ export class BookingFormComponent {
     }
 
     const val = this.bookingForm.value;
-    const service = this.services().find(s => s.name === val.serviceId);
+    const service = this.services().find((s) => s.name === val.serviceId);
 
     if (!service) return;
 
     this.isSubmitting.set(true);
-    
+
     this.formSubmitted.emit({
       name: val.name!,
       phone: val.phone!,
       description: val.description || undefined,
       barber: val.barberId || undefined,
       service: service,
-      hairLength: val.hairLength as any
+      hairLength: val.hairLength as any,
     });
   }
 
-  private doesServiceFit(service: Service, startTime: string, availableSlots: string[]): boolean {
+  private doesServiceFit(
+    service: Service,
+    startTime: string,
+    availableSlots: string[]
+  ): boolean {
     // Simplified logic: Check if enough contiguous slots exist
     const startMinutes = TimeUtils.timeToMinutes(startTime);
-    const duration = service.computeTotalTime('medium'); 
+    const duration = service.computeTotalTime('medium');
     const slotsNeeded = Math.ceil(duration / 30);
 
     for (let i = 0; i < slotsNeeded; i++) {
-      const checkTime = TimeUtils.minutesToTime(startMinutes + (i * 30));
+      const checkTime = TimeUtils.minutesToTime(startMinutes + i * 30);
       if (!availableSlots.includes(checkTime)) {
         return false;
       }
     }
     return true;
   }
-  
+
   getServiceDuration(service: Service): number {
-      return service.computeTotalTime('medium');
+    return service.computeTotalTime('medium');
   }
 }

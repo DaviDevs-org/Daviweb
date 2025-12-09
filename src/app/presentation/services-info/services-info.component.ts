@@ -1,49 +1,49 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from "@angular/core";
-import { Service, ServiceCategory } from "@domain/services";
-import { Subscription } from "rxjs";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { Service, ServiceCategory } from '@domain/services';
+import { effect } from '@angular/core';
 import { CommonModule, ViewportScroller } from '@angular/common';
-import { BookingPreselectionService } from "@presentation/shared/booking-preselection.service";
-import { GetServicesUseCase } from "@application/services";
+import { BookingPreselectionService } from '@presentation/shared/booking-preselection.service';
+import { BusinessStateService } from '@presentation/shared/business-state.service';
 
 @Component({
-  selector: "app-services-info",
-  templateUrl: "./services-info.component.html",
-  styleUrls: ["./services-info.component.scss"],
+  selector: 'app-services-info',
+  templateUrl: './services-info.component.html',
+  styleUrls: ['./services-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule],
 })
-export class ServicesInfoComponent implements OnInit, OnDestroy {
-  private getServicesUseCase = inject(GetServicesUseCase);
+export class ServicesInfoComponent {
+  private businessState = inject(BusinessStateService);
   private viewportScroller = inject(ViewportScroller);
   private preselectionService = inject(BookingPreselectionService);
-
-  private subscriptions: Subscription[] = [];
 
   categories = signal<ServiceCategory[]>([]);
   selectedCategory = signal<ServiceCategory | null>(null);
   selectedService = signal<Service | null>(null);
   loading = signal(true);
 
-  ngOnInit() {
-    const s1 = this.getServicesUseCase.execute().subscribe({
-      next: (services) => {
-        this.organizeServicesByCategory(services);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error('Error cargando servicios:', err);
-        this.loading.set(false);
-      }
-    });
-
-    this.subscriptions.push(s1);
-  }
+  private readonly servicesEffect = effect(() => {
+    const services = this.businessState.services();
+    if (!services || services.length === 0) {
+      this.loading.set(false);
+      return;
+    }
+    this.organizeServicesByCategory(services);
+    this.loading.set(false);
+  });
 
   private organizeServicesByCategory(services: Service[]) {
     const categoryMap = new Map<string, Service[]>();
 
-    services.forEach(service => {
+    services.forEach((service) => {
       const category = this.getCategoryFromService(service);
       if (!categoryMap.has(category)) {
         categoryMap.set(category, []);
@@ -51,15 +51,24 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
       categoryMap.get(category)?.push(service);
     });
 
-    const unsorted: ServiceCategory[] = Array.from(categoryMap.entries()).map(([categoryName, services]) => ({
-      id: categoryName.toLowerCase().replace(/\s+/g, '-'),
-      name: categoryName,
-      icon: this.getCategoryIcon(categoryName),
-      services: services
-    }));
+    const unsorted: ServiceCategory[] = Array.from(categoryMap.entries()).map(
+      ([categoryName, services]) => ({
+        id: categoryName.toLowerCase().replace(/\s+/g, '-'),
+        name: categoryName,
+        icon: this.getCategoryIcon(categoryName),
+        services: services,
+      })
+    );
 
     // Orden lógico deseado
-    const desiredOrder = ['Cortes', 'Tintes', 'Lavado', 'Barba & Bigote', 'Cejas & Depilación', 'Otros'];
+    const desiredOrder = [
+      'Cortes',
+      'Tintes',
+      'Lavado',
+      'Barba & Bigote',
+      'Cejas & Depilación',
+      'Otros',
+    ];
     const sortedCategories = unsorted.sort((a, b) => {
       const ia = desiredOrder.indexOf(a.name);
       const ib = desiredOrder.indexOf(b.name);
@@ -90,7 +99,11 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
     // Lógica para determinar la categoría basada en el nombre del servicio
     const name = service.name.toLowerCase();
 
-    if (name.includes('corte') || name.includes('fade') || name.includes('rapado')) {
+    if (
+      name.includes('corte') ||
+      name.includes('fade') ||
+      name.includes('rapado')
+    ) {
       return 'Cortes';
     } else if (name.includes('barba') || name.includes('bigote')) {
       return 'Barba & Bigote';
@@ -107,12 +120,12 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
 
   private getCategoryIcon(categoryName: string): string {
     const iconMap: { [key: string]: string } = {
-      'Cortes': 'bi-scissors',
+      Cortes: 'bi-scissors',
       'Barba & Bigote': 'bi-mustache',
-      'Tintes': 'bi-palette',
-      'Lavado': 'bi-droplet',
+      Tintes: 'bi-palette',
+      Lavado: 'bi-droplet',
       'Cejas & Depilación': 'bi-eye',
-      'Otros': 'bi-tools'
+      Otros: 'bi-tools',
     };
 
     return iconMap[categoryName] || 'bi-gear';
@@ -141,7 +154,11 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
         if (!mod) continue;
         let total = 0;
         if (Array.isArray(mod.segments) && mod.segments.length) {
-          total = mod.segments.reduce((acc: number, seg: any) => acc + (seg.duration || 0) + (seg.breakAfter || 0), 0);
+          total = mod.segments.reduce(
+            (acc: number, seg: any) =>
+              acc + (seg.duration || 0) + (seg.breakAfter || 0),
+            0
+          );
         } else if (typeof mod.time === 'number') {
           total = mod.time;
         }
@@ -149,7 +166,11 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
       }
       return min === Infinity ? null : min;
     } else {
-      const active = service.timeSegments?.reduce((acc, seg) => acc + (seg.duration || 0), 0) || 0;
+      const active =
+        service.timeSegments?.reduce(
+          (acc, seg) => acc + (seg.duration || 0),
+          0
+        ) || 0;
       return active || null;
     }
   }
@@ -162,7 +183,11 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
         if (!mod) continue;
         let total = 0;
         if (Array.isArray(mod.segments) && mod.segments.length) {
-          total = mod.segments.reduce((acc: number, seg: any) => acc + (seg.duration || 0) + (seg.breakAfter || 0), 0);
+          total = mod.segments.reduce(
+            (acc: number, seg: any) =>
+              acc + (seg.duration || 0) + (seg.breakAfter || 0),
+            0
+          );
         } else if (typeof mod.time === 'number') {
           total = mod.time;
         }
@@ -171,7 +196,11 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
       return max > 0 ? max : null;
     } else {
       // total con pausas
-      const total = service.timeSegments?.reduce((acc, seg) => acc + (seg.duration || 0) + (seg.breakAfter || 0), 0) || 0;
+      const total =
+        service.timeSegments?.reduce(
+          (acc, seg) => acc + (seg.duration || 0) + (seg.breakAfter || 0),
+          0
+        ) || 0;
       return total || null;
     }
   }
@@ -180,9 +209,5 @@ export class ServicesInfoComponent implements OnInit, OnDestroy {
     const min = this.getMinTime(service);
     const max = this.getMaxTime(service);
     return !!(min && max && min !== max);
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(s => s.unsubscribe());
   }
 }

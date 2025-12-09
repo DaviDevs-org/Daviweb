@@ -1,13 +1,27 @@
-import { Component, inject, signal, computed, effect, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HourSelectorComponent } from './hour-selector/hour-selector.component';
 import { BookingFormComponent } from './booking-form/booking-form.component';
-import { Barber, Service, ScheduleDay, ExceptionItem, PastDateHandler, ExceptionHandler, WeeklyScheduleHandler, AvailabilityContext, Appointment } from '@domain/index';
-import { TimeUtils } from '@domain/shared/utils/time.utils';
+import {
+  Service,
+  PastDateHandler,
+  ExceptionHandler,
+  WeeklyScheduleHandler,
+  AvailabilityContext,
+  Appointment,
+} from '@domain/index';
+import { GetAvailableSlotsForDayService } from '@domain/business-info/availability/get-available-slots-for-day.service';
 import { AlertService } from '../../shared/alert/alert.service';
-import { GetAvailableSlotsForDayUseCase } from '@application/business/schedule/slots/get-available-slots-for-day.use-case';
-import { GetScheduleUseCase, GetExceptionsUseCase, GetBarberSettingsUseCase } from '@application/business';
+import { BusinessStateService } from '@presentation/shared/business-state.service';
 import { AddAppointmentUseCase } from '@application/appointments/add-appointment.use-case';
 import { firstValueFrom } from 'rxjs';
 
@@ -18,17 +32,14 @@ import { firstValueFrom } from 'rxjs';
     CommonModule,
     FormsModule,
     HourSelectorComponent,
-    BookingFormComponent
+    BookingFormComponent,
   ],
   templateUrl: './calendar-selector.component.html',
-  styleUrls: ['./calendar-selector.component.scss']
+  styleUrls: ['./calendar-selector.component.scss'],
 })
 export class CalendarSelectorComponent implements AfterViewInit {
   // Dependencies
-  private getAvailableSlotsUseCase = inject(GetAvailableSlotsForDayUseCase);
-  private getScheduleUseCase = inject(GetScheduleUseCase);
-  private getExceptionsUseCase = inject(GetExceptionsUseCase);
-  private getBarberSettingsUseCase = inject(GetBarberSettingsUseCase);
+  public readonly businessState = inject(BusinessStateService);
   private addAppointmentUseCase = inject(AddAppointmentUseCase);
   private toast = inject(AlertService);
 
@@ -36,21 +47,34 @@ export class CalendarSelectorComponent implements AfterViewInit {
   public selectedYear = signal(new Date().getFullYear());
   public selectedMonth = signal(new Date().getMonth());
   public showPicker = signal(false);
-  
+
   public selectedDate = signal<Date | null>(null);
   public selectedHour = signal<string | null>(null);
-  
+
   // Data Signals
-  public schedule = signal<ScheduleDay[]>([]);
-  public exceptions = signal<ExceptionItem[]>([]);
-  public barbers = signal<Barber[]>([]);
-  public allowBarberSelection = signal(false);
-  
+  public schedule = this.businessState.rawSchedule;
+  public exceptions = this.businessState.exceptions;
+
   public availableHours = signal<string[]>([]);
   public isSubmitting = signal(false);
 
+  public appointments = this.businessState.appointments;
+
   // Constants
-  public readonly monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  public readonly monthNames = [
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
+  ];
   public readonly weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   public readonly phoneOnlyDays = [5, 6]; // Viernes y Sábado
   public readonly years: number[] = [];
@@ -85,6 +109,14 @@ export class CalendarSelectorComponent implements AfterViewInit {
     return matrix;
   });
 
+  public barbers = computed(
+    () => this.businessState.barberSettings()?.barbers ?? []
+  );
+
+  public allowBarberSelection = computed(
+    () => this.businessState.barberSettings()?.barberSelection ?? false
+  );
+
   public currentView = computed(() => {
     if (this.selectedHour()) return 'booking';
     if (this.selectedDate()) return 'hours';
@@ -94,35 +126,12 @@ export class CalendarSelectorComponent implements AfterViewInit {
   constructor() {
     const currentYear = new Date().getFullYear();
     for (let y = currentYear - 2; y <= currentYear + 2; y++) this.years.push(y);
-    
-    this.loadData();
   }
 
   ngAfterViewInit() {
     // Focus logic can be implemented here if needed, using effects or direct DOM manipulation
     // For now, we'll keep it simple or adapt the old logic if strictly required
     setTimeout(() => this.focusFirstAvailableDay(), 0);
-  }
-
-  private async loadData() {
-    try {
-      const [schedule, exceptions, settings] = await Promise.all([
-        firstValueFrom(this.getScheduleUseCase.execute()),
-        firstValueFrom(this.getExceptionsUseCase.execute()),
-        firstValueFrom(this.getBarberSettingsUseCase.execute())
-      ]);
-
-      this.schedule.set(schedule);
-      this.exceptions.set(exceptions);
-
-      const config = (settings as any).settings || settings;
-      this.barbers.set((config.staff || []).filter((b: any) => b.visible));
-      this.allowBarberSelection.set(config.barberSelection ?? false);
-
-    } catch (error) {
-      console.error('Error loading calendar data:', error);
-      this.toast.error('Error al cargar los datos del calendario');
-    }
   }
 
   public prevMonth() {
@@ -151,7 +160,7 @@ export class CalendarSelectorComponent implements AfterViewInit {
 
   // Actions
   public togglePicker() {
-    this.showPicker.update(v => !v);
+    this.showPicker.update((v) => !v);
   }
 
   public onDateChange() {
@@ -161,16 +170,14 @@ export class CalendarSelectorComponent implements AfterViewInit {
 
   public async selectDate(date: Date | null) {
     if (!date || !this.isAvailable(date)) return;
-    
+
     this.selectedDate.set(date);
-    this.selectedHour.set(null); // Reset hour when date changes
-    
-    // Load available slots
+    this.selectedHour.set(null);
+
     try {
-      // Pass the Date object directly, not a string
-      const slots = await firstValueFrom(this.getAvailableSlotsUseCase.execute(date));
+      const slots = this.businessState.getAvailableSlotsForDate(date);
       this.availableHours.set(slots);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error loading slots:', error);
       this.toast.error('No se pudieron cargar las horas disponibles');
       this.availableHours.set([]);
@@ -201,7 +208,7 @@ export class CalendarSelectorComponent implements AfterViewInit {
   }) {
     const date = this.selectedDate();
     const time = this.selectedHour();
-    
+
     if (!date || !time) return;
 
     this.isSubmitting.set(true);
@@ -230,7 +237,6 @@ export class CalendarSelectorComponent implements AfterViewInit {
       // Reset or redirect
       this.selectedDate.set(null);
       this.selectedHour.set(null);
-      
     } catch (error) {
       console.error('Error creating appointment:', error);
       this.toast.error('Error al crear la reserva. Inténtalo de nuevo.');
@@ -243,9 +249,11 @@ export class CalendarSelectorComponent implements AfterViewInit {
   public isToday(date: Date | null): boolean {
     if (!date) return false;
     const today = new Date();
-    return date.getFullYear() === today.getFullYear() &&
-           date.getMonth() === today.getMonth() &&
-           date.getDate() === today.getDate();
+    return (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    );
   }
 
   public isSelected(date: Date | null): boolean {
@@ -257,11 +265,11 @@ export class CalendarSelectorComponent implements AfterViewInit {
   public isAvailable(date: Date | null): boolean {
     if (!date) return false;
     if (date.getMonth() !== this.selectedMonth()) return false; // Disable days from other months
-    
+
     const context: AvailabilityContext = {
       date: date,
       schedule: this.schedule(),
-      exceptions: this.exceptions()
+      exceptions: this.exceptions(),
     };
 
     // Instantiate handlers

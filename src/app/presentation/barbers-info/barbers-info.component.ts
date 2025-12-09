@@ -1,64 +1,57 @@
 // barbers-info.component.ts
-import { Component, inject, Injector, OnInit, runInInjectionContext, signal } from "@angular/core";
-import { BarberDisplay, BarberSettings } from "@domain/index";
-import { firstValueFrom } from "rxjs";
+import { Component, inject, signal } from '@angular/core';
+import { BarberDisplay, BarberSettings } from '@domain/index';
 import { CommonModule, ViewportScroller } from '@angular/common';
-import { BookingPreselectionService } from "../shared/booking-preselection.service";
-import { GetBarberSettingsUseCase } from "@application/business";
+import { BookingPreselectionService } from '../shared/booking-preselection.service';
+import { effect } from '@angular/core';
+import { BusinessStateService } from '@presentation/shared/business-state.service';
 
 @Component({
-  selector: "app-barbers-info",
-  templateUrl: "./barbers-info.component.html",
-  styleUrls: ["./barbers-info.component.scss"],
+  selector: 'app-barbers-info',
+  templateUrl: './barbers-info.component.html',
+  styleUrls: ['./barbers-info.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule],
 })
-
-export class BarbersInfoComponent implements OnInit {
-  private getBarbers = inject(GetBarberSettingsUseCase);
-  private injector = inject(Injector);
+export class BarbersInfoComponent {
+  private businessState = inject(BusinessStateService);
   private viewportScroller = inject(ViewportScroller);
   private preselectionService = inject(BookingPreselectionService);
-
 
   barbers: BarberDisplay[] = [];
   loading = signal(true);
   barberSelectionEnabled = false;
 
-  ngOnInit() {
-    this.loadBarbers();
-  }
+  private readonly barbersEffect = effect(() => {
+    const settings = this.businessState.barberSettings();
+    if (!settings) {
+      this.barberSelectionEnabled = false;
+      this.barbers = [];
+      this.loading.set(false);
+      return;
+    }
 
-  private loadBarbers() {
-    runInInjectionContext(this.injector, async () => {
-      try {
-        const barberSettings: BarberSettings = await firstValueFrom(this.getBarbers.execute());
+    this.barberSelectionEnabled = settings.barberSelection ?? false;
+    if (!this.barberSelectionEnabled) {
+      this.barbers = [];
+      this.loading.set(false);
+      return;
+    }
 
-        this.barberSelectionEnabled = barberSettings?.barberSelection ?? false;
-        // Si no está habilitada, no mostrar peluqueros
-        if (!this.barberSelectionEnabled) {
-          this.loading.set(false);
-          return;
-        }
-
-        // Convertir a BarberDisplay con información adicional
-        this.barbers = barberSettings.barbers.map((barber, index) => new BarberDisplay(
+    this.barbers = settings.barbers.map(
+      (barber, index) =>
+        new BarberDisplay(
           barber.name,
           barber.imageUrl,
-          index === 0, // featured
+          index === 0,
           this.getRandomSpecialty(),
           this.getRandomExperience(),
           this.getRandomDescription(barber.name)
-        ));
+        )
+    );
 
-        this.loading.set(false);
-
-      } catch (error) {
-        console.error('Error cargando peluqueros:', error);
-        this.loading.set(false);
-      }
-    });
-  }
+    this.loading.set(false);
+  });
 
   bookWithBarber(barber: BarberDisplay) {
     // Guardar el peluquero preseleccionado
@@ -79,7 +72,7 @@ export class BarbersInfoComponent implements OnInit {
       'Fade Moderno',
       'Estilo Vintage',
       'Cortes Creativos',
-      'Afeitado Tradicional'
+      'Afeitado Tradicional',
     ];
     return specialties[Math.floor(Math.random() * specialties.length)];
   }
@@ -90,11 +83,21 @@ export class BarbersInfoComponent implements OnInit {
 
   private getRandomDescription(name: string): string {
     const descriptions = [
-      `${name.split(' ')[0]} es un experto en técnicas tradicionales de peluquería con un toque moderno.`,
-      `Especialista en crear el look perfecto para cada cliente, ${name.split(' ')[0]} combina precisión con creatividad.`,
-      `Con años de experiencia, ${name.split(' ')[0]} domina tanto estilos clásicos como las últimas tendencias.`,
-      `${name.split(' ')[0]} se enfoca en brindar una experiencia premium a cada cliente que atiende.`,
-      `Apasionado por la peluquería, ${name.split(' ')[0]} está siempre actualizado con las nuevas técnicas y estilos.`
+      `${
+        name.split(' ')[0]
+      } es un experto en técnicas tradicionales de peluquería con un toque moderno.`,
+      `Especialista en crear el look perfecto para cada cliente, ${
+        name.split(' ')[0]
+      } combina precisión con creatividad.`,
+      `Con años de experiencia, ${
+        name.split(' ')[0]
+      } domina tanto estilos clásicos como las últimas tendencias.`,
+      `${
+        name.split(' ')[0]
+      } se enfoca en brindar una experiencia premium a cada cliente que atiende.`,
+      `Apasionado por la peluquería, ${
+        name.split(' ')[0]
+      } está siempre actualizado con las nuevas técnicas y estilos.`,
     ];
     return descriptions[Math.floor(Math.random() * descriptions.length)];
   }

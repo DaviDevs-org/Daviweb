@@ -3,23 +3,32 @@ import { Service } from '@domain/services/service.entity';
 
 export interface AppointmentView {
   id?: string;
-  name?: string;
-  phone?: string;
-  description?: string;
-  barber?: string;
-  hairLengthChoice?: string;
+  name?: string | null;
+  phone?: string | null;
+  description?: string | null;
+  barber?: string | null;
+  hairLengthChoice?: string | null;
   datetime: Date;
   dateISO: string;
   timeNormalized: string;
   service?: Service;
 }
 
-export function toAppointmentView(appointment: Appointment): AppointmentView {
-  const datetime: Date = appointment.datetime;
+export function toAppointmentView(
+  appointment: Appointment,
+  allServices: Service[]
+): AppointmentView {
+  const datetime = appointment.datetime;
 
-  const dateISO = `${datetime.getFullYear()}-${String(datetime.getMonth() + 1).padStart(2, '0')}-${String(datetime.getDate()).padStart(2, '0')}`;
+  const dateISO = `${datetime.getFullYear()}-${String(
+    datetime.getMonth() + 1
+  ).padStart(2, '0')}-${String(datetime.getDate()).padStart(2, '0')}`;
+  const timeNormalized = `${String(datetime.getHours()).padStart(
+    2,
+    '0'
+  )}:${String(datetime.getMinutes()).padStart(2, '0')}`;
 
-  const timeNormalized = `${String(datetime.getHours()).padStart(2, '0')}:${String(datetime.getMinutes()).padStart(2, '0')}`;
+  const service = allServices.find((s) => s.name === appointment.service.name);
 
   return {
     id: appointment.id,
@@ -31,6 +40,6 @@ export function toAppointmentView(appointment: Appointment): AppointmentView {
     datetime,
     dateISO,
     timeNormalized,
-    service: appointment.service as Service
+    service, // tipo Service | undefined
   };
 }

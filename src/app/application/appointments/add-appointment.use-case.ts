@@ -12,13 +12,17 @@ export class AddAppointmentUseCase {
     private appointmentRepository: AppointmentRepository,
     private getAvailableSlotsUseCase: GetAvailableSlotsForDayUseCase,
     private scheduleRepository: ScheduleRepository
-  ) { }
+  ) {}
 
   async execute(appointment: Appointment): Promise<void> {
     // 1. Get segments
     let segments = appointment.service.timeSegments;
-    if (appointment.hairLengthChoice && appointment.service.hairLengthModifiers) {
-      const mod = appointment.service.hairLengthModifiers[appointment.hairLengthChoice];
+    if (
+      appointment.hairLengthChoice &&
+      appointment.service.hairLengthModifiers
+    ) {
+      const mod =
+        appointment.service.hairLengthModifiers[appointment.hairLengthChoice];
       if (mod && mod.segments && mod.segments.length > 0) {
         segments = mod.segments;
       } else if (mod && mod.time) {
@@ -31,9 +35,12 @@ export class AddAppointmentUseCase {
     }
 
     // 2. Check availability and calculate slots to reserve
-    const availableSlots = await firstValueFrom(this.getAvailableSlotsUseCase.execute(appointment.datetime));
+    const availableSlots = await firstValueFrom(
+      this.getAvailableSlotsUseCase.execute(appointment.datetime)
+    );
 
-    let currentMinutes = appointment.datetime.getHours() * 60 + appointment.datetime.getMinutes();
+    let currentMinutes =
+      appointment.datetime.getHours() * 60 + appointment.datetime.getMinutes();
     const slotsToReserve: Date[] = [];
 
     for (const segment of segments) {
@@ -42,10 +49,15 @@ export class AddAppointmentUseCase {
       for (let i = 0; i < durationSlots; i++) {
         const h = Math.floor(currentMinutes / 60);
         const m = currentMinutes % 60;
-        const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(
+          2,
+          '0'
+        )}`;
 
         if (!availableSlots.includes(timeStr)) {
-          throw new Error(`El horario ${timeStr} no está disponible para la duración del servicio.`);
+          throw new Error(
+            `El horario ${timeStr} no está disponible para la duración del servicio.`
+          );
         }
 
         // Create Date object for this slot
@@ -63,10 +75,12 @@ export class AddAppointmentUseCase {
     }
 
     // 3. Add appointment
-    const appointmentId = await this.appointmentRepository.addAppointment(appointment);
+    const appointmentId = await this.appointmentRepository.addAppointment(
+      appointment
+    );
 
     // 4. Reserve slots
-    const reservationPromises = slotsToReserve.map(slotDate => {
+    const reservationPromises = slotsToReserve.map((slotDate) => {
       const reservedSlot = new ReservedSlot(appointmentId, slotDate);
       return this.scheduleRepository.addSlot(reservedSlot);
     });

@@ -1,13 +1,12 @@
-import { AppointmentService } from "@domain/services/service.types";
-
+import { AppointmentService } from '@domain/services/service.types';
 
 export interface AppointmentDTO {
-    datetime: Date;
-    createdAt: Date;
-    service: AppointmentService;
-    name?: string;
-    phone?: string;
-    description?: string;
-    barber?: string;
-    hairLengthChoice?: 'short' | 'medium' | 'long';
+  datetime: Date;
+  createdAt: Date;
+  service: AppointmentService;
+  description?: string | null;
+  name?: string | null;
+  phone?: string | null;
+  barber?: string | null;
+  hairLengthChoice?: 'short' | 'medium' | 'long' | null;
 }

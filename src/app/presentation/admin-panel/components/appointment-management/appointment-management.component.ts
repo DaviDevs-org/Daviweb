@@ -1,27 +1,47 @@
-import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit, inject, signal, computed, effect, Injector, runInInjectionContext } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  Component,
+  OnDestroy,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  inject,
+  signal,
+  computed,
+  effect,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { map } from 'rxjs/operators';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 
 // Domain Imports
-import { Appointment, Service, Barber, ExceptionItem, 
-  AvailabilityContext, ExceptionHandler, 
-  WeeklyScheduleHandler } from '@domain/index';
+import {
+  Appointment,
+  Service,
+  Barber,
+  ExceptionItem,
+  AvailabilityContext,
+  ExceptionHandler,
+  WeeklyScheduleHandler,
+} from '@domain/index';
 import { TimeUtils } from '@domain/shared/utils/time.utils';
 
 // Application Imports
-import { 
-  AddAppointmentUseCase, 
-  DeleteAppointmentUseCase, 
-  GetAppointmentsUseCase, 
-  UpdateAppointmentUseCase 
+import {
+  AddAppointmentUseCase,
+  DeleteAppointmentUseCase,
+  UpdateAppointmentUseCase,
 } from '@application/appointments';
 import { BusinessStateService } from '@presentation/shared/business-state.service';
-import { GetServicesUseCase } from '@application/services';
 
 // Presentation Imports
-import { AppointmentView, toAppointmentView } from '@presentation/shared/models/appointment-view.model';
+import {
+  AppointmentView,
+  toAppointmentView,
+} from '@presentation/shared/models/appointment-view.model';
 import { AlertService } from '@presentation/shared/alert/alert.service';
 
 type EditableAppointment = Partial<Appointment>;
@@ -31,41 +51,37 @@ type EditableAppointment = Partial<Appointment>;
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './appointment-management.component.html',
-  styleUrls: ['./appointment-management.component.scss']
+  styleUrls: ['./appointment-management.component.scss'],
 })
-export class AppointmentManagementComponent implements OnDestroy, AfterViewInit {
-  @ViewChild('calendarBody', { static: false }) calendarBody!: ElementRef<HTMLElement>;
-  @ViewChild('selectedDetail', { static: false }) selectedDetail!: ElementRef<HTMLElement>;
-  @ViewChild('calendarHeader', { static: false }) calendarHeader!: ElementRef<HTMLElement>;
-  @ViewChild('editFormContainer', { static: false }) editFormContainer!: ElementRef<HTMLElement>;
+export class AppointmentManagementComponent
+  implements OnDestroy, AfterViewInit
+{
+  @ViewChild('calendarBody', { static: false })
+  calendarBody!: ElementRef<HTMLElement>;
+  @ViewChild('selectedDetail', { static: false })
+  selectedDetail!: ElementRef<HTMLElement>;
+  @ViewChild('calendarHeader', { static: false })
+  calendarHeader!: ElementRef<HTMLElement>;
+  @ViewChild('editFormContainer', { static: false })
+  editFormContainer!: ElementRef<HTMLElement>;
 
   // Dependencies
   private readonly fb = inject(FormBuilder);
   public readonly businessState = inject(BusinessStateService);
   private readonly toast = inject(AlertService);
-  private readonly getAppointmentsUseCase = inject(GetAppointmentsUseCase);
   private readonly addAppointmentUseCase = inject(AddAppointmentUseCase);
   private readonly updateAppointmentUseCase = inject(UpdateAppointmentUseCase);
   private readonly deleteAppointmentUseCase = inject(DeleteAppointmentUseCase);
-  private readonly getServicesUseCase = inject(GetServicesUseCase);
-  private readonly injector = inject(Injector);
 
   // --- Signals State ---
 
+  // Data signals
+  public schedule = this.businessState.rawSchedule;
+  public exceptions = this.businessState.exceptions;
+  public appointments = this.businessState.appointments;
+  public services = this.businessState.services;
+
   // 1. Citas (Source of Truth)
-  // Convertimos el Observable a Signal. initialValue: [] evita nulls.
-  public appointments = toSignal(
-    this.getAppointmentsUseCase.execute().pipe(
-      map(list => list.map(a => {
-        const view = toAppointmentView(a);
-        if (view.service) {
-          view.service = this.ensureServiceInstance(view.service);
-        }
-        return view;
-      }))
-    ), 
-    { initialValue: [] as AppointmentView[] }
-  );
 
   // 2. Fecha seleccionada
   public selectedDate = signal<Date>(new Date());
@@ -73,33 +89,35 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   // 3. ID de cita seleccionada
   public selectedAppointmentId = signal<string | null>(null);
 
-  // 4. Servicios disponibles
-  public services = toSignal(
-    this.getServicesUseCase.execute().pipe(
-        map(list => list.map(s => this.ensureServiceInstance(s)))
-    ),
-    { initialValue: [] as Service[] }
+  // --- Computed State ---
+  public allowBarberSelection = computed(
+    () => this.businessState.barberSettings()?.barberSelection ?? false
   );
 
-  // --- Computed State ---
+  public appointmentViews = computed<AppointmentView[]>(() => {
+    const services = this.services(); // Service[] (dominio)
+    return this.appointments().map((a) => toAppointmentView(a, services));
+  });
 
   // Citas filtradas para el día seleccionado
   public filteredForDay = computed(() => {
-    const all = this.appointments();
+    const all = this.appointmentViews();
     const date = this.selectedDate();
     const iso = TimeUtils.toISODate(date);
-    
+
     return all
-      .filter(a => a.dateISO === iso)
-      .sort((x, y) => (x.timeNormalized || '').localeCompare(y.timeNormalized || ''));
+      .filter((a) => a.dateISO === iso)
+      .sort((x, y) =>
+        (x.timeNormalized || '').localeCompare(y.timeNormalized || '')
+      );
   });
 
   // Cita seleccionada (objeto completo)
   public selectedAppointment = computed(() => {
     const id = this.selectedAppointmentId();
-    const all = this.appointments();
+    const all = this.appointmentViews();
     if (!id || !all.length) return null;
-    return all.find(a => a.id === id) || null;
+    return all.find((a) => a.id === id) || null;
   });
 
   // Slots ocupados en el día (calculado dinámicamente)
@@ -107,27 +125,34 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const dayAppointments = this.filteredForDay();
     const bookedSlots: string[] = [];
 
-    dayAppointments.forEach(appointment => {
-      if (!appointment.timeNormalized || appointment.timeNormalized === '—') return;
-      
+    dayAppointments.forEach((appointment) => {
+      if (!appointment.timeNormalized || appointment.timeNormalized === '—')
+        return;
+
       const service = this.ensureServiceInstance(appointment.service);
       if (!service) return;
 
       const startMinutes = TimeUtils.timeToMinutes(appointment.timeNormalized);
-      const segments = service.getTimeSegmentsForLength(appointment.hairLengthChoice as any);
-      
+      const segments = service.getTimeSegmentsForLength(
+        appointment.hairLengthChoice as any
+      );
+
       let currentMinutes = startMinutes;
-      
+
       segments.forEach((segment) => {
-          // Marcar slots activos
-          for (let m = currentMinutes; m < currentMinutes + segment.duration; m += 30) {
-              bookedSlots.push(TimeUtils.minutesToTime(m));
-          }
-          currentMinutes += segment.duration;
-          
-          if (segment.breakAfter) {
-              currentMinutes += segment.breakAfter;
-          }
+        // Marcar slots activos
+        for (
+          let m = currentMinutes;
+          m < currentMinutes + segment.duration;
+          m += 30
+        ) {
+          bookedSlots.push(TimeUtils.minutesToTime(m));
+        }
+        currentMinutes += segment.duration;
+
+        if (segment.breakAfter) {
+          currentMinutes += segment.breakAfter;
+        }
       });
     });
     return bookedSlots;
@@ -137,26 +162,30 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   public hours = computed(() => {
     const selectedDate = this.selectedDate();
     const schedule = this.businessState.rawSchedule();
-    const exceptions: ExceptionItem[] = []; // TODO: Conectar con exceptions del state
+    const exceptions = this.businessState.exceptions(); // ← usar state
 
-    // 1. Calcular horas abiertas según horario
-    const context: AvailabilityContext = { date: selectedDate, schedule, exceptions };
+    const context: AvailabilityContext = {
+      date: selectedDate,
+      schedule,
+      exceptions,
+    };
+
     const exceptionHandler = new ExceptionHandler();
     const weeklyHandler = new WeeklyScheduleHandler();
     exceptionHandler.setNext(weeklyHandler);
-    
+
     const availability = exceptionHandler.handle(context);
     let availableHours: string[] = [];
-    
+
     if (availability.isAvailable && availability.intervals) {
-        availability.intervals.forEach(interval => {
-            availableHours.push(...TimeUtils.hoursRangeFromOpenClose(interval.open, interval.close));
-        });
+      availability.intervals.forEach((interval) => {
+        availableHours.push(
+          ...TimeUtils.hoursRangeFromOpenClose(interval.open, interval.close)
+        );
+      });
     }
 
-    // 2. Combinar con horas ocupadas (para mostrar citas fuera de horario si las hubiera)
     const booked = this.bookedSlotsForDay();
-    
     return [...new Set([...availableHours, ...booked])].sort();
   });
 
@@ -166,8 +195,8 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   editedAppointment: EditableAppointment | null = null;
   isSaving = false;
   editForm: FormGroup;
-  
-  barbers: Barber[] = []; 
+
+  barbers: Barber[] = [];
   barberSelectionEnabled = false;
 
   private scrollTimeout: any;
@@ -180,24 +209,24 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       time: ['', Validators.required],
       serviceId: ['', Validators.required],
       barberId: [''],
-      description: ['']
+      description: [''],
     });
 
     // Effect para scroll automático cuando cambia la selección
     effect(() => {
-        const appointment = this.selectedAppointment();
-        const dayList = this.filteredForDay();
-        
-        if (appointment && dayList.some(a => a.id === appointment.id)) {
-            // Usamos setTimeout para asegurar que el DOM se ha actualizado
-            setTimeout(() => {
-                if (this.isMobileViewport()) {
-                    this.scrollToSelectedDetail();
-                } else if (appointment.timeNormalized) {
-                    this.scrollToAppointment(appointment.timeNormalized);
-                }
-            }, 100);
-        }
+      const appointment = this.selectedAppointment();
+      const dayList = this.filteredForDay();
+
+      if (appointment && dayList.some((a) => a.id === appointment.id)) {
+        // Usamos setTimeout para asegurar que el DOM se ha actualizado
+        setTimeout(() => {
+          if (this.isMobileViewport()) {
+            this.scrollToSelectedDetail();
+          } else if (appointment.timeNormalized) {
+            this.scrollToAppointment(appointment.timeNormalized);
+          }
+        }, 100);
+      }
     });
   }
 
@@ -213,11 +242,19 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
   // --- Logic: Navigation ---
 
-  prevDay() { this.navigateDate(-1); }
-  nextDay() { this.navigateDate(1); }
-  prevWeek() { this.navigateDate(-7); }
-  nextWeek() { this.navigateDate(7); }
-  
+  prevDay() {
+    this.navigateDate(-1);
+  }
+  nextDay() {
+    this.navigateDate(1);
+  }
+  prevWeek() {
+    this.navigateDate(-7);
+  }
+  nextWeek() {
+    this.navigateDate(7);
+  }
+
   prevMonth() {
     const d = new Date(this.selectedDate());
     d.setMonth(d.getMonth() - 1);
@@ -238,13 +275,18 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   }
 
   private navigateDate(days: number) {
-    const targetDate = new Date(this.selectedDate().getTime() + days * 24 * 3600 * 1000);
+    const targetDate = new Date(
+      this.selectedDate().getTime() + days * 24 * 3600 * 1000
+    );
     const availableDate = this.findNearestAvailableDay(targetDate, days > 0);
     this.selectedDate.set(availableDate);
     this.validateSelectedAppointmentForCurrentDay();
   }
 
-  private findNearestAvailableDay(startDate: Date, searchForward: boolean): Date {
+  private findNearestAvailableDay(
+    startDate: Date,
+    searchForward: boolean
+  ): Date {
     let currentDate = new Date(startDate);
     let attempts = 0;
     const maxAttempts = 60;
@@ -261,13 +303,16 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
 
   private isDayAvailable(date: Date): boolean {
     const schedule = this.businessState.rawSchedule();
+    const exceptions = this.businessState.exceptions();
+
     if (!schedule || schedule.length === 0) return true;
 
-    const context: AvailabilityContext = { date, schedule, exceptions: [] };
+    const context: AvailabilityContext = { date, schedule, exceptions };
+
     const exceptionHandler = new ExceptionHandler();
     const weeklyHandler = new WeeklyScheduleHandler();
     exceptionHandler.setNext(weeklyHandler);
-    
+
     return exceptionHandler.handle(context).isAvailable;
   }
 
@@ -282,21 +327,25 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     // 2. Chequear si el negocio está abierto
     const selectedDate = this.selectedDate();
     const schedule = this.businessState.rawSchedule();
-    const context: AvailabilityContext = { date: selectedDate, schedule, exceptions: [] };
-    
+    const context: AvailabilityContext = {
+      date: selectedDate,
+      schedule,
+      exceptions: [],
+    };
+
     const exceptionHandler = new ExceptionHandler();
     const weeklyHandler = new WeeklyScheduleHandler();
     exceptionHandler.setNext(weeklyHandler);
-    
+
     const availability = exceptionHandler.handle(context);
-    
+
     if (!availability.isAvailable || !availability.intervals) return false;
 
     const hourMins = TimeUtils.timeToMinutes(hour);
-    return availability.intervals.some(interval => {
-        const start = TimeUtils.timeToMinutes(interval.open);
-        const end = TimeUtils.timeToMinutes(interval.close);
-        return hourMins >= start && hourMins < end;
+    return availability.intervals.some((interval) => {
+      const start = TimeUtils.timeToMinutes(interval.open);
+      const end = TimeUtils.timeToMinutes(interval.close);
+      return hourMins >= start && hourMins < end;
     });
   }
 
@@ -305,35 +354,44 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   getAppointmentDuration(appointment: AppointmentView): string {
     const service = this.ensureServiceInstance(appointment.service);
     if (!service) return '30min';
-    return `${service.computeTotalTime(appointment.hairLengthChoice as any)}min`;
+    return `${service.computeTotalTime(
+      appointment.hairLengthChoice as any
+    )}min`;
   }
 
   getAppointmentSlotCount(appointment: AppointmentView): number {
     const service = this.ensureServiceInstance(appointment.service);
     if (!service) return 1;
-    const totalMinutes = service.computeTotalTime(appointment.hairLengthChoice as any);
+    const totalMinutes = service.computeTotalTime(
+      appointment.hairLengthChoice as any
+    );
     return Math.ceil(totalMinutes / 30);
   }
 
   // Helpers de visualización
-  
-  findReservation(list: AppointmentView[], hour: string): AppointmentView | undefined {
+
+  findReservation(
+    list: AppointmentView[],
+    hour: string
+  ): AppointmentView | undefined {
     const slotMinutes = TimeUtils.timeToMinutes(hour);
-    
-    return list.find(a => {
+
+    return list.find((a) => {
       if (!a.timeNormalized) return false;
       const startMinutes = TimeUtils.timeToMinutes(a.timeNormalized);
       const service = this.ensureServiceInstance(a.service);
       if (!service) return false;
 
-      const segments = service.getTimeSegmentsForLength(a.hairLengthChoice as any);
+      const segments = service.getTimeSegmentsForLength(
+        a.hairLengthChoice as any
+      );
       let current = startMinutes;
-      
+
       for (const seg of segments) {
-          if (slotMinutes >= current && slotMinutes < current + seg.duration) {
-              return true;
-          }
-          current += seg.duration + (seg.breakAfter || 0);
+        if (slotMinutes >= current && slotMinutes < current + seg.duration) {
+          return true;
+        }
+        current += seg.duration + (seg.breakAfter || 0);
       }
       return false;
     });
@@ -343,7 +401,10 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     return !!this.findBreakSlot(list, hour);
   }
 
-  findBreakSlot(list: AppointmentView[], hour: string): { appointment: AppointmentView, breakInfo: any } | undefined {
+  findBreakSlot(
+    list: AppointmentView[],
+    hour: string
+  ): { appointment: AppointmentView; breakInfo: any } | undefined {
     const slotMinutes = TimeUtils.timeToMinutes(hour);
 
     for (const appointment of list) {
@@ -352,27 +413,36 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       const service = this.ensureServiceInstance(appointment.service);
       if (!service) continue;
 
-      const segments = service.getTimeSegmentsForLength(appointment.hairLengthChoice as any);
+      const segments = service.getTimeSegmentsForLength(
+        appointment.hairLengthChoice as any
+      );
       let current = startMinutes;
 
       for (const seg of segments) {
-          current += seg.duration;
-          
-          if (seg.breakAfter && seg.breakAfter > 0) {
-              if (slotMinutes >= current && slotMinutes < current + seg.breakAfter) {
-                  return { 
-                      appointment, 
-                      breakInfo: { start: current, duration: seg.breakAfter } 
-                  };
-              }
-              current += seg.breakAfter;
+        current += seg.duration;
+
+        if (seg.breakAfter && seg.breakAfter > 0) {
+          if (
+            slotMinutes >= current &&
+            slotMinutes < current + seg.breakAfter
+          ) {
+            return {
+              appointment,
+              breakInfo: { start: current, duration: seg.breakAfter },
+            };
           }
+          current += seg.breakAfter;
+        }
       }
     }
     return undefined;
   }
 
-  isMainAppointmentSlot(dayList: AppointmentView[], hour: string, appointment: AppointmentView): boolean {
+  isMainAppointmentSlot(
+    dayList: AppointmentView[],
+    hour: string,
+    appointment: AppointmentView
+  ): boolean {
     return appointment.timeNormalized === hour;
   }
 
@@ -400,17 +470,17 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   }
 
   isConnectedToPrevious(appointment: AppointmentView, hour: string): boolean {
-      const slotMins = TimeUtils.timeToMinutes(hour);
-      const prevHour = TimeUtils.minutesToTime(slotMins - 30);
-      const prevAppt = this.findReservation([appointment], prevHour);
-      return !!prevAppt;
+    const slotMins = TimeUtils.timeToMinutes(hour);
+    const prevHour = TimeUtils.minutesToTime(slotMins - 30);
+    const prevAppt = this.findReservation([appointment], prevHour);
+    return !!prevAppt;
   }
 
   isConnectedToNext(appointment: AppointmentView, hour: string): boolean {
-      const slotMins = TimeUtils.timeToMinutes(hour);
-      const nextHour = TimeUtils.minutesToTime(slotMins + 30);
-      const nextAppt = this.findReservation([appointment], nextHour);
-      return !!nextAppt;
+    const slotMins = TimeUtils.timeToMinutes(hour);
+    const nextHour = TimeUtils.minutesToTime(slotMins + 30);
+    const nextAppt = this.findReservation([appointment], nextHour);
+    return !!nextAppt;
   }
 
   // --- CRUD Operations ---
@@ -422,7 +492,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     this.editForm.reset();
     this.editForm.patchValue({
       date: TimeUtils.toISODate(this.selectedDate()),
-      time: timeSlot
+      time: timeSlot,
     });
     if (this.isMobileViewport()) this.scrollToEditForm();
   }
@@ -432,7 +502,11 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     this.isCreating = false;
     this.editedAppointment = {
       ...appointment,
-      hairLengthChoice: (appointment.hairLengthChoice as "short" | "medium" | "long" | undefined)
+      hairLengthChoice: appointment.hairLengthChoice as
+        | 'short'
+        | 'medium'
+        | 'long'
+        | undefined,
     };
     this.selectedAppointmentId.set(appointment.id || null);
     this.editForm.patchValue({
@@ -442,7 +516,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       time: appointment.timeNormalized,
       serviceId: appointment.service?.name,
       barberId: appointment.barber,
-      description: appointment.description
+      description: appointment.description,
     });
     if (this.isMobileViewport()) this.scrollToEditForm();
   }
@@ -462,24 +536,29 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     this.isSaving = true;
     try {
       const formData = this.editForm.value;
-      const serviceInstance = this.services().find(s => s.name === formData.serviceId);
-      
+      const serviceInstance = this.services().find(
+        (s) => s.name === formData.serviceId
+      );
+
       const [y, m, d] = formData.date.split('-').map(Number);
       const [h, min] = formData.time.split(':').map(Number);
       const datetime = new Date(y, m - 1, d, h, min);
 
       const appointmentDomain: Appointment = new Appointment(
-          datetime,
-          serviceInstance!,
-          this.isEditing ? this.editedAppointment?.id : undefined,
-          formData.description,
-          formData.name,
-          formData.phone,
-          formData.barberId
+        datetime,
+        serviceInstance!,
+        this.isEditing ? this.editedAppointment?.id : undefined,
+        formData.description,
+        formData.name,
+        formData.phone,
+        formData.barberId
       );
 
       if (this.isEditing && this.editedAppointment?.id) {
-        await this.updateAppointmentUseCase.execute(this.editedAppointment.id, appointmentDomain);
+        await this.updateAppointmentUseCase.execute(
+          this.editedAppointment.id,
+          appointmentDomain
+        );
         this.toast.success('Cita actualizada correctamente');
       } else {
         await this.addAppointmentUseCase.execute(appointmentDomain);
@@ -489,7 +568,6 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
       this.isEditing = false;
       this.isCreating = false;
       this.editForm.reset();
-
     } catch (error: any) {
       console.error('Error guardando cita:', error);
       this.toast.error(error.message || 'Error al guardar la cita');
@@ -499,7 +577,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   }
 
   async deleteAppointment(id: string) {
-    if (!await this.toast.confirm('¿Eliminar cita?')) return;
+    if (!(await this.toast.confirm('¿Eliminar cita?'))) return;
     try {
       await this.deleteAppointmentUseCase.execute(id);
       this.toast.success('Cita eliminada');
@@ -515,25 +593,35 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   chooseAppointment(id: string | undefined) {
     if (!id) return;
     this.selectedAppointmentId.set(id);
-    
+
     // Buscar si la cita está en otro día
-    const appt = this.appointments().find(a => a.id === id);
+    const appt = this.appointments().find((a) => a.id === id);
     if (appt) {
-        const apptDate = new Date(appt.datetime);
-        if (TimeUtils.toISODate(apptDate) !== TimeUtils.toISODate(this.selectedDate())) {
-            this.selectedDate.set(apptDate);
-        }
+      const apptDate = new Date(appt.datetime);
+      if (
+        TimeUtils.toISODate(apptDate) !==
+        TimeUtils.toISODate(this.selectedDate())
+      ) {
+        this.selectedDate.set(apptDate);
+      }
     }
   }
 
-  toISODate(d: Date) { return TimeUtils.toISODate(d); }
-  
-  formatDateHeader(d: Date) {
-    return d.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  toISODate(d: Date) {
+    return TimeUtils.toISODate(d);
   }
-  
+
+  formatDateHeader(d: Date) {
+    return d.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  }
+
   getServiceDuration(service: Service) {
-      return service.computeTotalTime();
+    return service.computeTotalTime();
   }
 
   // --- Private Helpers ---
@@ -541,7 +629,7 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
   private ensureServiceInstance(service: any): Service {
     if (!service) return new Service('Desconocido', '', []);
     if (service instanceof Service) return service;
-    
+
     return new Service(
       service.name,
       service.description,
@@ -558,8 +646,8 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     const selectedId = this.selectedAppointmentId();
     if (!selectedId) return;
     const dayAppointments = this.filteredForDay();
-    if (!dayAppointments.some(a => a.id === selectedId)) {
-        this.selectedAppointmentId.set(null);
+    if (!dayAppointments.some((a) => a.id === selectedId)) {
+      this.selectedAppointmentId.set(null);
     }
   }
 
@@ -567,20 +655,37 @@ export class AppointmentManagementComponent implements OnDestroy, AfterViewInit 
     setTimeout(() => {
       if (!this.calendarBody?.nativeElement) return;
       const hour = time.split(':')[0] + ':00';
-      const el = this.calendarBody.nativeElement.querySelector(`[data-hour="${hour}"]`);
+      const el = this.calendarBody.nativeElement.querySelector(
+        `[data-hour="${hour}"]`
+      );
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
   }
 
   private isMobileViewport(): boolean {
-    return typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+    return (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(max-width: 768px)').matches
+    );
   }
 
   private scrollToSelectedDetail() {
-    setTimeout(() => this.selectedDetail?.nativeElement?.scrollIntoView({ behavior: 'smooth' }), 100);
+    setTimeout(
+      () =>
+        this.selectedDetail?.nativeElement?.scrollIntoView({
+          behavior: 'smooth',
+        }),
+      100
+    );
   }
-  
+
   private scrollToEditForm() {
-    setTimeout(() => this.editFormContainer?.nativeElement?.scrollIntoView({ behavior: 'smooth' }), 100);
+    setTimeout(
+      () =>
+        this.editFormContainer?.nativeElement?.scrollIntoView({
+          behavior: 'smooth',
+        }),
+      100
+    );
   }
 }

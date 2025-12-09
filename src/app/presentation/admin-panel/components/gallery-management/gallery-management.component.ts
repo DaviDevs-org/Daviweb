@@ -9,15 +9,10 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
 
 import { GalleryPhoto, PhotoType } from '@domain/gallery';
 
-import {
-  GetPhotosUseCase,
-  UploadPhotoUseCase,
-  DeletePhotoUseCase,
-} from '@application/gallery';
+import { UploadPhotoUseCase, DeletePhotoUseCase } from '@application/gallery';
 
 // Shared
 import { AlertService } from '@presentation/shared/alert/alert.service';
@@ -86,7 +81,7 @@ export class GalleryManagementComponent implements OnDestroy {
   // ========================
 
   onImageLoad(index: number) {
-    this.imageLoadStates.update(states => {
+    this.imageLoadStates.update((states) => {
       const newStates = [...states];
       newStates[index] = true;
       return newStates;
@@ -161,8 +156,11 @@ export class GalleryManagementComponent implements OnDestroy {
     try {
       this.progress.set('0%');
 
-      const { task } = await this.uploadPhotoUseCase.execute(this.selectedFile, photoEntity);
-      
+      const { task } = await this.uploadPhotoUseCase.execute(
+        this.selectedFile,
+        photoEntity
+      );
+
       // Monitorizar progreso
       task.on('state_changed', (snapshot) => {
         const percent = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -214,7 +212,7 @@ export class GalleryManagementComponent implements OnDestroy {
       );
 
       // Actualizar estado de carga de imágenes
-      this.imageLoadStates.update((states) => 
+      this.imageLoadStates.update((states) =>
         states.filter((_, i) => i !== index)
       );
 
@@ -264,4 +262,3 @@ export class GalleryManagementComponent implements OnDestroy {
     this.toast.success('Nombre actualizado');
   }
 }
-

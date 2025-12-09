@@ -13,7 +13,7 @@
             </div>
 
             <div class="list">
-                @for (a of appointments(); track a.id) {
+                @for (a of appointmentViews(); track a.id) {
                     <div class="appointment-card"
                         [class.active]="selectedAppointment()?.id === a.id" (click)="chooseAppointment(a.id)">
                         <div class="card-top">

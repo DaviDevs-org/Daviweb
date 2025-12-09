@@ -1,17 +1,28 @@
-import { CommonModule, isPlatformBrowser, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID, NgZone } from '@angular/core';
-import { GetPhotosUseCase } from '../../application/gallery/get-photos.use-case';
+import {
+  CommonModule,
+  isPlatformBrowser,
+  NgOptimizedImage,
+} from '@angular/common';
+import {
+  Component,
+  OnDestroy,
+  inject,
+  signal,
+  PLATFORM_ID,
+  NgZone,
+} from '@angular/core';
+import { effect } from '@angular/core';
 import { GalleryPhoto, PhotoType } from '../../domain';
-import { take } from 'rxjs/operators';
+import { BusinessStateService } from '@presentation/shared/business-state.service';
 
 @Component({
   selector: 'app-photo-of-the-day',
   templateUrl: './photo-of-the-day.component.html',
   styleUrls: ['./photo-of-the-day.component.scss'],
-  imports: [CommonModule, NgOptimizedImage]
+  imports: [CommonModule, NgOptimizedImage],
 })
-export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
-  private getPhotosUseCase = inject(GetPhotosUseCase);
+export class PhotoOfTheDayComponent implements OnDestroy {
+  private businessState = inject(BusinessStateService);
   private platformId = inject(PLATFORM_ID);
   private ngZone = inject(NgZone);
 
@@ -22,9 +33,32 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
 
   private intervalId?: number;
 
-  ngOnInit() {
-    this.loadGalleryImages();
-  }
+  private readonly photosEffect = effect(() => {
+    const photos = this.businessState.galleryImages(); // señal del state
+    if (!photos) {
+      this.isLoading.set(true);
+      return;
+    }
+
+    const items = photos.filter((p) => p.type === PhotoType.GALLERY && !!p.url);
+
+    if (!items.length) {
+      // fallback si no hay fotos reales
+      this.loadFallbackImages();
+      this.isLoading.set(false);
+      return;
+    }
+
+    this.carouselItems.set(items);
+    this.totalSlides.set(items.length);
+    this.isLoading.set(false);
+
+    if (items.length > 1 && isPlatformBrowser(this.platformId)) {
+      this.startAutoPlay();
+    } else {
+      this.stopAutoPlay();
+    }
+  });
 
   ngOnDestroy() {
     if (this.intervalId) {
@@ -32,38 +66,36 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
     }
   }
 
-  private loadGalleryImages() {
-    this.isLoading.set(true);
-
-    this.getPhotosUseCase.execute(PhotoType.GALLERY)
-      .pipe(take(1))
-      .subscribe({
-        next: (galleryPhotos) => {
-          const items = galleryPhotos.filter(photo => !!photo.url);
-
-          this.carouselItems.set(items);
-          this.totalSlides.set(items.length);
-
-          if (items.length > 1 && isPlatformBrowser(this.platformId)) {
-            this.startAutoPlay();
-          }
-          this.isLoading.set(false);
-        },
-        error: (error) => {
-          console.error('Error loading gallery images:', error);
-          this.loadFallbackImages();
-          this.isLoading.set(false);
-        }
-      });
-  }
-
-
   private loadFallbackImages() {
     const fallbackItems: GalleryPhoto[] = [
-      new GalleryPhoto('Corte clásico fade – Cliente: Pedro L.', 'fallback-1', 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80', true, PhotoType.GALLERY),
-      new GalleryPhoto('Afeitado con navaja – Cliente: Marco S.', 'fallback-2', 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80', true, PhotoType.GALLERY),
-      new GalleryPhoto('Corte texturizado – Cliente: Antonio G.', 'fallback-3', 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80', true, PhotoType.GALLERY),
-      new GalleryPhoto('Estilo vintage – Cliente: Raúl M.', 'fallback-4', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80', true, PhotoType.GALLERY)
+      new GalleryPhoto(
+        'Corte clásico fade – Cliente: Pedro L.',
+        'fallback-1',
+        'https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
+        true,
+        PhotoType.GALLERY
+      ),
+      new GalleryPhoto(
+        'Afeitado con navaja – Cliente: Marco S.',
+        'fallback-2',
+        'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
+        true,
+        PhotoType.GALLERY
+      ),
+      new GalleryPhoto(
+        'Corte texturizado – Cliente: Antonio G.',
+        'fallback-3',
+        'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
+        true,
+        PhotoType.GALLERY
+      ),
+      new GalleryPhoto(
+        'Estilo vintage – Cliente: Raúl M.',
+        'fallback-4',
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=755&h=500&q=80',
+        true,
+        PhotoType.GALLERY
+      ),
     ];
 
     this.carouselItems.set(fallbackItems);
@@ -78,7 +110,7 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
     // Capitalizar la primera letra y reemplazar guiones/underscore por espacios
     const formatted = nameWithoutExtension
       .replace(/[-_]/g, ' ')
-      .replace(/\b\w/g, l => l.toUpperCase());
+      .replace(/\b\w/g, (l) => l.toUpperCase());
 
     return formatted;
   }
@@ -162,10 +194,5 @@ export class PhotoOfTheDayComponent implements OnInit, OnDestroy {
     if (!this.intervalId && this.totalSlides() > 1) {
       this.startAutoPlay();
     }
-  }
-
-  // Método para actualizar las imágenes (útil si se llama desde el admin)
-  refreshGallery() {
-    this.loadGalleryImages();
   }
 }
