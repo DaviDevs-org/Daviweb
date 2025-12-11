@@ -1,11 +1,12 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as *;
+@use '../../../styles/functions' as *;
 
 .admin-container {
   // Evitar problemas de viewport móvil: usar min-height en vez de height fija
   height: auto;
   min-height: 100dvh;
-  background: linear-gradient(135deg, $primary-lighter 0%, rgba($primary-light, 0.2) 50%, rgba($white, 0.9) 100%);
+  background: linear-gradient(135deg, $primary-lighter 0%, alpha($primary-light, 0.2) 50%, alpha($white, 0.9) 100%);
   font-family: $font-primary;
   display: flex;
   flex-direction: column;

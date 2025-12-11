@@ -1,13 +1,14 @@
 @use '../../../../../styles/variables' as *;
 @use '../../../../../styles/mixins' as *;
+@use '../../../../../styles/functions' as *;
 
 .admin-nav {
     background: $white;
-    border-bottom: 2px solid rgba($primary, 0.2);
+    border-bottom: 2px solid alpha($primary, 0.2);
     position: sticky;
     top: 73px;
     z-index: $z-index-sticky;
-    box-shadow: 0 2px 15px rgba($primary, 0.1);
+    box-shadow: 0 2px 15px alpha($primary, 0.1);
 
     @include mobile {
         // En móvil evitamos sticky para no depender de la altura exacta del header
@@ -51,12 +52,12 @@
 
         &:hover {
             color: $primary;
-            background: rgba($primary, 0.05);
+            background: alpha($primary, 0.05);
         }
         &.active {
             color: $primary;
             border-bottom-color: $primary;
-            background: rgba($primary, 0.08);
+            background: alpha($primary, 0.08);
             font-weight: $font-weight-bold;
         }
     }
@@ -92,9 +93,9 @@
         align-items: center;
         justify-content: space-between;
         transition: all $transition-normal;
-        box-shadow: 0 2px 10px rgba($primary, 0.3);
+        box-shadow: 0 2px 10px alpha($primary, 0.3);
 
-        &:hover { box-shadow: 0 4px 20px rgba($primary, 0.4); }
+        &:hover { box-shadow: 0 4px 20px alpha($primary, 0.4); }
 
         .menu-icon {
             display: flex;
@@ -189,12 +190,12 @@
 
             &:hover {
                 color: $primary;
-                background: rgba($primary, 0.05);
+                background: alpha($primary, 0.05);
             }
 
             &.active {
                 color: $primary;
-                background: rgba($primary, 0.08);
+                background: alpha($primary, 0.08);
                 border-left: 4px solid $primary;
             }
         }

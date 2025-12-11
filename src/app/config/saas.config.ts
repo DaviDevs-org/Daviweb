@@ -24,6 +24,15 @@ export const SAAS_CONFIG = {
       backgroundSecondary: '#f0f4f8', // Fondo secundario (gris muy claro)
       text: '#3d4a56',           // Color de texto principal
       border: '#cbd5e0',         // Color de bordes por defecto
+      
+      // Colores restaurados
+      secondaryDark: '#3d4a56',
+      secondaryLight: '#8a9ba8',
+      backgroundSection: '#e8eff5',
+      backgroundCalendar: '#EA76B8',
+      backgroundAccent: '#e88fa7',
+      borderAccent: '#f5c5d4',
+      textPink: '#dc5b7d',
     },
     fonts: {
       main: "'Roboto', sans-serif",

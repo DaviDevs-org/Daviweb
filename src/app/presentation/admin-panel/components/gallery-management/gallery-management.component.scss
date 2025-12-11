@@ -2,14 +2,15 @@
 
 @use "../../../../../styles/variables" as *;
 @use "../../../../../styles/mixins" as *;
+@use "../../../../../styles/functions" as *;
 
 
 .upload-section {
     @include card-style;
     background: $white;
     margin-bottom: 30px;
-    border: 1px solid rgba($primary, 0.1);
-    box-shadow: 0 4px 20px rgba($primary, 0.1);
+    border: 1px solid alpha($primary, 0.1);
+    box-shadow: 0 4px 20px alpha($primary, 0.1);
 
     .upload-area {
         border: 2px dashed $primary;
@@ -32,7 +33,7 @@
             border-color: $primary-dark;
 
             &:not(.has-image) {
-                background: rgba($primary, 0.2);
+                background: alpha($primary, 0.2);
             }
 
             .upload-content {
@@ -45,7 +46,7 @@
             border-width: 3px;
 
             .upload-content {
-                background: rgba($white, 0.9);
+                background: alpha($white, 0.9);
                 backdrop-filter: blur(5px);
                 border-radius: 8px;
                 padding: 20px;
@@ -100,8 +101,8 @@
     @include card-style;
     min-height: 300px;
     background: $white;
-    border: 1px solid rgba($primary, 0.1);
-    box-shadow: 0 4px 20px rgba($primary, 0.1);
+    border: 1px solid alpha($primary, 0.1);
+    box-shadow: 0 4px 20px alpha($primary, 0.1);
 
     h3 {
         color: $text-dark;
@@ -132,7 +133,7 @@
     overflow: hidden;
     aspect-ratio: 16/9;
     box-shadow: $shadow-md;
-    background: rgba($primary, 0.1);
+    background: alpha($primary, 0.1);
 
     img {
         width: 100%;
@@ -153,9 +154,9 @@
         right: 0;
         bottom: 0;
         background: linear-gradient(90deg,
-                rgba($primary, 0.1) 25%,
-                rgba($primary, 0.2) 50%,
-                rgba($primary, 0.1) 75%);
+                alpha($primary, 0.1) 25%,
+                alpha($primary, 0.2) 50%,
+                alpha($primary, 0.1) 75%);
         background-size: 200% 100%;
         animation: shimmer 1.5s infinite;
     }
@@ -183,7 +184,7 @@
         color: $white;
 
         .photo-title-input {
-            background: rgba($white, 0.9);
+            background: alpha($white, 0.9);
             border: none;
             padding: 8px 12px;
             border-radius: 6px;

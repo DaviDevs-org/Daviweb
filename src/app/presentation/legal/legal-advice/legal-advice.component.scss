@@ -1,6 +1,7 @@
 @use "sass:color";
 @use "../../../../styles/variables" as *;
 @use "../../../../styles/mixins" as *;
+@use "../../../../styles/functions" as *;
 
 :host {
 	display: block;
@@ -11,9 +12,9 @@
 	margin: 0 auto;
 	padding: 2rem;
 	background: $white;
-	border: 1px solid rgba($primary-rgb, 0.08);
+	border: 1px solid alpha($primary, 0.08);
 	border-radius: 16px;
-	box-shadow: 0 8px 30px rgba($primary-rgb, 0.06);
+	box-shadow: 0 8px 30px alpha($primary, 0.06);
 
 	@include mobile {
 		padding: 1.25rem;
@@ -22,7 +23,7 @@
 
 	header {
 		margin-bottom: 1.5rem;
-		border-bottom: 1px solid rgba($primary-rgb, 0.12);
+		border-bottom: 1px solid alpha($primary, 0.12);
 		padding-bottom: 1rem;
 
 		h1 {

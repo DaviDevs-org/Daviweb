@@ -1,6 +1,7 @@
 @use "sass:color";
 @use "../../../styles/variables" as *;
 @use "../../../styles/mixins" as *;
+@use "../../../styles/functions" as *;
 
 
 .barbers-section {
@@ -74,7 +75,7 @@
     .loading-spinner {
         width: 40px;
         height: 40px;
-        border: 4px solid rgba($primary, 0.2);
+        border: 4px solid alpha($primary, 0.2);
         border-left: 4px solid $primary;
         border-radius: 50%;
         animation: spin 1s linear infinite;
@@ -136,10 +137,10 @@
 
     &.featured {
         border: 2px solid $primary;
-        box-shadow: 0 4px 20px rgba($primary, 0.2);
+        box-shadow: 0 4px 20px alpha($primary, 0.2);
 
         &:hover {
-            box-shadow: 0 8px 30px rgba($primary, 0.3);
+            box-shadow: 0 8px 30px alpha($primary, 0.3);
         }
     }
 
@@ -168,7 +169,7 @@
             padding: 16px;
 
             .featured-badge {
-                background: rgba($primary, 0.95);
+                background: alpha($primary, 0.95);
                 color: $white;
                 padding: 8px 16px;
                 border-radius: 20px;
@@ -219,7 +220,7 @@
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 margin: 0;
-                background: rgba($primary, 0.15);
+                background: alpha($primary, 0.15);
                 padding: 4px 12px;
                 border-radius: 12px;
                 display: inline-block;
@@ -245,7 +246,7 @@
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
-                background: rgba($white, 0.8);
+                background: alpha($white, 0.8);
                 padding: 10px 16px;
                 border-radius: 8px;
                 margin-bottom: 12px;
@@ -286,7 +287,7 @@
                 font-style: italic;
                 text-align: center;
                 font-family: Inter, sans-serif;
-                background: rgba($white, 0.8);
+                background: alpha($white, 0.8);
                 font-weight: 500;
 
                 @include mobile {
@@ -324,7 +325,7 @@
                 &:hover {
                     background: $secondary;
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba($primary, 0.3);
+                    box-shadow: 0 4px 12px alpha($primary, 0.3);
                 }
 
                 i {
@@ -365,7 +366,7 @@
     .placeholder-icon {
         width: 60px;
         height: 60px;
-        background: rgba($primary, 0.15);
+        background: alpha($primary, 0.15);
         border-radius: 50%;
         display: flex;
         align-items: center;

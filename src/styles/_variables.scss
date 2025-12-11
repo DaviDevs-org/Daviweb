@@ -12,21 +12,35 @@
   --color-accent: #ef51aA;
   --color-background: #ffffff;
   --color-text: #3d4a56;
+  --color-secondary-dark: #3d4a56;
+  --color-secondary-light: #8a9ba8;
+  --color-background-section: #e8eff5;
+  --color-background-calendar: #EA76B8;
+  --color-background-accent: #e88fa7;
+  --color-border-accent: #f5c5d4;
+  --color-text-pink: #dc5b7d;
 }
 
 $primary: var(--color-primary); 
 $primary-rgb: var(--color-primary-rgb); // Para uso en rgba()
 
 $primary-light: var(--color-primary-light); 
+$primary-light-rgb: var(--color-primary-light-rgb);
+
 $primary-lighter: var(--color-primary-lighter); 
+$primary-lighter-rgb: var(--color-primary-lighter-rgb);
+
 $primary-dark: var(--color-primary-dark); 
+$primary-dark-rgb: var(--color-primary-dark-rgb);
 
 $accent: var(--color-accent);
+$accent-rgb: var(--color-accent-rgb);
 
 // FONDOS - Sistema coherente de claro a oscuro
 $secondary: var(--color-secondary); 
-$secondary-dark: #3d4a56; // Azul grisáceo más oscuro - solo detalles
-$secondary-light: #8a9ba8; // Azul grisáceo claro - para textos sobre oscuro
+$secondary-rgb: var(--color-secondary-rgb); 
+$secondary-dark: var(--color-secondary-dark);
+$secondary-light: var(--color-secondary-light);
 
 
 
@@ -48,9 +62,9 @@ $text-gray: #6b7a8a; // Gris azulado medio para textos secundarios
 $text-gray-light: #9ca3af; // Gris claro para textos menos importantes
 $text-dark: var(--color-text); // Azul grisáceo oscuro para textos importantes
 $light-gray: #e8eff5; // Azul grisáceo claro con personalidad
-$border-color: #cbd5e0; // Gris azulado para bordes sutiles
-$border-color-accent: #f5c5d4; // Rosa claro para bordes destacados
-$text-pink: #dc5b7d;
+$border-color: var(--color-border); // Vinculado a configuración
+$border-color-accent: var(--color-border-accent);
+$text-pink: var(--color-text-pink);
 
 // Colores adicionales para componentes específicos
 $color-disabled: #aaaaaa; // Color para elementos deshabilitados
@@ -96,20 +110,20 @@ $star-filled-border: #f59e0b;
 // Header y navegación - tono medio consistente
 $background-primary: var(--color-primary); // Azul grisáceo medio - header y nav
 $background-nav: var(--color-primary); // Igual que primary para consistencia
-$background-calendar: var(--color-primary);
+$background-calendar: var(--color-background-calendar);
 // Fondo general de la página - con color suave
 $background-secondary: var(--color-background-secondary); // Azul grisáceo muy claro - tiene personalidad
 
 // Secciones de contenido - con color pero suaves
-$background-section: var(--color-background-secondary); // Azul grisáceo claro - secciones destacadas
+$background-section: var(--color-background-section); // Azul grisáceo claro - secciones destacadas
 $background-card: var(--color-background); // Blanco puro para cards dentro de secciones
 
 // Solo para elementos que realmente necesitan ser oscuros
-$background-dark: var(--color-text); // Azul grisáceo oscuro - usar con moderación
+$background-dark: var(--color-secondary-dark); // Azul grisáceo oscuro - usar con moderación
 $background-overlay: rgba(61, 74, 86, 0.85); // Overlay oscuro para modales
 
 // Acentos
-$background-accent: var(--color-primary); // Rosa para botones principales
+$background-accent: var(--color-background-accent); // Rosa para botones principales
 $background-accent-light: var(--color-primary-lighter); // Rosa muy claro para fondos suaves
 $background-grey: rgba(232, 239, 245, 0.90); // Fondo azulado claro translúcido
 
@@ -122,7 +136,9 @@ $background-button-info: #c1b0c1; // Botón azul información
 // ============================================
 // TIPOGRAFÍA
 // ============================================
-$font-primary: 'Noto Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+// Vinculamos a las variables CSS generadas por SaasConfigService
+$font-primary: var(--font-main, 'Noto Serif', sans-serif);
+$font-headings: var(--font-headings, 'Noto Sans', sans-serif);
 $font-mono: 'Noto Sans', monospace;
 
 // Tamaños de fuente

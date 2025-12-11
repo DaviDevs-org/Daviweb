@@ -11,6 +11,7 @@ import { ServicesInfoComponent } from '../services-info/services-info.component'
 import { BarbersInfoComponent } from '../barbers-info/barbers-info.component';
 import { Meta, Title } from '@angular/platform-browser';
 import { isPlatformBrowser } from '@angular/common';
+import { SaasConfigService } from 'src/app/config/saas-config.service';
 
 @Component({
   selector: 'app-home',
@@ -21,6 +22,7 @@ import { isPlatformBrowser } from '@angular/common';
   styleUrl: './home.component.scss'
 })
 export class HomeComponent {
+  private saasConfig = inject(SaasConfigService);
   private title = inject(Title);
   private meta = inject(Meta);
   private platformId = inject(PLATFORM_ID);

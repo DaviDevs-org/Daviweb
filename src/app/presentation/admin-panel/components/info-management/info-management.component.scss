@@ -1,6 +1,7 @@
 @use 'sass:color';
 @use '../../../../../styles/variables' as *;
 @use '../../../../../styles/mixins' as *;
+@use '../../../../../styles/functions' as *;
 
 // ------------------------
 // Estilos globales de inputs
@@ -54,8 +55,8 @@ select {
   padding: 20px;
   background: $white;
   color: $true-black;
-  border: 1px solid rgba($primary, 0.1);
-  box-shadow: 0 4px 20px rgba($primary, 0.1);
+  border: 1px solid alpha($primary, 0.1);
+  box-shadow: 0 4px 20px alpha($primary, 0.1);
 
   @include mobile {
     padding: 12px;
@@ -115,7 +116,7 @@ select {
   align-items: start;
   margin-bottom: 10px;
   padding: 12px;
-  border: 1px solid rgba($border-color, 0.3);
+  border: 1px solid alpha($border-color, 0.3);
   border-radius: 10px;
   background: $white;
   transition: all 0.3s ease;
@@ -133,8 +134,8 @@ select {
   }
 
   &:hover {
-    border-color: rgba($primary, 0.4);
-    box-shadow: 0 2px 8px rgba($primary, 0.1);
+    border-color: alpha($primary, 0.4);
+    box-shadow: 0 2px 8px alpha($primary, 0.1);
   }
 
   .day-label {
@@ -147,7 +148,7 @@ select {
     padding: 0;
 
     @include mobile {
-      background: rgba($primary, 0.08);
+      background: alpha($primary, 0.08);
       padding: 10px 12px;
       border-radius: 8px;
       margin-bottom: 0;
@@ -209,7 +210,7 @@ select {
       &:focus {
         outline: none;
         border-color: $primary;
-        box-shadow: 0 0 0 3px rgba($primary, 0.1);
+        box-shadow: 0 0 0 3px alpha($primary, 0.1);
       }
 
       &:disabled {
@@ -282,7 +283,7 @@ select {
     cursor: pointer;
     padding: 8px 12px;
     border-radius: 6px;
-    background: rgba($text-gray, 0.05);
+    background: alpha($text-gray, 0.05);
     transition: all 0.3s ease;
     white-space: nowrap;
     align-self: start;
@@ -300,7 +301,7 @@ select {
     }
 
     &:hover {
-      background: rgba($text-gray, 0.1);
+      background: alpha($text-gray, 0.1);
     }
 
     input[type="checkbox"] {
@@ -336,8 +337,8 @@ select {
 }
 
 .schedule-row:has(.closed-checkbox input[type="checkbox"]:checked) {
-  background: rgba($danger-red, 0.03);
-  border-color: rgba($danger-red, 0.2);
+  background: alpha($danger-red, 0.03);
+  border-color: alpha($danger-red, 0.2);
 
   .day-label {
     color: $danger-red;
@@ -347,8 +348,8 @@ select {
 }
 
 .schedule-row.closed-day {
-  background: rgba($danger-red, 0.03);
-  border-color: rgba($danger-red, 0.2);
+  background: alpha($danger-red, 0.03);
+  border-color: alpha($danger-red, 0.2);
 
   .day-label {
     color: $danger-red;
@@ -356,7 +357,7 @@ select {
   }
 
   .closed-checkbox {
-    background: rgba($danger-red, 0.1);
+    background: alpha($danger-red, 0.1);
     color: $danger-red;
     font-weight: 600;
   }
@@ -390,7 +391,7 @@ select {
     gap: 8px;
     margin-bottom: 20px;
     padding: 12px;
-    background: rgba($primary, 0.1);
+    background: alpha($primary, 0.1);
     border-radius: 8px;
     cursor: pointer;
 
@@ -426,7 +427,7 @@ select {
     }
 
     &:hover {
-      background: rgba($primary, 0.08);
+      background: alpha($primary, 0.08);
       transform: translateY(-1px);
     }
 
@@ -452,8 +453,8 @@ select {
       }
 
       &.no-image {
-        background: rgba($text-gray, 0.1);
-        border: 2px solid rgba($text-gray, 0.2);
+        background: alpha($text-gray, 0.1);
+        border: 2px solid alpha($text-gray, 0.2);
 
         i {
           font-size: 2rem;
@@ -493,7 +494,7 @@ select {
         &:focus {
           outline: none;
           border-color: $primary;
-          box-shadow: 0 0 0 3px rgba($primary, 0.1);
+          box-shadow: 0 0 0 3px alpha($primary, 0.1);
         }
       }
 
@@ -538,7 +539,7 @@ select {
 
       &:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba($danger-red, 0.25);
+        box-shadow: 0 4px 12px alpha($danger-red, 0.25);
       }
     }
   }
@@ -549,7 +550,7 @@ select {
     gap: 15px;
     margin-top: 20px;
     padding: 20px;
-    border: 2px dashed rgba($primary, 0.5);
+    border: 2px dashed alpha($primary, 0.5);
     border-radius: 12px;
     background: $white;
 
@@ -583,9 +584,9 @@ select {
       .barber-upload-area {
         width: 120px;
         height: 120px;
-        border: 2px dashed rgba($primary, 0.4);
+        border: 2px dashed alpha($primary, 0.4);
         border-radius: 50%;
-        background: rgba($primary, 0.05);
+        background: alpha($primary, 0.05);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -604,7 +605,7 @@ select {
 
         &:hover {
           border-color: $primary;
-          background-color: rgba($primary, 0.1);
+          background-color: alpha($primary, 0.1);
         }
 
         &.has-image {
@@ -678,7 +679,7 @@ select {
       .barber-progress {
         width: 120px;
         height: 4px;
-        background: rgba($primary, 0.2);
+        background: alpha($primary, 0.2);
         border-radius: 2px;
         overflow: hidden;
 
@@ -721,7 +722,7 @@ select {
         &:focus {
           outline: none;
           border-color: $primary;
-          box-shadow: 0 0 0 3px rgba($primary, 0.1);
+          box-shadow: 0 0 0 3px alpha($primary, 0.1);
         }
       }
 
@@ -768,7 +769,7 @@ select {
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba($primary, 0.3);
+    box-shadow: 0 8px 25px alpha($primary, 0.3);
   }
 }
 
@@ -798,7 +799,7 @@ select {
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba($danger-red, 0.25);
+    box-shadow: 0 4px 12px alpha($danger-red, 0.25);
   }
 }
 
@@ -887,7 +888,7 @@ select {
   flex-direction: column;
   gap: 15px;
   padding: 20px;
-  border: 2px solid rgba($border-color, 0.5);
+  border: 2px solid alpha($border-color, 0.5);
   border-radius: 12px;
   background: $light-gray;
   margin-bottom: 15px;
@@ -900,8 +901,8 @@ select {
   }
 
   &:hover {
-    border-color: rgba($primary, 0.4);
-    background: rgba($primary, 0.05);
+    border-color: alpha($primary, 0.4);
+    background: alpha($primary, 0.05);
   }
 
   .ex-date {
@@ -918,7 +919,7 @@ select {
     &:focus {
       outline: none;
       border-color: $primary;
-      box-shadow: 0 0 0 3px rgba($primary, 0.1);
+      box-shadow: 0 0 0 3px alpha($primary, 0.1);
     }
   }
 
@@ -944,7 +945,7 @@ select {
   }
 
   .ex-hours {
-    border-top: 1px solid rgba($border-color, 0.5);
+    border-top: 1px solid alpha($border-color, 0.5);
     padding-top: 15px;
 
     @include mobile {
@@ -998,7 +999,7 @@ select {
           &:focus {
             outline: none;
             border-color: $primary;
-            box-shadow: 0 0 0 3px rgba($primary, 0.1);
+            box-shadow: 0 0 0 3px alpha($primary, 0.1);
           }
         }
 
@@ -1038,7 +1039,7 @@ select {
 
           &:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba($danger-red, 0.25);
+            box-shadow: 0 4px 12px alpha($danger-red, 0.25);
           }
         }
       }
@@ -1060,8 +1061,8 @@ select {
 
   .no-intervals-message {
     padding: 15px;
-    background: rgba($danger-red, 0.1);
-    border: 1px solid rgba($danger-red, 0.3);
+    background: alpha($danger-red, 0.1);
+    border: 1px solid alpha($danger-red, 0.3);
     border-radius: 8px;
     color: color.scale($danger-red, $lightness: -20%);
     text-align: center;
@@ -1091,9 +1092,9 @@ select {
   display: flex;
   justify-content: center;
   padding: 20px;
-  border: 2px dashed rgba($primary, 0.4);
+  border: 2px dashed alpha($primary, 0.4);
   border-radius: 12px;
-  background: rgba($primary, 0.05);
+  background: alpha($primary, 0.05);
 
   @include mobile {
     padding: 15px;
@@ -1114,15 +1115,15 @@ select {
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba($primary, 0.3);
+      box-shadow: 0 6px 20px alpha($primary, 0.3);
     }
   }
 }
 
 // Estilos para el nuevo flujo de excepciones
 .exception-creation-flow {
-  background: rgba($primary, 0.05);
-  border: 2px solid rgba($primary, 0.2);
+  background: alpha($primary, 0.05);
+  border: 2px solid alpha($primary, 0.2);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -1141,7 +1142,7 @@ select {
     left: 10%;
     right: 10%;
     height: 2px;
-    background: rgba($primary, 0.3);
+    background: alpha($primary, 0.3);
     z-index: 1;
   }
 
@@ -1157,7 +1158,7 @@ select {
       height: 40px;
       border-radius: 50%;
       background: $light-gray;
-      border: 2px solid rgba($text-gray, 0.3);
+      border: 2px solid alpha($text-gray, 0.3);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1212,7 +1213,7 @@ select {
 
   .type-option {
     padding: 20px;
-    border: 2px solid rgba($border-color, 0.5);
+    border: 2px solid alpha($border-color, 0.5);
     border-radius: 10px;
     text-align: center;
     cursor: pointer;
@@ -1226,7 +1227,7 @@ select {
 
     &.selected {
       border-color: $primary;
-      background: rgba($primary, 0.1);
+      background: alpha($primary, 0.1);
     }
 
     i {
@@ -1257,7 +1258,7 @@ select {
 // Lista de excepciones existentes
 .exception-item {
   background: $white;
-  border: 1px solid rgba($border-color, 0.5);
+  border: 1px solid alpha($border-color, 0.5);
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 15px;
@@ -1296,10 +1297,10 @@ select {
         font-size: 0.9rem;
         padding: 4px 8px;
         border-radius: 6px;
-        background: rgba($primary, 0.1);
+        background: alpha($primary, 0.1);
 
         &.closed {
-          background: rgba($danger-red, 0.1);
+          background: alpha($danger-red, 0.1);
           color: $danger-red;
         }
       }
@@ -1323,7 +1324,7 @@ select {
     }
 
     .interval-tag {
-      background: rgba($primary, 0.1);
+      background: alpha($primary, 0.1);
       padding: 4px 8px;
       border-radius: 6px;
       font-size: 0.85rem;
@@ -1363,8 +1364,8 @@ select {
 // ===== NUEVOS ESTILOS MEJORADOS PARA EXCEPCIONES =====
 
 .exception-creation-flow {
-  background: rgba($primary, 0.05);
-  border: 2px solid rgba($primary, 0.2);
+  background: alpha($primary, 0.05);
+  border: 2px solid alpha($primary, 0.2);
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 24px;
@@ -1388,7 +1389,7 @@ select {
     left: 15%;
     right: 15%;
     height: 3px;
-    background: rgba($primary, 0.2);
+    background: alpha($primary, 0.2);
     z-index: 1;
 
     @include mobile {
@@ -1411,7 +1412,7 @@ select {
       height: 48px;
       border-radius: 50%;
       background: $white;
-      border: 3px solid rgba($text-gray, 0.3);
+      border: 3px solid alpha($text-gray, 0.3);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1506,7 +1507,7 @@ select {
 
   .type-option {
     padding: 24px 20px;
-    border: 2px solid rgba($border-color, 0.6);
+    border: 2px solid alpha($border-color, 0.6);
     border-radius: 12px;
     text-align: center;
     cursor: pointer;
@@ -1516,14 +1517,14 @@ select {
     &:hover {
       border-color: $primary;
       transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba($primary, 0.15);
+      box-shadow: 0 4px 15px alpha($primary, 0.15);
     }
 
     &.selected {
       border-color: $primary;
-      background: rgba($primary, 0.08);
+      background: alpha($primary, 0.08);
       transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba($primary, 0.2);
+      box-shadow: 0 4px 20px alpha($primary, 0.2);
     }
 
     i {
@@ -1556,7 +1557,7 @@ select {
   gap: 12px;
   flex-wrap: wrap;
   padding: 16px;
-  background: rgba($light-gray, 0.3);
+  background: alpha($light-gray, 0.3);
   border-radius: 10px;
   margin-bottom: 12px;
 
@@ -1594,7 +1595,7 @@ select {
     &:focus {
       outline: none;
       border-color: $primary;
-      box-shadow: 0 0 0 3px rgba($primary, 0.15);
+      box-shadow: 0 0 0 3px alpha($primary, 0.15);
     }
 
     &:invalid {
@@ -1628,9 +1629,9 @@ select {
 .closed-message {
   text-align: center;
   padding: 30px 20px;
-  background: rgba($primary, 0.08);
+  background: alpha($primary, 0.08);
   border-radius: 10px;
-  border: 2px dashed rgba($primary, 0.3);
+  border: 2px dashed alpha($primary, 0.3);
 
   i {
     font-size: 3rem;
@@ -1650,9 +1651,9 @@ select {
 .range-selector {
   text-align: center;
   padding: 30px 20px;
-  background: rgba($danger-red, 0.05);
+  background: alpha($danger-red, 0.05);
   border-radius: 10px;
-  border: 2px dashed rgba($danger-red, 0.3);
+  border: 2px dashed alpha($danger-red, 0.3);
 
   i {
     font-size: 3rem;
@@ -1726,15 +1727,15 @@ select {
 // Mejorar la lista de excepciones existentes
 .exception-item {
   background: $white;
-  border: 2px solid rgba($border-color, 0.4);
+  border: 2px solid alpha($border-color, 0.4);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: rgba($primary, 0.5);
-    box-shadow: 0 4px 15px rgba($primary, 0.1);
+    border-color: alpha($primary, 0.5);
+    box-shadow: 0 4px 15px alpha($primary, 0.1);
   }
 
   .exception-header {
@@ -1768,17 +1769,17 @@ select {
         padding: 6px 12px;
         border-radius: 20px;
         font-weight: 600;
-        background: rgba($primary, 0.1);
+        background: alpha($primary, 0.1);
         color: $primary;
         display: inline-block;
 
         &.closed {
-          background: rgba($danger-red, 0.1);
+          background: alpha($danger-red, 0.1);
           color: $danger-red;
         }
 
         &.range {
-          background: rgba($danger-red, 0.15);
+          background: alpha($danger-red, 0.15);
           color: $danger-red;
         }
       }
@@ -1825,13 +1826,13 @@ select {
     }
 
     .interval-tag {
-      background: rgba($primary, 0.1);
+      background: alpha($primary, 0.1);
       padding: 6px 12px;
       border-radius: 20px;
       font-size: 0.85rem;
       color: $text-dark;
       font-weight: 500;
-      border: 1px solid rgba($primary, 0.2);
+      border: 1px solid alpha($primary, 0.2);
     }
   }
 }
@@ -1859,9 +1860,9 @@ select {
   display: flex;
   justify-content: center;
   padding: 24px;
-  border: 2px dashed rgba($primary, 0.4);
+  border: 2px dashed alpha($primary, 0.4);
   border-radius: 12px;
-  background: rgba($primary, 0.03);
+  background: alpha($primary, 0.03);
   margin-top: 20px;
 
   @include mobile {
@@ -1882,7 +1883,7 @@ select {
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba($primary, 0.3);
+      box-shadow: 0 6px 20px alpha($primary, 0.3);
     }
   }
 }
@@ -1922,7 +1923,7 @@ select {
     align-items: center;
     gap: 6px;
     padding: 4px 8px;
-    background: rgba($light-gray, 0.3);
+    background: alpha($light-gray, 0.3);
     border-radius: 6px;
 
     @include mobile {

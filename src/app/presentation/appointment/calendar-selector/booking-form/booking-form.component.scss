@@ -1,5 +1,6 @@
 @use '../../../../../styles/variables' as *;
 @use '../../../../../styles/mixins' as *;
+@use '../../../../../styles/functions' as *;
 
 .booking-form-container {
   max-width: 800px;
@@ -373,7 +374,7 @@ textarea {
 
       &:focus-visible {
         outline: none;
-        box-shadow: 0 0 0 3px rgba($primary-rgb, 0.35);
+        box-shadow: 0 0 0 3px alpha($primary, 0.35);
         transform: translateY(-1px);
       }
     }

@@ -1,6 +1,7 @@
 @use 'sass:color';
 @use '../../../../../styles/variables' as *;
 @use '../../../../../styles/mixins' as *;
+@use '../../../../../styles/functions' as *;
 
 // ------------------------
 // Estilos globales de inputs
@@ -41,8 +42,8 @@ select {
             @include card-style;
             margin-bottom: 30px;
             background: $white;
-            border: 1px solid rgba($primary, 0.1);
-            box-shadow: 0 4px 20px rgba($primary, 0.1);
+            border: 1px solid alpha($primary, 0.1);
+            box-shadow: 0 4px 20px alpha($primary, 0.1);
             padding-top: 16px; // un poco más de aire arriba
 }
 
@@ -78,7 +79,7 @@ select {
             border-color: $primary-dark;
 
             &:not(.has-image) {
-                background: rgba($primary, 0.05);
+                background: alpha($primary, 0.05);
             }
 
             .upload-content {
@@ -159,9 +160,9 @@ select {
     &.time-configuration {
         margin-bottom: 30px;
         padding: 20px;
-        background: rgba($primary, 0.03);
+        background: alpha($primary, 0.03);
         border-radius: 12px;
-        border: 1px solid rgba($primary, 0.1);
+        border: 1px solid alpha($primary, 0.1);
 
         > label {
             font-size: 1.1rem;
@@ -245,8 +246,8 @@ select {
 .services-list {
     @include card-style;
     background: $white;
-    border: 1px solid rgba($primary, 0.1);
-    box-shadow: 0 4px 20px rgba($primary, 0.1);
+    border: 1px solid alpha($primary, 0.1);
+    box-shadow: 0 4px 20px alpha($primary, 0.1);
 
     h3 {
         color: $text-dark;
@@ -489,7 +490,7 @@ select {
 }
 
 .time-summary {
-    background: rgba($primary, 0.1);
+    background: alpha($primary, 0.1);
     border-left: 3px solid $primary;
     padding: 10px 15px;
     border-radius: 4px;
@@ -555,8 +556,8 @@ select {
     font-size: 0.85rem;
     font-weight: 600;
     color: $text-dark;
-    background: rgba($primary, 0.06);
-    border: 1px solid rgba($primary, 0.08);
+    background: alpha($primary, 0.06);
+    border: 1px solid alpha($primary, 0.08);
     white-space: nowrap;
 }
 
@@ -572,7 +573,7 @@ select {
 }
 
 .chip-estimated {
-    background: rgba($primary, 0.9);
+    background: alpha($primary, 0.9);
     color: $white;
     border: none;
 }
@@ -590,9 +591,9 @@ select {
 }
 
 .chip-hair {
-    background: rgba($primary, 0.08);
+    background: alpha($primary, 0.08);
     color: $text-dark;
-    border: 1px dashed rgba($primary, 0.12);
+    border: 1px dashed alpha($primary, 0.12);
 }
 
 @include mobile {
@@ -657,8 +658,8 @@ select {
     max-height: 340px; // suficiente para contenido medio
     opacity: 1;
     padding: 8px 4px 4px 4px;
-    border-left-color: rgba($primary, 0.4);
-    background: rgba($primary, 0.03);
+    border-left-color: alpha($primary, 0.4);
+    background: alpha($primary, 0.03);
     border-radius: 6px;
 }
 
@@ -685,7 +686,7 @@ select {
 .segments-list li {
     font-size: 0.8rem;
     background: $white;
-    border: 1px solid rgba($primary, 0.15);
+    border: 1px solid alpha($primary, 0.15);
     padding: 6px 8px;
     border-radius: 6px;
     margin-bottom: 6px;
@@ -697,7 +698,7 @@ select {
 .hair-length-item {
     font-size: 0.8rem;
     background: $white;
-    border: 1px solid rgba($primary, 0.15);
+    border: 1px solid alpha($primary, 0.15);
     padding: 6px 8px;
     border-radius: 6px;
     margin-bottom: 6px;
@@ -717,8 +718,8 @@ select {
     font-size: 0.75rem;
     font-weight: 600;
     padding: 4px 6px;
-    background: rgba($primary, 0.05);
-    border: 1px solid rgba($primary, 0.1);
+    background: alpha($primary, 0.05);
+    border: 1px solid alpha($primary, 0.1);
     border-radius: 6px;
 }
 
@@ -744,17 +745,17 @@ select {
     cursor: pointer;
     margin: 0;
     padding: 16px 20px;
-    background: rgba($primary, 0.05);
+    background: alpha($primary, 0.05);
     border-radius: 12px;
-    border: 2px solid rgba($primary, 0.15);
+    border: 2px solid alpha($primary, 0.15);
     transition: all 0.3s ease;
     height: 100%;
     min-height: 56px;
     align-content: center;
 
     &:hover {
-        border-color: rgba($primary, 0.4);
-        background: rgba($primary, 0.1);
+        border-color: alpha($primary, 0.4);
+        background: alpha($primary, 0.1);
         transform: translateY(-2px);
         box-shadow: $shadow-md;
     }
@@ -877,9 +878,9 @@ select {
 }
 
 .hair-length-row {
-    border: 2px solid rgba($primary, 0.2);
+    border: 2px solid alpha($primary, 0.2);
     border-left: 5px solid $primary;
-    background: rgba($primary, 0.03);
+    background: alpha($primary, 0.03);
     border-radius: 12px;
     padding: 14px 16px;
     display: grid;
@@ -899,7 +900,7 @@ select {
     align-items: center;
     gap: 8px;
     background: $white;
-    border: 1px solid rgba($primary, 0.2);
+    border: 1px solid alpha($primary, 0.2);
     padding: 6px 10px;
     border-radius: 999px;
     // Evitar overflow horizontal en móviles: no forzar max-content
@@ -942,7 +943,7 @@ select {
         align-items: center;
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid rgba($primary, 0.1);
+        border-bottom: 2px solid alpha($primary, 0.1);
 
         h4 {
             margin: 0;
@@ -981,16 +982,16 @@ select {
 
 .time-segment-card {
     background: $white;
-    border: 2px solid rgba($primary, 0.3);
+    border: 2px solid alpha($primary, 0.3);
     border-radius: 12px;
     padding: 1.5rem;
     transition: all 0.3s ease;
     position: relative;
-    box-shadow: 0 2px 10px rgba($primary, 0.1);
+    box-shadow: 0 2px 10px alpha($primary, 0.1);
 
     &:hover {
-        border-color: rgba($primary, 0.5);
-        box-shadow: 0 4px 20px rgba($primary, 0.2);
+        border-color: alpha($primary, 0.5);
+        box-shadow: 0 4px 20px alpha($primary, 0.2);
     }
 
     .segment-header {
@@ -1012,8 +1013,8 @@ select {
         }
 
         .btn-remove-segment {
-            background: rgba($danger-red, 0.1);
-            border: 1px solid rgba($danger-red, 0.3);
+            background: alpha($danger-red, 0.1);
+            border: 1px solid alpha($danger-red, 0.3);
             color: $danger-red;
             width: 32px;
             height: 32px;
@@ -1056,8 +1057,8 @@ select {
                 overflow: hidden;
 
                 &.disabled {
-                    background: rgba($text-gray, 0.05);
-                    border-color: rgba($text-gray, 0.2);
+                    background: alpha($text-gray, 0.05);
+                    border-color: alpha($text-gray, 0.2);
                 }
 
                 input {
@@ -1078,7 +1079,7 @@ select {
                 }
 
                 .suffix {
-                    background: rgba($primary, 0.1);
+                    background: alpha($primary, 0.1);
                     padding: 0.5rem 0.75rem;
                     color: $text-gray;
                     font-weight: 600;
@@ -1100,7 +1101,7 @@ select {
         align-items: center;
         gap: 1rem;
         padding: 1rem;
-        background: rgba($primary, 0.03);
+        background: alpha($primary, 0.03);
         border-radius: 8px;
 
         .active-time {
@@ -1123,7 +1124,7 @@ select {
             }
 
             .break-time {
-                background: rgba($text-gray, 0.1);
+                background: alpha($text-gray, 0.1);
                 padding: 0.5rem 1rem;
                 border-radius: 20px;
                 font-weight: 600;
@@ -1138,8 +1139,8 @@ select {
     margin-top: 1.5rem;
 
     .summary-card {
-        background: linear-gradient(135deg, rgba($primary, 0.05), rgba($secondary, 0.02));
-        border: 2px solid rgba($primary, 0.1);
+        background: linear-gradient(135deg, alpha($primary, 0.05), alpha($secondary, 0.02));
+        border: 2px solid alpha($primary, 0.1);
         border-radius: 12px;
         padding: 1.5rem;
 
@@ -1148,7 +1149,7 @@ select {
             justify-content: space-between;
             align-items: center;
             padding: 0.5rem 0;
-            border-bottom: 1px solid rgba($primary, 0.1);
+            border-bottom: 1px solid alpha($primary, 0.1);
 
             &:last-child {
                 border-bottom: none;

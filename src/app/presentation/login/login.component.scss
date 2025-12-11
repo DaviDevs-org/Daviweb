@@ -1,10 +1,11 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as *;
+@use '../../../styles/functions' as *;
 
 .login-container {
   min-height: 100svh;
   height: 100svh;
-  background: linear-gradient(135deg, $primary-lighter 0%, rgba($primary-light, 0.3) 50%, $white 100%);
+  background: linear-gradient(135deg, $primary-lighter 0%, alpha($primary-light, 0.3) 50%, $white 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,14 +23,14 @@
 .login-card {
   background: $white;
   border-radius: 20px;
-  box-shadow: 0 10px 40px rgba($primary, 0.15);
+  box-shadow: 0 10px 40px alpha($primary, 0.15);
   width: 100%;
   max-width: 380px;
   min-width: 280px;
   overflow: hidden;
   position: relative;
   margin: auto;
-  border: 1px solid rgba($primary, 0.1);
+  border: 1px solid alpha($primary, 0.1);
 
   &::before {
     content: '';
@@ -43,10 +44,10 @@
 }
 
 .login-header {
-  background: linear-gradient(135deg, rgba($primary, 0.08) 0%, rgba($accent, 0.05) 100%);
+  background: linear-gradient(135deg, alpha($primary, 0.08) 0%, alpha($accent, 0.05) 100%);
   padding: 30px 25px 20px;
   text-align: center;
-  border-bottom: 2px solid rgba($primary, 0.15);
+  border-bottom: 2px solid alpha($primary, 0.15);
 
   .scissors-icon {
     font-size: 2rem;
@@ -111,7 +112,7 @@
   &:focus {
     outline: none;
     border-color: $primary;
-    box-shadow: 0 0 0 3px rgba($primary, 0.1);
+    box-shadow: 0 0 0 3px alpha($primary, 0.1);
   }
 
   &::placeholder {
@@ -146,7 +147,7 @@
   color: $text-dark;
 
   &:hover {
-    background-color: rgba($primary, 0.1);
+    background-color: alpha($primary, 0.1);
   }
 }
 
@@ -171,11 +172,11 @@
   margin-bottom: 15px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba($primary, 0.3);
+  box-shadow: 0 4px 15px alpha($primary, 0.3);
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba($primary, 0.4);
+    box-shadow: 0 6px 25px alpha($primary, 0.4);
     background: linear-gradient(135deg, $accent 0%, $primary 100%);
   }
 
@@ -189,7 +190,7 @@
   }
 
   &.loading {
-    background: linear-gradient(135deg, rgba($primary, 0.7) 0%, rgba($accent, 0.7) 100%);
+    background: linear-gradient(135deg, alpha($primary, 0.7) 0%, alpha($accent, 0.7) 100%);
   }
 }
 
@@ -203,7 +204,7 @@
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba($white, 0.3);
+  border: 2px solid alpha($white, 0.3);
   border-top: 2px solid $white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -233,10 +234,10 @@
 }
 
 .login-footer {
-  background: linear-gradient(135deg, rgba($primary, 0.08) 0%, rgba($accent, 0.05) 100%);
+  background: linear-gradient(135deg, alpha($primary, 0.08) 0%, alpha($accent, 0.05) 100%);
   padding: 15px 25px;
   text-align: center;
-  border-top: 2px solid rgba($primary, 0.15);
+  border-top: 2px solid alpha($primary, 0.15);
 
   p {
     color: $text-pink;

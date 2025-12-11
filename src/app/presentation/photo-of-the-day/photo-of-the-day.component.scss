@@ -1,5 +1,6 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as *;
+@use '../../../styles/functions' as *;
 
 .photo-of-the-day {
   padding: 32px 40px 48px 40px;
@@ -359,7 +360,7 @@
   appearance: none;
   background: $background-accent;
   border-radius: 6px;
-  box-shadow: 0 2px 6px rgba($primary-rgb, 0.12);
+  box-shadow: 0 2px 6px alpha($primary, 0.12);
 
   // Track
   &::-webkit-slider-runnable-track {
@@ -388,7 +389,7 @@
     border-radius: 50%;
     background: $primary;
     border: 2px solid $secondary;
-    box-shadow: 0 2px 3px rgba($primary-rgb, 0.16);
+    box-shadow: 0 2px 3px alpha($primary, 0.16);
     transition: background 0.3s;
     cursor: pointer;
   }
@@ -399,7 +400,7 @@
     border-radius: 50%;
     background: $primary;
     border: 2px solid $secondary;
-    box-shadow: 0 2px 3px rgba($primary-rgb, 0.16);
+    box-shadow: 0 2px 3px alpha($primary, 0.16);
     cursor: pointer;
   }
 
@@ -409,12 +410,12 @@
     border-radius: 50%;
     background: $primary;
     border: 2px solid $secondary;
-    box-shadow: 0 2px 3px rgba($primary-rgb, 0.16);
+    box-shadow: 0 2px 3px alpha($primary, 0.16);
     cursor: pointer;
   }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba($primary-rgb, 0.22);
+    box-shadow: 0 0 0 3px alpha($primary, 0.22);
   }
 }
