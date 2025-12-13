@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Injectable, Injector, runInInjectionContext } from "@angular/core";
 import { addDoc, collection, collectionData, deleteDoc, doc, docData, Firestore, setDoc, updateDoc } from "@angular/fire/firestore";
 import { ScheduleRepository } from "@application/business";
 import { ExceptionItem, ExceptionItemDTO, ReservedSlot, ReservedSlotDTO, ScheduleDay, ScheduleDayDTO } from "@domain/business-info";
@@ -12,6 +12,7 @@ import { SaasConfigService } from "src/app/config/saas-config.service";
 export class FirebaseScheduleRepository implements ScheduleRepository {
     private pathConfig = inject(SaasConfigService).getDDBBPaths();
     private firestore = inject(Firestore);
+    private injector = inject(Injector);
 
     private schedulePath = this.pathConfig.schedule;
     private exceptionsPath = this.pathConfig.exceptions;
@@ -37,21 +38,23 @@ export class FirebaseScheduleRepository implements ScheduleRepository {
         }
         const placeRef = doc(this.firestore, this.schedulePath);
 
-        return (docData(placeRef) as Observable<any>).pipe(
-            map(data => {
-                const scheduleData = data?.schedule ?? this.getDefaultSchedule();
-                // Convertir DTOs a entidades del domain
-                return scheduleData.map((dayDTO: ScheduleDayDTO) => ScheduleDay.fromDTO(dayDTO));
-            }),
-            catchError(err => {
-                if (err.code === 'permission-denied') {
-                    console.warn('Permisos insuficientes para leer el horario. Usando horario por defecto.');
-                } else {
-                    console.error('Error getting schedule:', err);
-                }
-                return of(this.getDefaultSchedule().map(dto => ScheduleDay.fromDTO(dto)));
-            })
-        );
+        return runInInjectionContext(this.injector, () => {
+            return (docData(placeRef) as Observable<any>).pipe(
+                map(data => {
+                    const scheduleData = data?.schedule ?? this.getDefaultSchedule();
+                    // Convertir DTOs a entidades del domain
+                    return scheduleData.map((dayDTO: ScheduleDayDTO) => ScheduleDay.fromDTO(dayDTO));
+                }),
+                catchError(err => {
+                    if (err.code === 'permission-denied') {
+                        console.warn('Permisos insuficientes para leer el horario. Usando horario por defecto.');
+                    } else {
+                        console.error('Error getting schedule:', err);
+                    }
+                    return of(this.getDefaultSchedule().map(dto => ScheduleDay.fromDTO(dto)));
+                })
+            );
+        });
     }
 
     async updateSchedule(schedule: ScheduleDay[]): Promise<void> {
@@ -75,17 +78,19 @@ export class FirebaseScheduleRepository implements ScheduleRepository {
         }
         const collectionRef = collection(this.firestore, this.exceptionsPath);
 
-        return (collectionData(collectionRef, { idField: 'id' }) as Observable<ExceptionItemDTO[]>).pipe(
-            map(dtos => dtos.map(dto => ExceptionItem.fromDTO(dto))),
-            catchError(err => {
-                if (err.code === 'permission-denied') {
-                    console.warn('Permisos insuficientes para leer excepciones. Usando lista vacía.');
-                } else {
-                    console.error('Error getting exceptions:', err);
-                }
-                return of([]);
-            })
-        );
+        return runInInjectionContext(this.injector, () => {
+            return (collectionData(collectionRef, { idField: 'id' }) as Observable<ExceptionItemDTO[]>).pipe(
+                map(dtos => dtos.map(dto => ExceptionItem.fromDTO(dto))),
+                catchError(err => {
+                    if (err.code === 'permission-denied') {
+                        console.warn('Permisos insuficientes para leer excepciones. Usando lista vacía.');
+                    } else {
+                        console.error('Error getting exceptions:', err);
+                    }
+                    return of([]);
+                })
+            );
+        });
     }
 
     async addException(exception: ExceptionItem): Promise<void> {
@@ -107,19 +112,20 @@ export class FirebaseScheduleRepository implements ScheduleRepository {
 
     // ============= SLOTS =============
     getSlots(): Observable<ReservedSlot[]> {
-        const collectionRef = collection(this.firestore, this.slotsPath);
-        
-        return (collectionData(collectionRef, { idField: 'id' }) as Observable<ReservedSlotDTO[]>).pipe(
-            map(dtos => dtos.map(dto => ReservedSlot.fromDTO(dto))),
-            catchError(err => {
-                if (err.code === 'permission-denied') {
-                    console.warn('Permisos insuficientes para leer slots. Usando lista vacía.');
-                } else {
-                    console.error('Error getting slots:', err);
-                }
-                return of([]);
-            })
-        );
+        return runInInjectionContext(this.injector, () => {
+            const collectionRef = collection(this.firestore, this.slotsPath);
+            return (collectionData(collectionRef, { idField: 'id' }) as Observable<ReservedSlotDTO[]>).pipe(
+                map(dtos => dtos.map(dto => ReservedSlot.fromDTO(dto))),
+                catchError(err => {
+                    if (err.code === 'permission-denied') {
+                        console.warn('Permisos insuficientes para leer slots. Usando lista vacía.');
+                    } else {
+                        console.error('Error getting slots:', err);
+                    }
+                    return of([]);
+                })
+            );
+        });
     }
 
     async addSlot(slot: ReservedSlot): Promise<void> {

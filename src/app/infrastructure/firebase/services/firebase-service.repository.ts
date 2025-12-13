@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Injectable, Injector, runInInjectionContext } from "@angular/core";
 import { addDoc, collection, collectionData, deleteDoc, doc, Firestore, updateDoc } from "@angular/fire/firestore";
 import { ServiceRepository } from "@application/services";
 import { Service, ServiceDTO } from "@domain/services";
@@ -11,6 +11,7 @@ import { SaasConfigService } from "src/app/config/saas-config.service";
 export class FirebaseServiceRepository implements ServiceRepository {
     private firestore = inject(Firestore);
     private pathConfig = inject(SaasConfigService).getDDBBPaths();
+    private injector = inject(Injector);
     
     // Usamos la ruta definida en la configuración
     private path = this.pathConfig.services;
@@ -20,18 +21,19 @@ export class FirebaseServiceRepository implements ServiceRepository {
             console.error('Firebase Firestore is not initialized!');
             return of([]);
         }
-        const placeRef = collection(this.firestore, this.path);
-        
-        return (collectionData(placeRef, { idField: 'id' }) as Observable<ServiceDTO[]>).pipe(
-            catchError(err => {
-                if (err.code === 'permission-denied') {
-                    console.warn('Permisos insuficientes para leer servicios. Usando lista vacía.');
-                } else {
-                    console.error('Error getting services:', err);
-                }
-                return of([]);
-            })
-        );
+        return runInInjectionContext(this.injector, () => {
+            const placeRef = collection(this.firestore, this.path);
+            return (collectionData(placeRef, { idField: 'id' }) as Observable<ServiceDTO[]>).pipe(
+                catchError(err => {
+                    if (err.code === 'permission-denied') {
+                        console.warn('Permisos insuficientes para leer servicios. Usando lista vacía.');
+                    } else {
+                        console.error('Error getting services:', err);
+                    }
+                    return of([]);
+                })
+            );
+        });
     }
 
     async addService(service: Service): Promise<string> {

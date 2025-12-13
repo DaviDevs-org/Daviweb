@@ -18,10 +18,12 @@
   font-family: $font-primary;
   color: $text-dark;
   overflow-x: hidden;
+  min-height: 500px; /* Coincide con skeleton desktop */
 
   @include mobile {
     padding: $spacing-xl $spacing-md;
     gap: 40px;
+    min-height: 800px; /* Coincide con skeleton móvil */
   }
 
   @include small-mobile {

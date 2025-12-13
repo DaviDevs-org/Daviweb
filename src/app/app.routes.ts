@@ -1,16 +1,27 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './presentation/login/login.component';
-import { HomeComponent } from './presentation/home/home.component';
-import { AdminPanelComponent } from './presentation/admin-panel/admin-panel.component';
 import { AuthenticationService } from './presentation/shared/authentication.service';
-import { LegalAdviceComponent } from './presentation/legal/legal-advice/legal-advice.component';
-import { PrivacyTermsComponent } from './presentation/legal/privacy-terms/privacy-terms.component';
 
 export const routes: Routes = [
-    { path: '', component: HomeComponent, },
-    { path: 'login', component: LoginComponent },
-    { path: 'admin', component: AdminPanelComponent, canActivate: [AuthenticationService] },
-    { path: 'aviso-legal', component: LegalAdviceComponent },
-    { path: 'privacidad', component: PrivacyTermsComponent },
+    { 
+        path: '', 
+        loadComponent: () => import('./presentation/home/home.component').then(m => m.HomeComponent) 
+    },
+    { 
+        path: 'login', 
+        loadComponent: () => import('./presentation/login/login.component').then(m => m.LoginComponent) 
+    },
+    { 
+        path: 'admin', 
+        loadComponent: () => import('./presentation/admin-panel/admin-panel.component').then(m => m.AdminPanelComponent),
+        canActivate: [AuthenticationService] 
+    },
+    { 
+        path: 'aviso-legal', 
+        loadComponent: () => import('./presentation/legal/legal-advice/legal-advice.component').then(m => m.LegalAdviceComponent) 
+    },
+    { 
+        path: 'privacidad', 
+        loadComponent: () => import('./presentation/legal/privacy-terms/privacy-terms.component').then(m => m.PrivacyTermsComponent) 
+    },
     { path: '**', redirectTo: '' }
 ];

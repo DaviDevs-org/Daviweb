@@ -10,107 +10,130 @@
             <app-photo-of-the-day></app-photo-of-the-day>
         </section>
 
-        @if (loadServices()) {
-        <section aria-labelledby="services-heading" class="section services-section" id="services">
-            <h2 class="sr-only" id="services-heading">Servicios</h2>
-            <app-services-info />
-        </section>
-        } @else {
-        <div class="skeleton-services" aria-hidden="true" data-section="services">
-        <div class="skeleton-header"></div>
-        <div class="skeleton-categories"></div>
-        <div class="skeleton-content"></div>
-    </div>
-    }
-        @if (loadBarbers()) {
-        <section aria-labelledby="barbers-heading" class="section barbers-section" id="barbers">
-            <h2 class="sr-only" id="barbers-heading">Barberos</h2>
-            <app-barbers-info />
-        </section>
-        } @else {
-        <div class="skeleton-barbers" aria-hidden="true" data-section="barbers">
-        <div class="skeleton-header"></div>
-        <div class="skeleton-cards"></div>
-        <div class="skeleton-note"></div>
-    </div>
-    }
-        @if (loadAppointments()) {
-        <section aria-labelledby="appointment-heading" class="section appointment-section" id="appointments">
-            <h2 class="sr-only" id="appointment-heading">Reserva de cita</h2>
-            <app-appointment />
-        </section>
-        } @else {
-        <div class="skeleton-appointment" aria-hidden="true" data-section="appointments">
-        <div class="skeleton-calendar-header"></div>
-        <div class="skeleton-calendar-grid"></div>
-    </div>
-    }
-        @if (loadLocation()) {
-        <section aria-labelledby="location-heading" class="section location-section" id="location-and-contact">
-            <h2 class="sr-only" id="location-heading">Ubicación y contacto</h2>
-            <app-location-and-contact />
-        </section>
-        } @else {
-        <div class="skeleton-location" aria-hidden="true" data-section="location-and-contact">
-        <div class="skeleton-heading"></div>
-        <div class="skeleton-content">
-            <div class="skeleton-map"></div>
-            <div class="skeleton-info"></div>
+        <div id="services">
+            @defer (on viewport) {
+            <section aria-labelledby="services-heading" class="section services-section">
+                <h2 class="sr-only" id="services-heading">Servicios</h2>
+                <app-services-info />
+            </section>
+            } @placeholder {
+            <div class="skeleton-services" aria-hidden="true">
+                <div class="skeleton-header"></div>
+                <div class="skeleton-categories"></div>
+                <div class="skeleton-content"></div>
+            </div>
+            }
         </div>
-    </div>
-    }
-        @if (loadAbout()) {
-        <section aria-labelledby="about-heading" class="section about-section" id="about">
-            <h2 class="sr-only" id="about-heading">Sobre nosotros</h2>
-            <app-about-us />
-        </section>
-        } @else {
-        <div class="skeleton-about" aria-hidden="true" data-section="about">
-        <div class="skeleton-heading"></div>
-        <div class="skeleton-content">
-            <div class="skeleton-text"></div>
-            <div class="skeleton-image"></div>
+
+        <div id="barbers">
+            @defer (on viewport) {
+            <section aria-labelledby="barbers-heading" class="section barbers-section">
+                <h2 class="sr-only" id="barbers-heading">Barberos</h2>
+                <app-barbers-info />
+            </section>
+            } @placeholder {
+            <div class="skeleton-barbers" aria-hidden="true">
+                <div class="skeleton-header"></div>
+                <div class="skeleton-cards"></div>
+                <div class="skeleton-note"></div>
+            </div>
+            }
         </div>
-    </div>
-    }
-        @if (loadOpinions()) {
-        <section aria-labelledby="opinions-heading" class="section opinions-section" id="opinions">
-            <h2 class="sr-only" id="opinions-heading">Opiniones</h2>
-            <app-opinions />
-        </section>
-        } @else {
-        <div class="skeleton-opinions" aria-hidden="true" data-section="opinions">
-        <div class="skeleton-heading"></div>
-        <div class="skeleton-subtitle"></div>
-        <div class="skeleton-cards-container">
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
+
+        <div id="appointments">
+            @defer (on viewport) {
+            <section aria-labelledby="appointment-heading" class="section appointment-section">
+                <h2 class="sr-only" id="appointment-heading">Reserva de cita</h2>
+                <app-appointment />
+            </section>
+            } @placeholder {
+            <div class="skeleton-appointment" aria-hidden="true">
+                <div class="skeleton-calendar-header"></div>
+                <div class="skeleton-calendar-grid"></div>
+            </div>
+            }
         </div>
-    </div>
-    }
-        @if (loadFaq()) {
-        <section aria-labelledby="faq-heading" class="section faq-section" id="faq">
-            <h2 class="sr-only" id="faq-heading">Preguntas frecuentes</h2>
-            <app-faq />
-        </section>
-        } @else {
-        <div class="skeleton-faq" aria-hidden="true" data-section="faq">
-        <div class="skeleton-heading"></div>
-        <div class="skeleton-items">
-            <div class="skeleton-item"></div>
-            <div class="skeleton-item"></div>
-            <div class="skeleton-item"></div>
-            <div class="skeleton-item"></div>
+
+        <div id="location-and-contact">
+            @defer (on viewport) {
+            <section aria-labelledby="location-heading" class="section location-section">
+                <h2 class="sr-only" id="location-heading">Ubicación y contacto</h2>
+                <app-location-and-contact />
+            </section>
+            } @placeholder {
+            <div class="skeleton-location" aria-hidden="true">
+                <div class="skeleton-heading"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-map"></div>
+                    <div class="skeleton-info"></div>
+                </div>
+            </div>
+            }
         </div>
-    </div>
-    }
-        @if (loadFooter()) {
-        <section aria-labelledby="footer-heading" class="section footer-section" id="footer">
-            <h2 class="sr-only" id="footer-heading">Pie de página</h2>
-            <app-footer />
-        </section>
-        } @else {
-        <div class="skeleton-footer" aria-hidden="true" data-section="footer"></div>
-        }
+
+        <div id="about">
+            @defer (on viewport) {
+            <section aria-labelledby="about-heading" class="section about-section">
+                <h2 class="sr-only" id="about-heading">Sobre nosotros</h2>
+                <app-about-us />
+            </section>
+            } @placeholder {
+            <div class="skeleton-about" aria-hidden="true">
+                <div class="skeleton-heading"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-image"></div>
+                </div>
+            </div>
+            }
+        </div>
+
+        <div id="opinions">
+            @defer (on viewport) {
+            <section aria-labelledby="opinions-heading" class="section opinions-section">
+                <h2 class="sr-only" id="opinions-heading">Opiniones</h2>
+                <app-opinions />
+            </section>
+            } @placeholder {
+            <div class="skeleton-opinions" aria-hidden="true">
+                <div class="skeleton-heading"></div>
+                <div class="skeleton-subtitle"></div>
+                <div class="skeleton-cards-container">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+            </div>
+            }
+        </div>
+
+        <div id="faq">
+            @defer (on viewport) {
+            <section aria-labelledby="faq-heading" class="section faq-section">
+                <h2 class="sr-only" id="faq-heading">Preguntas frecuentes</h2>
+                <app-faq />
+            </section>
+            } @placeholder {
+            <div class="skeleton-faq" aria-hidden="true">
+                <div class="skeleton-heading"></div>
+                <div class="skeleton-items">
+                    <div class="skeleton-item"></div>
+                    <div class="skeleton-item"></div>
+                    <div class="skeleton-item"></div>
+                    <div class="skeleton-item"></div>
+                </div>
+            </div>
+            }
+        </div>
+
+        <div id="footer">
+            @defer (on viewport) {
+            <section aria-labelledby="footer-heading" class="section footer-section">
+                <h2 class="sr-only" id="footer-heading">Pie de página</h2>
+                <app-footer />
+            </section>
+            } @placeholder {
+            <div class="skeleton-footer" aria-hidden="true"></div>
+            }
+        </div>
 </div>

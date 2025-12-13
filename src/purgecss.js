@@ -2,7 +2,7 @@ const { PurgeCSS } = require("purgecss");
 const fs = require("fs");
 const path = require("path");
 
-const distPath = path.join(__dirname, "../../dist/daviweb/browser");
+const distPath = path.join(__dirname, "../dist/daviweb/browser");
 
 async function purgeCss() {
     const cssFiles = fs

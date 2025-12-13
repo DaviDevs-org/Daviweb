@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import { BusinessInfoRepository } from '@application/business';
 import {
   collection,
@@ -28,6 +28,7 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
   private pathConfig = inject(SaasConfigService).getDDBBPaths();
   private firestore = inject(Firestore);
   private storage = inject(Storage);
+  private injector = inject(Injector);
 
   private contactInfoPath = this.pathConfig.contactInfo;
   private barberSettingsPath = this.pathConfig.barberSelection;
@@ -49,26 +50,28 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
         const defaults = this.getDefaultContactInfo();
         return of(new ContactInfo(defaults.phone, defaults.email, defaults.address));
     }
-    const docRef = doc(this.firestore, this.contactInfoPath);
-
-    return (docData(docRef) as Observable<any>).pipe(
-      map(data => {
-        const defaults = this.getDefaultContactInfo();
-        if (!data || !data.contactInfo) {
-          return new ContactInfo(defaults.phone, defaults.email, defaults.address);
-        }
-        return new ContactInfo(
-            data.contactInfo.phone || defaults.phone,
-            data.contactInfo.email || defaults.email,
-            data.contactInfo.address || defaults.address
-        );
-      }),
-      catchError(err => {
-        console.error('Error getting contact info:', err);
-        const defaults = this.getDefaultContactInfo();
-        return of(new ContactInfo(defaults.phone, defaults.email, defaults.address));
-      })
-    );
+  
+    return runInInjectionContext(this.injector, () => {
+      const docRef = doc(this.firestore, this.contactInfoPath);
+      return (docData(docRef) as Observable<any>).pipe(
+        map(data => {
+          const defaults = this.getDefaultContactInfo();
+          if (!data || !data.contactInfo) {
+            return new ContactInfo(defaults.phone, defaults.email, defaults.address);
+          }
+          return new ContactInfo(
+              data.contactInfo.phone || defaults.phone,
+              data.contactInfo.email || defaults.email,
+              data.contactInfo.address || defaults.address
+          );
+        }),
+        catchError(err => {
+          console.error('Error getting contact info:', err);
+          const defaults = this.getDefaultContactInfo();
+          return of(new ContactInfo(defaults.phone, defaults.email, defaults.address));
+        })
+      );
+    });
   }
 
   async updateContactInfo(contactInfo: ContactInfo): Promise<void> {
@@ -91,25 +94,27 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
   }
 
   getBarberSettings(): Observable<BarberSettings> {
-    const settingsDocRef = doc(this.firestore, this.barberSettingsPath);
-    const settings$ = docData(settingsDocRef) as Observable<{ barberSelection: boolean } | undefined>;
+    return runInInjectionContext(this.injector, () => {
+      const settingsDocRef = doc(this.firestore, this.barberSettingsPath);
+      const settings$ = docData(settingsDocRef) as Observable<{ barberSelection: boolean } | undefined>;
 
-    const barbersColRef = collection(this.firestore, this.barbersPath);
-    // Map document ID to 'id' field in DTO
-    const barbers$ = collectionData(barbersColRef, { idField: 'id' }) as Observable<BarberDTO[]>;
+      const barbersColRef = collection(this.firestore, this.barbersPath);
+      // Map document ID to 'id' field in DTO
+      const barbers$ = collectionData(barbersColRef, { idField: 'id' }) as Observable<BarberDTO[]>;
 
-    return combineLatest([settings$, barbers$]).pipe(
-      map(([settingsData, barbersDtos]) => {
-        const barberSelection = settingsData?.barberSelection ?? false;
-        const staff = barbersDtos.map(dto => Barber.fromDTO(dto));
-        return new BarberSettings(barberSelection, staff);
-      }),
-      catchError(error => {
-        console.error('Error obteniendo BarberSettings:', error);
-        const defaults = this.getDefaultBarberSettings();
-        return of(new BarberSettings(defaults.barberSelection, defaults.staff));
-      })
-    );
+      return combineLatest([settings$, barbers$]).pipe(
+        map(([settingsData, barbersDtos]) => {
+          const barberSelection = settingsData?.barberSelection ?? false;
+          const staff = barbersDtos.map(dto => Barber.fromDTO(dto));
+          return new BarberSettings(barberSelection, staff);
+        }),
+        catchError(error => {
+          console.error('Error obteniendo BarberSettings:', error);
+          const defaults = this.getDefaultBarberSettings();
+          return of(new BarberSettings(defaults.barberSelection, defaults.staff));
+        })
+      );
+    });
   }
 
   async updateBarberSettings(settings: BarberSettings): Promise<void> {

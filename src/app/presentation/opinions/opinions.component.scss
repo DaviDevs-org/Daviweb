@@ -9,7 +9,12 @@
   color: $text-dark;
   border-radius: $border-radius-xl;
   box-shadow: $shadow-md;
-  @include section
+  min-height: 500px; /* Coincide con skeleton desktop */
+  @include section;
+
+  @include mobile {
+    min-height: 1200px; /* Coincide con skeleton móvil */
+  }
 }
 
 // Título y subtítulo consistentes con otras secciones

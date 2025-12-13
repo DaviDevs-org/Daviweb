@@ -19,6 +19,7 @@
     overflow: hidden;
     font-family: 'Inter', sans-serif;
     color: $secondary-dark;
+    min-height: 800px; /* Coincide con el skeleton */
     @include section;
 
     @include mobile {

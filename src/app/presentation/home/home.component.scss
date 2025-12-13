@@ -54,6 +54,7 @@
     display: flex;
     flex-direction: column;
     gap: 32px;
+    min-height: 1124px;
 
     .skeleton-header {
         height: 100px;
@@ -71,11 +72,14 @@
     }
 
     .skeleton-content {
-        height: 500px;
+        height: 800px; /* Aumentado para coincidir mejor con el contenido real */
         background: $background-grey;
         border-radius: 12px;
         animation: pulse 1.5s ease-in-out infinite;
         animation-delay: 0.4s;
+    }
+    @include mobile {
+        min-height: 1269px;
     }
 }
 
@@ -88,10 +92,12 @@
     flex-direction: column;
     align-items: center;
     gap: 32px;
+    min-height: 999px; /* Altura mínima para evitar saltos */
     @include section;
 
     @include mobile {
         padding: 36px 16px;
+        min-height: 922px;
     }
 
     .skeleton-header {
@@ -106,7 +112,7 @@
     .skeleton-cards {
         width: 100%;
         max-width: 1180px;
-        height: 450px;
+        height: 600px; /* Aumentado */
         background: $overlay-skeleton;
         border-radius: 12px;
         animation: pulse 1.5s ease-in-out infinite;
@@ -130,11 +136,15 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-    min-height: 700px;
+    min-height: 772px;
 
     @include mobile {
         padding: 20px;
         min-height: 650px;
+    }
+    @include small-mobile {
+        padding: 16px;
+        min-height: 450px;
     }
 
     .skeleton-calendar-header {
@@ -166,10 +176,12 @@
     flex-direction: column;
     align-items: center;
     gap: 48px;
+    min-height: 691px;
 
     @include mobile {
         padding: 36px 16px;
         gap: 32px;
+        min-height: 900px;
     }
 
     .skeleton-heading {
@@ -184,15 +196,18 @@
         display: flex;
         gap: 48px;
         width: 100%;
+        height: 500px; /* Aumentado */
 
         @include tablet {
             flex-direction: column;
             gap: 32px;
+            height: auto;
         }
 
         .skeleton-map {
             flex: 1 1 55%;
-            height: 384px;
+            height: 100%;
+            min-height: 400px; /* Altura mínima para mapa */
             background: $overlay-skeleton;
             border-radius: 12px;
             animation: pulse 1.5s ease-in-out infinite;
@@ -205,7 +220,8 @@
 
         .skeleton-info {
             flex: 1 1 40%;
-            height: 384px;
+            height: 100%;
+            min-height: 400px;
             background: $overlay-skeleton;
             border-radius: 12px;
             animation: pulse 1.5s ease-in-out infinite;
@@ -225,10 +241,12 @@
     flex-direction: column;
     align-items: center;
     gap: 48px;
+    min-height: 500px;
 
     @include mobile {
         padding: 36px 16px;
         gap: 40px;
+        min-height: 800px;
     }
 
     .skeleton-heading {
@@ -244,15 +262,18 @@
         flex-direction: row;
         gap: 48px;
         width: 100%;
+        height: 400px; /* Aumentado */
 
         @include tablet {
             flex-direction: column;
             gap: 32px;
+            height: auto;
         }
 
         .skeleton-text {
             flex: 1 1 60%;
-            height: 300px;
+            height: 100%;
+            min-height: 300px;
             background: $overlay-skeleton;
             border-radius: 12px;
             animation: pulse 1.5s ease-in-out infinite;
@@ -261,7 +282,8 @@
 
         .skeleton-image {
             flex: 0 0 40%;
-            height: 300px;
+            height: 100%;
+            min-height: 300px;
             background: $overlay-skeleton;
             border-radius: 12px;
             animation: pulse 1.5s ease-in-out infinite;
@@ -278,9 +300,11 @@
 .skeleton-opinions {
     @include section;
     padding: 48px 24px;
+    min-height: 643px; /* Altura mínima */
 
     @include mobile {
         padding: 36px 16px;
+        min-height: 1271px;
     }
 
     .skeleton-heading {
@@ -313,6 +337,7 @@
         gap: 20px;
         padding: 0 12px;
         max-width: 100%;
+        min-height: 350px; /* Altura mínima para cards */
 
         .skeleton-card {
             flex: 1 1 300px;
@@ -345,9 +370,11 @@
     flex-direction: column;
     align-items: center;
     gap: 48px;
+    min-height: 622px; /* Altura mínima */
 
     @include mobile {
         padding: 24px 24px 36px;
+        min-height: 800px;
     }
 
     .skeleton-heading {
@@ -364,6 +391,7 @@
         gap: 24px;
         width: 100%;
         max-width: 1120px;
+        min-height: 500px; /* Altura mínima para items */
 
         .skeleton-item {
             width: 100%;

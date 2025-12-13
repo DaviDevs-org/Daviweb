@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, PLATFORM_ID } from "@angular/core";
 import { CommonModule, isPlatformBrowser, NgOptimizedImage } from "@angular/common";
 import { BusinessStateService } from "@presentation/shared/business-state.service";
+import { ScrollService } from "@presentation/shared/scroll.service";
 
 @Component({
   selector: "app-header",
@@ -12,26 +13,9 @@ import { BusinessStateService } from "@presentation/shared/business-state.servic
 })
 export class HeaderComponent {
   public state = inject(BusinessStateService);
-  private platformId = inject(PLATFORM_ID);
+  private scrollService = inject(ScrollService);
 
   scrollToSection(sectionId: string) {
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
-    }
-
-    window.dispatchEvent(new CustomEvent('force-load-section', { 
-      detail: { sectionId } 
-    }));
-
-    setTimeout(() => {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          });
-        });
-      }
-    }, 300);
+    this.scrollService.scrollToSection(sectionId);
   }
 }

@@ -17,10 +17,12 @@
   color: $text-dark;
   font-family: $font-primary;
   overflow-x: hidden;
+  min-height: 600px; /* Coincide con skeleton desktop */
 
   @include mobile {
     padding: $spacing-xl $spacing-md;
     gap: $spacing-2xl;
+    min-height: 900px; /* Coincide con skeleton móvil */
   }
 
   @include small-mobile {

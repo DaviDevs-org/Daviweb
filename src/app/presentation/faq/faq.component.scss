@@ -17,10 +17,12 @@
   width: 100%;
   margin-bottom: 2%;
   color: $white;
+  min-height: 600px; /* Coincide con skeleton desktop */
   @include section;
   
   @include mobile {
     padding: $spacing-lg $spacing-lg $spacing-xl;
+    min-height: 800px; /* Coincide con skeleton móvil */
   }
 }
 

@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed, NgZone } from '@angular/core';
+import { Injectable, inject, signal, computed, NgZone, afterNextRender } from '@angular/core';
 import {
   GetContactInfoUseCase,
   GetScheduleUseCase,
@@ -114,8 +114,12 @@ export class BusinessStateService {
   });
 
   constructor() {
-    this.loadInitialData();
+    this.loadCriticalData();
     this.startClock();
+
+    afterNextRender(() => {
+      this.loadDeferredData();
+    });
   }
 
   // --- ACTIONS ---
@@ -130,8 +134,29 @@ export class BusinessStateService {
     });
   }
 
-  private loadInitialData() {
-    // 1. Cargar Info de Contacto
+  private loadCriticalData() {
+    // 1. Cargar Horario (Crítico para Header)
+    this.getSchedule.execute().subscribe({
+      next: (schedule) => this.rawSchedule.set(schedule),
+      error: (err) => {
+        console.error('Error loading schedule:', err);
+        this.rawSchedule.set([]);
+      },
+    });
+
+    // 2. Cargar Excepciones (Crítico para Header)
+    this.getExceptions.execute().subscribe({
+      next: (exceptions) => this.exceptions.set(exceptions),
+      error: (err) => {
+        console.error('Error loading exceptions:', err);
+        this.exceptions.set([]);
+      },
+    });
+    this.loadGalleryImages()
+  }
+
+  private loadDeferredData() {
+    // 3. Cargar Info de Contacto
     this.getInfo.execute().subscribe({
       next: (info) => this.contactInfo.set(info),
       error: (err) => {
@@ -146,30 +171,12 @@ export class BusinessStateService {
       },
     });
 
-    // 2. Cargar Horario
-    this.getSchedule.execute().subscribe({
-      next: (schedule) => this.rawSchedule.set(schedule),
-      error: (err) => {
-        console.error('Error loading schedule:', err);
-        this.rawSchedule.set([]);
-      },
-    });
-
-    // 3. Cargar Servicios
+    // 4. Cargar Servicios
     this.getServices.execute().subscribe({
       next: (services) => this.services.set(services),
       error: (err) => {
         console.error('Error loading services:', err);
         this.services.set([]);
-      },
-    });
-
-    // 4. Cargar Excepciones
-    this.getExceptions.execute().subscribe({
-      next: (exceptions) => this.exceptions.set(exceptions),
-      error: (err) => {
-        console.error('Error loading exceptions:', err);
-        this.exceptions.set([]);
       },
     });
 
@@ -182,6 +189,7 @@ export class BusinessStateService {
       },
     });
 
+    // 6. Cargar Slots Reservados
     this.getReservedSlots.execute().subscribe({
       next: (slots) => this.reservedSlots.set(slots),
       error: (err) => {
@@ -190,6 +198,7 @@ export class BusinessStateService {
       },
     });
 
+    // 7. Cargar Citas
     this.getAppointments.execute().subscribe({
       next: (appointment) => this.appointments.set(appointment),
       error: (err) => {

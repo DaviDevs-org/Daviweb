@@ -35,7 +35,7 @@ export class PhotoOfTheDayComponent implements OnDestroy {
 
   private readonly photosEffect = effect(() => {
     const photos = this.businessState.galleryImages(); // señal del state
-    if (!photos) {
+    if (photos.length === 0) {
       this.isLoading.set(true);
       return;
     }

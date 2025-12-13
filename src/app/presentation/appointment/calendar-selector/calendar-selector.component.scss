@@ -17,17 +17,14 @@
   flex-direction: column;
   width: 100%;
   box-sizing: border-box;
-  min-height: 700px;
 
   @include mobile {
     padding: 20px;
     max-width: 100%;
-    min-height: 650px;
   }
 
   @include small-mobile {
     padding: 16px;
-    min-height: 600px;
   }
 }
 

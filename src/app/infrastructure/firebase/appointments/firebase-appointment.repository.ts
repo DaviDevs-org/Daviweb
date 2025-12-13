@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
   addDoc,
   collection,
@@ -25,30 +25,34 @@ import { SaasConfigService } from 'src/app/config/saas-config.service';
 export class FirebaseAppointmentRepository implements AppointmentRepository {
   private pathConfig = inject(SaasConfigService).getDDBBPaths();
   private firestore = inject(Firestore);
+  private injector = inject(Injector);
 
   getAppointments(): Observable<Appointment[]> {
-    const ref = collection(this.firestore, this.pathConfig.appointments);
-    const q = query(ref, orderBy('datetime', 'asc'));
-    
-    return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
-      map(docs => docs.map(doc => this.mapToDomain(doc))),
-      catchError(err => {
-        console.error('Error getting appointments:', err);
-        return of([]);
-      })
-    );
+    return runInInjectionContext(this.injector, () => {
+      const ref = collection(this.firestore, this.pathConfig.appointments);
+      const q = query(ref, orderBy('datetime', 'asc'));
+      return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
+        map(docs => docs.map(doc => this.mapToDomain(doc))),
+        catchError(err => {
+          console.error('Error getting appointments:', err);
+          return of([]);
+        })
+      );
+    });
   }
 
   getAppointmentById(id: string): Observable<Appointment | null> {
     const docRef = doc(this.firestore, `${this.pathConfig.appointments}/${id}`);
-    
-    return (docData(docRef, { idField: 'id' }) as Observable<any>).pipe(
-      map(doc => doc ? this.mapToDomain(doc) : null),
-      catchError(err => {
-        console.error(`Error getting appointment ${id}:`, err);
-        return of(null);
-      })
-    );
+
+    return runInInjectionContext(this.injector, () => {
+      return (docData(docRef, { idField: 'id' }) as Observable<any>).pipe(
+        map(doc => doc ? this.mapToDomain(doc) : null),
+        catchError(err => {
+          console.error(`Error getting appointment ${id}:`, err);
+          return of(null);
+        })
+      );
+    });
   }
 
   getAppointmentsByDate(date: Date): Observable<Appointment[]> {
@@ -68,13 +72,15 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
       orderBy('datetime', 'asc')
     );
 
-    return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
-      map(docs => docs.map(doc => this.mapToDomain(doc))),
-      catchError(err => {
-        console.error('Error getting appointments by date:', err);
-        return of([]);
-      })
-    );
+    return runInInjectionContext(this.injector, () => {
+      return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
+        map(docs => docs.map(doc => this.mapToDomain(doc))),
+        catchError(err => {
+          console.error('Error getting appointments by date:', err);
+          return of([]);
+        })
+      );
+    });
   }
 
   getAppointmentsByDateRange(startDate: Date, endDate: Date): Observable<Appointment[]> {
@@ -95,13 +101,15 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
       orderBy('datetime', 'asc')
     );
 
-    return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
-      map(docs => docs.map(doc => this.mapToDomain(doc))),
-      catchError(err => {
-        console.error('Error getting appointments by range:', err);
-        return of([]);
-      })
-    );
+    return runInInjectionContext(this.injector, () => {
+      return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
+        map(docs => docs.map(doc => this.mapToDomain(doc))),
+        catchError(err => {
+          console.error('Error getting appointments by range:', err);
+          return of([]);
+        })
+      );
+    });
   }
 
   async addAppointment(appointment: Appointment): Promise<string> {
@@ -123,7 +131,7 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
     // Borrar slots reservados asociados
     const reservedCol = collection(this.firestore, this.pathConfig.reservedSlots);
     const qSlots = query(reservedCol, where('appointmentId', '==', id));
-    
+
     try {
       const snaps = await getDocs(qSlots);
       const deletions: Promise<void>[] = [];
@@ -136,8 +144,8 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
   }
 
   private mapToDomain(data: any): Appointment {
-    const datetime = data.datetime instanceof Timestamp 
-      ? data.datetime.toDate() 
+    const datetime = data.datetime instanceof Timestamp
+      ? data.datetime.toDate()
       : (typeof data.datetime === 'string' ? new Date(data.datetime) : data.datetime);
 
     const createdAt = data.createdAt instanceof Timestamp
