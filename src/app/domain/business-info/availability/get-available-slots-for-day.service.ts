@@ -1,3 +1,4 @@
+import { Injectable } from '@angular/core';
 import { ScheduleDay, ExceptionItem } from '@domain/index';
 import {
   ReservedSlot,
@@ -7,6 +8,9 @@ import {
   AvailabilityContext,
 } from '@domain/index';
 
+@Injectable({
+  providedIn: 'root',
+})
 export class GetAvailableSlotsForDayService {
   execute(
     date: Date,

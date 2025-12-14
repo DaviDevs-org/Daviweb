@@ -1,11 +1,24 @@
-import { Component, ElementRef, inject, signal, ViewChild, OnDestroy } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  inject,
+  signal,
+  ViewChild,
+  OnDestroy,
+  Injector,
+  runInInjectionContext,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { percentage, getDownloadURL } from '@angular/fire/storage';
 import { Subscription } from 'rxjs';
-import { CreateServiceUseCase, UpdateServiceUseCase, DeleteServiceUseCase } from '@application/services';
+import {
+  CreateServiceUseCase,
+  UpdateServiceUseCase,
+  DeleteServiceUseCase,
+} from '@application/services';
 import { UploadPhotoUseCase } from '@application/gallery';
-import { Service} from '@domain/services';
+import { Service } from '@domain/services';
 import { GalleryPhoto, PhotoType } from '@domain/gallery';
 import { AlertService } from '@presentation/shared/alert/alert.service';
 import { BusinessStateService } from '@presentation/shared/business-state.service';
@@ -16,10 +29,9 @@ import { getErrorMessage } from '@domain/shared/utils/error.utils';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './services-management.component.html',
-  styleUrls: ['./services-management.component.scss']
+  styleUrls: ['./services-management.component.scss'],
 })
 export class ServicesManagementComponent implements OnDestroy {
-
   // ==========================================================================
   // View Children
   // ==========================================================================
@@ -29,6 +41,7 @@ export class ServicesManagementComponent implements OnDestroy {
   // ==========================================================================
   // Dependency Injection
   // ==========================================================================
+  private injector = inject(Injector);
   private businessState = inject(BusinessStateService);
   private createServiceUseCase = inject(CreateServiceUseCase);
   private updateServiceUseCase = inject(UpdateServiceUseCase);
@@ -55,7 +68,7 @@ export class ServicesManagementComponent implements OnDestroy {
   lengthMap: Record<'short' | 'medium' | 'long', string> = {
     short: 'Corto',
     medium: 'Medio',
-    long: 'Largo'
+    long: 'Largo',
   };
 
   // ==========================================================================
@@ -127,13 +140,20 @@ export class ServicesManagementComponent implements OnDestroy {
   // Service CRUD Operations
   // ==========================================================================
   async addService(): Promise<void> {
-    if (!this.selectedFile) { this.toast.error('Por favor, escoja una imagen.'); return; }
-    
+    if (!this.selectedFile) {
+      this.toast.error('Por favor, escoja una imagen.');
+      return;
+    }
+
     const error = this.newService.validate();
-    if (error) { this.toast.error(error); return; }
+    if (error) {
+      this.toast.error(error);
+      return;
+    }
 
     try {
-      this.newService.imageUrl = await this.uploadImageIfSelected() ?? undefined;
+      this.newService.imageUrl =
+        (await this.uploadImageIfSelected()) ?? undefined;
       await this.createServiceUseCase.execute(this.newService);
       this.resetForm();
       this.toast.success('Servicio añadido correctamente!');
@@ -143,7 +163,6 @@ export class ServicesManagementComponent implements OnDestroy {
     }
     return;
   }
-  
 
   async editService(index: number) {
     const serviceU = this.services()[index];
@@ -151,14 +170,26 @@ export class ServicesManagementComponent implements OnDestroy {
   }
 
   private async updateServiceFromForm(): Promise<void> {
-    if (!this.editServiceId) { this.toast.error('No se ha podido identificar el servicio a actualizar.'); return; }
-    
+    if (!this.editServiceId) {
+      this.toast.error('No se ha podido identificar el servicio a actualizar.');
+      return;
+    }
+
     const error = this.newService.validate();
-    if (error) { this.toast.error(error); return; }
+    if (error) {
+      this.toast.error(error);
+      return;
+    }
 
     try {
-      this.newService.imageUrl = (this.selectedFile ? await this.uploadImageIfSelected() : this.existingImageUrl) ?? undefined;
-      await this.updateServiceUseCase.execute(this.editServiceId, this.newService);
+      this.newService.imageUrl =
+        (this.selectedFile
+          ? await this.uploadImageIfSelected()
+          : this.existingImageUrl) ?? undefined;
+      await this.updateServiceUseCase.execute(
+        this.editServiceId,
+        this.newService
+      );
       this.resetForm();
       this.toast.success('Servicio actualizado correctamente!');
     } catch (error) {
@@ -169,17 +200,22 @@ export class ServicesManagementComponent implements OnDestroy {
 
   async deleteService(index: number) {
     const service = this.services()[index];
-    if (await this.toast.confirm(`¿Estás seguro de que quieres eliminar "${service.name}"?`)) {
+    if (
+      await this.toast.confirm(
+        `¿Estás seguro de que quieres eliminar "${service.name}"?`
+      )
+    ) {
       try {
         await this.deleteServiceUseCase.execute(service.id!);
-        this.toast.success(`El servicio ${service.name} ha sido borrado con éxito`);
+        this.toast.success(
+          `El servicio ${service.name} ha sido borrado con éxito`
+        );
       } catch (error) {
         console.error('Error al eliminar servicio:', error);
         this.toast.error(getErrorMessage(error));
       }
     }
   }
-  
 
   private populateFormFromService(service: Service) {
     this.isEditing.set(true);
@@ -194,7 +230,10 @@ export class ServicesManagementComponent implements OnDestroy {
     // Create a deep copy using DTO
     this.newService = Service.fromDTO(service.toDTO(), service.id);
 
-    this.hasBreaks.set(!this.newService.requiresHairLength && ((this.newService.timeSegments?.length || 0) > 1));
+    this.hasBreaks.set(
+      !this.newService.requiresHairLength &&
+        (this.newService.timeSegments?.length || 0) > 1
+    );
     this.useHourRange.set(!!service.hourRange);
 
     this.scrollToForm();
@@ -208,7 +247,10 @@ export class ServicesManagementComponent implements OnDestroy {
       this.newService.timeSegments.push({ duration: 30, breakAfter: 0 });
     }
     if (!this.hasBreaks() && this.newService.timeSegments.length > 1) {
-      const total = this.newService.timeSegments.reduce((acc, curr) => acc + curr.duration + (curr.breakAfter || 0), 0);
+      const total = this.newService.timeSegments.reduce(
+        (acc, curr) => acc + curr.duration + (curr.breakAfter || 0),
+        0
+      );
       this.newService.timeSegments = [{ duration: total, breakAfter: 0 }];
     }
   }
@@ -217,7 +259,8 @@ export class ServicesManagementComponent implements OnDestroy {
     if (this.newService.requiresHairLength) {
       this.hasBreaks.set(false);
       if (!this.newService.hairLengthModifiers) {
-        this.newService.hairLengthModifiers = Service.defaultHairLengthModifiers();
+        this.newService.hairLengthModifiers =
+          Service.defaultHairLengthModifiers();
       }
     } else {
       if (this.newService.timeSegments.length === 0) {
@@ -235,7 +278,7 @@ export class ServicesManagementComponent implements OnDestroy {
   }
 
   toggleDetails(index: number): void {
-    this.expandedServiceIndexes.update(set => {
+    this.expandedServiceIndexes.update((set) => {
       const newSet = new Set(set);
       if (newSet.has(index)) newSet.delete(index);
       else newSet.add(index);
@@ -252,10 +295,14 @@ export class ServicesManagementComponent implements OnDestroy {
       setTimeout(() => {
         const el = this.formTop?.nativeElement;
         if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+          el.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest',
+          });
         }
       }, 100);
-    } catch { }
+    } catch {}
   }
 
   // ==========================================================================
@@ -275,7 +322,10 @@ export class ServicesManagementComponent implements OnDestroy {
 
   removeTimeSegment(index: number) {
     if (!this.hasBreaks() && !this.newService.requiresHairLength) {
-      if (this.newService.timeSegments.length > 0 && this.newService.timeSegments[0].duration > 15) {
+      if (
+        this.newService.timeSegments.length > 0 &&
+        this.newService.timeSegments[0].duration > 15
+      ) {
         this.newService.timeSegments[0].duration -= 15;
       }
     } else {
@@ -290,7 +340,10 @@ export class ServicesManagementComponent implements OnDestroy {
     if (!this.newService.hairLengthModifiers[length].segments) {
       this.newService.hairLengthModifiers[length].segments = [];
     }
-    this.newService.hairLengthModifiers[length].segments!.push({ duration: 30, breakAfter: 0 });
+    this.newService.hairLengthModifiers[length].segments!.push({
+      duration: 30,
+      breakAfter: 0,
+    });
   }
 
   removeHairLengthSegment(length: 'short' | 'medium' | 'long', index: number) {
@@ -307,19 +360,33 @@ export class ServicesManagementComponent implements OnDestroy {
   private async uploadImageIfSelected(): Promise<string | null> {
     if (!this.selectedFile) return null;
 
-    const photo = new GalleryPhoto(this.selectedFile.name, 'temp-id', undefined, false, PhotoType.SERVICE);
-    const { task } = await this.uploadPhotoUseCase.execute(this.selectedFile, photo);
+    const photo = new GalleryPhoto(
+      this.selectedFile.name,
+      'temp-id',
+      undefined,
+      false,
+      PhotoType.SERVICE
+    );
+    const { task } = await this.uploadPhotoUseCase.execute(
+      this.selectedFile,
+      photo
+    );
 
     this.uploadSubscription?.unsubscribe();
     this.isUploading.set(true);
 
-    this.uploadSubscription = percentage(task).subscribe(({ progress }) => {
-      this.uploadProgress.set(`${progress}%`);
-    });
+    this.uploadSubscription = runInInjectionContext(this.injector, () =>
+      percentage(task).subscribe(({ progress }) => {
+        this.uploadProgress.set(`${progress}%`);
+      })
+    );
 
     try {
       const snapshot = await task;
-      return await getDownloadURL(snapshot.ref);
+      const url = await runInInjectionContext(this.injector, () =>
+        getDownloadURL(snapshot.ref)
+      );
+      return url;
     } catch (error) {
       console.error('Error al subir:', error);
       throw error;
@@ -330,4 +397,3 @@ export class ServicesManagementComponent implements OnDestroy {
     }
   }
 }
-

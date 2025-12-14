@@ -1,23 +1,32 @@
-import { Component, inject, signal, computed, ViewChild, ElementRef, OnDestroy, linkedSignal } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { BusinessStateService } from "@presentation/shared/business-state.service";
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  ViewChild,
+  ElementRef,
+  OnDestroy,
+  linkedSignal,
+  Injector,
+  runInInjectionContext,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { BusinessStateService } from '@presentation/shared/business-state.service';
 import {
   ScheduleDay,
   ScheduleDayDTO,
   ContactInfo,
-  ContactInfoDTO,
   ExceptionItem,
   ExceptionItemDTO,
   Barber,
   BarberDTO,
   BarberSettings,
-  BarberSettingsDTO,
   Interval,
   IntervalDTO,
   PhotoType,
-  GalleryPhoto
-} from "@domain/index";
+  GalleryPhoto,
+} from '@domain/index';
 import {
   UpdateScheduleUseCase,
   UpdateContactInfoUseCase,
@@ -27,26 +36,29 @@ import {
   UpdateBarberSettingsUseCase,
   AddBarberUseCase,
   RemoveBarberUseCase,
-  EditBarberUseCase
-} from "@application/business";
-import { UploadPhotoUseCase } from "@application/gallery";
-import { AlertService } from "@presentation/shared/alert/alert.service";
-import { percentage } from "@angular/fire/storage";
-import { Subscription } from "rxjs";
-import { getErrorMessage } from "@domain/shared/utils/error.utils";
+  EditBarberUseCase,
+} from '@application/business';
+import { UploadPhotoUseCase } from '@application/gallery';
+import { AlertService } from '@presentation/shared/alert/alert.service';
+import { percentage, getDownloadURL } from '@angular/fire/storage';
+import { Subscription } from 'rxjs';
+import { getErrorMessage } from '@domain/shared/utils/error.utils';
 
 @Component({
-  selector: "app-info-management",
+  selector: 'app-info-management',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: "./info-management.component.html",
-  styleUrls: ["./info-management.component.scss"]
+  templateUrl: './info-management.component.html',
+  styleUrls: ['./info-management.component.scss'],
 })
 export class InfoManagementComponent implements OnDestroy {
   private businessState = inject(BusinessStateService);
+  private injector = inject(Injector);
 
   // Signals for local form state
-  schedule = linkedSignal(() => this.businessState.rawSchedule().map(day => day.toDTO()));
+  schedule = linkedSignal(() =>
+    this.businessState.rawSchedule().map((day) => day.toDTO())
+  );
 
   contactInfo = linkedSignal(() => {
     const info = this.businessState.contactInfo();
@@ -55,13 +67,17 @@ export class InfoManagementComponent implements OnDestroy {
     return info.toDTO();
   });
 
-  exceptions = linkedSignal(() => this.businessState.exceptions().map(ex => ex.toDTO()));
+  exceptions = linkedSignal(() =>
+    this.businessState.exceptions().map((ex) => ex.toDTO())
+  );
 
-  barberSettings = linkedSignal(() => this.businessState.barberSettings()?.toDTO() ?? null);
+  barberSettings = linkedSignal(
+    () => this.businessState.barberSettings()?.toDTO() ?? null
+  );
 
   // UI State signals
   isBarberUploading = signal(false);
-  barberUploadProgress = signal("0%");
+  barberUploadProgress = signal('0%');
 
   // Computed signals for loading state
   isLoading = computed(() => {
@@ -74,20 +90,26 @@ export class InfoManagementComponent implements OnDestroy {
     return this.barberSettings() === null;
   });
 
-    // Exception Wizard State
-  currentExceptionStep = signal<"date" | "type" | "hours" | "complete">("complete");
+  // Exception Wizard State
+  currentExceptionStep = signal<'date' | 'type' | 'hours' | 'complete'>(
+    'complete'
+  );
   tempException = signal<Partial<ExceptionItemDTO> | null>(null);
-  
+
   exceptionTypes = [
-    { value: "closed", label: "Cerrar todo el día", icon: "bi bi-x-circle" },
-    { value: "custom", label: "Horario especial", icon: "bi bi-clock" },
-    { value: "range", label: "Cerrar varios días", icon: "bi bi-calendar-range" }
+    { value: 'closed', label: 'Cerrar todo el día', icon: 'bi bi-x-circle' },
+    { value: 'custom', label: 'Horario especial', icon: 'bi bi-clock' },
+    {
+      value: 'range',
+      label: 'Cerrar varios días',
+      icon: 'bi bi-calendar-range',
+    },
   ];
 
   // Barber Image Upload
-  @ViewChild("barberFileInput") barberFileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('barberFileInput') barberFileInput!: ElementRef<HTMLInputElement>;
   selectedBarberFile: File | null = null;
-  barberImagePreviewUrl = signal<string>("");
+  barberImagePreviewUrl = signal<string>('');
   private barberUploadSubscription: Subscription | undefined;
 
   // Injected Use Cases
@@ -105,15 +127,15 @@ export class InfoManagementComponent implements OnDestroy {
   private toast = inject(AlertService);
 
   // ===== SCHEDULE =====
-  
+
   getScheduleRowClass(day: ScheduleDayDTO): string {
-    return day.closed ? "schedule-row closed-day" : "schedule-row";
+    return day.closed ? 'schedule-row closed-day' : 'schedule-row';
   }
 
   addInterval(day: ScheduleDayDTO) {
     if (day.closed) return;
     const currentSchedule = this.schedule();
-    day.intervals.push({ open: "09:00", close: "14:00" });
+    day.intervals.push({ open: '09:00', close: '14:00' });
     this.schedule.set([...currentSchedule]);
   }
 
@@ -124,8 +146,13 @@ export class InfoManagementComponent implements OnDestroy {
   }
 
   validateInterval(day: ScheduleDayDTO, interval: IntervalDTO) {
-    if (!day.closed && interval.open && interval.close && interval.open >= interval.close) {
-      interval.close = "";
+    if (
+      !day.closed &&
+      interval.open &&
+      interval.close &&
+      interval.open >= interval.close
+    ) {
+      interval.close = '';
       this.schedule.set([...this.schedule()]);
     }
   }
@@ -139,7 +166,7 @@ export class InfoManagementComponent implements OnDestroy {
       if ((day as any).backupIntervals?.length) {
         day.intervals = [...(day as any).backupIntervals];
       } else if (!day.intervals.length) {
-        day.intervals.push({ open: "09:00", close: "14:00" });
+        day.intervals.push({ open: '09:00', close: '14:00' });
       }
       delete (day as any).backupIntervals;
     }
@@ -149,9 +176,11 @@ export class InfoManagementComponent implements OnDestroy {
   async saveSchedule() {
     try {
       const scheduleDTOs = this.schedule();
-      const scheduleEntities = scheduleDTOs.map(dto => ScheduleDay.fromDTO(dto));
+      const scheduleEntities = scheduleDTOs.map((dto) =>
+        ScheduleDay.fromDTO(dto)
+      );
       await this.updateScheduleUC.execute(scheduleEntities);
-      this.toast.success("Horario semanal guardado correctamente!");
+      this.toast.success('Horario semanal guardado correctamente!');
     } catch (err) {
       console.error(err);
       this.toast.error(getErrorMessage(err));
@@ -166,7 +195,7 @@ export class InfoManagementComponent implements OnDestroy {
     const processedRanges = new Set<string>();
 
     for (const ex of exList) {
-      if (ex.exceptionType === "range" && ex.startDate && ex.endDate) {
+      if (ex.exceptionType === 'range' && ex.startDate && ex.endDate) {
         const rangeKey = `${ex.startDate}-${ex.endDate}`;
         if (processedRanges.has(rangeKey)) continue;
         processedRanges.add(rangeKey);
@@ -180,36 +209,36 @@ export class InfoManagementComponent implements OnDestroy {
 
   startNewException() {
     this.tempException.set({
-      date: "",
+      date: '',
       closed: false,
-      intervals: [{ open: "09:00", close: "14:00" }],
+      intervals: [{ open: '09:00', close: '14:00' }],
       exceptionType: undefined,
       startDate: undefined,
-      endDate: undefined
+      endDate: undefined,
     });
-    this.currentExceptionStep.set("type");
+    this.currentExceptionStep.set('type');
   }
 
   selectExceptionType(type: string) {
     const temp = this.tempException();
     if (!temp) return;
 
-    const validType = type as "closed" | "custom" | "range";
+    const validType = type as 'closed' | 'custom' | 'range';
     temp.exceptionType = validType;
-    temp.closed = validType === "closed" || validType === "range";
+    temp.closed = validType === 'closed' || validType === 'range';
 
-    if (validType === "closed" || validType === "custom") {
-      this.currentExceptionStep.set("date");
-      if (validType === "closed") {
+    if (validType === 'closed' || validType === 'custom') {
+      this.currentExceptionStep.set('date');
+      if (validType === 'closed') {
         temp.intervals = [];
       } else {
         if (!temp.intervals?.length) {
-          temp.intervals = [{ open: "09:00", close: "14:00" }];
+          temp.intervals = [{ open: '09:00', close: '14:00' }];
         }
       }
-    } else if (validType === "range") {
+    } else if (validType === 'range') {
       temp.intervals = [];
-      this.currentExceptionStep.set("hours");
+      this.currentExceptionStep.set('hours');
     }
     this.tempException.set({ ...temp });
   }
@@ -217,62 +246,65 @@ export class InfoManagementComponent implements OnDestroy {
   validateExceptionDate(): boolean {
     const temp = this.tempException();
     if (!temp?.date) {
-      this.toast.error("Por favor, selecciona una fecha");
+      this.toast.error('Por favor, selecciona una fecha');
       return false;
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(temp.date)) {
-      this.toast.error("Formato de fecha inválido. Use YYYY-MM-DD.");
+      this.toast.error('Formato de fecha inválido. Use YYYY-MM-DD.');
       return false;
     }
-    const existing = this.exceptions().find(ex => ex.date === temp.date);
+    const existing = this.exceptions().find((ex) => ex.date === temp.date);
     if (existing) {
-      this.toast.error("Ya existe una excepción para esta fecha");
+      this.toast.error('Ya existe una excepción para esta fecha');
       return false;
     }
     return true;
   }
 
   nextStep() {
-    if (this.currentExceptionStep() === "date" && this.validateExceptionDate()) {
-      this.currentExceptionStep.set("type");
+    if (
+      this.currentExceptionStep() === 'date' &&
+      this.validateExceptionDate()
+    ) {
+      this.currentExceptionStep.set('type');
     }
   }
 
   nextStepFromDate() {
     if (this.validateExceptionDate()) {
-      this.currentExceptionStep.set("hours");
+      this.currentExceptionStep.set('hours');
     }
   }
 
   prevStep() {
     const step = this.currentExceptionStep();
-    if (step === "type") return;
-    if (step === "date") this.currentExceptionStep.set("type");
-    if (step === "hours") {
-      if (this.tempException()?.exceptionType === "range") {
-        this.currentExceptionStep.set("type");
+    if (step === 'type') return;
+    if (step === 'date') this.currentExceptionStep.set('type');
+    if (step === 'hours') {
+      if (this.tempException()?.exceptionType === 'range') {
+        this.currentExceptionStep.set('type');
       } else {
-        this.currentExceptionStep.set("date");
+        this.currentExceptionStep.set('date');
       }
     }
   }
 
   cancelException() {
     this.tempException.set(null);
-    this.currentExceptionStep.set("complete");
+    this.currentExceptionStep.set('complete');
   }
 
   addExInterval() {
     const temp = this.tempException();
     if (!temp?.intervals) return;
-    temp.intervals.push({ open: "09:00", close: "14:00" });
+    temp.intervals.push({ open: '09:00', close: '14:00' });
     this.tempException.set({ ...temp });
   }
 
   removeExInterval(index: number) {
     const temp = this.tempException();
     if (!temp?.intervals || temp.intervals.length <= 1) {
-      this.toast.error("Debe haber al menos un intervalo de horario");
+      this.toast.error('Debe haber al menos un intervalo de horario');
       return;
     }
     temp.intervals.splice(index, 1);
@@ -281,8 +313,8 @@ export class InfoManagementComponent implements OnDestroy {
 
   validateExInterval(interval: IntervalDTO, index: number) {
     if (interval.open && interval.close && interval.open >= interval.close) {
-      this.toast.error("La hora de cierre debe ser posterior a la de apertura");
-      interval.close = "";
+      this.toast.error('La hora de cierre debe ser posterior a la de apertura');
+      interval.close = '';
       return false;
     }
     return true;
@@ -291,18 +323,20 @@ export class InfoManagementComponent implements OnDestroy {
   async finishException() {
     const temp = this.tempException();
     if (!temp?.exceptionType) {
-      this.toast.error("Completa todos los campos obligatorios");
+      this.toast.error('Completa todos los campos obligatorios');
       return;
     }
 
     try {
-      if (temp.exceptionType === "range") {
+      if (temp.exceptionType === 'range') {
         if (!temp.startDate || !temp.endDate) {
-          this.toast.error("Debes seleccionar una fecha de inicio y fin");
+          this.toast.error('Debes seleccionar una fecha de inicio y fin');
           return;
         }
         if (temp.startDate > temp.endDate) {
-          this.toast.error("La fecha de inicio debe ser anterior o igual a la fecha de fin");
+          this.toast.error(
+            'La fecha de inicio debe ser anterior o igual a la fecha de fin'
+          );
           return;
         }
 
@@ -315,16 +349,16 @@ export class InfoManagementComponent implements OnDestroy {
         // So we assume this is always a new range or a replacement.
 
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-          const dateKey = d.toISOString().split("T")[0];
+          const dateKey = d.toISOString().split('T')[0];
           // Check if exists in local state (which reflects global)
-          if (this.exceptions().find(ex => ex.date === dateKey)) {
+          if (this.exceptions().find((ex) => ex.date === dateKey)) {
             continue;
           }
           const ex = new ExceptionItem(
             dateKey,
             true,
             [],
-            "range",
+            'range',
             undefined,
             false,
             temp.startDate,
@@ -334,37 +368,37 @@ export class InfoManagementComponent implements OnDestroy {
         }
 
         await Promise.all(promises);
-        this.toast.success("Rango de excepciones guardado");
-
+        this.toast.success('Rango de excepciones guardado');
       } else {
         if (!temp.date) {
-            this.toast.error("Falta la fecha");
-            return;
+          this.toast.error('Falta la fecha');
+          return;
         }
-        const intervals = (temp.intervals || []).map(i => new Interval(i.open, i.close));
+        const intervals = (temp.intervals || []).map(
+          (i) => new Interval(i.open, i.close)
+        );
         const ex = new ExceptionItem(
-            temp.date,
-            !!temp.closed,
-            intervals,
-            temp.exceptionType,
-            temp.id, // Pass ID if exists
-            false
+          temp.date,
+          !!temp.closed,
+          intervals,
+          temp.exceptionType,
+          temp.id, // Pass ID if exists
+          false
         );
 
         if (temp.id) {
-            // It's an update
-            await this.updateExceptionUC.execute(temp.id, ex);
-            this.toast.success("Excepción actualizada");
+          // It's an update
+          await this.updateExceptionUC.execute(temp.id, ex);
+          this.toast.success('Excepción actualizada');
         } else {
-            // It's a new one
-            // Check if date already exists to avoid duplicates/overwrite without warning?
-            // The validateExceptionDate() checks this for new ones.
-            await this.addExceptionUC.execute(ex);
-            this.toast.success("Excepción guardada");
+          // It's a new one
+          // Check if date already exists to avoid duplicates/overwrite without warning?
+          // The validateExceptionDate() checks this for new ones.
+          await this.addExceptionUC.execute(ex);
+          this.toast.success('Excepción guardada');
         }
-      }      // No need to manually refresh exceptions, the subscription will handle it
+      } // No need to manually refresh exceptions, the subscription will handle it
       this.cancelException();
-
     } catch (error) {
       console.error(error);
       this.toast.error(getErrorMessage(error));
@@ -376,46 +410,58 @@ export class InfoManagementComponent implements OnDestroy {
     const toRemove = grouped[index];
     if (!toRemove) return;
 
-    if (!await this.toast.confirm("¿Seguro que desea eliminar esta excepción?")) return;
+    if (
+      !(await this.toast.confirm('¿Seguro que desea eliminar esta excepción?'))
+    )
+      return;
 
     try {
-      if (toRemove.exceptionType === "range" && toRemove.startDate && toRemove.endDate) {
+      if (
+        toRemove.exceptionType === 'range' &&
+        toRemove.startDate &&
+        toRemove.endDate
+      ) {
         const allEx = this.exceptions();
-        const inRange = allEx.filter(ex =>
-          ex.exceptionType === "range" &&
-          ex.startDate === toRemove.startDate &&
-          ex.endDate === toRemove.endDate
+        const inRange = allEx.filter(
+          (ex) =>
+            ex.exceptionType === 'range' &&
+            ex.startDate === toRemove.startDate &&
+            ex.endDate === toRemove.endDate
         );
-        await Promise.all(inRange.map(ex => this.deleteExceptionUC.execute(ex.id || ex.date)));
+        await Promise.all(
+          inRange.map((ex) => this.deleteExceptionUC.execute(ex.id || ex.date))
+        );
       } else {
         await this.deleteExceptionUC.execute(toRemove.id || toRemove.date);
       }
 
       // No need to manually refresh exceptions
-      this.toast.success("Excepción eliminada");
+      this.toast.success('Excepción eliminada');
     } catch (e) {
       this.toast.error(getErrorMessage(e));
     }
   }
 
   async editException(index: number) {
-      const grouped = this.groupedExceptions();
-      const toEdit = grouped[index];
-      if(!toEdit) return;
-      
-      if(toEdit.exceptionType === "range") {
-          this.toast.error("Elimina y crea de nuevo para rangos");
-          return;
-      }
-      
-      const intervalsDTO = toEdit.intervals.map(i => ({ open: i.open, close: i.close }));
-      this.tempException.set({
-        ...toEdit,
-        intervals: intervalsDTO
-      });
-      this.currentExceptionStep.set("hours");
-  }  // ===== CONTACT INFO =====
+    const grouped = this.groupedExceptions();
+    const toEdit = grouped[index];
+    if (!toEdit) return;
 
+    if (toEdit.exceptionType === 'range') {
+      this.toast.error('Elimina y crea de nuevo para rangos');
+      return;
+    }
+
+    const intervalsDTO = toEdit.intervals.map((i) => ({
+      open: i.open,
+      close: i.close,
+    }));
+    this.tempException.set({
+      ...toEdit,
+      intervals: intervalsDTO,
+    });
+    this.currentExceptionStep.set('hours');
+  } // ===== CONTACT INFO =====
 
   async saveContactInfo() {
     const infoDTO = this.contactInfo();
@@ -424,7 +470,7 @@ export class InfoManagementComponent implements OnDestroy {
       // Reconstruct domain object from DTO
       const info = ContactInfo.fromDTO(infoDTO);
       await this.updateContactInfoUC.execute(info);
-      this.toast.success("Información de contacto guardada");
+      this.toast.success('Información de contacto guardada');
     } catch (err) {
       console.error(err);
       this.toast.error(getErrorMessage(err));
@@ -449,14 +495,16 @@ export class InfoManagementComponent implements OnDestroy {
     if (!settings) return;
     try {
       // Reconstruct Barber objects from plain JSON
-      const barbers = settings.barbers.map(b => new Barber(b.name, b.imageUrl, b.id));
+      const barbers = settings.barbers.map(
+        (b) => new Barber(b.name, b.imageUrl, b.id)
+      );
       const domainSettings = new BarberSettings(
         settings.barberSelection,
         barbers
       );
 
       await this.updateBarberSettingsUC.execute(domainSettings);
-      this.toast.success("Configuración de peluqueros guardada");
+      this.toast.success('Configuración de peluqueros guardada');
     } catch (err) {
       console.error(err);
       this.toast.error(getErrorMessage(err));
@@ -467,7 +515,7 @@ export class InfoManagementComponent implements OnDestroy {
     const n = name?.trim();
     if (!n) return;
     if (!this.selectedBarberFile) {
-      this.toast.error("Selecciona una imagen");
+      this.toast.error('Selecciona una imagen');
       return;
     }
 
@@ -477,7 +525,10 @@ export class InfoManagementComponent implements OnDestroy {
       const currentSettings = this.barberSettings();
       if (currentSettings) {
         // We use plain object for local state to match what JSON.parse gave us
-        const newBarberPlain: BarberDTO = { name: n, imageUrl: imageUrl || undefined };
+        const newBarberPlain: BarberDTO = {
+          name: n,
+          imageUrl: imageUrl || undefined,
+        };
         currentSettings.barbers.push(newBarberPlain);
         this.barberSettings.set({ ...currentSettings });
       }
@@ -485,14 +536,13 @@ export class InfoManagementComponent implements OnDestroy {
       const newBarber = new Barber(n, imageUrl || undefined);
       await this.addBarberUC.execute(newBarber);
 
-      this.toast.success("Peluquero añadido");
+      this.toast.success('Peluquero añadido');
       this.clearBarberFileSelection();
 
       // Force refresh of local state from business state (which should update after UC execution)
       // Actually, since we only init local state if empty, we might need to manually update local state here
       // or rely on the user refreshing.
       // Better: update local state to reflect the change.
-
     } catch (err) {
       console.error(err);
       this.toast.error(getErrorMessage(err));
@@ -500,9 +550,13 @@ export class InfoManagementComponent implements OnDestroy {
   }
 
   async removeBarber(barberDTO: BarberDTO) {
-    if (!await this.toast.confirm(`¿Eliminar a ${barberDTO.name}?`)) return;
+    if (!(await this.toast.confirm(`¿Eliminar a ${barberDTO.name}?`))) return;
     try {
-      const barber = new Barber(barberDTO.name, barberDTO.imageUrl, barberDTO.id);
+      const barber = new Barber(
+        barberDTO.name,
+        barberDTO.imageUrl,
+        barberDTO.id
+      );
       await this.removeBarberUC.execute(barber);
       // No need to manually refresh
     } catch (err) {
@@ -531,33 +585,44 @@ export class InfoManagementComponent implements OnDestroy {
         PhotoType.BARBER
       );
 
-      this.uploadPhotoUC.execute(this.selectedBarberFile!, photo).then(({ task }) => {
-        this.isBarberUploading.set(true);
+      this.uploadPhotoUC
+        .execute(this.selectedBarberFile!, photo)
+        .then(({ task }) => {
+          this.isBarberUploading.set(true);
 
-        this.barberUploadSubscription = percentage(task).subscribe(({ progress }) => {
-          this.barberUploadProgress.set(`${progress}%`);
+          // ✅ percentage dentro de runInInjectionContext
+          this.barberUploadSubscription = runInInjectionContext(
+            this.injector,
+            () =>
+              percentage(task).subscribe(({ progress }) => {
+                this.barberUploadProgress.set(`${progress}%`);
+              })
+          );
+
+          task
+            .then(async (snapshot) => {
+              // ✅ getDownloadURL dentro de runInInjectionContext
+              const url = await runInInjectionContext(this.injector, () =>
+                getDownloadURL(snapshot.ref)
+              );
+
+              this.isBarberUploading.set(false);
+              this.barberUploadProgress.set('0%');
+              resolve(url);
+            })
+            .catch((err) => {
+              this.isBarberUploading.set(false);
+              reject(err);
+            });
         });
-
-        task.then(async (snapshot) => {
-          const { getDownloadURL } = await import("@angular/fire/storage");
-          const url = await getDownloadURL(snapshot.ref);
-
-          this.isBarberUploading.set(false);
-          this.barberUploadProgress.set("0%");
-          resolve(url);
-        }).catch(err => {
-          this.isBarberUploading.set(false);
-          reject(err);
-        });
-      });
     });
   }
 
   private clearBarberFileSelection() {
     this.selectedBarberFile = null;
     URL.revokeObjectURL(this.barberImagePreviewUrl());
-    this.barberImagePreviewUrl.set("");
-    if (this.barberFileInput) this.barberFileInput.nativeElement.value = "";
+    this.barberImagePreviewUrl.set('');
+    if (this.barberFileInput) this.barberFileInput.nativeElement.value = '';
   }
 
   ngOnDestroy() {
