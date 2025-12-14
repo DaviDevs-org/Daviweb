@@ -17,6 +17,7 @@
 .admin-content {
   flex: 1;
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: $spacing-xl $spacing-lg;
   // Evitar scroll anidado que pueda dejar “huecos” con fondos del layout

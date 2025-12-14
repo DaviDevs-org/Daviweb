@@ -1,7 +1,7 @@
 <div class="header">
   <nav class="nav" aria-label="Navegación principal">
     <div class="heading">
-      <span class="heading-text">RO'S PELUQUEROS</span>
+      <span class="heading-text">{{ saasConfig.business.name.toUpperCase() }}</span>
     </div>
 
     <div class="anchors">
@@ -49,11 +49,11 @@
   </nav>
 
   <div class="welcome-banner">
-    <img ngSrc="banner.webp" alt="Banner principal de Ro's Peluqueros" fill priority fetchpriority="high" sizes="100vw">
+    <img ngSrc="banner.webp" alt="Banner principal de {{ saasConfig.business.name }}" fill priority fetchpriority="high" sizes="100vw">
     <div class="banner-overlay"></div>
     <div class="banner-content">
       <h1 class="banner-title">
-        RO'S PELUQUEROS
+        {{ saasConfig.business.name.toUpperCase() }}
         <span class="banner-location">Peluquería moderna en Alcorcón</span>
       </h1>
       <h2 class="banner-subtitle">Tu estilo, mi pasión</h2>

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthenticationService } from '@presentation/shared/authentication.service';
 import { Router } from '@angular/router';
 import { AlertService } from '@presentation/shared/alert/alert.service';
+import { SaasConfigService } from 'src/app/config/saas-config.service';
 
 @Component({
   selector: 'app-login',
@@ -17,6 +18,7 @@ export class LoginComponent {
   private router = inject(Router);
   private toast = inject(AlertService);
   private injector = inject(Injector);
+  public saasConfig = inject(SaasConfigService).getAll().business;
   loginData = {
     email: '',
     password: ''

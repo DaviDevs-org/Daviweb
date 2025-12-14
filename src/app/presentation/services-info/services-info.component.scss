@@ -363,8 +363,8 @@
                 }
 
                 .service-meta {
-                    .duration, .price { color: $white !important; background: rgba($white, 0.18); }
-                    .hour-range { color: $white !important; background: rgba($white, 0.18); }
+                    .duration, .price { color: $primary !important; background: $white !important; }
+                    .hour-range { color: $primary !important; background: $white !important; }
                 }
 
                 .service-arrow { color: $white; }

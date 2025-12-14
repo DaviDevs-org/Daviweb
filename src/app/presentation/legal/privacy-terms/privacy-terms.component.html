@@ -1,7 +1,7 @@
 <main class="legal-page">
   <header>
     <h1>Política de Privacidad</h1>
-    <p class="meta">Última actualización: <time datetime="2025-11-18">18 de noviembre de 2025</time></p>
+    <p class="meta">Última actualización: <time datetime="2025-12-14">14 de diciembre de 2025</time></p>
   </header>
 
   <section>
@@ -11,12 +11,12 @@
     </p>
     <ul>
       <li><strong>Titular:</strong> Rosa María Díaz Luis</li>
-      <li><strong>Nombre comercial:</strong> Ros peluqueros</li>
+      <li><strong>Nombre comercial:</strong> </li>
       <li><strong>NIF/CIF:</strong> 08042161g</li>
       <li><strong>Domicilio social (fiscal):</strong> C. Nápoles n15 6a (Móstoles)</li>
       <li><strong>Dirección del establecimiento:</strong> C. Referéndum de Viña Grande, 28925 Alcorcón, Madrid</li>
-      <li><strong>Correo electrónico de contacto:</strong> ros.pelukeros&#64;gmail.com</li>
-      <li><strong>Teléfono:</strong> +34 916 425 660</li>
+      <li><strong>Correo electrónico de contacto:</strong> {{ state.contactInfo().email }} </li>
+      <li><strong>Teléfono:</strong> {{state.contactInfo().phone}}</li>
       <li><strong>Actividad:</strong> Prestación de servicios de peluquería; gestión de citas.</li>
     </ul>
   </section>
@@ -63,7 +63,7 @@
   <section>
     <h2>7. Derechos de los usuarios</h2>
     <p>
-      Puede ejercitar sus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad (ARCO/DP) enviando un correo a: <a href="mailto:ros.pelukeros@gmail.com">ros.pelukeros&#64;gmail.com</a>.
+      Puede ejercitar sus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad (ARCO/DP) enviando un correo a: <a href="mailto:{{ state.contactInfo().email }}">{{ state.contactInfo().email }}</a>.
     </p>
   </section>
 
@@ -85,6 +85,6 @@
   </section>
 
   <footer class="legal-footer">
-    <p>Si desea más información o ejercer sus derechos, contacte por correo a <a href="mailto:ros.pelukeros@gmail.com">ros.pelukeros&#64;gmail.com</a>.</p>
+    <p>Si desea más información o ejercer sus derechos, contacte por correo a <a href="mailto:{{ state.contactInfo().email }}">{{ state.contactInfo().email }}</a>.</p>
   </footer>
 </main>

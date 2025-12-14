@@ -2,7 +2,7 @@
 <main class="legal-page">
   <header>
     <h1>Aviso Legal</h1>
-    <p class="meta">Última actualización: <time datetime="2025-11-18">18 de noviembre de 2025</time></p>
+    <p class="meta">Última actualización: <time datetime="2025-12-14">14 de diciembre de 2025</time></p>
   </header>
 
   <section>
@@ -17,8 +17,8 @@
       <li><strong>NIF/CIF:</strong> 08042161g</li>
       <li><strong>Domicilio social (fiscal):</strong> C. Nápoles n15 6a (Móstoles)</li>
       <li><strong>Dirección del establecimiento:</strong> C. Referéndum de Viña Grande, 28925 Alcorcón, Madrid</li>
-      <li><strong>Correo electrónico de contacto:</strong> ros.pelukeros&#64;gmail.com</li>
-      <li><strong>Teléfono:</strong> +34 916 425 660</li>
+      <li><strong>Correo electrónico de contacto:</strong> {{ state.contactInfo().email }}</li>
+      <li><strong>Teléfono:</strong> {{ state.contactInfo().phone }}</li>
       <li><strong>Actividad:</strong> Prestación de servicios de peluquería; gestión de citas.</li>
     </ul>
   </section>
@@ -68,7 +68,7 @@
     <p>
       El tratamiento de datos personales recogidos a través de formularios para la gestión de citas se realiza conforme a la
       <a class="text" routerLink="/privacidad">Política de Privacidad</a> (RGPD y LOPDGDD). Para cualquier consulta relativa a la protección de datos,
-      puede contactar por correo a: <a href="mailto:ros.pelukeros@gmail.com">ros.pelukeros&#64;gmail.com</a>.
+      puede contactar por correo a: <a href="mailto:{{ state.contactInfo().email }}">{{ state.contactInfo().email }}</a>.
     </p>
   </section>
 
@@ -90,6 +90,6 @@
 
   <footer class="legal-footer">
     <p>Si necesita más información o desea ejercer sus derechos ARCO/DP (Acceso, Rectificación, Supresión, Oposición, Limitación y Portabilidad),
-      contacte por correo a <a href="mailto:ros.pelukeros@gmail.com">ros.pelukeros&#64;gmail.com</a>.</p>
+      contacte por correo a <a href="mailto:{{ state.contactInfo().email }}">{{ state.contactInfo().email }}</a>.</p>
   </footer>
 </main>

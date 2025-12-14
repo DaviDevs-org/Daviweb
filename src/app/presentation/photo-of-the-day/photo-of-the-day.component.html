@@ -24,10 +24,10 @@
     <div class="single-image-container">
       <div class="single-image-wrapper">
         <!-- width/height reflejan la ratio intrínseca (ej. 1024x1024). priority porque es LCP -->
-        <img [ngSrc]="carouselItems()[0].url!" [alt]="getAltText(carouselItems()[0].name)" width="1024" height="1024" priority
+        <img [ngSrc]="carouselItems()[0].url!" [alt]="getAltText(carouselItems()[0].displayName )" width="1024" height="1024" priority
           decoding="async" class="single-image">
         <div class="image-caption">
-          <span>{{ formatCaption(carouselItems()[0].name) }}</span>
+          <span>{{ formatCaption(carouselItems()[0].displayName) }}</span>
         </div>
       </div>
     </div>
@@ -44,11 +44,11 @@
             <div class="carousel-slide"
               [style.width]="(100 / totalSlides()) + '%'" 
               [style.--bg]="'url(' + item.url + ')'">
-              <img [ngSrc]="item.url!" [alt]="getAltText(item.name)" fill class="carousel-image"
+              <img [ngSrc]="item.url!" [alt]="getAltText(item.displayName)" fill class="carousel-image"
                 [attr.priority]="i === currentSlide() ? '' : null" [attr.loading]="i === currentSlide() ? null : 'lazy'"
                 decoding="async">
               <div class="carousel-caption">
-                <span>{{ formatCaption(item.name) }}</span>
+                <span>{{ formatCaption(item.displayName) }}</span>
               </div>
             </div>
           }

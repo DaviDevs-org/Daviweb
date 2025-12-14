@@ -26,7 +26,6 @@ export class HomeComponent {
   private meta = inject(Meta);
 
   ngOnInit() {
-    this.title.setTitle('Peluquería - Reserva tu cita online | Nombre Peluquería');
 
     // SEO básico
     this.meta.updateTag({ name: 'description', content: 'Reserva cita en nuestra peluquería. Los mejores profesionales a tu servicio.' });

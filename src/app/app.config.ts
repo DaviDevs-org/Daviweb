@@ -1,6 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
+import { environment } from './environments/environment';
 import { routes } from './app.routes';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
@@ -20,14 +21,7 @@ import { FirebaseGalleryRepository } from '@infrastructure/firebase/gallery/fire
 export const appConfig: ApplicationConfig = {
   providers:
     [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes),
-    provideFirebaseApp(() => initializeApp({
-      projectId: "daviweb-3b415",
-      appId: "1:835985113850:web:c3645c905f7eb579823f43",
-      storageBucket: "daviweb-3b415.firebasestorage.app",
-      apiKey: "AIzaSyDdSdy08ZYN2Tqgub-Cg9hFg0hUUMEyfK0",
-      authDomain: "daviweb-3b415.firebaseapp.com",
-      messagingSenderId: "835985113850",
-      measurementId: "G-P0HMFQM2TM" })),
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideStorage(() => getStorage()),

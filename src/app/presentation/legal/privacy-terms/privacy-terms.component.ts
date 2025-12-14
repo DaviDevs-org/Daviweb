@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { BusinessStateService } from '@presentation/shared/business-state.service';
 
 @Component({
   selector: 'app-privacy-terms',
@@ -7,5 +8,5 @@ import { Component } from '@angular/core';
   styleUrl: './privacy-terms.component.scss'
 })
 export class PrivacyTermsComponent {
-
+  public state = inject(BusinessStateService);
 }

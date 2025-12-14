@@ -14,6 +14,7 @@ import {
 import { effect } from '@angular/core';
 import { GalleryPhoto, PhotoType } from '../../domain';
 import { BusinessStateService } from '@presentation/shared/business-state.service';
+import { SaasConfigService } from 'src/app/config/saas-config.service';
 
 @Component({
   selector: 'app-photo-of-the-day',
@@ -25,6 +26,7 @@ export class PhotoOfTheDayComponent implements OnDestroy {
   private businessState = inject(BusinessStateService);
   private platformId = inject(PLATFORM_ID);
   private ngZone = inject(NgZone);
+  public saasConfig = inject(SaasConfigService).getAll().business;
 
   carouselItems = signal<GalleryPhoto[]>([]);
   currentSlide = signal(0);
@@ -117,7 +119,7 @@ export class PhotoOfTheDayComponent implements OnDestroy {
 
   getAltText(filename: string): string {
     const baseName = this.formatCaption(filename);
-    return `${baseName} realizado en peluquería moderna en Madrid | RO'S PELUQUEROS`;
+    return `${baseName} realizado en peluquería moderna en Madrid | ${this.saasConfig.name.toUpperCase()}`;
   }
 
   onProgressInput(event: Event): void {

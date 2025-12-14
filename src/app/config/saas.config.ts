@@ -2,10 +2,10 @@ const userId = 'ddbbchanges';
 export const SAAS_CONFIG = {
   // Configuración de la Empresa
   business: {
-    name: 'Nombre de tu Negocio',
-    email: 'contacto@negocio.com',
-    phone: '+34 600 000 000',
-    address: 'Calle Ejemplo, 123, Madrid',
+    name: "Ro's Pruebas",
+    ownerName: 'Rosi',
+    instagram: 'ros.peluqueros',
+    facebook: 'ros.peluqueros',
     currency: 'EUR',
     currencySymbol: '€',
   },

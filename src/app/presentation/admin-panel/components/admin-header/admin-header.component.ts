@@ -3,6 +3,7 @@ import { Component, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../../../shared/authentication.service';
 import { AlertService } from '../../../shared/alert/alert.service';
+import { SaasConfigService } from 'src/app/config/saas-config.service';
 
 @Component({
   selector: 'app-admin-header',
@@ -14,6 +15,7 @@ import { AlertService } from '../../../shared/alert/alert.service';
 export class AdminHeaderComponent {
   private auth = inject(AuthenticationService)
   private toast = inject(AlertService)
+  public saasConfig = inject(SaasConfigService).getAll().business;
 
   async onLogout() {
     if (await this.toast.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
