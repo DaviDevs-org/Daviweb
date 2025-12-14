@@ -86,6 +86,7 @@
           [barbers]="barbers()" 
           [allowBarberSelection]="allowBarberSelection()"
           [availableSlots]="availableHours()"
+          [isSubmitting]="isSubmitting()"
           (formSubmitted)="onBookingSubmit($event)">
         </app-booking-form>
       </div>

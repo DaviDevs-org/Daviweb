@@ -18,6 +18,7 @@ import {
   WeeklyScheduleHandler,
   AvailabilityContext,
   Appointment,
+  Phone,
 } from '@domain/index';
 import { GetAvailableSlotsForDayService } from '@domain/business-info/availability/get-available-slots-for-day.service';
 import { AlertService } from '../../shared/alert/alert.service';
@@ -218,7 +219,7 @@ export class CalendarSelectorComponent implements AfterViewInit {
       const [hours, minutes] = time.split(':').map(Number);
       const appointmentDate = new Date(date);
       appointmentDate.setHours(hours, minutes, 0, 0);
-
+      const phone = new Phone(data.phone);
       // Create Appointment entity
       const appointment = new Appointment(
         appointmentDate,
@@ -226,7 +227,7 @@ export class CalendarSelectorComponent implements AfterViewInit {
         undefined, // id
         data.description,
         data.name,
-        data.phone,
+        phone.getValue(),
         data.barber,
         data.hairLength || undefined
       );
@@ -239,7 +240,7 @@ export class CalendarSelectorComponent implements AfterViewInit {
       this.selectedHour.set(null);
     } catch (error) {
       console.error('Error creating appointment:', error);
-      this.toast.error('Error al crear la reserva. Inténtalo de nuevo.');
+      this.toast.error(`Error al intentar crear la reserva: ${error instanceof Error ? error.message : 'Desconocido'}`);
     } finally {
       this.isSubmitting.set(false);
     }

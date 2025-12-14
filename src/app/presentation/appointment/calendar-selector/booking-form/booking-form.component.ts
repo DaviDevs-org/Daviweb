@@ -36,6 +36,7 @@ export class BookingFormComponent {
   public barbers = input<Barber[]>([]);
   public allowBarberSelection = input<boolean>(false);
   public availableSlots = input<string[]>([]); // List of all available start times for the day
+  public isSubmitting = input<boolean>(false);
 
   // Outputs
   public formSubmitted = output<{
@@ -54,7 +55,6 @@ export class BookingFormComponent {
   // State
   private businessState = inject(BusinessStateService);
   public services = this.businessState.services;
-  public isSubmitting = signal(false);
 
   // Form
   public bookingForm = this.fb.group({
@@ -117,8 +117,6 @@ export class BookingFormComponent {
     const service = this.services().find((s) => s.name === val.serviceId);
 
     if (!service) return;
-
-    this.isSubmitting.set(true);
 
     this.formSubmitted.emit({
       name: val.name!,
