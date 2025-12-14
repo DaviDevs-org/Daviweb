@@ -203,12 +203,17 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
 
   async removeBarber(barber: Barber): Promise<void> {
     try {
-      if (barber.imageUrl) {
+      console.log('REMOVE BARBER: ', {
+        id: barber.id,
+        name: barber.name,
+        imagePath: barber.imagePath,
+        barbersPath: this.barbersPath,
+      });
+
+      if (barber.imagePath) {
         try {
-          return runInInjectionContext(this.injector, async () => {
-            const imageRef = ref(this.storage, barber.imageUrl);
-            await deleteObject(imageRef);
-          });
+          const imageRef = ref(this.storage, barber.imagePath);
+          await deleteObject(imageRef);
         } catch (e) {
           console.warn('No se pudo borrar la imagen del barber:', e);
         }
@@ -216,14 +221,12 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
 
       if (!barber.id) {
         console.warn('Intentando borrar barbero sin ID:', barber.name);
-        // Fallback to name if ID is missing (legacy support or error recovery)
-        // But with auto-IDs, name is not the ID.
-        // We'll try to find by name? No, that's dangerous.
-        // Just throw or return.
         throw new Error('Cannot remove barber without ID');
       }
 
-      const docRef = doc(this.firestore, `${this.barbersPath}/${barber.id}`);
+      const docPath = `${this.barbersPath}/${barber.id}`;
+      console.log('DELETE DOC PATH:', docPath);
+      const docRef = doc(this.firestore, docPath);
       await deleteDoc(docRef);
     } catch (error) {
       console.error('Error removing barber:', error);

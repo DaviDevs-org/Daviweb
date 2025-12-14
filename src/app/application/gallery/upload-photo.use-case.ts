@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { GalleryRepository } from './gallery.repository.interface';
 import { ProcessResult, PhotoType, GalleryPhoto } from '@domain/index';
-import { UploadTask, UploadTaskSnapshot } from '@angular/fire/storage';
-import { Observable } from 'rxjs';
+import { UploadTask } from '@angular/fire/storage';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +9,10 @@ import { Observable } from 'rxjs';
 export class UploadPhotoUseCase {
   constructor(private readonly galleryRepository: GalleryRepository) {}
 
-  async execute(file: File, photo: GalleryPhoto): Promise<{ task: UploadTask }> {
+  async execute(
+    file: File,
+    photo: GalleryPhoto
+  ): Promise<{ task: UploadTask }> {
     // Validación: archivo requerido
     if (!file) {
       throw new Error('El archivo es requerido');

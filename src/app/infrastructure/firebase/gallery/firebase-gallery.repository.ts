@@ -83,6 +83,47 @@ export class FirebaseGalleryRepository implements GalleryRepository {
     return from(loadPhotos()).pipe(catchError(() => of([])));
   }
 
+  async renamePhoto(
+    photo: GalleryPhoto,
+    newName: string
+  ): Promise<GalleryPhoto> {
+    return await runInInjectionContext(this.injector, async () => {
+      // 1. Construir paths antiguo y nuevo
+      const oldPath = `${this.galleryPath}/${photo.type}/${photo.id}`;
+      const extension = photo.id.split('.').pop() || 'webp';
+      const sanitized = newName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      const newFileName = `${sanitized}.${extension}`;
+      const newPath = `${this.galleryPath}/${photo.type}/${newFileName}`;
+
+      const oldRef = ref(this.storage, oldPath);
+      const newRef = ref(this.storage, newPath);
+
+      // 2. Descargar el blob del antiguo fichero
+      const url = await getDownloadURL(oldRef);
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      // 3. Subir el blob al nuevo path con el mismo metadata
+      const metadata = { customMetadata: { name: newName } };
+      await uploadBytesResumable(newRef, blob, metadata);
+
+      // 4. Borrar el antiguo fichero
+      await deleteObject(oldRef);
+
+      // 5. Devolver nuevo GalleryPhoto (id = nuevo nombre de fichero)
+      return new GalleryPhoto(
+        newFileName,
+        newFileName,
+        await getDownloadURL(newRef),
+        true,
+        photo.type
+      );
+    });
+  }
+
   uploadPhoto(file: File, photo: GalleryPhoto): UploadTask {
     return runInInjectionContext(this.injector, () => {
       const fileRef: StorageReference = ref(

@@ -2,6 +2,7 @@ export interface BarberDTO {
   id?: string; // Original ID (usually the name)
   name: string;
   imageUrl?: string;
+  imagePath?: string;
 }
 
 export interface BarberSettingsDTO {
@@ -14,6 +15,7 @@ export class Barber {
   constructor(
     public name: string,
     public imageUrl?: string,
+    public imagePath?: string,
     public id?: string
   ) {
     this.validateName();
@@ -32,38 +34,39 @@ export class Barber {
   getInitials(): string {
     return this.name
       .split(' ')
-      .map(word => word[0])
+      .map((word) => word[0])
       .join('')
       .toUpperCase()
       .substring(0, 2);
   }
 
   toDTO(): BarberDTO {
-    const tdo: BarberDTO = {
-      name: this.name
+    const dto: BarberDTO = {
+      name: this.name,
     };
 
     if (this.id) {
-      tdo.id = this.id;
+      dto.id = this.id;
     }
 
     if (this.imageUrl) {
-      tdo.imageUrl = this.imageUrl;
+      dto.imageUrl = this.imageUrl;
     }
 
-    return tdo;
+    if (this.imagePath) {
+      dto.imagePath = this.imagePath;
+    }
+
+    return dto;
   }
 
-  static fromDTO(tdo: BarberDTO): Barber {
-    return new Barber(tdo.name, tdo.imageUrl, tdo.id);
+  static fromDTO(dto: BarberDTO): Barber {
+    return new Barber(dto.name, dto.imageUrl, dto.imagePath, dto.id);
   }
 }
 
 export class BarberSettings {
-  constructor(
-    public barberSelection: boolean,
-    public barbers: Barber[]
-  ) {}
+  constructor(public barberSelection: boolean, public barbers: Barber[]) {}
 
   isEnabled(): boolean {
     return this.barberSelection;
@@ -73,12 +76,9 @@ export class BarberSettings {
     return this.barbers.length > 0;
   }
 
-  /**
-   * Obtiene un barbero por su nombre
-   */
   getBarberByName(name: string): Barber | undefined {
-    return this.barbers.find(barber =>
-      barber.name.toLowerCase() === name.toLowerCase()
+    return this.barbers.find(
+      (barber) => barber.name.toLowerCase() === name.toLowerCase()
     );
   }
 
@@ -87,19 +87,19 @@ export class BarberSettings {
   }
 
   getBarberNames(): string[] {
-    return this.barbers.map(b => b.name);
+    return this.barbers.map((b) => b.name);
   }
 
   toDTO(): BarberSettingsDTO {
     return {
       barberSelection: this.barberSelection,
-      barbers: this.barbers.map(barber => barber.toDTO())
+      barbers: this.barbers.map((barber) => barber.toDTO()),
     };
   }
 
-  static fromDTO(tdo: BarberSettingsDTO): BarberSettings {
-    const barbers = tdo.barbers.map(b => Barber.fromDTO(b));
-    return new BarberSettings(tdo.barberSelection, barbers);
+  static fromDTO(dto: BarberSettingsDTO): BarberSettings {
+    const barbers = dto.barbers.map((b) => Barber.fromDTO(b));
+    return new BarberSettings(dto.barberSelection, barbers);
   }
 }
 
@@ -112,6 +112,7 @@ export class BarberDisplay extends Barber {
     public experience?: number,
     public description?: string
   ) {
+    // imagePath e id opcionales, no los usas aquí
     super(name, imageUrl);
   }
 }

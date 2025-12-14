@@ -496,7 +496,7 @@ export class InfoManagementComponent implements OnDestroy {
     try {
       // Reconstruct Barber objects from plain JSON
       const barbers = settings.barbers.map(
-        (b) => new Barber(b.name, b.imageUrl, b.id)
+        (b) => new Barber(b.name, b.imageUrl, b.imagePath, b.id)
       );
       const domainSettings = new BarberSettings(
         settings.barberSelection,
@@ -520,29 +520,32 @@ export class InfoManagementComponent implements OnDestroy {
     }
 
     try {
-      const imageUrl = await this.uploadBarberImage();
-      // Add to local state
+      const uploadResult = await this.uploadBarberImage();
+      if (!uploadResult) {
+        this.toast.error('No se pudo subir la imagen');
+        return;
+      }
+
+      const { url, path } = uploadResult;
+
+      // Local state
       const currentSettings = this.barberSettings();
       if (currentSettings) {
-        // We use plain object for local state to match what JSON.parse gave us
         const newBarberPlain: BarberDTO = {
           name: n,
-          imageUrl: imageUrl || undefined,
+          imageUrl: url,
+          imagePath: path,
         };
         currentSettings.barbers.push(newBarberPlain);
         this.barberSettings.set({ ...currentSettings });
       }
 
-      const newBarber = new Barber(n, imageUrl || undefined);
+      // Dominio + persistencia
+      const newBarber = new Barber(n, url, path);
       await this.addBarberUC.execute(newBarber);
 
       this.toast.success('Peluquero añadido');
       this.clearBarberFileSelection();
-
-      // Force refresh of local state from business state (which should update after UC execution)
-      // Actually, since we only init local state if empty, we might need to manually update local state here
-      // or rely on the user refreshing.
-      // Better: update local state to reflect the change.
     } catch (err) {
       console.error(err);
       this.toast.error(getErrorMessage(err));
@@ -555,6 +558,7 @@ export class InfoManagementComponent implements OnDestroy {
       const barber = new Barber(
         barberDTO.name,
         barberDTO.imageUrl,
+        barberDTO.imagePath,
         barberDTO.id
       );
       await this.removeBarberUC.execute(barber);
@@ -573,13 +577,17 @@ export class InfoManagementComponent implements OnDestroy {
     }
   }
 
-  private async uploadBarberImage(): Promise<string | null> {
+  private async uploadBarberImage(): Promise<{
+    url: string;
+    path: string;
+  } | null> {
     if (!this.selectedBarberFile) return null;
 
     return new Promise((resolve, reject) => {
+      const id = crypto.randomUUID();
       const photo = new GalleryPhoto(
         this.selectedBarberFile!.name,
-        crypto.randomUUID(),
+        id,
         undefined,
         false,
         PhotoType.BARBER
@@ -590,7 +598,6 @@ export class InfoManagementComponent implements OnDestroy {
         .then(({ task }) => {
           this.isBarberUploading.set(true);
 
-          // ✅ percentage dentro de runInInjectionContext
           this.barberUploadSubscription = runInInjectionContext(
             this.injector,
             () =>
@@ -601,14 +608,15 @@ export class InfoManagementComponent implements OnDestroy {
 
           task
             .then(async (snapshot) => {
-              // ✅ getDownloadURL dentro de runInInjectionContext
               const url = await runInInjectionContext(this.injector, () =>
                 getDownloadURL(snapshot.ref)
               );
 
               this.isBarberUploading.set(false);
               this.barberUploadProgress.set('0%');
-              resolve(url);
+
+              // snapshot.ref.fullPath = path real en Storage
+              resolve({ url, path: snapshot.ref.fullPath });
             })
             .catch((err) => {
               this.isBarberUploading.set(false);
