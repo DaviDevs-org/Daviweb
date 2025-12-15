@@ -305,6 +305,7 @@
         overflow-y: auto;
         max-height: 420px;
         padding-right: 8px;
+        padding-top: 8px;
 
         /* Scrollbar styling */
         &::-webkit-scrollbar {
@@ -352,22 +353,29 @@
             }
 
             &.selected {
-                background: linear-gradient(135deg, $primary 0%, color-mix(in srgb, var(--color-primary), black 15%) 100%);
-                border-color: $primary;
-                box-shadow: 0 0 0 3px rgba($primary,0.3), 0 4px 12px rgba($primary, 0.35);
-                transform: translateY(-1px);
+                background: $primary;
+                border-color: $primary-dark;
+                box-shadow: 0 8px 24px rgba($primary, 0.3);
+                transform: translateY(-2px);
 
                 .service-info .service-name {
                     color: $white;
                     font-weight: 700;
+                    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
                 }
 
                 .service-meta {
-                    .duration, .price { color: $primary !important; background: $white !important; }
-                    .hour-range { color: $primary !important; background: $white !important; }
+                    .duration, .price, .hour-range { 
+                        color: $primary-dark !important; 
+                        background: $white !important;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    }
                 }
 
-                .service-arrow { color: $white; }
+                .service-arrow { 
+                    color: $white;
+                    opacity: 1;
+                }
             }
 
             .service-info {

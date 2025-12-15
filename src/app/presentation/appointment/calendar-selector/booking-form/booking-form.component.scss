@@ -117,19 +117,29 @@ textarea {
 }
 
 .error {
-  color: $danger-red;
+  color: $white;
+  background-color: $danger-red;
   font-size: 13px;
-  margin-top: 6px;
+  margin-top: 8px;
   font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  
+  // Animación
   max-height: 0;
   opacity: 0;
-  transition: max-height 0.4s ease, opacity 0.3s ease;
+  transform: translateY(-5px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   overflow: hidden;
 }
 
 .error.visible {
-  max-height: 50px;
+  max-height: 80px; // Espacio suficiente para el padding y texto
   opacity: 1;
+  transform: translateY(0);
 }
 
 .contact-error {
@@ -317,7 +327,6 @@ textarea {
   .error {
     margin-top: 6px;
     font-size: 13px;
-    color: $danger-red-text;
     font-weight: 600;
   }
 }

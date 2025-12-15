@@ -27,6 +27,7 @@ import {
   ExceptionHandler,
   WeeklyScheduleHandler,
 } from '@domain/index';
+import { Phone } from '@domain/shared/value-objects/phone.vo';
 import { TimeUtils } from '@domain/shared/utils/time.utils';
 
 // Application Imports
@@ -205,7 +206,7 @@ export class AppointmentManagementComponent
   constructor() {
     this.editForm = this.fb.group({
       name: ['', Validators.required],
-      phone: [''],
+      phone: ['', [this.phoneValidator]],
       date: ['', Validators.required],
       time: ['', Validators.required],
       serviceId: ['', Validators.required],
@@ -688,5 +689,16 @@ export class AppointmentManagementComponent
         }),
       100
     );
+  }
+
+  private phoneValidator(control: any) {
+    const value = control.value;
+    if (!value) return null; // Si está vacío es válido (es opcional)
+    try {
+      new Phone(value);
+      return null;
+    } catch (e) {
+      return { invalidPhone: true };
+    }
   }
 }

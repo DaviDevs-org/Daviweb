@@ -20,7 +20,7 @@ export const routes: Routes = [
         loadComponent: () => import('./presentation/legal/legal-advice/legal-advice.component').then(m => m.LegalAdviceComponent) 
     },
     { 
-        path: 'privacidad', 
+        path: 'politica-privacidad', 
         loadComponent: () => import('./presentation/legal/privacy-terms/privacy-terms.component').then(m => m.PrivacyTermsComponent) 
     },
     { path: '**', redirectTo: '' }

@@ -3,16 +3,15 @@
 
 html {
   scroll-behavior: smooth;
-  height: 100%;
+  // height: 100%; // Eliminamos altura fija para evitar conflictos de scroll
 }
 
 body {
-  height: 100%;
-  overflow-x: hidden;
+  min-height: 100vh; // Aseguramos que cubra la pantalla
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow-y: auto;
+  // overflow-y: auto; // ELIMINADO: Dejamos que el navegador gestione el scroll nativo
   background-color: $background-primary;
   font-family: $font-primary;
   font-size: $font-size-base;
@@ -25,7 +24,7 @@ app-root {
   flex-direction: column;
   min-height: 100vh;
   background-color: $background-secondary;
-  overflow-y: auto;
+  // overflow-y: auto; // ELIMINADO: Causa del bug de doble scroll y glitches visuales
 }
 
 * {
