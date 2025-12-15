@@ -5,3 +5,4 @@ export * from './gallery.repository.interface';
 export * from './get-photos.use-case';
 export * from './upload-photo.use-case';
 export * from './delete-photo.use-case';
+export * from './rename-photo.use-case';

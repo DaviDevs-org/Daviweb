@@ -1,4 +1,11 @@
-import { Injectable, inject, signal, computed, NgZone, afterNextRender } from '@angular/core';
+import {
+  Injectable,
+  inject,
+  signal,
+  computed,
+  NgZone,
+  afterNextRender,
+} from '@angular/core';
 import {
   GetContactInfoUseCase,
   GetScheduleUseCase,
@@ -38,7 +45,7 @@ export class BusinessStateService {
   private getAppointments = inject(GetAppointmentsUseCase);
 
   // Available Slots
-  private readonly slotsService = new GetAvailableSlotsForDayService();
+  private slotsService = inject(GetAvailableSlotsForDayService);
 
   // Estado para la información de contacto
   // Inicializamos con valores por defecto para evitar "undefined" en la UI
@@ -152,7 +159,7 @@ export class BusinessStateService {
         this.exceptions.set([]);
       },
     });
-    this.loadGalleryImages()
+    this.loadGalleryImages();
   }
 
   private loadDeferredData() {

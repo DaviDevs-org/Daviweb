@@ -5,14 +5,17 @@ import {
   ViewChild,
   OnDestroy,
   inject,
-  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { GalleryPhoto, PhotoType } from '@domain/gallery';
 
-import { UploadPhotoUseCase, DeletePhotoUseCase } from '@application/gallery';
+import {
+  UploadPhotoUseCase,
+  DeletePhotoUseCase,
+  RenamePhotoUseCase,
+} from '@application/gallery';
 
 // Shared
 import { AlertService } from '@presentation/shared/alert/alert.service';
@@ -35,6 +38,7 @@ export class GalleryManagementComponent implements OnDestroy {
   private state = inject(BusinessStateService);
   private uploadPhotoUseCase = inject(UploadPhotoUseCase);
   private deletePhotoUseCase = inject(DeletePhotoUseCase);
+  private renamePhotoUseCase = inject(RenamePhotoUseCase);
   private toast = inject(AlertService);
 
   // ========================
@@ -152,7 +156,7 @@ export class GalleryManagementComponent implements OnDestroy {
       /\.(jpe?g|png|webp)$/i,
       '.webp'
     );
-    const photoEntity = new GalleryPhoto(fileName, '', PhotoType.GALLERY);
+    const photoEntity = new GalleryPhoto(fileName, fileName, PhotoType.GALLERY);
 
     try {
       this.progress.set('0%');
@@ -202,6 +206,7 @@ export class GalleryManagementComponent implements OnDestroy {
     if (!confirmed) return;
 
     const photo = this.galleryPhotos()[index];
+    console.log('DELETE photo:', photo);
 
     try {
       // ✅ USAR EL USE CASE PARA ELIMINAR
@@ -232,32 +237,29 @@ export class GalleryManagementComponent implements OnDestroy {
     const photo = this.galleryPhotos()[index];
 
     let newName = await this.toast.prompt(
-      'Introduzca un nuevo nombre para la imagen'
+      'Introduzca un nuevo nombre para la imagen',
+      photo.displayName
     );
 
     if (newName === null) {
       this.toast.error('Por favor, ingrese un nombre para la imagen');
       return;
     }
-
     if (newName === false) return;
 
-    // Agregar extensión original
-    const extension = photo.name.split('.').pop();
-    newName = `${newName}.${extension}`;
+    newName = newName.trim();
+    if (!newName) {
+      this.toast.error('El nombre no puede estar vacío');
+      return;
+    }
 
-    // TODO: Si tienes un UpdatePhotoUseCase, úsalo aquí
-    // Por ahora, actualizamos solo localmente
+    // Solo cambiamos el name visible
+    const updatedPhoto = this.renamePhotoUseCase.execute(photo, newName);
+
     this.galleryPhotos.update((photos) => {
-      const updated = [...photos];
-      updated[index] = new GalleryPhoto(
-        newName,
-        photo.id,
-        photo.url,
-        photo.imageLoaded,
-        photo.type
-      );
-      return updated;
+      const clone = [...photos];
+      clone[index] = updatedPhoto;
+      return clone;
     });
 
     this.toast.success('Nombre actualizado');

@@ -1,16 +1,15 @@
 import { Appointment, ReservedSlot } from '@domain/index';
 import { AppointmentRepository } from '@application/appointments/appointment.repository.interface';
 import { Injectable } from '@angular/core';
-import { GetAvailableSlotsForDayUseCase } from '@application/business/schedule/slots/get-available-slots-for-day.use-case';
 import { ScheduleRepository } from '@application/business';
 import { firstValueFrom } from 'rxjs';
-import { Service } from '@domain/services/service.entity';
+import { BusinessStateService } from '@presentation/shared/business-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class AddAppointmentUseCase {
   constructor(
     private appointmentRepository: AppointmentRepository,
-    private getAvailableSlotsUseCase: GetAvailableSlotsForDayUseCase,
+    private readonly businessState: BusinessStateService,
     private scheduleRepository: ScheduleRepository
   ) {}
 
@@ -35,8 +34,8 @@ export class AddAppointmentUseCase {
     }
 
     // 2. Check availability and calculate slots to reserve
-    const availableSlots = await firstValueFrom(
-      this.getAvailableSlotsUseCase.execute(appointment.datetime)
+    const availableSlots = this.businessState.getAvailableSlotsForDate(
+      appointment.datetime
     );
 
     let currentMinutes =
