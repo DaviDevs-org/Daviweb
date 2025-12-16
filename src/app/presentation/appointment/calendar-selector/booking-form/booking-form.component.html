@@ -73,21 +73,21 @@
              [class.active]="bookingForm.get('hairLength')?.value === 'short'"
              (click)="bookingForm.get('hairLength')?.setValue('short')">
           <button type="button">CORTO</button>
-          <img src="assets/hair-length/short.jpeg" alt="Ejemplo pelo corto" />
+          <img src="/short.jpeg" (error)="handleImageError($event, 'assets/hair-length/short.png')" alt="Ejemplo pelo corto" />
         </div>
         
         <div class="hair-length-card" 
              [class.active]="bookingForm.get('hairLength')?.value === 'medium'"
              (click)="bookingForm.get('hairLength')?.setValue('medium')">
           <button type="button">MEDIO</button>
-          <img src="assets/hair-length/medium.jpeg" alt="Ejemplo pelo medio" />
+          <img src="/medium.jpeg" (error)="handleImageError($event, 'assets/hair-length/medium.png')" alt="Ejemplo pelo medio" />
         </div>
         
         <div class="hair-length-card" 
              [class.active]="bookingForm.get('hairLength')?.value === 'long'"
              (click)="bookingForm.get('hairLength')?.setValue('long')">
           <button type="button">LARGO</button>
-          <img src="assets/hair-length/long.jpeg" alt="Ejemplo pelo largo" />
+          <img src="/long.jpeg" (error)="handleImageError($event, 'assets/hair-length/long.png')" alt="Ejemplo pelo largo" />
         </div>
       </div>
       

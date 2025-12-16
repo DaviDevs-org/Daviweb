@@ -8,6 +8,7 @@ export const SAAS_CONFIG = {
     facebook: 'ros.peluqueros',
     currency: 'EUR',
     currencySymbol: '€',
+    opinionsUrl: 'https://www.google.com/search?client=ubuntu-sn&hs=l6U&sca_esv=f4f4d625b74d76fe&channel=fs&tbm=lcl&sxsrf=AE3TifM_mpB4Ebr-Yc9SHHYNBnaIBQxHOw:1761821391581&q=Ro%27s+Peluqueros+Rese%C3%B1as&rflfq=1&num=20&stick=H4sIAAAAAAAAAONgkxK2MDIytTQ1NDYyMDO2NDExMrcw3MDI-IpRIihfvVghIDWntLA0tSi_WCEotTj18MbE4kWsOKUACtvZTFAAAAA&rldimm=8225951320639442781&hl=es-ES&sa=X&ved=2ahUKEwjWv8-R4MuQAxUEUaQEHZEqAEAQ9fQKegQIRRAF&biw=1600&bih=778&dpr=1.2#lkt=LocalPoiReviews'
   },
 
   // Configuración Visual (Tema)

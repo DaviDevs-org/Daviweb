@@ -70,14 +70,14 @@ export class GalleryManagementComponent implements OnDestroy {
   // CARGA DE DATOS
   // ========================
 
-  private async loadGalleryPhotos() {
+  private async loadGalleryPhotos(isBackgroundReload = false) {
     try {
-      this.isLoading.set(true);
+      if (!isBackgroundReload) this.isLoading.set(true);
       await this.state.loadGalleryImages();
-      this.isLoading.set(false);
+      if (!isBackgroundReload) this.isLoading.set(false);
     } catch (error) {
       console.error('Error en loadGalleryPhotos:', error);
-      this.isLoading.set(false);
+      if (!isBackgroundReload) this.isLoading.set(false);
     }
   }
 
@@ -185,7 +185,7 @@ export class GalleryManagementComponent implements OnDestroy {
       }
 
       // Recargar la galería (ahora sí, con la nueva foto en el servidor)
-      await this.loadGalleryPhotos();
+      await this.loadGalleryPhotos(true);
     } catch (error) {
       console.error('Error al subir la imagen:', error);
       this.toast.error(getErrorMessage(error));
@@ -254,14 +254,19 @@ export class GalleryManagementComponent implements OnDestroy {
     }
 
     // Solo cambiamos el name visible
-    const updatedPhoto = this.renamePhotoUseCase.execute(photo, newName);
+    try {
+      const updatedPhoto = await this.renamePhotoUseCase.execute(photo, newName);
 
-    this.galleryPhotos.update((photos) => {
-      const clone = [...photos];
-      clone[index] = updatedPhoto;
-      return clone;
-    });
+      this.galleryPhotos.update((photos) => {
+        const clone = [...photos];
+        clone[index] = updatedPhoto;
+        return clone;
+      });
 
-    this.toast.success('Nombre actualizado');
+      this.toast.success('Nombre actualizado');
+    } catch (error) {
+      console.error('Error renombrando foto:', error);
+      this.toast.error(getErrorMessage(error));
+    }
   }
 }

@@ -18,6 +18,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 
 import { BusinessStateService } from '@presentation/shared/business-state.service';
+import { BookingPreselectionService } from '@presentation/shared/booking-preselection.service';
 import { Barber, Service } from '@domain/index';
 import { GetServicesUseCase } from '@application/services';
 import { TimeUtils } from '@domain/shared/utils/time.utils';
@@ -51,6 +52,7 @@ export class BookingFormComponent {
   // Dependencies
   private fb = inject(FormBuilder);
   private getServicesUseCase = inject(GetServicesUseCase);
+  private preselectionService = inject(BookingPreselectionService);
 
   // State
   private businessState = inject(BusinessStateService);
@@ -75,6 +77,11 @@ export class BookingFormComponent {
     this.bookingForm.controls.hairLength.valueChanges,
     { initialValue: 'medium' }
   );
+
+  // Signals
+  private preselection = toSignal(this.preselectionService.preselection$, {
+    initialValue: {} as import('@presentation/shared/booking-preselection.service').BookingPreselection,
+  });
 
   // Computed
   public availableServices = computed(() => {
@@ -104,7 +111,37 @@ export class BookingFormComponent {
   });
 
   constructor() {
-    // Optional: React to form changes if needed
+    // Aplicar preselección si existe
+    effect(() => {
+      const preselection = this.preselection();
+      const services = this.availableServices(); // Esperar a que se calculen los servicios disponibles
+
+      if (services.length > 0 && preselection.serviceName) {
+        // Verificar si el servicio preseleccionado está disponible para esta hora
+        const isAvailable = services.some(
+          (s) => s.name === preselection.serviceName
+        );
+
+        if (isAvailable) {
+          // Usamos patchValue con emitEvent: false para evitar bucles si fuera necesario,
+          // aunque aquí queremos que se disparen los signals derivados
+          // Solo actualizamos si es diferente para no molestar si el usuario ya lo tiene
+          if (this.bookingForm.get('serviceId')?.value !== preselection.serviceName) {
+             this.bookingForm.patchValue({
+              serviceId: preselection.serviceName,
+            });
+          }
+        }
+      }
+
+      if (preselection.barberName && this.allowBarberSelection()) {
+         if (this.bookingForm.get('barberId')?.value !== preselection.barberName) {
+            this.bookingForm.patchValue({
+              barberId: preselection.barberName,
+            });
+         }
+      }
+    });
   }
 
   onSubmit() {
@@ -133,8 +170,21 @@ export class BookingFormComponent {
     startTime: string,
     availableSlots: string[]
   ): boolean {
-    // Simplified logic: Check if enough contiguous slots exist
     const startMinutes = TimeUtils.timeToMinutes(startTime);
+
+    // 1. Validar Rango Horario del Servicio (si existe)
+    if (service.hourRange) {
+      const rangeStart = TimeUtils.timeToMinutes(service.hourRange.start);
+      const rangeEnd = TimeUtils.timeToMinutes(service.hourRange.end);
+
+      // La hora de inicio de la cita debe estar DENTRO del rango permitido
+      // (start >= rangeStart Y start < rangeEnd)
+      if (startMinutes < rangeStart || startMinutes >= rangeEnd) {
+        return false;
+      }
+    }
+
+    // 2. Validar Disponibilidad de Slots (duración)
     const duration = service.computeTotalTime('medium');
     const slotsNeeded = Math.ceil(duration / 30);
 
@@ -149,5 +199,12 @@ export class BookingFormComponent {
 
   getServiceDuration(service: Service): number {
     return service.computeTotalTime('medium');
+  }
+
+  handleImageError(event: any, fallbackSrc: string) {
+    const img = event.target as HTMLImageElement;
+    if (img.src !== window.location.origin + '/' + fallbackSrc) {
+       img.src = fallbackSrc;
+    }
   }
 }

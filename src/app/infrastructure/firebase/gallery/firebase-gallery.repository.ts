@@ -114,8 +114,11 @@ export class FirebaseGalleryRepository implements GalleryRepository {
       await deleteObject(oldRef);
 
       // 5. Devolver nuevo GalleryPhoto (id = nuevo nombre de fichero)
+      // IMPORTANTE: Pasamos 'newName' (el input del usuario) como nombre, no el nombre del fichero.
+      // La entidad GalleryPhoto se encargará de sanitizarlo internamente, pero al menos
+      // no le pegamos la extensión del fichero (.webp) al nombre visible.
       return new GalleryPhoto(
-        newFileName,
+        newName,
         newFileName,
         await getDownloadURL(newRef),
         true,

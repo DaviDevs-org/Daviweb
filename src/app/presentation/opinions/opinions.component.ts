@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject, Input } from "@angular/core";
 import { OpinionComponent } from './opinion/opinion.component';
+import { SaasConfigService } from "src/app/config/saas-config.service";
 @Component({
   selector: "app-opinions",
   templateUrl: "./opinions.component.html",
@@ -9,4 +10,6 @@ import { OpinionComponent } from './opinion/opinion.component';
     OpinionComponent
   ]
 })
-export class OpinionsComponent { }
+export class OpinionsComponent { 
+  public saasConfig = inject(SaasConfigService).getAll().business
+}
