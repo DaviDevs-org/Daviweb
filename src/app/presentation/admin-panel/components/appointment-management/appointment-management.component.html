@@ -237,7 +237,7 @@
                                     <option value="">Seleccionar servicio</option>
                                     @for (service of services(); track service.name) {
                                         <option [value]="service.name">
-                                            {{ service.name }} ({{ this.getServiceDuration(service) }} min)
+                                            {{ service.name }} ({{ this.getServiceDurationLabel(service) }})
                                         </option>
                                     }
                                 </select>
@@ -247,6 +247,23 @@
                                     </div>
                                 }
                             </div>
+
+                            @if (selectedServiceRequiresHairLength) {
+                                <div class="form-group">
+                                    <label for="editHairLength">Longitud de pelo *</label>
+                                    <select id="editHairLength" formControlName="hairLength" required>
+                                        <option value="">Seleccionar longitud</option>
+                                        <option value="short">Corto</option>
+                                        <option value="medium">Medio</option>
+                                        <option value="long">Largo</option>
+                                    </select>
+                                    @if (editForm.get('hairLength')?.invalid && editForm.get('hairLength')?.touched) {
+                                        <div class="error-message">
+                                            La longitud es requerida
+                                        </div>
+                                    }
+                                </div>
+                            }
 
                             @if (barberSelectionEnabled) {
                                 <div class="form-group">
@@ -441,6 +458,12 @@
                                 <span>No especificado</span>
                             }
                         </div>
+                        @if (selected.service?.requiresHairLength) {
+                            <div class="detail-item">
+                                <strong>Longitud de pelo:</strong>
+                                <span>{{ getHairLengthLabel(selected.hairLengthChoice) }}</span>
+                            </div>
+                        }
                         @if (barberSelectionEnabled) {
                             <div class="detail-item">
                                 <strong>Peluquero:</strong>

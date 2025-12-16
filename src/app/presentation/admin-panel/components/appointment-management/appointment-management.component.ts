@@ -210,8 +210,23 @@ export class AppointmentManagementComponent
       date: ['', Validators.required],
       time: ['', Validators.required],
       serviceId: ['', Validators.required],
+      hairLength: [''],
       barberId: [''],
       description: [''],
+    });
+
+    // Suscripción a cambios de servicio para validación dinámica
+    this.editForm.get('serviceId')?.valueChanges.subscribe((serviceName) => {
+      const service = this.services().find((s) => s.name === serviceName);
+      const hairLengthControl = this.editForm.get('hairLength');
+
+      if (service?.requiresHairLength) {
+        hairLengthControl?.setValidators([Validators.required]);
+      } else {
+        hairLengthControl?.clearValidators();
+        hairLengthControl?.setValue('');
+      }
+      hairLengthControl?.updateValueAndValidity();
     });
 
     // Effect para scroll automático cuando cambia la selección
@@ -517,6 +532,7 @@ export class AppointmentManagementComponent
       date: appointment.dateISO,
       time: appointment.timeNormalized,
       serviceId: appointment.service?.name,
+      hairLength: appointment.hairLengthChoice,
       barberId: appointment.barber,
       description: appointment.description,
     });
@@ -553,7 +569,8 @@ export class AppointmentManagementComponent
         formData.description,
         formData.name,
         formData.phone,
-        formData.barberId
+        formData.barberId,
+        formData.hairLength || null
       );
 
       if (this.isEditing && this.editedAppointment?.id) {
@@ -624,6 +641,29 @@ export class AppointmentManagementComponent
 
   getServiceDuration(service: Service) {
     return service.computeTotalTime();
+  }
+
+  getServiceDurationLabel(service: Service) {
+    if (service.requiresHairLength) {
+      return service.getEstimatedTimeRange();
+    }
+    return `${service.computeTotalTime()} min`;
+  }
+
+  getHairLengthLabel(length: string | null | undefined): string {
+    const map: Record<string, string> = {
+      short: 'Corto',
+      medium: 'Medio',
+      long: 'Largo',
+    };
+    return length && map[length] ? map[length] : 'No especificado';
+  }
+
+  get selectedServiceRequiresHairLength(): boolean {
+    const serviceName = this.editForm.get('serviceId')?.value;
+    if (!serviceName) return false;
+    const service = this.services().find((s) => s.name === serviceName);
+    return service?.requiresHairLength ?? false;
   }
 
   // --- Private Helpers ---
