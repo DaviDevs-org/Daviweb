@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection, provideAppInitializer, inject } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { environment } from './environments/environment';
@@ -17,6 +17,11 @@ import { FirebaseBusinessInfoRepository } from '@infrastructure/firebase/busines
 import { FirebaseScheduleRepository } from '@infrastructure/firebase/business/firebase-schedule.repository';
 import { FirebaseServiceRepository } from '@infrastructure/firebase/services/firebase-service.repository';
 import { FirebaseGalleryRepository } from '@infrastructure/firebase/gallery/firebase-gallery.repository';
+import { TenantService } from './config/tenant.service';
+
+export function initializeTenant(tenantService: TenantService) {
+  return () => tenantService.load();
+}
 
 export const appConfig: ApplicationConfig = {
   providers:
@@ -26,6 +31,10 @@ export const appConfig: ApplicationConfig = {
     provideFirestore(() => getFirestore()),
     provideStorage(() => getStorage()),
     provideClientHydration(),
+    provideAppInitializer(() => {
+        const initializerFn = (initializeTenant)(inject(TenantService));
+        return initializerFn();
+      }),
     {provide: AppointmentRepository, useClass: FirebaseAppointmentRepository},
     {provide: BusinessInfoRepository, useClass: FirebaseBusinessInfoRepository},
     {provide: ScheduleRepository, useClass: FirebaseScheduleRepository},

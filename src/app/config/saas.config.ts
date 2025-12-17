@@ -1,5 +1,9 @@
-const userId = 'ddbbchanges';
-export const SAAS_CONFIG = {
+import { TenantConfig } from '../domain/saas/tenant.config';
+
+const defaultId = 'demo';
+
+export const SAAS_CONFIG: TenantConfig = {
+  id: defaultId,
   // Configuración de la Empresa
   business: {
     name: "Ro's Pruebas",
@@ -45,17 +49,17 @@ export const SAAS_CONFIG = {
   // Usa estas rutas en tus repositorios para no hardcodear strings
   database: {
     collections: {
-      appointments: `/${userId}/data/appointments`,
-      barberSelection: `/${userId}/data/business/barbers`,
-      barbers: `/${userId}/data/business/barbers/barber`,
-      contactInfo: `/${userId}/data/business/contactInfo`,
-      schedule: `/${userId}/data/business/schedule`,
-      exceptions: `/${userId}/data/business/schedule/exceptions`,
-      reservedSlots: `/${userId}/data/business/schedule/reservedSlots`,
-      services: `/${userId}/data/services`,
+      appointments: `/${defaultId}/data/appointments`,
+      barberSelection: `/${defaultId}/data/business/barbers`,
+      barbers: `/${defaultId}/data/business/barbers/barber`,
+      contactInfo: `/${defaultId}/data/business/contactInfo`,
+      schedule: `/${defaultId}/data/business/schedule`,
+      exceptions: `/${defaultId}/data/business/schedule/exceptions`,
+      reservedSlots: `/${defaultId}/data/business/schedule/reservedSlots`,
+      services: `/${defaultId}/data/services`,
     },
     storage: {
-      general: `/${userId}/data/`
+      general: `/${defaultId}/data/`
     }
   },
 
@@ -68,4 +72,3 @@ export const SAAS_CONFIG = {
   }
 };
 
-export type SaasConfig = typeof SAAS_CONFIG;
