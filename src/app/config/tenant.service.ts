@@ -128,12 +128,12 @@ export class TenantService {
   private generateDatabasePaths(tenantId: string) {
     return {
       collections: {
-        appointments: `hairdressers/${tenantId}/appointments`,
-        barberSelection: `hairdressers/${tenantId}/business/barbers`,
-        barbers: `hairdressers/${tenantId}/business/barbers/barber`,
-        contactInfo: `hairdressers/${tenantId}/business/contactInfo`,
-        schedule: `hairdressers/${tenantId}/business/schedule`,
-        exceptions: `hairdressers/${tenantId}/business/schedule/exceptions`,
+        appointments: `/hairdressers/${tenantId}/appointments`,
+        barberSelection: `/hairdressers/${tenantId}/business/barbers`,
+        barbers: `/hairdressers/${tenantId}/business/barbers/barber`,
+        contactInfo: `/hairdressers/${tenantId}/business/contactInfo`,
+        schedule: `/hairdressers/${tenantId}/business/schedule`,
+        exceptions: `/hairdressers/${tenantId}/business/schedule/exceptions`,
         reservedSlots: `/hairdressers/${tenantId}/business/schedule/reservedSlots`,
         services: `/hairdressers/${tenantId}/services`,
       },
