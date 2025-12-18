@@ -107,12 +107,15 @@ export class ExceptionItem {
 
   toDTO(): ExceptionItemDTO {
     const tdo: ExceptionItemDTO = {
-      id: this.id,
       date: this.date,
       closed: this.closed,
       intervals: this.intervals.map(interval => interval.toDTO()),
       exceptionType: this.exceptionType
     };
+
+    if (this.id) {
+      tdo.id = this.id;
+    }
 
     if (this.startDate) {
       tdo.startDate = this.startDate;

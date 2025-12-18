@@ -128,12 +128,16 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
 
       return combineLatest([settings$, barbers$]).pipe(
         map(([settingsData, barbersDtos]) => {
+          // Si el documento no existe, asumimos false, pero logueamos para depurar
+          if (settingsData === undefined) {
+            console.warn('[FirebaseBusinessInfoRepository] BarberSettings document is missing/undefined. Defaulting selection to false.');
+          }
           const barberSelection = settingsData?.barberSelection ?? false;
           const staff = barbersDtos.map((dto) => Barber.fromDTO(dto));
           return new BarberSettings(barberSelection, staff);
         }),
         catchError((error) => {
-          console.error('Error obteniendo BarberSettings:', error);
+          console.error('[FirebaseBusinessInfoRepository] CRITICAL Error getting BarberSettings:', error);
           const defaults = this.getDefaultBarberSettings();
           return of(
             new BarberSettings(defaults.barberSelection, defaults.staff)
@@ -179,7 +183,7 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
     try {
       return runInInjectionContext(this.injector, async () => {
         const docRef = doc(this.firestore, this.barberSettingsPath);
-        await updateDoc(docRef, { barberSelection: value });
+        await setDoc(docRef, { barberSelection: value }, { merge: true });
       });
     } catch (error) {
       console.error('Error updating barber selection:', error);
@@ -203,12 +207,6 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
 
   async removeBarber(barber: Barber): Promise<void> {
     try {
-      console.log('REMOVE BARBER: ', {
-        id: barber.id,
-        name: barber.name,
-        imagePath: barber.imagePath,
-        barbersPath: this.barbersPath,
-      });
 
       if (barber.imagePath) {
         try {
@@ -225,7 +223,6 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
       }
 
       const docPath = `${this.barbersPath}/${barber.id}`;
-      console.log('DELETE DOC PATH:', docPath);
       const docRef = doc(this.firestore, docPath);
       await deleteDoc(docRef);
     } catch (error) {
