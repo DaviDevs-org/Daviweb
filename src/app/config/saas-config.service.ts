@@ -1,15 +1,31 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { SAAS_CONFIG, SaasConfig } from './saas.config';
+import { TenantService } from './tenant.service';
+import { TenantConfig } from '../domain/saas/tenant.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SaasConfigService {
-  private readonly config: SaasConfig = SAAS_CONFIG;
+  
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private tenantService: TenantService
+  ) {
+    // Theme initialization should happen after config is loaded.
+    // Since we use APP_INITIALIZER, config should be ready.
+    // However, to be safe, we can check or just let it throw if not ready.
+    // Better: Call this explicitly or ensure it runs.
+    // If this service is injected, it means app is running, so config is loaded.
+    try {
+      this.initializeTheme();
+    } catch (e) {
+      console.warn('SaasConfigService: Config not ready during initialization. Theme might not be applied yet.');
+    }
+  }
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
-    this.initializeTheme();
+  private get config(): TenantConfig {
+    return this.tenantService.getTenantConfig();
   }
 
   /**

@@ -1,0 +1,25 @@
+{
+  "business": {
+    "name": "Barbería de Prueba",
+    "ownerName": "Pepe",
+    "instagram": "pepe.barber",
+    "facebook": "pepe.barber",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "opinionsUrl": "https://google.com/..."
+  },
+  "theme": {
+    "colors": {
+      "primary": "#000000",
+      "primaryLight": "#333333",
+      "primaryLighter": "#eeeeee",
+      "primaryDark": "#000000",
+      "secondary": "#ffffff",
+      "accent": "#ff0000",
+      "background": "#ffffff",
+      "backgroundSecondary": "#f0f0f0",
+      "text": "#000000",
+      "border": "#cccccc"
+    }
+  }
+}

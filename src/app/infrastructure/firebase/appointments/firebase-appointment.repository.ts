@@ -28,7 +28,8 @@ import { SaasConfigService } from 'src/app/config/saas-config.service';
   providedIn: 'root',
 })
 export class FirebaseAppointmentRepository implements AppointmentRepository {
-  private pathConfig = inject(SaasConfigService).getDDBBPaths();
+  private saasConfigService = inject(SaasConfigService);
+  private pathConfig = this.saasConfigService.getDDBBPaths();
   private firestore = inject(Firestore);
   private injector = inject(Injector);
 
@@ -123,7 +124,9 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
   async addAppointment(appointment: Appointment): Promise<string> {
     return await runInInjectionContext(this.injector, async () => {
       const ref = collection(this.firestore, this.pathConfig.appointments);
-      const docRef = await addDoc(ref, appointment.toDTO());
+      const tenantId = this.saasConfigService.getAll().id;
+      const dto: AppointmentDTO = { ...appointment.toDTO(), tenantId };
+      const docRef = await addDoc(ref, dto);
       return docRef.id;
     });
   }

@@ -36,7 +36,7 @@ export class LoginComponent {
           this.router.navigate(['admin'])
         }
         else {
-          this.toast.error("Email o contraseña incorrectos")
+          this.toast.error(response.error?.message || "Email o contraseña incorrectos")
         }
         this.isLoading = false
       }
