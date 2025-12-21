@@ -70,6 +70,10 @@ export class AddAppointmentUseCase {
       // Process break (just advance time, don't reserve or check availability)
       if (segment.breakAfter && segment.breakAfter > 0) {
         currentMinutes += segment.breakAfter;
+        const remainder = currentMinutes % 30;
+        if (remainder !== 0) {
+          currentMinutes += 30 - remainder;
+        }
       }
     }
 

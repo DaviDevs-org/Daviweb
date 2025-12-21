@@ -35,7 +35,7 @@ describe('AddAppointmentUseCase', () => {
     requiresHairLength: true,
     hairLengthModifiers: {
       short: { time: 30, segments: [{ duration: 30, breakAfter: 0 }] },
-      medium: { time: 45, segments: [{ duration: 45, breakAfter: 0 }] },
+      medium: { time: 60, segments: [{ duration: 60, breakAfter: 0 }] },
       long: {
         time: 90,
         segments: [
@@ -87,7 +87,7 @@ describe('AddAppointmentUseCase', () => {
 
   describe('Simple Service (30 min)', () => {
     it('should add appointment and reserve single slot', async () => {
-      const datetime = new Date('2025-01-15T10:00:00');
+      const datetime = new Date('2026-01-15T10:00:00');
       const appointment = new Appointment(datetime, mockSimpleService);
 
       mockBusinessState.getAvailableSlotsForDate.and.returnValue([
@@ -110,7 +110,7 @@ describe('AddAppointmentUseCase', () => {
     });
 
     it('should throw error when slot is not available', async () => {
-      const datetime = new Date('2025-01-15T10:00:00');
+      const datetime = new Date('2026-01-15T10:00:00');
       const appointment = new Appointment(datetime, mockSimpleService);
 
       // 10:00 is NOT in available slots
@@ -153,14 +153,15 @@ describe('AddAppointmentUseCase', () => {
     });
 
     it('should fail if any required slot is unavailable', async () => {
-      const datetime = new Date('2025-01-15T10:00:00');
+      const datetime = new Date('2026-01-15T10:00:00');
       const appointment = new Appointment(datetime, mockServiceWithSegments);
 
-      // Missing 10:30 slot
+      // Missing 11:00 slot (which will be needed after the break)
       mockBusinessState.getAvailableSlotsForDate.and.returnValue([
         '09:30',
         '10:00',
-        '11:00',
+        '10:30',
+        // '11:00' is missing!
       ]);
 
       await expectAsync(useCase.execute(appointment)).toBeRejectedWithError(
@@ -171,7 +172,7 @@ describe('AddAppointmentUseCase', () => {
 
   describe('Service with Hair Length', () => {
     it('should use hair length modifier segments for short hair', async () => {
-      const datetime = new Date('2025-01-15T10:00:00');
+      const datetime = new Date('2027-01-15T10:00:00');
       const appointment = new Appointment(
         datetime,
         mockServiceWithHairLength,
@@ -200,7 +201,7 @@ describe('AddAppointmentUseCase', () => {
     });
 
     it('should use hair length modifier segments for long hair', async () => {
-      const datetime = new Date('2025-01-15T10:00:00');
+      const datetime = new Date('2027-01-15T10:00:00');
       const appointment = new Appointment(
         datetime,
         mockServiceWithHairLength,
@@ -240,7 +241,7 @@ describe('AddAppointmentUseCase', () => {
         requiresHairLength: false,
       };
 
-      const datetime = new Date('2025-01-15T10:00:00');
+      const datetime = new Date('2027-01-15T10:00:00');
       const appointment = new Appointment(datetime, serviceNoSegments);
 
       mockBusinessState.getAvailableSlotsForDate.and.returnValue([
@@ -261,7 +262,7 @@ describe('AddAppointmentUseCase', () => {
 
   describe('Error Handling', () => {
     it('should not add slots if appointment creation fails', async () => {
-      const datetime = new Date('2025-01-15T10:00:00');
+      const datetime = new Date('2027-01-15T10:00:00');
       const appointment = new Appointment(datetime, mockSimpleService);
 
       mockBusinessState.getAvailableSlotsForDate.and.returnValue(['10:00']);
@@ -277,7 +278,7 @@ describe('AddAppointmentUseCase', () => {
     });
 
     it('should handle concurrent slot operations', async () => {
-      const datetime = new Date('2025-01-15T10:00:00');
+      const datetime = new Date('2027-01-15T10:00:00');
       const appointment = new Appointment(datetime, mockServiceWithSegments);
 
       mockBusinessState.getAvailableSlotsForDate.and.returnValue([
@@ -305,7 +306,7 @@ describe('AddAppointmentUseCase', () => {
 
   describe('Time Calculation Edge Cases', () => {
     it('should handle appointment at end of day', async () => {
-      const datetime = new Date('2025-01-15T19:30:00');
+      const datetime = new Date('2027-01-15T19:30:00');
       const appointment = new Appointment(datetime, mockSimpleService);
 
       mockBusinessState.getAvailableSlotsForDate.and.returnValue(['19:30']);
@@ -320,7 +321,7 @@ describe('AddAppointmentUseCase', () => {
     });
 
     it('should handle appointment at start of day', async () => {
-      const datetime = new Date('2025-01-15T09:00:00');
+      const datetime = new Date('2027-01-15T09:00:00');
       const appointment = new Appointment(datetime, mockSimpleService);
 
       mockBusinessState.getAvailableSlotsForDate.and.returnValue([

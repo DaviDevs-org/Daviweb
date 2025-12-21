@@ -340,7 +340,7 @@ describe('Availability Handlers (Chain of Responsibility)', () => {
     });
 
     it('should handle custom exception with special hours', () => {
-      const specialDay = new Date('2025-06-15');
+      const specialDay = new Date('2027-06-15');
       // Usar el mismo formato que ExceptionHandler.formatDate()
       const formatDate = (date: Date) => {
         const year = date.getFullYear();
