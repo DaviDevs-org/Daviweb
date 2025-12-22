@@ -88,11 +88,12 @@ export class BookingFormComponent {
     const allServices = this.services();
     const startTime = this.time();
     const slots = this.availableSlots();
+    const length = this.hairLength();
 
     if (!startTime || !slots.length || !allServices.length) return [];
 
     return allServices.filter((service) =>
-      this.doesServiceFit(service, startTime, slots)
+      this.doesServiceFit(service, startTime, slots, length as 'short' | 'medium' | 'long')
     );
   });
 
@@ -168,7 +169,8 @@ export class BookingFormComponent {
   private doesServiceFit(
     service: Service,
     startTime: string,
-    availableSlots: string[]
+    availableSlots: string[],
+    length: 'short' | 'medium' | 'long' = 'medium'
   ): boolean {
     const startMinutes = TimeUtils.timeToMinutes(startTime);
 
@@ -185,7 +187,7 @@ export class BookingFormComponent {
     }
 
     // 2. Validar Disponibilidad de Slots (duración)
-    const duration = service.computeTotalTime('medium');
+    const duration = service.computeTotalTime(length);
     const slotsNeeded = Math.ceil(duration / 30);
 
     for (let i = 0; i < slotsNeeded; i++) {

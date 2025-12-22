@@ -20,11 +20,9 @@ import {
   Appointment,
   Phone,
 } from '@domain/index';
-import { GetAvailableSlotsForDayService } from '@domain/business-info/availability/get-available-slots-for-day.service';
 import { AlertService } from '../../shared/alert/alert.service';
 import { BusinessStateService } from '@presentation/shared/business-state.service';
 import { AddAppointmentUseCase } from '@application/appointments/add-appointment.use-case';
-import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-calendar-selector',

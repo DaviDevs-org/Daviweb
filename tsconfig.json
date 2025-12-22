@@ -38,9 +38,6 @@
       "@styles":[
         "src/styles"
       ],
-      "@styles/*": [
-        "src/styles/*"
-      ]
     },
     "outDir": "./dist/out-tsc",
     "strict": true,
