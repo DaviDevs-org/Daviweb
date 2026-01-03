@@ -19,7 +19,8 @@
     overflow: hidden;
     font-family: 'Inter', sans-serif;
     color: $secondary-dark;
-    min-height: 800px; /* Coincide con el skeleton */
+    min-height: 800px;
+    /* Coincide con el skeleton */
     @include section;
 
     @include mobile {
@@ -107,6 +108,11 @@
     gap: 40px;
     box-sizing: border-box;
     width: 100%;
+
+    @media (max-width: 399px) {
+        padding: 16px 12px;
+        gap: 24px;
+    }
 }
 
 .categories-nav {
@@ -252,6 +258,10 @@
         flex-direction: column;
         gap: 24px;
     }
+
+    @media (max-width: 399px) {
+        gap: 16px;
+    }
 }
 
 .services-panel {
@@ -361,18 +371,21 @@
                 .service-info .service-name {
                     color: $white;
                     font-weight: 700;
-                    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
                 }
 
                 .service-meta {
-                    .duration, .price, .hour-range { 
-                        color: $primary-dark !important; 
+
+                    .duration,
+                    .price,
+                    .hour-range {
+                        color: $primary-dark !important;
                         background: $white !important;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                     }
                 }
 
-                .service-arrow { 
+                .service-arrow {
                     color: $white;
                     opacity: 1;
                 }
@@ -416,6 +429,7 @@
                             font-size: 12px;
                         }
                     }
+
                     .hour-range {
                         display: flex;
                         align-items: center;
@@ -428,7 +442,9 @@
                         font-weight: 600;
                         font-family: Inter, sans-serif;
 
-                        .bi-calendar-range { font-size: 12px; }
+                        .bi-calendar-range {
+                            font-size: 12px;
+                        }
                     }
                 }
             }
@@ -460,7 +476,10 @@
                         justify-content: flex-start;
                         gap: 12px;
 
-                        .duration, .hour-range { font-size: 11px; }
+                        .duration,
+                        .hour-range {
+                            font-size: 11px;
+                        }
                     }
                 }
 
@@ -487,11 +506,16 @@
     border: 1px solid $border-color;
     box-sizing: border-box;
     overflow: hidden;
-    min-width: 300px;
+    min-width: 0;
 
     @include mobile {
         flex: 1;
         order: 2; // En móvil, detalles después de la lista
+    }
+
+    @media (max-width: 399px) {
+        flex: 1;
+        min-width: 0;
     }
 
     .service-image {
@@ -539,6 +563,10 @@
         @include mobile {
             height: 180px;
         }
+
+        @media (max-width: 399px) {
+            height: 150px;
+        }
     }
 
     .service-content {
@@ -569,6 +597,14 @@
                 .service-title {
                     font-size: 18px;
                 }
+            }
+        }
+
+        @media (max-width: 399px) {
+            padding: 16px 12px;
+
+            .service-header-details .service-title {
+                font-size: 16px;
             }
         }
 

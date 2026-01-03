@@ -183,7 +183,7 @@
                     <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form">
                         <!-- Nombre completo -->
                         <div class="form-group full-width" id="name-group">
-                            <label for="editName">Nombre completo *</label>
+                            <label for="editName">Nombre completo</label>
                             <input type="text" id="editName" formControlName="name" required
                                 placeholder="Nombre del cliente">
                             @if (editForm.get('name')?.invalid && editForm.get('name')?.touched) {
@@ -209,7 +209,7 @@
                         <!-- Fecha y Hora -->
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="editDate">Fecha *</label>
+                                <label for="editDate">Fecha</label>
                                 <input type="date" id="editDate" formControlName="date" required>
                                 @if (editForm.get('date')?.invalid && editForm.get('date')?.touched) {
                                     <div class="error-message">
@@ -219,7 +219,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="editTime">Hora *</label>
+                                <label for="editTime">Hora</label>
                                 <input type="time" id="editTime" formControlName="time" required>
                                 @if (editForm.get('time')?.invalid && editForm.get('time')?.touched) {
                                     <div class="error-message">
@@ -232,7 +232,7 @@
                         <!-- Servicio y Peluquero -->
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="editService">Servicio *</label>
+                                <label for="editService">Servicio</label>
                                 <select id="editService" formControlName="serviceId" required>
                                     <option value="">Seleccionar servicio</option>
                                     @for (service of services(); track service.name) {
@@ -250,7 +250,7 @@
 
                             @if (selectedServiceRequiresHairLength) {
                                 <div class="form-group">
-                                    <label for="editHairLength">Longitud de pelo *</label>
+                                    <label for="editHairLength">Longitud de pelo</label>
                                     <select id="editHairLength" formControlName="hairLength" required>
                                         <option value="">Seleccionar longitud</option>
                                         <option value="short">Corto</option>

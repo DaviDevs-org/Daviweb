@@ -485,6 +485,12 @@ select {
         border-radius: 6px;
         font-size: 0.95rem;
         transition: all 0.3s ease;
+        background: $white;
+        color: $text-dark;
+        
+        &::placeholder {
+          color: $text-gray;
+        }
 
         @include mobile {
           font-size: 0.9rem;
@@ -713,6 +719,12 @@ select {
         border-radius: 8px;
         transition: all 0.3s ease;
         font-size: 0.95rem;
+        background: $white;
+        color: $text-dark;
+
+        &::placeholder {
+          color: $text-gray;
+        }
 
         @include mobile {
           font-size: 0.9rem;
