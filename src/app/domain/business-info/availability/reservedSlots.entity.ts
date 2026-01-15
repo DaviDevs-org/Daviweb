@@ -2,6 +2,7 @@ export interface ReservedSlotDTO {
   appointmentId: string;
   dateTime: Date;
   createdAt: Date;
+  barberId?: string | null;
 }
 
 export class ReservedSlot {
@@ -10,7 +11,8 @@ export class ReservedSlot {
   constructor(
     public appointmentId: string,
     public dateTime: Date,
-    public id?: string
+    public id?: string,
+    public barberId: string | null = null
   ) {
     // Defensive check: ensure dateTime is a valid Date object
     if (!(this.dateTime instanceof Date)) {
@@ -32,6 +34,7 @@ export class ReservedSlot {
       appointmentId: this.appointmentId,
       dateTime: this.dateTime,
       createdAt: new Date(),
+      barberId: this.barberId,
     };
     return dto;
   }
@@ -50,6 +53,6 @@ export class ReservedSlot {
       dateTime = new Date(raw);
     }
 
-    return new ReservedSlot(dto.appointmentId, dateTime, dto.id);
+    return new ReservedSlot(dto.appointmentId, dateTime, dto.id, dto.barberId);
   }
 }

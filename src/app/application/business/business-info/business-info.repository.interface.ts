@@ -13,6 +13,6 @@ export abstract class BusinessInfoRepository {
   abstract updateBarberSelection(value: boolean): Promise<void>;
   abstract addBarber(barber: Barber): Promise<void>;
   abstract removeBarber(barber: Barber): Promise<void>;
-  abstract editBarber(oldBarber: Barber, newBarber: Barber): Promise<void>;
+  abstract editBarber(newBarber: Barber): Promise<void>;
 
 }

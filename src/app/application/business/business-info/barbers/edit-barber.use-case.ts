@@ -8,7 +8,7 @@ import {Barber} from '@domain/index';
 export class EditBarberUseCase {
   constructor(private readonly businessInfoRepository: BusinessInfoRepository) {}
 
-  execute(oldBarber: Barber, newBarber: Barber): Promise<void> {
-    return this.businessInfoRepository.editBarber(oldBarber, newBarber);
+  execute(newBarber: Barber): Promise<void> {
+    return this.businessInfoRepository.editBarber(newBarber);
   }
 }

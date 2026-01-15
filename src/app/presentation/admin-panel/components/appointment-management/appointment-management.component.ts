@@ -90,6 +90,9 @@ export class AppointmentManagementComponent
 
   // 3. ID de cita seleccionada
   public selectedAppointmentId = signal<string | null>(null);
+  
+  // Barbers
+  public barbers = computed(() => this.businessState.barberSettings()?.barbers ?? []);
 
   // --- Computed State ---
   public allowBarberSelection = computed(
@@ -198,7 +201,8 @@ export class AppointmentManagementComponent
   isSaving = false;
   editForm: FormGroup;
 
-  barbers: Barber[] = [];
+  // Barbers are now a signal
+  // barbers: Barber[] = []; // removed duplicate
   barberSelectionEnabled = false;
 
   private scrollTimeout: any;
@@ -387,13 +391,13 @@ export class AppointmentManagementComponent
 
   // Helpers de visualización
 
-  findReservation(
+  findReservations(
     list: AppointmentView[],
     hour: string
-  ): AppointmentView | undefined {
+  ): AppointmentView[] {
     const slotMinutes = TimeUtils.timeToMinutes(hour);
 
-    return list.find((a) => {
+    return list.filter((a) => {
       if (!a.timeNormalized) return false;
       const startMinutes = TimeUtils.timeToMinutes(a.timeNormalized);
       const service = this.ensureServiceInstance(a.service);
@@ -412,6 +416,13 @@ export class AppointmentManagementComponent
       }
       return false;
     });
+  }
+
+  findReservation(
+    list: AppointmentView[],
+    hour: string
+  ): AppointmentView | undefined {
+    return this.findReservations(list, hour)[0];
   }
 
   isBreakSlot(list: AppointmentView[], hour: string): boolean {
@@ -657,6 +668,50 @@ export class AppointmentManagementComponent
       long: 'Largo',
     };
     return length && map[length] ? map[length] : 'No especificado';
+  }
+
+  getCapacityForSlot(time: string): number {
+    const settings = this.businessState.barberSettings();
+    if (!settings?.barberSelection) {
+      return 1;
+    }
+  
+    const barbers = this.barbers();
+    const activeBarbers = barbers.filter(b => b.isAvailable);
+    
+    if (activeBarbers.length === 0) return 1;
+
+    const date = this.selectedDate();
+    const dayIndex = date.getDay(); // 0 Sun, 1 Mon...
+    const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const currentDayName = dayNames[dayIndex];
+
+    let workingCount = 0;
+    const minutes = TimeUtils.timeToMinutes(time);
+
+    for (const barber of activeBarbers) {
+        // Usar horario personalizado o global
+        const scheduleToUse = (barber.schedule && barber.schedule.length > 0) 
+            ? barber.schedule 
+            : this.businessState.rawSchedule();
+            
+        const daySchedule = scheduleToUse.find(d => d.name === currentDayName);
+        
+        if (daySchedule && !daySchedule.closed) {
+           const works = daySchedule.intervals.some(interval => {
+               const start = TimeUtils.timeToMinutes(interval.open);
+               const end = TimeUtils.timeToMinutes(interval.close);
+               return minutes >= start && minutes < end;
+           });
+           if (works) workingCount++;
+        }
+    }
+    
+    return workingCount;
+  }
+
+  getRange(n: number): number[] {
+    return Array(Math.max(0, n)).fill(0).map((x, i) => i);
   }
 
   get selectedServiceRequiresHairLength(): boolean {

@@ -8,6 +8,8 @@ export interface AppointmentDTO {
   name?: string | null;
   phone?: string | null;
   barber?: string | null;
+  barberId?: string | null;
+  barberName?: string | null;
   hairLengthChoice?: 'short' | 'medium' | 'long' | null;
   tenantId?: string;
 }

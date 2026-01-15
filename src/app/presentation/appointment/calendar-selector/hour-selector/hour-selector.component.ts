@@ -13,6 +13,7 @@ export class HourSelectorComponent {
   // Inputs
   public date = input.required<string | null>(); // ISO Date YYYY-MM-DD
   public availableHours = input<string[]>([]); // List of available time slots "HH:mm"
+  public slotCapacity = input<Map<string, number>>(new Map()); // Capacity per slot
 
   // Outputs
   public back = output<void>();
@@ -46,11 +47,15 @@ export class HourSelectorComponent {
         }
       }
 
-      return { value: time, disabled };
+      return { 
+        value: time, 
+        disabled,
+        capacity: this.slotCapacity().get(time)
+      };
     }).sort((a, b) => a.value.localeCompare(b.value));
   });
 
-  selectHour(hour: { value: string, disabled: boolean }) {
+  selectHour(hour: { value: string, disabled: boolean, capacity?: number }) {
     if (!hour.disabled) {
       this.selectedHour.set(hour.value);
     }
@@ -63,7 +68,7 @@ export class HourSelectorComponent {
     }
   }
 
-  confirmDirect(hour: { value: string, disabled: boolean }) {
+  confirmDirect(hour: { value: string, disabled: boolean, capacity?: number }) {
     if (!hour.disabled) {
       this.selectedHour.set(hour.value);
       this.hourSelected.emit(hour.value);

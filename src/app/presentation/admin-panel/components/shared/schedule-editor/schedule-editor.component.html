@@ -1,0 +1,43 @@
+<div class="schedule-editor">
+  <div class="schedule-container">
+    @for (day of schedule(); track day.name) {
+      <div [class]="getScheduleRowClass(day)">
+        <label class="day-label">{{ day.name }}</label>
+
+        <div class="intervals-container">
+          @for (interval of day.intervals; track $index; let i = $index) {
+            <div class="time-inputs">
+              <input type="time" [(ngModel)]="interval.open" class="time-input" [disabled]="day.closed"
+                (blur)="validateInterval(day, interval)"
+                [attr.aria-label]="'Hora de apertura ' + day.name + ' intervalo ' + (i+1)">
+              <span class="time-separator">-</span>
+              <input type="time" [(ngModel)]="interval.close" class="time-input" [disabled]="day.closed"
+                (blur)="validateInterval(day, interval)"
+                [attr.aria-label]="'Hora de cierre ' + day.name + ' intervalo ' + (i+1)">
+              <button type="button" class="danger-btn" (click)="removeInterval(day,i)"
+                [disabled]="day.intervals.length <= 1 || day.closed" title="Eliminar intervalo">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          }
+          <button type="button" class="add-btn" (click)="addInterval(day)" [disabled]="day.closed">
+            <i class="bi bi-plus-circle"></i> Añadir intervalo
+          </button>
+        </div>
+
+        <label class="closed-checkbox">
+          <input type="checkbox" [(ngModel)]="day.closed" (change)="onToggleDayClosed(day)">
+          Cerrado
+        </label>
+      </div>
+    }
+  </div>
+  
+  @if (showSaveButton()) {
+    <div class="schedule-actions">
+      <button type="button" class="save-btn" (click)="onSave()">
+        <i class="bi bi-check-circle"></i> Guardar Horario
+      </button>
+    </div>
+  }
+</div>

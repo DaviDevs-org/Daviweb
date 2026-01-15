@@ -99,13 +99,199 @@ export class BusinessStateService {
     return this.calculateBusinessStatus(schedule, now, exceptions);
   });
 
-  getAvailableSlotsForDate(date: Date): string[] {
-    return this.slotsService.execute(
-      date,
-      this.rawSchedule(),
-      this.exceptions(),
-      this.reservedSlots()
+  getAvailableSlotsForDate(date: Date, barberId?: string | null): string[] {
+    const settings = this.barberSettings();
+    const reservedSlots = this.reservedSlots();
+    const exceptions = this.exceptions();
+    const globalSchedule = this.rawSchedule();
+
+    // 1. Modo Global (Legacy) o Barbero específico no seleccionado pero sistema desactivado
+    if (!settings?.barberSelection) {
+      return this.slotsService.execute(
+        date,
+        globalSchedule,
+        exceptions,
+        reservedSlots // Filtra slots globales (barberId=null) y específicos? No, en modo global todos bloquean?
+        // En modo global, reservedSlots debería tener barberId=null.
+        // Si hay slots con barberId, ¿deberían bloquear el global?
+        // Asumimos que si barberSelection=false, operamos como antes.
+      );
+    }
+
+    // 2. Modo Multi-Barbero
+    if (barberId) {
+      // 2a. Disponibilidad para un barbero específico
+      const barber = settings.barbers.find((b) => b.id === barberId);
+      if (!barber || !barber.isAvailable) return [];
+
+      const schedule =
+        barber.schedule && barber.schedule.length > 0
+          ? barber.schedule
+          : globalSchedule;
+
+      // Filtramos slots que afectan a este barbero:
+      // - Sus propios slots (barberId === id)
+      // - Slots globales (barberId === null/undefined) que bloquean a todos
+      const relevantSlots = reservedSlots.filter(
+        (s) =>
+          s.barberId === barberId ||
+          s.barberId === null ||
+          s.barberId === undefined
+      );
+
+      return this.slotsService.execute(
+        date,
+        schedule,
+        exceptions,
+        relevantSlots
+      );
+    } else {
+      // 2b. Disponibilidad general (cualquier barbero libre)
+      // Retorna slots donde AL MENOS UN barbero está disponible
+      const activeBarbers = settings.barbers.filter((b) => b.isAvailable);
+      const allAvailableSlots = new Set<string>();
+
+      for (const barber of activeBarbers) {
+        const schedule =
+          barber.schedule && barber.schedule.length > 0
+            ? barber.schedule
+            : globalSchedule;
+
+        const relevantSlots = reservedSlots.filter(
+          (s) =>
+            s.barberId === barber.id ||
+            s.barberId === null ||
+            s.barberId === undefined
+        );
+
+        const slots = this.slotsService.execute(
+          date,
+          schedule,
+          exceptions,
+          relevantSlots
+        );
+        slots.forEach((s) => allAvailableSlots.add(s));
+      }
+
+      return Array.from(allAvailableSlots).sort();
+    }
+  }
+
+  /**
+   * Retorna la capacidad (número de barberos libres) por slot horario.
+   * Útil para mostrar indicadores en la UI.
+   */
+  getSlotCapacity(date: Date): Map<string, number> {
+    const settings = this.barberSettings();
+    if (!settings?.barberSelection) return new Map();
+
+    const capacityMap = new Map<string, number>();
+    const activeBarbers = settings.barbers.filter((b) => b.isAvailable);
+    const reservedSlots = this.reservedSlots();
+    const exceptions = this.exceptions();
+    const globalSchedule = this.rawSchedule();
+
+    for (const barber of activeBarbers) {
+      const schedule =
+        barber.schedule && barber.schedule.length > 0
+          ? barber.schedule
+          : globalSchedule;
+
+      const relevantSlots = reservedSlots.filter(
+        (s) =>
+          s.barberId === barber.id ||
+          s.barberId === null ||
+          s.barberId === undefined
+      );
+
+      const slots = this.slotsService.execute(
+        date,
+        schedule,
+        exceptions,
+        relevantSlots
+      );
+
+      slots.forEach((time) => {
+        const current = capacityMap.get(time) || 0;
+        capacityMap.set(time, current + 1);
+      });
+    }
+
+    return capacityMap;
+  }
+
+  isBarberAvailable(
+    barberId: string,
+    date: Date,
+    time: string,
+    service?: Service,
+    hairLength?: 'short' | 'medium' | 'long' | null
+  ): boolean {
+    const settings = this.barberSettings();
+    const barber = settings?.barbers.find((b) => b.id === barberId);
+    if (!barber || !barber.isAvailable) return false;
+
+    const reservedSlots = this.reservedSlots();
+    const exceptions = this.exceptions();
+    const globalSchedule = this.rawSchedule();
+    const schedule =
+      barber.schedule && barber.schedule.length > 0
+        ? barber.schedule
+        : globalSchedule;
+
+    const relevantSlots = reservedSlots.filter(
+      (s) =>
+        s.barberId === barberId ||
+        s.barberId === null ||
+        s.barberId === undefined
     );
+
+    const availableSlots = this.slotsService.execute(
+      date,
+      schedule,
+      exceptions,
+      relevantSlots
+    );
+
+    // Calculate required slots
+    let segments = service?.timeSegments;
+    if (service && hairLength && service.hairLengthModifiers) {
+      const mod = service.hairLengthModifiers[hairLength];
+      if (mod && mod.segments && mod.segments.length > 0) {
+        segments = mod.segments;
+      } else if (mod && mod.time) {
+        segments = [{ duration: mod.time, breakAfter: 0 }];
+      }
+    }
+
+    if (!segments || segments.length === 0) {
+      segments = [{ duration: 30, breakAfter: 0 }];
+    }
+
+    let currentMinutes =
+      parseInt(time.split(':')[0]) * 60 + parseInt(time.split(':')[1]);
+
+    for (const segment of segments) {
+      const durationSlots = Math.ceil(segment.duration / 30);
+      for (let i = 0; i < durationSlots; i++) {
+        const h = Math.floor(currentMinutes / 60);
+        const m = currentMinutes % 60;
+        const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(
+          2,
+          '0'
+        )}`;
+
+        if (!availableSlots.includes(timeStr)) {
+          return false;
+        }
+        currentMinutes += 30;
+      }
+      if (segment.breakAfter) {
+        currentMinutes += segment.breakAfter;
+      }
+    }
+
+    return true;
   }
 
   // Esta señal se recalcula automáticamente cuando cambia 'rawSchedule'.

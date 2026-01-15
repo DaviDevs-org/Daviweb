@@ -36,7 +36,7 @@
 
                         <div class="card-body">
                             <div><strong>Teléfono:</strong> {{ a.phone || '—' }}</div>
-                            @if (barberSelectionEnabled) {
+                            @if (allowBarberSelection()) {
                                 <div><strong>Peluquero:</strong> {{ a.barber }}</div>
                             }
                             @if (a.description) {
@@ -265,12 +265,12 @@
                                 </div>
                             }
 
-                            @if (barberSelectionEnabled) {
+                            @if (allowBarberSelection()) {
                                 <div class="form-group">
                                     <label for="editBarber">Peluquero</label>
                                     <select id="editBarber" formControlName="barberId">
                                         <option value="Cualquiera">Sin peluquero específico</option>
-                                        @for (barber of barbers; track barber.name) {
+                                        @for (barber of barbers(); track barber.name) {
                                             <option [value]="barber.name">
                                                 {{ barber.name }}
                                             </option>
@@ -322,62 +322,61 @@
 
                                     <div class="hour-label">{{ h }}</div>
                                     <div class="slot">
-                                        @if (findReservation(dayList, h); as res) {
-                                            <!-- Slot con cita activa -->
-                                            <div class="reservation"
-                                                [class.selected]="selectedAppointment()?.id === res.id"
-                                                [class.is-main-slot]="isMainAppointmentSlot(dayList, h, res)"
-                                                [class.is-continuation-slot]="!isMainAppointmentSlot(dayList, h, res)"
-                                                [class.multi-slot]="getAppointmentSlotCount(res) > 1">
+                                        @if (findReservations(dayList, h); as reservations) {
+                                            @if (reservations.length > 0) {
+                                                <div class="reservations-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; width: 100%;">
+                                                    @for (res of reservations; track res.id) {
+                                                        <div class="reservation"
+                                                            [class.selected]="selectedAppointment()?.id === res.id"
+                                                            [class.is-main-slot]="isMainAppointmentSlot(dayList, h, res)"
+                                                            [class.is-continuation-slot]="!isMainAppointmentSlot(dayList, h, res)"
+                                                            [class.multi-slot]="getAppointmentSlotCount(res) > 1"
+                                                            style="width: 100%; min-width: 0;">
 
-                                                <!-- Contenido principal solo en el primer slot activo -->
-                                                @if (isMainAppointmentSlot(dayList, h, res)) {
-                                                    <div class="reservation-content"
-                                                        (click)="chooseAppointment(res.id)">
-                                                        <div class="res-header">
-                                                            <div class="res-time">{{ res.timeNormalized }}</div>
-                                                            <div class="res-duration">{{ getAppointmentDuration(res) }}</div>
+                                                            <!-- Contenido principal solo en el primer slot activo -->
+                                                            @if (isMainAppointmentSlot(dayList, h, res)) {
+                                                                <div class="reservation-content"
+                                                                    (click)="chooseAppointment(res.id)">
+                                                                    <div class="res-header">
+                                                                        <div class="res-time">{{ res.timeNormalized }}</div>
+                                                                    </div>
+                                                                    <div class="res-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ res.name }}</div>
+
+                                                                    @if (res.phone || (allowBarberSelection() && res.barber)) {
+                                                                        <div class="res-contact">
+                                                                            @if (allowBarberSelection() && res.barber) {
+                                                                                <span class="contact-item barber-info">
+                                                                                    <i class="bi bi-person-fill"></i> {{ res.barber }}
+                                                                                </span>
+                                                                            }
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            }
+
+                                                            <!-- Indicador de continuación para slots adicionales activos -->
+                                                            @if (!isMainAppointmentSlot(dayList, h, res)) {
+                                                                <div class="continuation-indicator"
+                                                                    (click)="chooseAppointment(res.id)">
+                                                                    <div class="continuation-line"></div>
+                                                                </div>
+                                                            }
                                                         </div>
-                                                        <div class="res-name">{{ res.name }}</div>
-
-                                                        @if (res.phone || (barberSelectionEnabled && res.barber)) {
-                                                            <div class="res-contact">
-                                                                @if (res.phone) {
-                                                                    <span class="contact-item">
-                                                                        <i class="bi bi-telephone-fill"></i> {{ res.phone }}
-                                                                    </span>
-                                                                }
-                                                                @if (barberSelectionEnabled && res.barber) {
-                                                                    <span class="contact-item barber-info">
-                                                                        <i class="bi bi-person-fill"></i> {{ res.barber }}
-                                                                    </span>
-                                                                }
+                                                    }
+                                                    <!-- Mostrar huecos libres si hay capacidad extra -->
+                                                    @if (getCapacityForSlot(h) - reservations.length > 0) {
+                                                        @for (i of getRange(getCapacityForSlot(h) - reservations.length); track i) {
+                                                            <div class="empty-slot" style="min-height: 80px; padding: 4px; background: #e6fcf5; border: 1px dashed #20c997; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #0ca678; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease;" (click)="startCreateFromSlot(h)">
+                                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                                    <i class="bi bi-plus-circle" style="font-size: 1.2rem;"></i>
+                                                                    <span class="desktop-only">Disponible</span>
+                                                                </div>
                                                             </div>
                                                         }
-                                                    </div>
-                                                }
-
-                                                <!-- Indicador de continuación para slots adicionales activos -->
-                                                @if (!isMainAppointmentSlot(dayList, h, res)) {
-                                                    <div class="continuation-indicator"
-                                                        (click)="chooseAppointment(res.id)">
-                                                        <div class="continuation-line"></div>
-                                                        <div class="continuation-text">{{ res.name }}</div>
-                                                    </div>
-                                                }
-
-                                                <!-- Acciones solo en el slot principal -->
-                                                @if (isMainAppointmentSlot(dayList, h, res)) {
-                                                    <div class="appointment-actions">
-                                                        <button class="action-btn" title="Ver detalles"
-                                                            (click)="chooseAppointment(res.id); $event.stopPropagation()">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                    </div>
-                                                }
-                                            </div>
-                                        } @else {
-                                            @if (findBreakSlot(dayList, h); as breakData) {
+                                                    }
+                                                </div>
+                                            } @else {
+                                                @if (findBreakSlot(dayList, h); as breakData) {
                                             <!-- Slot de break - disponible para otras citas -->
                                             <div class="break-slot-available"
                                                 [class.connected-top]="isConnectedToPrevious(breakData.appointment, h)"
@@ -402,18 +401,35 @@
                                             </div>
                                             } @else {
                                             <!-- Slot completamente libre -->
-                                            <div class="empty-slot" [class.disabled]="!isHourAvailable(h)">
-                                                @if (!isHourAvailable(h)) {
+                                            @if (!isHourAvailable(h)) {
+                                                <div class="empty-slot disabled">
                                                     <span class="availability-text">No disponible</span>
+                                                </div>
+                                            } @else {
+                                                @if (getCapacityForSlot(h) > 1) {
+                                                     <div class="reservations-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; width: 100%;">
+                                                        @for (i of getRange(getCapacityForSlot(h)); track i) {
+                                                            <div class="empty-slot" style="min-height: 80px;" (click)="startCreateFromSlot(h)">
+                                                                <span class="availability-text">Disponible</span>
+                                                                <button class="btn create-appointment-btn" title="Crear nueva cita en {{ h }}">
+                                                                    <i class="bi bi-plus-circle"></i>
+                                                                    <span>Crear cita</span>
+                                                                </button>
+                                                            </div>
+                                                        }
+                                                     </div>
                                                 } @else {
-                                                    <span class="availability-text">Disponible</span>
-                                                    <button class="btn create-appointment-btn" (click)="startCreateFromSlot(h)"
-                                                        title="Crear nueva cita en {{ h }}">
-                                                        <i class="bi bi-plus-circle"></i>
-                                                        <span>Crear cita</span>
-                                                    </button>
+                                                    <div class="empty-slot" (click)="startCreateFromSlot(h)">
+                                                        <span class="availability-text">Disponible</span>
+                                                        <button class="btn create-appointment-btn"
+                                                            title="Crear nueva cita en {{ h }}">
+                                                            <i class="bi bi-plus-circle"></i>
+                                                            <span>Crear cita</span>
+                                                        </button>
+                                                    </div>
                                                 }
-                                            </div>
+                                            }
+                                        }
                                         }
                                         }
                                     </div>
@@ -464,7 +480,7 @@
                                 <span>{{ getHairLengthLabel(selected.hairLengthChoice) }}</span>
                             </div>
                         }
-                        @if (barberSelectionEnabled) {
+                        @if (allowBarberSelection()) {
                             <div class="detail-item">
                                 <strong>Peluquero:</strong>
                                 @if (selected.barber) {

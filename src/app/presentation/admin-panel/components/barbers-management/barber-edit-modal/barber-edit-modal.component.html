@@ -1,0 +1,78 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Editar Peluquero: {{ barber().name }}</h2>
+      <button class="close-btn" (click)="onClose()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="tabs">
+        <button [class.active]="activeTab() === 'general'" (click)="activeTab.set('general')">
+          General
+        </button>
+        <button [class.active]="activeTab() === 'schedule'" (click)="activeTab.set('schedule')">
+          Horario
+        </button>
+      </div>
+
+      @if (activeTab() === 'general') {
+        <div class="tab-content">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" [(ngModel)]="localBarber().name" class="form-input">
+          </div>
+          
+          <div class="form-group toggle-group">
+            <label class="toggle-label">
+              <span>Estado:</span>
+              <span [class.active]="localBarber().isAvailable" [class.inactive]="!localBarber().isAvailable">
+                {{ localBarber().isAvailable ? 'Activo' : 'Inactivo' }}
+              </span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="localBarber().isAvailable">
+              <span class="slider round"></span>
+            </label>
+            <p class="help-text">Si está inactivo, no aparecerá disponible para reservar citas.</p>
+          </div>
+
+          <!-- Image upload could go here, for now keeping it simple as InfoManagement handles it -->
+        </div>
+      }
+
+      @if (activeTab() === 'schedule') {
+        <div class="tab-content">
+          @if (!hasCustomSchedule()) {
+            <div class="schedule-info">
+              <i class="bi bi-calendar3"></i>
+              <p>Este peluquero utiliza el horario general del negocio.</p>
+              <button class="primary-btn" (click)="enableCustomSchedule()">
+                Personalizar Horario
+              </button>
+            </div>
+            
+            <!-- Readonly view of general schedule could be useful here -->
+          } @else {
+            <div class="schedule-header">
+              <p>Horario personalizado</p>
+              <button class="text-btn danger" (click)="disableCustomSchedule()">
+                <i class="bi bi-arrow-counterclockwise"></i> Restaurar horario general
+              </button>
+            </div>
+            
+            <app-schedule-editor
+              [initialSchedule]="localBarber().schedule!"
+              [showSaveButton]="false"
+              (scheduleChange)="onScheduleChange($event)">
+            </app-schedule-editor>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button class="cancel-btn" (click)="onClose()">Cancelar</button>
+      <button class="save-btn" (click)="onSave()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>

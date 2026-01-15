@@ -32,17 +32,22 @@
   </div>
 
   <div class="form-row">
-    @if (allowBarberSelection() && barbers().length > 0) {
+    @if (allowBarberSelection()) {
       <div class="form-group">
-        <label for="barber">Peluquero</label>
+        <label for="barber">Peluquero *</label>
         <select id="barber" formControlName="barberId">
-          <option value="">-- Cualquiera --</option>
-          @for (b of barbers(); track b.name) {
-            <option [value]="b.name">
+          <option value="" disabled selected>-- Selecciona peluquero --</option>
+          @for (b of availableBarbersForSelection(); track b.id) {
+            <option [value]="b.id">
               {{ b.name }}
             </option>
           }
         </select>
+        @if (bookingForm.get('barberId')?.invalid && bookingForm.get('barberId')?.touched) {
+            <div class="error visible">
+              Debes seleccionar un peluquero.
+            </div>
+        }
       </div>
     }
 

@@ -44,10 +44,13 @@ import { percentage, getDownloadURL } from '@angular/fire/storage';
 import { Subscription } from 'rxjs';
 import { getErrorMessage } from '@domain/shared/utils/error.utils';
 
+import { ScheduleEditorComponent } from '../shared/schedule-editor/schedule-editor.component';
+import { BarberEditModalComponent } from '../barbers-management/barber-edit-modal/barber-edit-modal.component';
+
 @Component({
   selector: 'app-info-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ScheduleEditorComponent, BarberEditModalComponent],
   templateUrl: './info-management.component.html',
   styleUrls: ['./info-management.component.scss'],
 })
@@ -112,6 +115,9 @@ export class InfoManagementComponent implements OnDestroy {
   barberImagePreviewUrl = signal<string>('');
   private barberUploadSubscription: Subscription | undefined;
 
+  // Barber Modal State
+  editingBarber = signal<BarberDTO | null>(null);
+
   // Injected Use Cases
   private updateScheduleUC = inject(UpdateScheduleUseCase);
   private updateContactInfoUC = inject(UpdateContactInfoUseCase);
@@ -128,54 +134,11 @@ export class InfoManagementComponent implements OnDestroy {
 
   // ===== SCHEDULE =====
 
-  getScheduleRowClass(day: ScheduleDayDTO): string {
-    return day.closed ? 'schedule-row closed-day' : 'schedule-row';
-  }
-
-  addInterval(day: ScheduleDayDTO) {
-    if (day.closed) return;
-    const currentSchedule = this.schedule();
-    day.intervals.push({ open: '09:00', close: '14:00' });
-    this.schedule.set([...currentSchedule]);
-  }
-
-  removeInterval(day: ScheduleDayDTO, i: number) {
-    const currentSchedule = this.schedule();
-    day.intervals.splice(i, 1);
-    this.schedule.set([...currentSchedule]);
-  }
-
-  validateInterval(day: ScheduleDayDTO, interval: IntervalDTO) {
-    if (
-      !day.closed &&
-      interval.open &&
-      interval.close &&
-      interval.open >= interval.close
-    ) {
-      interval.close = '';
-      this.schedule.set([...this.schedule()]);
-    }
-  }
-
-  onToggleDayClosed(day: ScheduleDayDTO) {
-    const currentSchedule = this.schedule();
-    if (day.closed) {
-      (day as any).backupIntervals = [...day.intervals];
-      day.intervals = [];
-    } else {
-      if ((day as any).backupIntervals?.length) {
-        day.intervals = [...(day as any).backupIntervals];
-      } else if (!day.intervals.length) {
-        day.intervals.push({ open: '09:00', close: '14:00' });
-      }
-      delete (day as any).backupIntervals;
-    }
-    this.schedule.set([...currentSchedule]);
-  }
-
-  async saveSchedule() {
+  async saveSchedule(scheduleDTOs: ScheduleDayDTO[]) {
     try {
-      const scheduleDTOs = this.schedule();
+      // Update local state just in case
+      this.schedule.set(scheduleDTOs);
+      
       const scheduleEntities = scheduleDTOs.map((dto) =>
         ScheduleDay.fromDTO(dto)
       );
@@ -565,6 +528,36 @@ export class InfoManagementComponent implements OnDestroy {
       // No need to manually refresh
     } catch (err) {
       this.toast.error(getErrorMessage(err));
+    }
+  }
+
+  // Edit Barber Modal
+  openBarberModal(barber: BarberDTO) {
+    this.editingBarber.set(barber);
+  }
+
+  closeBarberModal() {
+    this.editingBarber.set(null);
+  }
+
+  async saveBarberEdit(updatedDTO: BarberDTO) {
+    try {
+      // Reconstitute domain entity
+      const barberEntity = new Barber(
+        updatedDTO.name,
+        updatedDTO.imageUrl,
+        updatedDTO.imagePath,
+        updatedDTO.id,
+        updatedDTO.schedule?.map(d => ScheduleDay.fromDTO(d)), // Transform schedule DTOs to entities
+        updatedDTO.isAvailable
+      );
+
+      await this.editBarberUC.execute(barberEntity);
+      this.toast.success('Peluquero actualizado correctamente');
+      this.closeBarberModal();
+    } catch (e: any) {
+      console.error(e);
+      this.toast.error('Error al actualizar peluquero');
     }
   }
 

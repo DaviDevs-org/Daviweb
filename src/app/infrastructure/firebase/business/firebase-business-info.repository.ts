@@ -231,7 +231,7 @@ export class FirebaseBusinessInfoRepository implements BusinessInfoRepository {
     }
   }
 
-  async editBarber(oldBarber: Barber, newBarber: Barber): Promise<void> {
+  async editBarber(newBarber: Barber): Promise<void> {
     try {
       if (!newBarber.id) {
         throw new Error('Cannot edit barber without ID');
