@@ -44,7 +44,8 @@ export class BookingFormComponent {
     name: string;
     phone: string;
     description?: string;
-    barber?: string;
+    barberId?: string;
+    barberName?: string;
     service: Service;
     hairLength?: 'short' | 'medium' | 'long' | null;
   }>();
@@ -102,6 +103,28 @@ export class BookingFormComponent {
     return service?.requiresHairLength ?? false;
   });
 
+  public availableBarbersForSelection = computed(() => {
+    const allBarbers = this.barbers();
+    const dateStr = this.date();
+    const time = this.time();
+    const serviceId = this.selectedServiceId();
+    const service = this.services().find((s) => s.name === serviceId);
+    const length = this.hairLength();
+
+    if (!dateStr || !time || !this.allowBarberSelection()) return [];
+
+    return allBarbers.filter((barber) => {
+      if (!barber.id) return false;
+      return this.businessState.isBarberAvailable(
+        barber.id,
+        new Date(dateStr),
+        time,
+        service,
+        length as any
+      );
+    });
+  });
+
   public currentDuration = computed(() => {
     const id = this.selectedServiceId();
     const length = this.hairLength();
@@ -142,6 +165,17 @@ export class BookingFormComponent {
          }
       }
     });
+
+    effect(() => {
+      const allow = this.allowBarberSelection();
+      const ctrl = this.bookingForm.controls.barberId;
+      if (allow) {
+        ctrl.setValidators(Validators.required);
+      } else {
+        ctrl.clearValidators();
+      }
+      ctrl.updateValueAndValidity();
+    });
   }
 
   onSubmit() {
@@ -155,11 +189,27 @@ export class BookingFormComponent {
 
     if (!service) return;
 
+    let barberId = val.barberId || undefined;
+    let barberName: string | undefined;
+
+    if (barberId) {
+      const barber = this.barbers().find((b) => b.id === barberId);
+      if (barber) {
+        barberName = barber.name;
+      } else {
+        // Fallback if value was name (legacy)
+        barberName = barberId;
+        const bByName = this.barbers().find((b) => b.name === barberId);
+        if (bByName) barberId = bByName.id;
+      }
+    }
+
     this.formSubmitted.emit({
       name: val.name!,
       phone: val.phone!,
       description: val.description || undefined,
-      barber: val.barberId || undefined,
+      barberId: barberId,
+      barberName: barberName,
       service: service,
       hairLength: val.hairLength as any,
     });

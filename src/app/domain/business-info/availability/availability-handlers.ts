@@ -1,11 +1,14 @@
 import { ScheduleDay } from './schedule.entity';
 import { ExceptionItem } from './exception.entity';
 import { Interval } from './interval.entity';
+import { Barber } from '../barber-entity';
 
 export interface AvailabilityContext {
     date: Date;
     schedule: ScheduleDay[];
     exceptions: ExceptionItem[];
+    barbers?: Barber[];
+    checkBarberAvailability?: boolean;
 }
 
 export interface DayAvailability {
@@ -78,6 +81,29 @@ export class WeeklyScheduleHandler extends AvailabilityHandler {
 
         if (daySchedule.closed) {
             return { isAvailable: false, intervals: [], reason: 'Weekly schedule: Closed' };
+        }
+
+        // Check Barber Availability if requested
+        if (context.checkBarberAvailability && context.barbers && context.barbers.length > 0) {
+            const activeBarbers = context.barbers.filter(b => b.isAvailable);
+            
+            // If we have active barbers system-wide
+            if (activeBarbers.length > 0) {
+                const isAnyBarberWorking = activeBarbers.some(barber => {
+                    // 1. If barber has specific schedule override
+                    if (barber.schedule && barber.schedule.length > 0) {
+                        const barberDay = barber.schedule.find(d => d.day === dayName);
+                        // If day found in schedule, check if open. If not found, assume closed/not scheduled.
+                        return barberDay ? !barberDay.closed : false;
+                    } 
+                    // 2. If no specific schedule, they follow business schedule (which is OPEN here)
+                    return true;
+                });
+
+                if (!isAnyBarberWorking) {
+                    return { isAvailable: false, intervals: [], reason: 'No barbers working today' };
+                }
+            }
         }
 
         return { isAvailable: true, intervals: daySchedule.intervals };

@@ -1,8 +1,13 @@
+import { ScheduleDay, ScheduleDayDTO } from './availability/schedule.entity';
+import { Interval } from './availability/interval.entity';
+
 export interface BarberDTO {
   id?: string; // Original ID (usually the name)
   name: string;
   imageUrl?: string;
   imagePath?: string;
+  schedule?: ScheduleDayDTO[];
+  isAvailable?: boolean;
 }
 
 export interface BarberSettingsDTO {
@@ -16,7 +21,9 @@ export class Barber {
     public name: string,
     public imageUrl?: string,
     public imagePath?: string,
-    public id?: string
+    public id?: string,
+    public schedule?: ScheduleDay[],
+    public isAvailable: boolean = true
   ) {
     this.validateName();
   }
@@ -43,6 +50,7 @@ export class Barber {
   toDTO(): BarberDTO {
     const dto: BarberDTO = {
       name: this.name,
+      isAvailable: this.isAvailable,
     };
 
     if (this.id) {
@@ -57,11 +65,38 @@ export class Barber {
       dto.imagePath = this.imagePath;
     }
 
+    if (this.schedule) {
+      dto.schedule = this.schedule.map((day) => ({
+        day: day.day,
+        name: day.name,
+        closed: day.closed,
+        intervals: day.intervals.map((i) => ({ open: i.open, close: i.close })),
+      }));
+    }
+
     return dto;
   }
 
   static fromDTO(dto: BarberDTO): Barber {
-    return new Barber(dto.name, dto.imageUrl, dto.imagePath, dto.id);
+    const schedule = dto.schedule
+      ? dto.schedule.map(
+          (d) =>
+            new ScheduleDay(
+              d.day,
+              d.name,
+              d.closed,
+              d.intervals.map((i) => new Interval(i.open, i.close))
+            )
+        )
+      : undefined;
+    return new Barber(
+      dto.name,
+      dto.imageUrl,
+      dto.imagePath,
+      dto.id,
+      schedule,
+      dto.isAvailable ?? true
+    );
   }
 }
 

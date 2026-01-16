@@ -13,44 +13,11 @@
     <!-- Horarios semanales -->
     <div class="info-card">
       <h3><i class="bi bi-clock"></i> Horarios de Apertura</h3>
-      <div class="schedule-container">
-        @for (day of schedule(); track day.name) {
-        <div [class]="getScheduleRowClass(day)">
-          <label class="day-label">{{ day.name }}</label>
-
-          <div class="intervals-container">
-            @for (interval of day.intervals; track $index; let i = $index) {
-            <div class="time-inputs">
-              <input type="time" [(ngModel)]="interval.open" class="time-input" [disabled]="day.closed"
-                (blur)="validateInterval(day, interval)"
-                [attr.aria-label]="'Hora de apertura ' + day.name + ' intervalo ' + (i+1)">
-              <span class="time-separator">-</span>
-              <input type="time" [(ngModel)]="interval.close" class="time-input" [disabled]="day.closed"
-                (blur)="validateInterval(day, interval)"
-                [attr.aria-label]="'Hora de cierre ' + day.name + ' intervalo ' + (i+1)">
-              <button type="button" class="danger-btn" (click)="removeInterval(day,i)"
-                [disabled]="day.intervals.length <= 1 || day.closed" title="Eliminar intervalo">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-            }
-            <button type="button" class="add-btn" (click)="addInterval(day)" [disabled]="day.closed">
-              <i class="bi bi-plus-circle"></i> Añadir intervalo
-            </button>
-          </div>
-
-          <label class="closed-checkbox">
-            <input type="checkbox" [(ngModel)]="day.closed" (change)="onToggleDayClosed(day)">
-            Cerrado
-          </label>
-        </div>
-        }
-      </div>
-      <div class="schedule-actions">
-        <button type="button" class="save-btn" (click)="saveSchedule()">
-          <i class="bi bi-check-circle"></i> Guardar Horario
-        </button>
-      </div>
+      
+      <app-schedule-editor
+        [initialSchedule]="schedule()"
+        (save)="saveSchedule($event)">
+      </app-schedule-editor>
     </div>
 
     <!-- Excepciones por fecha -->
@@ -305,12 +272,19 @@
             <!-- Resto del contenido -->
             <div class="barber-info">
               <input type="text" [(ngModel)]="barber.name" class="barber-name-input">
-              <!-- Visible checkbox removed as it is not in domain -->
+              <span class="barber-status" [class.active]="barber.isAvailable" [class.inactive]="!barber.isAvailable">
+                {{ barber.isAvailable ? 'Activo' : 'Inactivo' }}
+              </span>
             </div>
 
-            <button type="button" class="danger-btn" (click)="removeBarber(barber)">
-              <i class="bi bi-trash"></i> Eliminar
-            </button>
+            <div class="barber-actions">
+              <button type="button" class="edit-btn" (click)="openBarberModal(barber)" title="Editar información y horario">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button type="button" class="danger-btn" (click)="removeBarber(barber)" title="Eliminar peluquero">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
           </div>
           }
 
@@ -376,5 +350,13 @@
     <i class="bi bi-arrow-clockwise"></i>
     Cargando información...
   </div>
+  }
+
+  @if (editingBarber()) {
+    <app-barber-edit-modal
+      [barber]="editingBarber()!"
+      (close)="closeBarberModal()"
+      (save)="saveBarberEdit($event)">
+    </app-barber-edit-modal>
   }
 </section>

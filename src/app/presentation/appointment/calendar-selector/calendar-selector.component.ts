@@ -48,6 +48,8 @@ export class CalendarSelectorComponent implements AfterViewInit {
   public selectedYear = signal(new Date().getFullYear());
   public selectedMonth = signal(new Date().getMonth());
   public showPicker = signal(false);
+  public slotCapacity = signal<Map<string, number>>(new Map());
+
 
   public selectedDate = signal<Date | null>(null);
   public selectedHour = signal<string | null>(null);
@@ -178,6 +180,13 @@ export class CalendarSelectorComponent implements AfterViewInit {
     try {
       const slots = this.businessState.getAvailableSlotsForDate(date);
       this.availableHours.set(slots);
+
+      if (this.allowBarberSelection()) {
+        const capacity = this.businessState.getSlotCapacity(date);
+        this.slotCapacity.set(capacity);
+      } else {
+        this.slotCapacity.set(new Map());
+      }
     } catch (error: unknown) {
       console.error('Error loading slots:', error);
       this.toast.error('No se pudieron cargar las horas disponibles');
@@ -203,7 +212,8 @@ export class CalendarSelectorComponent implements AfterViewInit {
     name: string;
     phone: string;
     description?: string;
-    barber?: string;
+    barberId?: string;
+    barberName?: string;
     service: Service;
     hairLength?: 'short' | 'medium' | 'long' | null;
   }) {
@@ -228,7 +238,9 @@ export class CalendarSelectorComponent implements AfterViewInit {
         data.description,
         data.name,
         phone.getValue(),
-        data.barber,
+        data.barberName, // Legacy barber field
+        data.barberId,
+        data.barberName,
         data.hairLength || undefined
       );
 
@@ -271,6 +283,8 @@ export class CalendarSelectorComponent implements AfterViewInit {
       date: date,
       schedule: this.schedule(),
       exceptions: this.exceptions(),
+      barbers: this.barbers(),
+      checkBarberAvailability: true,
     };
 
     // Instantiate handlers

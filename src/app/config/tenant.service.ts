@@ -11,7 +11,7 @@ const TENANT_CONFIG_KEY = makeStateKey<TenantConfig>('tenant.config');
 })
 export class TenantService {
   private tenantConfig: TenantConfig | null = null;
-  private readonly DEFAULT_TENANT_ID = 'demo';
+  private readonly DEFAULT_TENANT_ID = 'development';
 
   // Manual mapping for custom domains: subdomain/SLD -> tenantId
   // Example: 'midominio' maps 'midominio.com', 'midominio.es', 'www.midominio.com' to 'tenant-id-real'

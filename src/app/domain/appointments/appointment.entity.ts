@@ -14,6 +14,8 @@ export class Appointment {
     public name?: string | null,
     public phone?: string | null,
     public barber?: string | null,
+    public barberId?: string | null,
+    public barberName?: string | null,
     public hairLengthChoice?: 'short' | 'medium' | 'long' | null
   ) {
     this.dateISO = datetime.toISOString().split('T')[0];
@@ -35,6 +37,8 @@ export class Appointment {
       name: this.name ?? null,
       phone: this.phone ?? null,
       barber: this.barber ?? null,
+      barberId: this.barberId ?? null,
+      barberName: this.barberName ?? null,
       hairLengthChoice: this.hairLengthChoice ?? null,
     };
     return base;
@@ -49,6 +53,8 @@ export class Appointment {
       dto.name,
       dto.phone,
       dto.barber,
+      dto.barberId,
+      dto.barberName,
       dto.hairLengthChoice
     );
   }

@@ -10,7 +10,12 @@
           (dblclick)="confirmDirect(hour)"
           [class.selected]="hour.value === selectedHour()"
           [class.disabled]="hour.disabled">
-        {{ hour.value }}
+        <span class="time">{{ hour.value }}</span>
+        @if (hour.capacity !== undefined && hour.capacity > 1) {
+          <span class="capacity-badge">
+            <i class="bi bi-person-fill"></i> {{ hour.capacity }} huecos
+          </span>
+        }
       </li>
     }
   </ul>

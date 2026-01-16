@@ -71,6 +71,7 @@
         <app-hour-selector 
           [date]="selectedDate() ? formatDate(selectedDate()!) : null" 
           [availableHours]="availableHours()"
+          [slotCapacity]="slotCapacity()"
           (back)="onBackToCalendar()"
           (hourSelected)="onHourSelected($event)">
         </app-hour-selector>

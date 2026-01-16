@@ -1,0 +1,266 @@
+@use 'sass:color';
+@use '../../../../../../styles/variables' as *;
+@use '../../../../../../styles/mixins' as *;
+@use '../../../../../../styles/functions' as *;
+
+.schedule-editor {
+  .schedule-container {
+      display: flex;
+      flex-direction: column;
+    gap: 8px;
+  
+    @include mobile {
+      gap: 6px;
+    }
+  }
+
+  // ------------------------
+  // Horarios
+  // ------------------------
+  .schedule-row {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: 10px;
+    align-items: start;
+    margin-bottom: 10px;
+    padding: 12px;
+    border: 1px solid alpha($border-color, 0.3);
+    border-radius: 10px;
+    background: $white;
+    transition: all 0.3s ease;
+  
+    // CORRECCIÓN RESPONSIVE - EVITAR OVERFLOW
+    @include mobile {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+      overflow: hidden; // Prevenir overflow
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    &.closed-day {
+        opacity: 0.6;
+        background: $background-section;
+        
+        .intervals-container {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+    }
+  
+    &:hover {
+      border-color: alpha($primary, 0.4);
+      box-shadow: 0 2px 8px alpha($primary, 0.1);
+    }
+  
+    .day-label {
+      font-weight: 600;
+      color: $text-dark;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      min-height: 40px; // Altura consistente
+      padding: 0;
+  
+      @include mobile {
+        background: alpha($primary, 0.08);
+        padding: 10px 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 1rem;
+        justify-content: center;
+        min-height: auto;
+        width: 100%;
+      }
+    }
+  
+    .intervals-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0; // Prevenir overflow
+      width: 100%;
+      box-sizing: border-box;
+      color: $true-black !important;
+  
+      @include mobile {
+        gap: 6px;
+        width: 100%;
+      }
+    }
+  
+    .time-inputs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+      padding: 6px 8px;
+      background: $white;
+      border-radius: 6px;
+      width: 100%;
+      box-sizing: border-box;
+      color: $true-black !important;
+  
+      @include mobile {
+        gap: 6px;
+        padding: 8px;
+        flex-wrap: wrap; // Permitir wrap en móvil
+        justify-content: flex-start;
+      }
+  
+      .time-input {
+        padding: 8px 10px;
+        border: 2px solid $border-color;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        min-width: 90px;
+        font-size: 0.9rem;
+        background: $white;
+        font-family: inherit;
+        color: $true-black !important;
+        box-sizing: border-box;
+  
+        // ESTÉTICA MEJORADA - COHERENTE CON EL RESTO
+        &:focus {
+          outline: none;
+          border-color: $primary;
+          box-shadow: 0 0 0 3px alpha($primary, 0.1);
+        }
+  
+        &:disabled {
+          background: $background-section;
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+  
+        @include mobile {
+          min-width: 80px;
+          flex: 0 0 auto;
+          padding: 10px 8px;
+          font-size: 0.85rem;
+        }
+      }
+  
+      .time-separator {
+        color: $text-dark;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin: 0 2px;
+        flex-shrink: 0;
+  
+        @include mobile {
+          margin: 0 2px;
+          font-size: 0.85rem;
+        }
+      }
+  
+      .danger-btn {
+        @include button-style($danger-red, color.scale($danger-red, $lightness: -15%));
+        font-size: 0.75rem;
+        padding: 6px 8px;
+        min-width: 35px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-left: auto;
+  
+        @include mobile {
+          min-width: 35px;
+          padding: 6px 8px;
+          flex-shrink: 0;
+          margin-left: 4px;
+        }
+  
+        span {
+          display: none;
+        }
+  
+        i {
+          font-size: 0.8rem;
+          margin: 0;
+        }
+  
+        &:hover {
+          transform: translateY(-1px);
+        }
+      }
+    }
+  
+    .closed-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: $text-gray;
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: alpha($text-gray, 0.05);
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      align-self: start;
+      margin-top: 10px;
+      width: fit-content;
+  
+      @include mobile {
+        order: 3;
+        justify-self: flex-start;
+        margin-top: 8px;
+        font-size: 0.85rem;
+        padding: 10px 12px;
+        justify-content: flex-start;
+        width: 100%;
+      }
+
+      input[type="checkbox"] {
+          width: 1rem;
+          height: 1rem;
+      }
+    }
+  }
+
+  .add-btn {
+    // simplified button style to avoid color functions on css vars
+    background: transparent;
+    color: $primary;
+    border: 1px dashed rgba($primary-rgb, 0.4);
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    width: fit-content;
+    margin-top: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba($primary-rgb, 0.05);
+      border-color: $primary;
+    }
+
+    &:disabled {
+      border-color: $border-color;
+      color: $text-gray;
+      background: transparent;
+      cursor: not-allowed;
+    }
+  }
+
+  .schedule-actions {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+
+    .save-btn {
+        @include button-style($primary, $primary-dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+  }
+}
+

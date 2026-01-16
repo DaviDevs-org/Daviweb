@@ -1,5 +1,6 @@
 @use '../../../../../styles/variables' as *;
 @use '../../../../../styles/mixins' as *;
+@use '../../../../../styles/functions' as *;
 
 .hour-selector-wrapper {
   text-align: center;
@@ -50,7 +51,7 @@
 }
 
 .hours-list li {
-  padding: 16px 12px;
+  padding: 12px 6px; // Reduced vertical padding slightly to accommodate badge
   cursor: pointer;
   border-radius: 8px;
   font-size: 1.05rem;
@@ -62,13 +63,31 @@
   user-select: none;
   text-align: center;
   border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+
   @media (max-width: 768px) {
-    padding: 10px 6px;
-    font-size: 0.9rem;
+    padding: 10px 4px;
+    font-size: 1rem;
   }
-  @media (max-width: 480px) {
-    padding: 8px 4px;
-    font-size: 0.85rem;
+}
+
+.capacity-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $secondary;
+  background: color-mix(in srgb, #{$secondary} 10%, transparent);
+  padding: 2px 6px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  
+  i {
+    font-size: 0.7rem;
   }
 }
 
@@ -77,6 +96,11 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   color: $white;
   border-color: $primary-dark;
+
+  .capacity-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: $white;
+  }
 }
 
 .hours-list li.selected {
@@ -86,6 +110,11 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   border-color: $primary-dark;
   transform: scale(1.05);
+
+  .capacity-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: $white;
+  }
 }
 
 .hours-list li.disabled {
