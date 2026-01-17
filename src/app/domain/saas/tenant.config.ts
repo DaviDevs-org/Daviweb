@@ -65,6 +65,7 @@ export interface TenantFeaturesConfig {
   enableReviews: boolean;
   enableGallery: boolean;
   maintenanceMode: boolean;
+  enableSms: boolean;
 }
 
 export interface TenantConfig {

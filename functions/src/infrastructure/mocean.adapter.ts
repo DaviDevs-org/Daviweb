@@ -26,10 +26,8 @@ export class MoceanAdapter implements SmsRepository {
         },
       });
 
-      // LOG COMPLETO para debugging
       console.log('📝 Respuesta MoceanAPI:', JSON.stringify(response.data));
 
-      // Verifica si viene en XML o JSON
       if (response.data.messages && response.data.messages[0]) {
         if (response.data.messages[0].status !== 0) {
           throw new Error(
@@ -39,8 +37,14 @@ export class MoceanAdapter implements SmsRepository {
       }
 
       console.log(`✅ SMS enviado a ${phoneNumber}`);
-    } catch (error) {
-      console.error('❌ Error completo:', error);
+    } catch (error: any) {
+      if (error.response) {
+        console.error(
+          '❌ Error MoceanAPI response:',
+          JSON.stringify(error.response.data),
+        );
+      }
+      console.error('❌ Error enviando SMS:', error);
       throw error;
     }
   }
