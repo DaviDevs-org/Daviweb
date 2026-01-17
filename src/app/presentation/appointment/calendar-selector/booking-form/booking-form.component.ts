@@ -22,11 +22,12 @@ import { BookingPreselectionService } from '@presentation/shared/booking-presele
 import { Barber, Service } from '@domain/index';
 import { GetServicesUseCase } from '@application/services';
 import { TimeUtils } from '@domain/shared/utils/time.utils';
+import { PhoneInputComponent } from '@presentation/shared/components/phone-input/phone-input.component';
 
 @Component({
   selector: 'app-booking-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, PhoneInputComponent],
   templateUrl: './booking-form.component.html',
   styleUrls: ['./booking-form.component.scss'],
 })
@@ -62,7 +63,7 @@ export class BookingFormComponent {
   // Form
   public bookingForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
-    phone: ['', [Validators.pattern(/^\+?[0-9\s-]{9,}$/)]],
+    phone: ['', [Validators.required]], // Validation handled by component
     serviceId: ['', Validators.required],
     barberId: [''],
     description: [''],
