@@ -1,0 +1,91 @@
+<div class="cancel-container">
+
+    <!-- Loading -->
+    <div *ngIf="status === 'loading'" class="status-card loading">
+        <div class="spinner"></div>
+        <h2>Cargando...</h2>
+        <p>Por favor espera un momento</p>
+    </div>
+
+    <!-- Confirming - Pedir confirmación -->
+    <div *ngIf="status === 'confirming'" class="status-card confirming">
+        <div class="icon">⚠️</div>
+        <h2>¿Estás seguro que quieres cancelar?</h2>
+        <div class="appointment-details">
+            <p><strong>Fecha:</strong> {{ appointmentDate }}</p>
+            <p><strong>Hora:</strong> {{ appointmentTime }}</p>
+            <p><strong>Local:</strong> {{ localName }}</p>
+        </div>
+        <p class="warning">Esta acción no se puede deshacer.</p>
+    
+        <!-- AÑADIR CHECKBOX AQUÍ -->
+        <div class="checkbox-confirm">
+            <input type="checkbox" id="confirm-checkbox" [(ngModel)]="userConfirmed">
+            <label for="confirm-checkbox">
+                Entiendo que esta acción es irreversible
+            </label>
+        </div>
+    
+        <div class="button-group">
+            <button class="btn btn-cancel" (click)="confirmCancel()" [disabled]="!userConfirmed">
+                Sí, cancelar cita
+            </button>
+            <button class="btn btn-keep" (click)="cancelAction()">
+                No, mantener cita
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Kept - Usuario decidió mantener la cita -->
+    <div *ngIf="status === 'kept'" class="status-card success">
+        <div class="icon">👍</div>
+        <h2>Cita mantenida</h2>
+        <p>Tu cita del <strong>{{ appointmentDate }}</strong> a las <strong>{{ appointmentTime }}</strong> se mantiene
+            confirmada.</p>
+        <p class="info">¡Nos vemos pronto!</p>
+    </div>
+
+
+    <!-- Cancelling - Procesando -->
+    <div *ngIf="status === 'cancelling'" class="status-card loading">
+        <div class="spinner"></div>
+        <h2>Cancelando...</h2>
+        <p>Por favor espera</p>
+    </div>
+
+    <!-- Success -->
+    <div *ngIf="status === 'success'" class="status-card success">
+        <div class="icon">✅</div>
+        <h2>Cita cancelada correctamente</h2>
+        <p *ngIf="appointmentDate && appointmentTime">
+            Tu cita del <strong>{{ appointmentDate }}</strong> a las <strong>{{ appointmentTime }}</strong>
+            ha sido cancelada.
+        </p>
+        <p class="info">Puedes cerrar esta ventana o reservar una nueva cita.</p>
+    </div>
+
+    <!-- Expired -->
+    <div *ngIf="status === 'expired'" class="status-card error">
+        <div class="icon">⏰</div>
+        <h2>Enlace expirado</h2>
+        <p>Solo puedes cancelar con <strong>24 horas de antelación</strong>.</p>
+        <p class="info">Por favor, contacta directamente con la peluquería.</p>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="status === 'error'" class="status-card error">
+        <div class="icon">❌</div>
+        <h2>Error al cancelar</h2>
+        <p>Hubo un problema al cancelar tu cita.</p>
+        <p class="info">Por favor, contacta directamente con la peluquería.</p>
+    </div>
+
+    <!-- Not found -->
+    <div *ngIf="status === 'not-found'" class="status-card error">
+        <div class="icon">⚠️</div>
+        <h2>Cita no encontrada</h2>
+        <p>La cita puede haber sido cancelada anteriormente.</p>
+    </div>
+
+</div>

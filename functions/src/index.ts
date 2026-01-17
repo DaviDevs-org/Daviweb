@@ -2,6 +2,10 @@ import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { MoceanAdapter } from './infrastructure/mocean.adapter';
 import { SendSmsCancelationUsecase } from './application/send-sms-cancelation.usecase';
 import { Appointment } from './domain/appointment.entity';
+import { Timestamp } from 'firebase-admin/firestore';
+import * as admin from 'firebase-admin';
+
+admin.initializeApp();
 
 const smsAdapter = new MoceanAdapter();
 const sendSmsUsecase = new SendSmsCancelationUsecase(smsAdapter);
@@ -12,7 +16,7 @@ const sendSmsUsecase = new SendSmsCancelationUsecase(smsAdapter);
  */
 export const sendSmsCancelation = onDocumentCreated(
   {
-    document: 'tenants/{tenantId}/citas/{citaId}',
+    document: 'hairdressers/{tenantId}/appointments/{citaId}',
     region: 'europe-west1',
     secrets: ['MOCEAN_API_KEY'],
   },
@@ -25,15 +29,21 @@ export const sendSmsCancelation = onDocumentCreated(
     }
 
     const appointment = snapshot.data() as Appointment;
-    const citaId = event.params.citaId;
+    const appointmentId = event.params.citaId;
     const tenantId = event.params.tenantId;
 
-    console.log(`📩 Procesando cita ${citaId} del tenant ${tenantId}`);
+    console.log(`📩 Procesando cita ${appointmentId} del tenant ${tenantId}`);
 
     // 2. Validate required fields
     if (!appointment.phone) {
       console.error('❌ Falta teléfono en la cita');
       return;
+    }
+
+    let phoneNumber = appointment.phone.trim();
+    if (!phoneNumber.startsWith('+')) {
+      phoneNumber = '+34' + phoneNumber; // Assuming default country code +34
+      console.warn(`⚠️ Teléfono sin prefijo, añadiendo +34: ${phoneNumber}`);
     }
 
     if (!appointment.datetime) {
@@ -43,9 +53,12 @@ export const sendSmsCancelation = onDocumentCreated(
 
     // Format date for SMS
     const datetime =
-      appointment.datetime instanceof Date
-        ? appointment.datetime
-        : new Date(appointment.datetime);
+      appointment.datetime instanceof Timestamp
+        ? appointment.datetime.toDate()
+        : typeof appointment.datetime === 'string'
+          ? new Date(appointment.datetime)
+          : appointment.datetime;
+
     const formatedDate = datetime.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
@@ -56,21 +69,43 @@ export const sendSmsCancelation = onDocumentCreated(
 
     const localName = tenantId;
 
+    // Expiration time for cancellation link
+    const appointmentDate = datetime; // Ya lo tienes convertido arriba
+    const expirationTime = appointmentDate.getTime() - 24 * 60 * 60 * 1000; // 24 hours before appointment
+
+    // Generate cancellation token
+    const tokenData = {
+      t: tenantId,
+      a: appointmentId,
+      e: expirationTime,
+    };
+
+    const cancelationToken = Buffer.from(JSON.stringify(tokenData)).toString(
+      'base64url',
+    );
+
+    // Obtener dominio del tenant desde Firestore
+    const tenantDoc = await admin
+      .firestore()
+      .collection('tenants')
+      .doc(tenantId)
+      .get();
+
     // Generate cancellation link
-    const cancelationToken = appointment.cancelationToken || citaId;
-    const cancelationLink = `https://tuapp.com/cancelar/${cancelationToken}`;
+    const domain = tenantDoc.data()?.domain || 'http://localhost:4200';
+    const cancelationLink = `${domain}/cancelar/${cancelationToken}`;
 
     // 3. Send SMS via use case
     try {
       await sendSmsUsecase.execute(
-        appointment.phone,
+        phoneNumber,
         formatedDate,
         localName,
-        cancelationLink
+        cancelationLink,
       );
-      console.log(`✅ SMS enviado a ${appointment.phone}`);
+      console.log(`✅ SMS enviado a ${phoneNumber}`);
     } catch (error) {
       console.error('❌ Error enviando SMS:', error);
     }
-  }
+  },
 );
