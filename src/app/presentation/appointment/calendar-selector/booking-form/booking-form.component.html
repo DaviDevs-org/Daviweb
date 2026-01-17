@@ -16,8 +16,11 @@
 
   <div class="form-row">
     <div class="form-group">
-      <label for="phone">Teléfono *</label>
-      <input id="phone" type="tel" formControlName="phone" placeholder="+34 123 456 789" />
+      <app-phone-input
+        label="Teléfono"
+        [required]="true"
+        formControlName="phone">
+      </app-phone-input> 
       @if (bookingForm.get('phone')?.invalid && bookingForm.get('phone')?.touched) {
         <div class="error visible">
           Introduce un teléfono válido.

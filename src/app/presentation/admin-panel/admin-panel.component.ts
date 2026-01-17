@@ -9,6 +9,7 @@ import { ServicesManagementComponent } from './components/services-management/se
 import { InfoManagementComponent } from './components/info-management/info-management.component';
 import { AuthenticationService } from '../shared/authentication.service';
 import { AppointmentManagementComponent } from './components/appointment-management/appointment-management.component';
+import { BlacklistManagementComponent } from './components/blacklist-management/blacklist-management.component';
 
 @Component({
   selector: 'app-admin-panel',
@@ -20,7 +21,8 @@ import { AppointmentManagementComponent } from './components/appointment-managem
     GalleryManagementComponent,
     ServicesManagementComponent,
     InfoManagementComponent,
-    AppointmentManagementComponent
+    AppointmentManagementComponent,
+    BlacklistManagementComponent
   ],
   templateUrl: "./admin-panel.component.html",
   styleUrls: ['./admin-panel.component.scss']

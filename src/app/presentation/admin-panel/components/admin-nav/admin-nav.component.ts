@@ -2,7 +2,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export type AdminTab = 'gallery' | 'services' | 'info' | 'appointment';
+export type AdminTab = 'gallery' | 'services' | 'info' | 'appointment' | 'blacklist';
 
 interface NavTab {
   id: AdminTab;
@@ -27,7 +27,8 @@ export class AdminNavComponent {
     { id: 'gallery', icon: 'bi bi-images', label: 'Galería de Fotos' },
     { id: 'services', icon: 'bi bi-scissors', label: 'Servicios y Precios' },
     { id: 'info', icon: 'bi bi-info-circle', label: 'Información General' },
-    { id: 'appointment', icon: 'bi bi-calendar-event', label: 'Citas' }
+    { id: 'appointment', icon: 'bi bi-calendar-event', label: 'Citas' },
+    { id: 'blacklist', icon: 'bi bi-shield-lock', label: 'Lista Negra' }
   ];
 
   onTabChange(tab: AdminTab): void {

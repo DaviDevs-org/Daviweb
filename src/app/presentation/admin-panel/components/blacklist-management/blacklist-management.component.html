@@ -1,0 +1,71 @@
+<section class="content-section">
+  <div class="section-header">
+    <h2>
+      <i class="bi bi-shield-lock"></i>
+      Lista Negra
+    </h2>
+    <p>Gestión de teléfonos bloqueados y acceso denegado</p>
+  </div>
+
+  <div class="blacklist-container">
+    
+    <!-- Cards layout similar to InfoManagement -->
+    <div class="info-sections">
+        
+        <!-- Formulario de Bloqueo -->
+        <div class="info-card">
+            <h3><i class="bi bi-slash-circle"></i> Bloquear Nuevo Número</h3>
+            <p class="card-desc">Los números añadidos aquí no podrán realizar nuevas reservas.</p>
+            
+            <div class="block-form-container">
+                <div class="form-group">
+                    <app-phone-input
+                        label="Teléfono a bloquear"
+                        [(ngModel)]="newPhone"
+                        placeholder="600 123 456">
+                    </app-phone-input>
+                </div>
+                
+                <div class="form-group">
+                    <label>Motivo (Interno)</label>
+                    <input type="text" class="form-input" [(ngModel)]="newReason" placeholder="Ej: No shows reiterados, Spam...">
+                </div>
+
+                <button class="add-btn large danger" (click)="blockNumber()" [disabled]="!newPhone">
+                    <i class="bi bi-ban"></i> Bloquear Acceso
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista de Bloqueados -->
+        <div class="info-card blocked-list-card">
+            <h3><i class="bi bi-list-ul"></i> Números Bloqueados</h3>
+            <div class="blocked-count">
+                <span class="badge">{{ (blockedNumbers$ | async)?.length || 0 }} activos</span>
+            </div>
+            
+            <div class="blocked-list">
+                @for (item of (blockedNumbers$ | async); track item.phone) {
+                    <div class="blocked-item">
+                        <div class="item-info">
+                            <span class="phone-number">{{ item.phone }}</span>
+                            <span class="reason">{{ item.reason || 'Sin motivo especificado' }}</span>
+                            <small class="date">Bloqueado el {{ item.createdAt | date:'shortDate' }}</small>
+                        </div>
+                        <div class="item-actions">
+                            <button class="unblock-btn" (click)="unblockNumber(item.phone)" title="Desbloquear y permitir acceso">
+                                <i class="bi bi-check-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                } @empty {
+                    <div class="empty-state">
+                        <i class="bi bi-shield-check"></i>
+                        <p>No hay números bloqueados actualmente.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+  </div>
+</section>
