@@ -160,11 +160,17 @@ export class BookingFormComponent {
       }
 
       if (preselection.barberName && this.allowBarberSelection()) {
-         if (this.bookingForm.get('barberId')?.value !== preselection.barberName) {
-            this.bookingForm.patchValue({
-              barberId: preselection.barberName,
-            });
-         }
+        const barberIdCtrl = this.bookingForm.get('barberId');
+        const matchingBarber = this.barbers().find(
+          (b) => b.name === preselection.barberName
+        );
+
+        // El control guarda IDs (o 'anyone'), no nombres.
+        if (matchingBarber?.id && barberIdCtrl?.value !== matchingBarber.id) {
+          this.bookingForm.patchValue({
+            barberId: matchingBarber.id,
+          });
+        }
       }
     });
 
@@ -194,14 +200,37 @@ export class BookingFormComponent {
     let barberId = val.barberId || undefined;
     let barberName: string | undefined;
 
-    if (barberId) {
-      const barber = this.barbers().find((b) => b.id === barberId);
-      if (barber) {
-        barberName = barber.name;
-      } else {
-        const randomIndex = Math.floor(Math.random() * this.availableBarbersForSelection().length);
-        barberName = this.availableBarbersForSelection()[randomIndex].name;
-        barberId = this.availableBarbersForSelection()[randomIndex].id;
+    if (this.allowBarberSelection()) {
+      const barberIdCtrl = this.bookingForm.controls.barberId;
+      const available = this.availableBarbersForSelection();
+
+      if (barberId === 'anyone') {
+        if (available.length === 0) {
+          barberIdCtrl.setErrors({ noAvailableBarbers: true });
+          barberIdCtrl.markAsTouched();
+          return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * available.length);
+        const chosen = available[randomIndex];
+        if (!chosen?.id) {
+          barberIdCtrl.setErrors({ invalidBarberSelection: true });
+          barberIdCtrl.markAsTouched();
+          return;
+        }
+
+        barberName = chosen.name;
+        barberId = chosen.id;
+      } else if (barberId) {
+        const chosen = available.find((b) => b.id === barberId);
+        if (!chosen?.id) {
+          barberIdCtrl.setErrors({ invalidBarberSelection: true });
+          barberIdCtrl.markAsTouched();
+          return;
+        }
+
+        barberName = chosen.name;
+        barberId = chosen.id;
       }
     }
 

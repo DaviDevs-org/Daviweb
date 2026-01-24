@@ -49,7 +49,11 @@
         </select>
         @if (bookingForm.get('barberId')?.invalid && bookingForm.get('barberId')?.touched) {
             <div class="error visible">
-              Debes seleccionar un peluquero.
+              @if (bookingForm.get('barberId')?.errors?.['noAvailableBarbers']) {
+                No hay peluqueros disponibles para esa hora.
+              } @else {
+                Debes seleccionar un peluquero.
+              }
             </div>
         }
       </div>
