@@ -249,8 +249,10 @@
                         <!-- Contacto - Teléfono -->
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="editPhone">Teléfono</label>
-                                <input type="tel" id="editPhone" formControlName="phone" placeholder="+34 123 456 789">
+                                <app-phone-input
+                                    label="Teléfono"
+                                    formControlName="phone">
+                                </app-phone-input>
                                 @if (editForm.get('phone')?.invalid && editForm.get('phone')?.touched) {
                                     <div class="error-message">
                                         Formato de teléfono inválido

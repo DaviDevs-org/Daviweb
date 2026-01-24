@@ -23,6 +23,7 @@ import { AppointmentRepository } from '@application/appointments';
 import { Appointment, AppointmentDTO } from '@domain/appointments';
 import { catchError, map, Observable, of } from 'rxjs';
 import { SaasConfigService } from 'src/app/config/saas-config.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable({
   providedIn: 'root',
@@ -125,7 +126,11 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
     return await runInInjectionContext(this.injector, async () => {
       const ref = collection(this.firestore, this.pathConfig.appointments);
       const tenantId = this.saasConfigService.getAll().id;
-      const dto: AppointmentDTO = { ...appointment.toDTO(), tenantId };
+      const dto: AppointmentDTO = {
+        ...appointment.toDTO(),
+        tenantId,
+        cancelationToken: uuidv4(),
+      };
       const docRef = await addDoc(ref, dto);
       return docRef.id;
     });

@@ -46,11 +46,12 @@ import { getErrorMessage } from '@domain/shared/utils/error.utils';
 
 import { ScheduleEditorComponent } from '../shared/schedule-editor/schedule-editor.component';
 import { BarberEditModalComponent } from '../barbers-management/barber-edit-modal/barber-edit-modal.component';
+import { PhoneInputComponent } from '@presentation/shared/components/phone-input/phone-input.component';
 
 @Component({
   selector: 'app-info-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScheduleEditorComponent, BarberEditModalComponent],
+  imports: [CommonModule, FormsModule, ScheduleEditorComponent, BarberEditModalComponent, PhoneInputComponent],
   templateUrl: './info-management.component.html',
   styleUrls: ['./info-management.component.scss'],
 })

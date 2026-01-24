@@ -11,6 +11,7 @@
     overflow: visible; // restaurar overflow previo
     display: flex;
     flex-direction: column;
+
     // En móvil evitamos forzar alturas o scrolls internos para prevenir "espacios en rosa"
     @include mobile {
         height: auto;
@@ -21,7 +22,6 @@
 }
 
 .section-header {
-    margin-left: 20px;
     margin-bottom: 20px;
     font-family: $font-primary;
     font-size: $font-size-lg;
@@ -790,7 +790,7 @@
     max-width: 100%;
     box-sizing: border-box;
 
-        @include mobile {
+    @include mobile {
         flex-direction: column;
         gap: 0.5rem;
         padding: 0.75rem;
@@ -803,7 +803,9 @@
         border-radius: 12px;
         box-shadow: 0 2px 8px alpha($primary, 0.05);
         border: 1px solid alpha($primary, 0.1);
-    }    &:hover {
+    }
+
+    &:hover {
         background: $light-gray;
     }
 
@@ -1408,10 +1410,12 @@
             overflow-y: auto;
         }
     }
-    .detail-content::-webkit-scrollbar{
+
+    .detail-content::-webkit-scrollbar {
         display: none;
         width: 0px;
     }
+
     .detail-item {
         margin-bottom: 0.75rem;
         padding: 0.6rem;
@@ -1615,6 +1619,7 @@
 
 .edit-form {
     color: $true-black !important;
+
     .form-row {
         display: flex;
         gap: 1rem;
@@ -2657,6 +2662,7 @@
         overflow-wrap: break-word;
     }
 }
+
 /* Reordenación móvil: citas -> información -> calendario */
 @media (max-width: 768px) {
     .right-panel {
@@ -2684,6 +2690,7 @@
 
 /* Overrides específicos para esta pantalla en móvil para evitar espacio extra al final */
 @include mobile {
+
     // No usar sticky en header/detalle dentro de esta sección para evitar que el documento "crezca"
     .appointment-section {
         .calendar-header {

@@ -1,9 +1,11 @@
-import { AppointmentService } from '@domain/services/service.types';
-
-export interface AppointmentDTO {
-  datetime: Date;
-  createdAt: Date;
-  service: AppointmentService;
+export interface Appointment {
+  datetime: Date | string;
+  createdAt: Date | string;
+  service: {
+    name: string;
+    duration: number;
+    price: number;
+  };
   description?: string | null;
   name?: string | null;
   phone?: string | null;
@@ -11,6 +13,6 @@ export interface AppointmentDTO {
   barberId?: string | null;
   barberName?: string | null;
   hairLengthChoice?: 'short' | 'medium' | 'long' | null;
-  tenantId?: string;
+
   cancelationToken?: string;
 }

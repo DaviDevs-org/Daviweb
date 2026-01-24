@@ -1,0 +1,33 @@
+@if (label) {
+  <label class="phone-label">
+    {{ label }} @if (required) { <span class="required">*</span> }
+  </label>
+}
+
+<div class="phone-container" [class.invalid]="isInvalid && touched">
+  <div class="country-selector">
+    <select [ngModel]="selectedCountry" (ngModelChange)="onCountryChange($event)" [disabled]="isDisabled">
+      @for (country of countries; track country.code) {
+        <option [value]="country.code">
+          {{ country.flag }} +{{ country.callingCode }}
+        </option>
+      }
+    </select>
+  </div>
+
+  <input
+    type="tel"
+    [value]="displayValue"
+    (input)="onInputChange($event)"
+    (blur)="onTouched()"
+    [disabled]="isDisabled"
+    [placeholder]="placeholder"
+    class="phone-input"
+  />
+</div>
+
+@if (isInvalid && touched) {
+  <div class="error-message">
+    Número de teléfono inválido
+  </div>
+}

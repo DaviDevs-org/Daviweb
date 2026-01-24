@@ -45,13 +45,14 @@ import {
 } from '@presentation/shared/models/appointment-view.model';
 import { AlertService } from '@presentation/shared/alert/alert.service';
 import { getErrorMessage } from '@domain/shared/utils/error.utils';
+import { PhoneInputComponent } from '@presentation/shared/components/phone-input/phone-input.component';
 
 type EditableAppointment = Partial<Appointment>;
 
 @Component({
   selector: 'app-appointment-management',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PhoneInputComponent],
   templateUrl: './appointment-management.component.html',
   styleUrls: ['./appointment-management.component.scss'],
 })
@@ -248,7 +249,7 @@ export class AppointmentManagementComponent
   constructor() {
     this.editForm = this.fb.group({
       name: ['', Validators.required],
-      phone: ['', [this.phoneValidator]],
+      phone: [''], // Validator handled by component
       date: ['', Validators.required],
       time: ['', Validators.required],
       serviceId: ['', Validators.required],
@@ -830,16 +831,5 @@ export class AppointmentManagementComponent
         }),
       100
     );
-  }
-
-  private phoneValidator(control: any) {
-    const value = control.value;
-    if (!value) return null; // Si está vacío es válido (es opcional)
-    try {
-      new Phone(value);
-      return null;
-    } catch (e) {
-      return { invalidPhone: true };
-    }
   }
 }
