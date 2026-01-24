@@ -46,7 +46,8 @@ Estamos construyendo una plataforma **SaaS Multi-tenant** ("White Label") para d
 - **Objetivo:** Que cada peluquería tenga su propia "web app" personalizada (branding, horarios, servicios) sin desarrollar una desde cero.
 - **Modelo:** Un único código base (Angular) que se adapta dinámicamente según el cliente (Tenant) que accede.
 - **Entidades Principales:**
-  - **Citas (Appointments):** El core del negocio. Gestión de reservas, bloqueos de horario, validaciones.
+  - **Citas (Appointments):** El core del negocio. Gestión de reservas, bloqueos de horario, validaciones y estrategias de reserva (Global vs Multi-Barbero).
+  - **Barberos (Staff):** Entidades con disponibilidad propia. Pueden tener horarios específicos o heredar los del negocio.
   - **Servicios:** Cortes, afeitados, tintes, etc., con duración y precio.
   - **Galería:** Portfolio de trabajos realizados.
   - **Negocio (Business Info):** Horarios, ubicación, contacto, redes sociales.
@@ -152,8 +153,8 @@ El proyecto sigue estrictamente **Clean Architecture** para desacoplar la lógic
 
 - Contiene **entidades, value objects, tipos y contratos de dominio**.
 - Subcarpetas por subdominio:
-  - `appointments/` – entidad de cita, tipos (`appointment.entity.ts`, `appointment.types.ts`).
-  - `business-info/` – datos del negocio (horarios, datos de contacto, etc.).
+  - `appointments/` – entidad de cita (`Appointment`), huecos reservados (`ReservedSlot`) y tipos.
+  - `business-info/` – datos del negocio y gestión de barberos (`Barber` con lógica de disponibilidad).
   - `gallery/` – fotos y metadatos.
   - `saas/` – configuración del tenant (`tenant.config.ts`).
   - `services/` – servicios de peluquería (cortes, arreglos, etc.).
@@ -165,8 +166,9 @@ El proyecto sigue estrictamente **Clean Architecture** para desacoplar la lógic
 - Implementa **use cases** y **puertos (interfaces de repositorio)**.
 - Estructura por subdominio:
   - `appointments/`
+    - **Patrón Strategy:** `strategies/` define la lógica de reserva (`Global` vs `Barber`).
     - Use cases como:
-      - `add-appointment.use-case.ts`
+      - `add-appointment.use-case.ts` (Delega en la estrategia activa).
       - `delete-appointment.use-case.ts`
       - `get-appointment-by-date-range.use-case.ts`
       - `get-appointment-by-id.use-case.ts`
@@ -221,7 +223,7 @@ El proyecto sigue estrictamente **Clean Architecture** para desacoplar la lógic
 - Servicios y utilidades de uso transversal:
   - `authentication.service.ts` – gestión de autenticación (Guard y lógica).
   - `booking-preselection.service.ts` – estado temporal de la reserva.
-    - `business-state.service.ts` – estado global de la información del negocio.
+    - `business-state.service.ts` – estado global de la información del negocio y cálculo de capacidad.
     - `scroll.service.ts` – utilidades de scroll.
 - Componentes y otros recursos compartidos:
   - `alert/` – componentes de alerta / feedback visual reutilizable.

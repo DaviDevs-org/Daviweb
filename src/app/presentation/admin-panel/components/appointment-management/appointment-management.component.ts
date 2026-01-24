@@ -95,6 +95,11 @@ export class AppointmentManagementComponent
   // Barbers
   public barbers = computed(() => this.businessState.barberSettings()?.barbers ?? []);
 
+  // --- Filtering State ---
+  public searchQuery = signal<string>('');
+  public filterServiceName = signal<string>('');
+  public filterBarberId = signal<string>('');
+
   // --- Computed State ---
   public allowBarberSelection = computed(
     () => this.businessState.barberSettings()?.barberSelection ?? false
@@ -103,6 +108,39 @@ export class AppointmentManagementComponent
   public appointmentViews = computed<AppointmentView[]>(() => {
     const services = this.services(); // Service[] (dominio)
     return this.appointments().map((a) => toAppointmentView(a, services));
+  });
+
+  public filteredAppointmentViews = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const serviceName = this.filterServiceName();
+    const barberId = this.filterBarberId();
+    const services = this.services();
+
+    const filteredApps = this.appointments().filter((a) => {
+      // 1. Service Filter (by Name, strict match)
+      if (serviceName && a.service?.name !== serviceName) return false;
+
+      // 2. Barber Filter
+      if (barberId && a.barberId !== barberId) return false;
+
+      // 3. Search Query
+      if (!query) return true;
+
+      const nameMatch = a.name?.toLowerCase().includes(query);
+      const phoneMatch = a.phone?.toLowerCase().includes(query);
+      const serviceNameMatch = a.service?.name?.toLowerCase().includes(query);
+
+      return nameMatch || phoneMatch || serviceNameMatch;
+    });
+
+    // Ordenar: Más nuevas primero (Descendente)
+    filteredApps.sort((a, b) => {
+      const dateA = a.datetime instanceof Date ? a.datetime.getTime() : new Date(a.datetime).getTime();
+      const dateB = b.datetime instanceof Date ? b.datetime.getTime() : new Date(b.datetime).getTime();
+      return dateB - dateA;
+    });
+
+    return filteredApps.map((a) => toAppointmentView(a, services));
   });
 
   // Citas filtradas para el día seleccionado
@@ -720,6 +758,14 @@ export class AppointmentManagementComponent
     if (!serviceName) return false;
     const service = this.services().find((s) => s.name === serviceName);
     return service?.requiresHairLength ?? false;
+  }
+
+  // --- Actions ---
+
+  public resetFilters(): void {
+    this.searchQuery.set('');
+    this.filterServiceName.set('');
+    this.filterBarberId.set('');
   }
 
   // --- Private Helpers ---

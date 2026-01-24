@@ -23,6 +23,7 @@ import { Barber, Service } from '@domain/index';
 import { GetServicesUseCase } from '@application/services';
 import { TimeUtils } from '@domain/shared/utils/time.utils';
 import { PhoneInputComponent } from '@presentation/shared/components/phone-input/phone-input.component';
+import { getRandomValues } from 'node:crypto';
 
 @Component({
   selector: 'app-booking-form',
@@ -198,10 +199,9 @@ export class BookingFormComponent {
       if (barber) {
         barberName = barber.name;
       } else {
-        // Fallback if value was name (legacy)
-        barberName = barberId;
-        const bByName = this.barbers().find((b) => b.name === barberId);
-        if (bByName) barberId = bByName.id;
+        const randomIndex = Math.floor(Math.random() * this.availableBarbersForSelection().length);
+        barberName = this.availableBarbersForSelection()[randomIndex].name;
+        barberId = this.availableBarbersForSelection()[randomIndex].id;
       }
     }
 

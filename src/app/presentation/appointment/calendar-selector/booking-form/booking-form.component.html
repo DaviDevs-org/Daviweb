@@ -40,6 +40,7 @@
         <label for="barber">Peluquero *</label>
         <select id="barber" formControlName="barberId">
           <option value="" disabled selected>-- Selecciona peluquero --</option>
+          <option value="anyone">Cualquiera</option>
           @for (b of availableBarbersForSelection(); track b.id) {
             <option [value]="b.id">
               {{ b.name }}
