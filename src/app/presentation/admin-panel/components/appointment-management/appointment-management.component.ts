@@ -105,42 +105,36 @@ export class AppointmentManagementComponent
     () => this.businessState.barberSettings()?.barberSelection ?? false
   );
 
+  private readonly servicesByName = computed(
+    () => new Map(this.services().map((s) => [s.name, s] as const))
+  );
+
   public appointmentViews = computed<AppointmentView[]>(() => {
-    const services = this.services(); // Service[] (dominio)
-    return this.appointments().map((a) => toAppointmentView(a, services));
+    const servicesByName = this.servicesByName();
+    return this.appointments().map((a) => toAppointmentView(a, servicesByName));
   });
 
   public filteredAppointmentViews = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const serviceName = this.filterServiceName();
     const barberId = this.filterBarberId();
-    const services = this.services();
 
-    const filteredApps = this.appointments().filter((a) => {
-      // 1. Service Filter (by Name, strict match)
-      if (serviceName && a.service?.name !== serviceName) return false;
-
-      // 2. Barber Filter
+    const filtered = this.appointmentViews().filter((a) => {
+      if (serviceName && a.serviceName !== serviceName) return false;
       if (barberId && a.barberId !== barberId) return false;
 
-      // 3. Search Query
       if (!query) return true;
 
       const nameMatch = a.name?.toLowerCase().includes(query);
       const phoneMatch = a.phone?.toLowerCase().includes(query);
-      const serviceNameMatch = a.service?.name?.toLowerCase().includes(query);
+      const serviceNameMatch = a.serviceName?.toLowerCase().includes(query);
 
-      return nameMatch || phoneMatch || serviceNameMatch;
+      return Boolean(nameMatch || phoneMatch || serviceNameMatch);
     });
 
-    // Ordenar: Más nuevas primero (Descendente)
-    filteredApps.sort((a, b) => {
-      const dateA = a.datetime instanceof Date ? a.datetime.getTime() : new Date(a.datetime).getTime();
-      const dateB = b.datetime instanceof Date ? b.datetime.getTime() : new Date(b.datetime).getTime();
-      return dateB - dateA;
-    });
-
-    return filteredApps.map((a) => toAppointmentView(a, services));
+    return filtered
+      .slice()
+      .sort((x, y) => y.datetime.getTime() - x.datetime.getTime());
   });
 
   // Citas filtradas para el día seleccionado

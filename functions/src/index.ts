@@ -1,4 +1,5 @@
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { defineSecret } from 'firebase-functions/params';
 import { MoceanAdapter } from './infrastructure/mocean.adapter';
 import { SendSmsCancelationUsecase } from './application/send-sms-cancelation.usecase';
 import { Appointment } from './domain/appointment.entity';
@@ -7,8 +8,7 @@ import * as admin from 'firebase-admin';
 
 admin.initializeApp();
 
-const smsAdapter = new MoceanAdapter();
-const sendSmsUsecase = new SendSmsCancelationUsecase(smsAdapter);
+const moceanApiKey = defineSecret('MOCEAN_API_KEY');
 
 function normalizePhoneNumber(raw: string, defaultCountryCallingCode = '34'): string | null {
   if (!raw) return null;
@@ -47,7 +47,7 @@ export const sendSmsCancelation = onDocumentCreated(
   {
     document: 'hairdressers/{tenantId}/appointments/{citaId}',
     region: 'europe-west1',
-    secrets: ['MOCEAN_API_KEY'],
+    secrets: [moceanApiKey],
   },
   async (event) => {
     const snapshot = event.data;
@@ -60,8 +60,6 @@ export const sendSmsCancelation = onDocumentCreated(
     const appointmentId = event.params.citaId;
     const tenantId = event.params.tenantId;
 
-    console.log(`📩 Procesando cita ${appointmentId} del tenant ${tenantId}`);
-
     // 0. Tenant feature flag (NO Angular DI in Cloud Functions)
     const tenantDoc = await admin
       .firestore()
@@ -72,19 +70,22 @@ export const sendSmsCancelation = onDocumentCreated(
     const tenantData = tenantDoc.data();
     const enableSms = tenantData?.features?.enableSms === true;
     if (!enableSms) {
-      console.log('ℹ️ SMS deshabilitado para este tenant');
+      return;
+    }
+
+    const apiToken = moceanApiKey.value();
+    if (!apiToken) {
+      console.error('❌ Falta el secreto MOCEAN_API_KEY (Secret Manager).');
       return;
     }
 
     // 1. Validate required fields
     const phoneNumber = normalizePhoneNumber(appointment.phone ?? '');
     if (!phoneNumber) {
-      console.error('❌ Teléfono inválido o vacío en la cita');
       return;
     }
 
     if (!appointment.datetime) {
-      console.error('❌ Falta fecha en la cita');
       return;
     }
 
@@ -106,6 +107,9 @@ export const sendSmsCancelation = onDocumentCreated(
 
     const localName = tenantData?.business?.name || tenantId;
 
+    // Sender por tenant (multi-tenant). Si no está, usamos el nombre del negocio.
+    const tenantFromName = tenantData?.sms?.fromName || tenantData?.business?.name || 'Peluqueria';
+
     // Expiration time for cancellation link
     const expirationTime = datetime.getTime() - 24 * 60 * 60 * 1000; // 24 hours before appointment
 
@@ -119,13 +123,15 @@ export const sendSmsCancelation = onDocumentCreated(
     const cancelationToken = Buffer.from(JSON.stringify(tokenData)).toString('base64url');
 
     // Generate cancellation link
-    const configuredDomain =
-      tenantData?.domain || tenantData?.publicBaseUrl || tenantData?.publicUrl;
+    const configuredDomain = tenantData?.domain;
     const baseUrl = normalizeBaseUrl(configuredDomain || 'http://localhost:4200');
     const cancelationLink = `${baseUrl}/cancelar/${cancelationToken}`;
 
     // 2. Send SMS via use case
     try {
+      const smsAdapter = new MoceanAdapter(apiToken, tenantFromName);
+      const sendSmsUsecase = new SendSmsCancelationUsecase(smsAdapter);
+
       await sendSmsUsecase.execute(
         phoneNumber,
         formatedDate,

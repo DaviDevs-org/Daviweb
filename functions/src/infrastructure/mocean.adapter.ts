@@ -6,9 +6,9 @@ export class MoceanAdapter implements SmsRepository {
   private readonly apiToken: string;
   private readonly fromName: string;
 
-  constructor() {
-    this.apiToken = process.env.MOCEAN_API_KEY || '';
-    this.fromName = this.normalizeFromName(process.env.MOCEAN_FROM || 'Peluqueria');
+  constructor(apiToken: string, fromName: string) {
+    this.apiToken = apiToken;
+    this.fromName = this.normalizeFromName(fromName || 'Peluqueria');
   }
 
   private normalizeFromName(raw: string): string {

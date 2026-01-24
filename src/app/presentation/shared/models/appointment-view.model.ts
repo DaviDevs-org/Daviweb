@@ -7,16 +7,18 @@ export interface AppointmentView {
   phone?: string | null;
   description?: string | null;
   barber?: string | null;
+  barberId?: string | null;
   hairLengthChoice?: string | null;
   datetime: Date;
   dateISO: string;
   timeNormalized: string;
+  serviceName?: string | null;
   service?: Service;
 }
 
 export function toAppointmentView(
   appointment: Appointment,
-  allServices: Service[]
+  allServices: ReadonlyArray<Service> | Map<string, Service>
 ): AppointmentView {
   const datetime = appointment.datetime;
 
@@ -28,7 +30,11 @@ export function toAppointmentView(
     '0'
   )}:${String(datetime.getMinutes()).padStart(2, '0')}`;
 
-  const service = allServices.find((s) => s.name === appointment.service.name);
+  const serviceName = appointment.service?.name ?? null;
+  const service =
+    allServices instanceof Map
+      ? (serviceName ? allServices.get(serviceName) : undefined)
+      : allServices.find((s) => s.name === serviceName);
 
   return {
     id: appointment.id,
@@ -36,10 +42,12 @@ export function toAppointmentView(
     phone: appointment.phone,
     description: appointment.description,
     barber: appointment.barber,
+    barberId: appointment.barberId,
     hairLengthChoice: appointment.hairLengthChoice,
     datetime,
     dateISO,
     timeNormalized,
+    serviceName,
     service, // tipo Service | undefined
   };
 }
