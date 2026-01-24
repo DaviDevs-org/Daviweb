@@ -8,15 +8,32 @@ export class MoceanAdapter implements SmsRepository {
 
   constructor() {
     this.apiToken = process.env.MOCEAN_API_KEY || '';
-    this.fromName = 'PeluqueriApp';
+    this.fromName = this.normalizeFromName(process.env.MOCEAN_FROM || 'Peluqueria');
+  }
+
+  private normalizeFromName(raw: string): string {
+    const candidate = (raw || '')
+      .trim()
+      // Most SMS providers are strict with sender IDs: alphanumeric only
+      .replace(/[^a-zA-Z0-9]/g, '');
+
+    const maxAlphaSenderLength = 11;
+    const trimmed = candidate.slice(0, maxAlphaSenderLength);
+    return trimmed || 'Peluqueria';
   }
 
   async sendSms(phoneNumber: string, message: string): Promise<void> {
     try {
+      const to = phoneNumber.replace(/\D/g, '');
+      if (!to) {
+        throw new Error(`Invalid phoneNumber for SMS (empty after normalization): ${phoneNumber}`);
+      }
+
       const formData = new URLSearchParams({
         'mocean-from': this.fromName,
-        'mocean-to': phoneNumber.replace('+', ''),
+        'mocean-to': to,
         'mocean-text': message,
+        'mocean-resp-format': 'json',
       });
 
       const response = await axios.post(this.apiUrl, formData.toString(), {
@@ -39,10 +56,18 @@ export class MoceanAdapter implements SmsRepository {
       console.log(`✅ SMS enviado a ${phoneNumber}`);
     } catch (error: any) {
       if (error.response) {
-        console.error(
-          '❌ Error MoceanAPI response:',
-          JSON.stringify(error.response.data),
-        );
+        const status = error.response.status;
+        const data = error.response.data;
+        console.error('❌ Error MoceanAPI response:', JSON.stringify({ status, data }));
+
+        const errMsg =
+          data?.messages?.[0]?.err_msg ||
+          data?.messages?.[0]?.status_desc ||
+          data?.err_msg;
+
+        if (errMsg) {
+          throw new Error(`MoceanAPI HTTP ${status}: ${errMsg}`);
+        }
       }
       console.error('❌ Error enviando SMS:', error);
       throw error;

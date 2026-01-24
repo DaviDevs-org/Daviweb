@@ -9,7 +9,7 @@ export class SendSmsCancelationUsecase {
     localName: string,
     cancelationLink: string
   ): Promise<void> {
-    const message = `Tu cita ${date} en ${localName} ha sido reservada correctamente. \n\Si deseas cancelar pulsa aquí: ${cancelationLink}`;
+    const message = `Tu cita ${date} en ${localName} ha sido reservada correctamente.\n\nSi deseas cancelar pulsa aquí: ${cancelationLink}`;
     await this.smsRepository.sendSms(phoneNumber, message);
   }
 }
