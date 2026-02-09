@@ -19,6 +19,8 @@ import { FirebaseServiceRepository } from '@infrastructure/firebase/services/fir
 import { FirebaseGalleryRepository } from '@infrastructure/firebase/gallery/firebase-gallery.repository';
 import { FirebaseBlockedNumberRepository } from '@infrastructure/firebase/blacklist/firebase-blocked-number.repository';
 import { BlockedNumberRepository } from '@application/blacklist/blocked-number.repository.interface';
+import { AttendanceRepository } from '@application/attendance';
+import { FirebaseAttendanceRepository } from '@infrastructure/firebase/attendance/firebase-attendance.repository';
 import { TenantService } from './config/tenant.service';
 
 export function initializeTenant(tenantService: TenantService) {
@@ -42,6 +44,7 @@ export const appConfig: ApplicationConfig = {
     {provide: ScheduleRepository, useClass: FirebaseScheduleRepository},
     {provide: ServiceRepository, useClass: FirebaseServiceRepository},
     {provide: GalleryRepository, useClass: FirebaseGalleryRepository},
-    {provide: BlockedNumberRepository, useClass: FirebaseBlockedNumberRepository}
+    {provide: BlockedNumberRepository, useClass: FirebaseBlockedNumberRepository},
+    {provide: AttendanceRepository, useClass: FirebaseAttendanceRepository}
   ]
 };
