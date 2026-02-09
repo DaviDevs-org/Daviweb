@@ -41,40 +41,38 @@
         <div class="info-card blocked-list-card">
             <h3><i class="bi bi-list-ul"></i> Números Bloqueados</h3>
             
-            @if (blockedNumbers$ | async; as blockedNumbers) {
-                <div class="blocked-count">
-                    <span class="badge">{{ blockedNumbers.length }} activos</span>
-                </div>
-                
-                <div class="blocked-list">
-                    @for (item of (showAllBlocked ? blockedNumbers : blockedNumbers.slice(0, 3)); track item.phone) {
-                        <div class="blocked-item">
-                            <div class="item-info">
-                                <span class="phone-number">{{ item.phone }}</span>
-                                <span class="reason">{{ item.reason || 'Sin motivo especificado' }}</span>
-                                <small class="date">Bloqueado el {{ item.createdAt | date:'shortDate' }}</small>
-                            </div>
-                            <div class="item-actions">
-                                <button class="unblock-btn" (click)="unblockNumber(item.phone)" title="Desbloquear y permitir acceso">
-                                    <i class="bi bi-check-circle"></i>
-                                </button>
-                            </div>
+            <div class="blocked-count">
+                <span class="badge">{{ blockedNumbers().length }} activos</span>
+            </div>
+            
+            <div class="blocked-list">
+                @for (item of (showAllBlocked ? blockedNumbers() : blockedNumbers().slice(0, 3)); track item.phone) {
+                    <div class="blocked-item">
+                        <div class="item-info">
+                            <span class="phone-number">{{ item.phone }}</span>
+                            <span class="reason">{{ item.reason || 'Sin motivo especificado' }}</span>
+                            <small class="date">Bloqueado el {{ item.blockedAt | date:'shortDate' }}</small>
                         </div>
-                    } @empty {
-                        <div class="empty-state">
-                            <i class="bi bi-shield-check"></i>
-                            <p>No hay números bloqueados actualmente.</p>
+                        <div class="item-actions">
+                            <button class="unblock-btn" (click)="unblockNumber(item.phone)" title="Desbloquear y permitir acceso">
+                                <i class="bi bi-check-circle"></i>
+                            </button>
                         </div>
-                    }
+                    </div>
+                } @empty {
+                    <div class="empty-state">
+                        <i class="bi bi-shield-check"></i>
+                        <p>No hay números bloqueados actualmente.</p>
+                    </div>
+                }
 
-                    @if (blockedNumbers.length > 3) {
-                        <button class="see-more-btn" (click)="showAllBlocked = !showAllBlocked">
-                            {{ showAllBlocked ? 'Ver menos' : 'Ver más (' + (blockedNumbers.length - 3) + ' restantes)' }}
-                            <i class="bi" [class.bi-chevron-down]="!showAllBlocked" [class.bi-chevron-up]="showAllBlocked"></i>
-                        </button>
-                    }
-                </div>
-            }
+                @if (blockedNumbers().length > 3) {
+                    <button class="see-more-btn" (click)="showAllBlocked = !showAllBlocked">
+                        {{ showAllBlocked ? 'Ver menos' : 'Ver más (' + (blockedNumbers().length - 3) + ' restantes)' }}
+                        <i class="bi" [class.bi-chevron-down]="!showAllBlocked" [class.bi-chevron-up]="showAllBlocked"></i>
+                    </button>
+                }
+            </div>
         </div>
 
         <!-- NEW: Añadir Falta -->
@@ -106,18 +104,18 @@
         <div class="info-card blocked-list-card">
             <h3><i class="bi bi-sort-numeric-down-alt"></i> Top Faltas de Asistencia</h3>
             <div class="blocked-count">
-                <span class="badge warning">{{ strikesList.length }} usuarios</span>
+                <span class="badge warning">{{ strikesList().length }} usuarios</span>
             </div>
             
             <div class="blocked-list">
-                @for (item of (showAllStrikes ? strikesList : strikesList.slice(0, 3)); track item.phone) {
+                @for (item of (showAllStrikes ? strikesList() : strikesList().slice(0, 3)); track item.phone) {
                     <div class="blocked-item strike-item">
                         <div class="item-info">
                             <span class="phone-number">{{ item.phone }}</span>
-                            <small class="date">Última: {{ item.lastStrike | date:'shortDate' }}</small>
+                            <small class="date">Última: {{ item.lastStrikeDate | date:'shortDate' }}</small>
                         </div>
                         <div class="item-actions strike-indicator">
-                            <span class="strike-badge">🔴 {{ item.count }}</span>
+                            <span class="strike-badge">🔴 {{ item.strikeCount }}</span>
                             <button class="manage-btn" (click)="openManageModal(item)">
                                 <i class="bi bi-gear"></i> Gestionar
                             </button>
@@ -130,9 +128,9 @@
                     </div>
                 }
 
-                @if (strikesList.length > 3) {
+                @if (strikesList().length > 3) {
                      <button class="see-more-btn" (click)="showAllStrikes = !showAllStrikes">
-                        {{ showAllStrikes ? 'Ver menos' : 'Ver más (' + (strikesList.length - 3) + ' restantes)' }}
+                        {{ showAllStrikes ? 'Ver menos' : 'Ver más (' + (strikesList().length - 3) + ' restantes)' }}
                         <i class="bi" [class.bi-chevron-down]="!showAllStrikes" [class.bi-chevron-up]="showAllStrikes"></i>
                     </button>
                 }
@@ -142,7 +140,7 @@
     </div>
   </div>
 
-  @if (selectedOffender) {
+  @if (selectedOffender(); as offender) {
     <div class="modal-overlay" (click)="closeManageModal()">
         <div class="modal-content" (click)="$event.stopPropagation()">
             <div class="modal-header">
@@ -153,47 +151,65 @@
             <div class="modal-body">
                 <div class="offender-info">
                     <span class="label">Usuario</span>
-                    <span class="value">{{ selectedOffender.phone }}</span>
+                    <span class="value">{{ offender.phone }}</span>
+                    @if (offender.isBlocked) {
+                         <span class="status-badge blocked">Bloqueado</span>
+                    }
                 </div>
 
                 <div class="strike-controls">
                     <div class="counter-display">
-                        <span class="count">{{ selectedOffender.count }}</span>
+                        <span class="count">{{ offender.strikeCount }}</span>
                         <span class="text">Faltas Totales</span>
                     </div>
+                    
                     <div class="counter-actions">
-                        <button class="counter-btn" title="Reducir faltas (Error/Perdón)"><i class="bi bi-dash-lg"></i></button>
-                        <button class="counter-btn add" title="Añadir falta"><i class="bi bi-plus-lg"></i></button>
+                         <button class="counter-btn minus" (click)="decreaseStrikes()" title="Restar falta manual (-1)">
+                            <i class="bi bi-dash-lg"></i>
+                        </button>
+                        <button class="counter-btn plus" (click)="increaseStrikes()" title="Añadir falta manual (+1)">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
                     </div>
+                </div>
+
+                 <div class="reset-section">
+                     <button class="reset-btn" (click)="clearAllStrikes()">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reiniciar Contador (0)
+                    </button>
                 </div>
 
                 <div class="history-section">
                     <h4>Historial de Faltas</h4>
                     <div class="history-list">
-                        @for (event of selectedOffender.history; track event.date) {
-                            <div class="history-item">
-                            <div class="history-content">
-                                <div class="history-date">
-                                    <i class="bi bi-calendar-event"></i>
-                                    {{ event.date | date:'dd MMM yyyy, HH:mm' }}
+                        @if (selectedOffenderStrikes$ | async; as history) {
+                            @for (event of history; track event.id) {
+                                <div class="history-item">
+                                    <div class="history-content">
+                                        <div class="history-date">
+                                            <i class="bi bi-calendar-event"></i>
+                                            {{ event.date | date:'dd MMM yyyy, HH:mm' }}
+                                        </div>
+                                        <div class="history-reason">
+                                            {{ event.reason || 'Sin motivo registrado' }}
+                                        </div>
+                                    </div>
+                                    <div class="history-actions">
+                                        <button class="action-btn edit" (click)="editStrike(event)" title="Editar observación">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="action-btn delete" (click)="deleteStrike(event)" title="Eliminar esta falta">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="history-reason">
-                                    {{ event.reason || 'Sin motivo registrado' }}
-                                </div>
-                            </div>
-                            <div class="history-actions">
-                                <button class="action-btn edit" (click)="editStrike(event)" title="Editar observación">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="action-btn delete" (click)="deleteStrike(event)" title="Eliminar esta falta">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    } @empty {
-                        <p class="no-history">No hay detalles históricos disponibles.</p>
-                    }
-                </div>
+                            } @empty {
+                                <p class="no-history">No hay detalles históricos disponibles.</p>
+                            }
+                        } @else {
+                             <p class="loading-history">Cargando historial...</p>
+                        }
+                    </div>
                 </div>
             </div>
         </div>

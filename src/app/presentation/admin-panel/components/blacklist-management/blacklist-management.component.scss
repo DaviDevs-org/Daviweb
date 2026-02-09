@@ -414,7 +414,7 @@
                 border-color: var(--color-secondary-dark);
             }
 
-            &.add {
+            &.add, &.plus {
                 background-color: #ffc107;
                 border-color: #e0a800;
                 color: black;
@@ -423,6 +423,46 @@
                     background-color: #e0a800;
                 }
             }
+
+            &.minus {
+                &:hover {
+                    background-color: #f8f9fa;
+                    border-color: #dc3545;
+                    color: #dc3545;
+                }
+            }
+        }
+    }
+}
+
+.reset-section {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+
+    .reset-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: transparent;
+        border: 1px dashed #dc3545;
+        color: #dc3545;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+
+        &:hover {
+            background-color: #ffebee;
+            border-style: solid;
+        }
+
+        i {
+            font-size: 1.1rem;
         }
     }
 }

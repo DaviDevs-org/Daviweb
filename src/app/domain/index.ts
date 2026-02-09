@@ -12,4 +12,3 @@ export * from './services';
 
 // Shared - Value Objects
 export * from './shared/value-objects';
-export * from './blacklist/blocked-number.entity';

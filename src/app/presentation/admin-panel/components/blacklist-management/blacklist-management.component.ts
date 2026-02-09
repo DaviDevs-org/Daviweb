@@ -1,9 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed, signal, effect } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { BlockedNumberRepository } from '@application/blacklist/blocked-number.repository.interface';
+import { GetBlacklistUseCase, BlockNumberUseCase, UnblockNumberUseCase, AddStrikeUseCase, GetStrikesUseCase, DeleteStrikeUseCase, UpdateStrikeUseCase, ResetStrikesUseCase } from '@application/blacklist';
+import { BlacklistEntry, Strike } from '@domain/blacklist/blacklist-entry.entity';
 import { PhoneInputComponent } from '@presentation/shared/components/phone-input/phone-input.component';
 import { AlertService } from '@presentation/shared/alert/alert.service';
+import { Observable, catchError, of, switchMap, firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-blacklist-management',
@@ -13,115 +16,199 @@ import { AlertService } from '@presentation/shared/alert/alert.service';
   styleUrls: ['./blacklist-management.component.scss']
 })
 export class BlacklistManagementComponent {
-  private repo = inject(BlockedNumberRepository);
+  private getBlacklistUC = inject(GetBlacklistUseCase);
+  private getStrikesUC = inject(GetStrikesUseCase);
+  private blockNumberUC = inject(BlockNumberUseCase);
+  private unblockNumberUC = inject(UnblockNumberUseCase);
+  private addStrikeUC = inject(AddStrikeUseCase);
+  private deleteStrikeUC = inject(DeleteStrikeUseCase);
+  private updateStrikeUC = inject(UpdateStrikeUseCase);
+  private resetStrikesUC = inject(ResetStrikesUseCase);
+  
   private alertService = inject(AlertService);
 
-  blockedNumbers$ = this.repo.getBlockedNumbers();
+  // Data Sources
+  blacklist$ = this.getBlacklistUC.execute().pipe(
+      catchError(err => {
+          console.error('Error loading blacklist:', err);
+          return of([]); 
+      })
+  );
+  blacklist = toSignal(this.blacklist$, { initialValue: [] });
+  
+  blockedNumbers = computed(() => this.blacklist().filter(e => e.isBlocked));
+  strikesList = computed(() => this.blacklist().filter(e => e.strikeCount > 0));
 
-  // Blocked Numbers Variables
+  // Form Inputs
   newPhone = '';
   newReason = '';
-
-  // Strikes Variables
   newStrikePhone = '';
   newStrikeReason = '';
   
   // View State
   showAllBlocked = false;
   showAllStrikes = false;
-  selectedOffender: any = null; // Should be typed with AttendanceRecord later
+  
+  // Modal State
+  selectedPhone = signal<string | null>(null);
+  
+  selectedOffender = computed(() => {
+      const phone = this.selectedPhone();
+      if (!phone) return null;
+      return this.blacklist().find(e => e.phone === phone) || null;
+  });
 
-  // TODO: Replace with real data from repository
-  strikesList = [
-      { 
-          phone: '+34 611 222 333', 
-          count: 5, 
-          lastStrike: new Date('2024-01-15'), 
-          history: [
-              { date: new Date('2024-01-15'), reason: 'No apareció' },
-              { date: new Date('2023-12-20'), reason: 'Canceló 5 min antes' }
-          ]
-      },
-      { 
-          phone: '+34 644 555 666', 
-          count: 3, 
-          lastStrike: new Date('2024-02-01'),
-          history: [] 
-      },
-      { 
-          phone: '+34 677 888 999', 
-          count: 1, 
-          lastStrike: new Date('2024-02-10'),
-          history: [] 
-      }
-  ];
+  selectedOffenderStrikes$ = toObservable(this.selectedPhone).pipe(
+      switchMap(phone => {
+          if (!phone) return of<Strike[]>([]);
+          return this.getStrikesUC.execute(phone);
+      })
+  );
 
-  openManageModal(item: any) {
-      this.selectedOffender = item;
+  constructor() {
+      // Auto-close modal if data disappears (cleanup)
+      effect(() => {
+          const phone = this.selectedPhone();
+          const offender = this.selectedOffender();
+          const list = this.blacklist();
+          
+          if (phone && !offender && list.length > 0) {
+              this.closeManageModal();
+          }
+      }, { allowSignalWrites: true });
+  }
+
+  openManageModal(item: BlacklistEntry) {
+      this.selectedPhone.set(item.phone);
   }
 
   closeManageModal() {
-      this.selectedOffender = null;
-  }
-
-  editStrike(event: any) {
-    // Placeholder logic
-    console.log('Edit strike', event);
-  }
-
-  deleteStrike(event: any) {
-    // Placeholder logic
-    console.log('Delete strike', event);
+      this.selectedPhone.set(null);
   }
 
   async blockNumber() {
     if (!this.newPhone) return;
     try {
-      await this.repo.blockNumber(this.newPhone, this.newReason);
-      
-      await this.alertService.success(
-          `El número ${this.newPhone} ha sido añadido a la lista negra.`
-      );
-
+      await this.blockNumberUC.execute(this.newPhone, this.newReason);
+      await this.alertService.success(`Número ${this.newPhone} bloqueado.`);
       this.newPhone = '';
       this.newReason = '';
     } catch (error) {
-      console.error('Error blocking number', error);
-      await this.alertService.error(
-          'No se pudo bloquear el número. Inténtalo de nuevo.'
-      );
+      console.error('Error blocking', error);
+      await this.alertService.error('Error al bloquear número.');
     }
   }
 
   async unblockNumber(phone: string) {
     const confirmed = await this.alertService.confirm(
-        `¿Estás seguro de que quieres desbloquear ${phone} y permitirle reservar de nuevo?`,
-        'Sí, desbloquear',
-        'Cancelar'
+        '¿Desbloquear número?',
+        `El número ${phone} podrá volver a reservar citas.`
     );
-
     if (confirmed) {
       try {
-        await this.repo.unblockNumber(phone);
-        await this.alertService.success(
-            'El número ya puede realizar reservas.'
-        );
+        await this.unblockNumberUC.execute(phone);
+        await this.alertService.success('Desbloqueado correctamente.');
       } catch (error) {
         console.error('Error unblocking', error);
-        await this.alertService.error(
-            'No se pudo desbloquear el número.'
-        );
+        await this.alertService.error('Error al desbloquear.');
       }
     }
   }
 
   async addStrike() {
     if (!this.newStrikePhone) return;
-    // Placeholder for future logic
-    await this.alertService.success(
-        `Falta añadida al número ${this.newStrikePhone} (Simulación)`
-    );
-    this.newStrikePhone = '';
-    this.newStrikeReason = '';
+    try {
+        await this.addStrikeUC.execute(this.newStrikePhone, this.newStrikeReason);
+        await this.alertService.success(`Falta registrada al ${this.newStrikePhone}`);
+        this.newStrikePhone = '';
+        this.newStrikeReason = '';
+    } catch (error) {
+        console.error('Error adding strike', error);
+        await this.alertService.error('Error al añadir falta.');
+    }
+  }
+
+  // === Modal Actions ===
+
+  async deleteStrike(strike: Strike) {
+      const offender = this.selectedOffender();
+      if (!offender || !strike.id) return;
+      
+      const confirmed = await this.alertService.confirm(
+          '¿Eliminar falta?',
+          'Esta acción restará 1 al contador de faltas.'
+      );
+
+      if (confirmed) {
+          try {
+              await this.deleteStrikeUC.execute(offender.phone, strike.id);
+              await this.alertService.success('Falta eliminada.');
+          } catch (error) {
+              console.error('Error deleting strike', error);
+              await this.alertService.error('No se pudo eliminar la falta.');
+          }
+      }
+  }
+
+  async editStrike(strike: Strike) {
+      const offender = this.selectedOffender();
+      if (!offender || !strike.id) return;
+
+      const newReason = prompt('Editar motivo:', strike.reason || '');
+      if (newReason === null || newReason === strike.reason) return;
+
+      try {
+          await this.updateStrikeUC.execute(offender.phone, strike.id, { reason: newReason });
+          await this.alertService.success('Motivo actualizado.');
+      } catch (error) {
+          console.error(error);
+          await this.alertService.error('Error al actualizar.');
+      }
+  }
+
+  async increaseStrikes() {
+      const offender = this.selectedOffender();
+      if (!offender) return;
+      try {
+          await this.addStrikeUC.execute(offender.phone, 'Ajuste manual (+)');
+      } catch (error) {
+          await this.alertService.error('Error al añadir falta.');
+      }
+  }
+
+  async decreaseStrikes() {
+      const offender = this.selectedOffender();
+      if (!offender) return;
+      
+      try {
+          // Get latest strike to delete
+          const strikes = await firstValueFrom(this.selectedOffenderStrikes$);
+          if (!strikes || strikes.length === 0) return;
+          
+          const latestStrike = strikes[0];
+          await this.deleteStrikeUC.execute(offender.phone, latestStrike.id!);
+      } catch (error) {
+          await this.alertService.error('No se puede reducir más.');
+      }
+  }
+
+  async clearAllStrikes() {
+      const offender = this.selectedOffender();
+      if (!offender) return;
+
+      const confirmed = await this.alertService.confirm(
+          '¿Reiniciar contador?',
+          'Se eliminarán TODAS las faltas registradas de este usuario.'
+      );
+
+      if (confirmed) {
+          try {
+              await this.resetStrikesUC.execute(offender.phone);
+              await this.alertService.success('Contador reiniciado.');
+              this.closeManageModal();
+          } catch (error) {
+              await this.alertService.error('Error al reiniciar.');
+          }
+      }
   }
 }

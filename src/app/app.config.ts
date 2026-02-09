@@ -17,10 +17,8 @@ import { FirebaseBusinessInfoRepository } from '@infrastructure/firebase/busines
 import { FirebaseScheduleRepository } from '@infrastructure/firebase/business/firebase-schedule.repository';
 import { FirebaseServiceRepository } from '@infrastructure/firebase/services/firebase-service.repository';
 import { FirebaseGalleryRepository } from '@infrastructure/firebase/gallery/firebase-gallery.repository';
-import { FirebaseBlockedNumberRepository } from '@infrastructure/firebase/blacklist/firebase-blocked-number.repository';
-import { BlockedNumberRepository } from '@application/blacklist/blocked-number.repository.interface';
-import { AttendanceRepository } from '@application/attendance';
-import { FirebaseAttendanceRepository } from '@infrastructure/firebase/attendance/firebase-attendance.repository';
+import { BlacklistRepository } from '@application/blacklist/blacklist.repository.interface';
+import { FirebaseBlacklistRepository } from '@infrastructure/firebase/blacklist/firebase-blacklist.repository';
 import { TenantService } from './config/tenant.service';
 
 export function initializeTenant(tenantService: TenantService) {
@@ -44,7 +42,6 @@ export const appConfig: ApplicationConfig = {
     {provide: ScheduleRepository, useClass: FirebaseScheduleRepository},
     {provide: ServiceRepository, useClass: FirebaseServiceRepository},
     {provide: GalleryRepository, useClass: FirebaseGalleryRepository},
-    {provide: BlockedNumberRepository, useClass: FirebaseBlockedNumberRepository},
-    {provide: AttendanceRepository, useClass: FirebaseAttendanceRepository}
+    {provide: BlacklistRepository, useClass: FirebaseBlacklistRepository}
   ]
 };
