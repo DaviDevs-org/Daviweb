@@ -19,9 +19,18 @@ import {
   updateDoc,
   where,
 } from '@angular/fire/firestore';
+import { Auth, authState } from '@angular/fire/auth';
 import { AppointmentRepository } from '@application/appointments';
 import { Appointment, AppointmentDTO } from '@domain/appointments';
-import { catchError, map, Observable, of } from 'rxjs';
+import {
+  catchError,
+  distinctUntilChanged,
+  from,
+  map,
+  Observable,
+  of,
+  switchMap,
+} from 'rxjs';
 import { SaasConfigService } from 'src/app/config/saas-config.service';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -32,17 +41,48 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
   private saasConfigService = inject(SaasConfigService);
   private pathConfig = this.saasConfigService.getDDBBPaths();
   private firestore = inject(Firestore);
+  private auth = inject(Auth);
   private injector = inject(Injector);
+
+  private ownerReadAccess$(): Observable<boolean> {
+    const tenantId = this.saasConfigService.getAll().id;
+
+    return authState(this.auth).pipe(
+      switchMap((user) => {
+        if (!user) return of(false);
+
+        return from(user.getIdTokenResult()).pipe(
+          map((tokenResult) => {
+            const role = tokenResult.claims['role'];
+            const tokenTenantId = tokenResult.claims['tenantId'];
+            return role === 'owner' && tokenTenantId === tenantId;
+          }),
+          catchError((err) => {
+            console.error('Error validating owner claims:', err);
+            return of(false);
+          })
+        );
+      }),
+      distinctUntilChanged()
+    );
+  }
 
   getAppointments(): Observable<Appointment[]> {
     return runInInjectionContext(this.injector, () => {
-      const ref = collection(this.firestore, this.pathConfig.appointments);
-      const q = query(ref, orderBy('datetime', 'asc'));
-      return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
-        map((docs) => docs.map((doc) => this.mapToDomain(doc))),
-        catchError((err) => {
-          console.error('Error getting appointments:', err);
-          return of([]);
+      return this.ownerReadAccess$().pipe(
+        switchMap((hasAccess) => {
+          if (!hasAccess) return of([]);
+
+          const ref = collection(this.firestore, this.pathConfig.appointments);
+          const q = query(ref, orderBy('datetime', 'asc'));
+
+          return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
+            map((docs) => docs.map((doc) => this.mapToDomain(doc))),
+            catchError((err) => {
+              console.error('Error getting appointments:', err);
+              return of([]);
+            })
+          );
         })
       );
     });
@@ -52,19 +92,23 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
     const docRef = doc(this.firestore, `${this.pathConfig.appointments}/${id}`);
 
     return runInInjectionContext(this.injector, () => {
-      return (docData(docRef, { idField: 'id' }) as Observable<any>).pipe(
-        map((doc) => (doc ? this.mapToDomain(doc) : null)),
-        catchError((err) => {
-          console.error(`Error getting appointment ${id}:`, err);
-          return of(null);
+      return this.ownerReadAccess$().pipe(
+        switchMap((hasAccess) => {
+          if (!hasAccess) return of(null);
+
+          return (docData(docRef, { idField: 'id' }) as Observable<any>).pipe(
+            map((doc) => (doc ? this.mapToDomain(doc) : null)),
+            catchError((err) => {
+              console.error(`Error getting appointment ${id}:`, err);
+              return of(null);
+            })
+          );
         })
       );
     });
   }
 
   getAppointmentsByDate(date: Date): Observable<Appointment[]> {
-    const ref = collection(this.firestore, this.pathConfig.appointments);
-
     // Crear inicio y fin del día
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
@@ -72,19 +116,26 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const q = query(
-      ref,
-      where('datetime', '>=', startOfDay),
-      where('datetime', '<=', endOfDay),
-      orderBy('datetime', 'asc')
-    );
-
     return runInInjectionContext(this.injector, () => {
-      return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
-        map((docs) => docs.map((doc) => this.mapToDomain(doc))),
-        catchError((err) => {
-          console.error('Error getting appointments by date:', err);
-          return of([]);
+      return this.ownerReadAccess$().pipe(
+        switchMap((hasAccess) => {
+          if (!hasAccess) return of([]);
+
+          const ref = collection(this.firestore, this.pathConfig.appointments);
+          const q = query(
+            ref,
+            where('datetime', '>=', startOfDay),
+            where('datetime', '<=', endOfDay),
+            orderBy('datetime', 'asc')
+          );
+
+          return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
+            map((docs) => docs.map((doc) => this.mapToDomain(doc))),
+            catchError((err) => {
+              console.error('Error getting appointments by date:', err);
+              return of([]);
+            })
+          );
         })
       );
     });
@@ -94,8 +145,6 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
     startDate: Date,
     endDate: Date
   ): Observable<Appointment[]> {
-    const ref = collection(this.firestore, this.pathConfig.appointments);
-
     // Asegurar que startDate comienza al inicio del día
     const start = new Date(startDate);
     start.setHours(0, 0, 0, 0);
@@ -104,19 +153,26 @@ export class FirebaseAppointmentRepository implements AppointmentRepository {
     const end = new Date(endDate);
     end.setHours(23, 59, 59, 999);
 
-    const q = query(
-      ref,
-      where('datetime', '>=', start),
-      where('datetime', '<=', end),
-      orderBy('datetime', 'asc')
-    );
-
     return runInInjectionContext(this.injector, () => {
-      return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
-        map((docs) => docs.map((doc) => this.mapToDomain(doc))),
-        catchError((err) => {
-          console.error('Error getting appointments by range:', err);
-          return of([]);
+      return this.ownerReadAccess$().pipe(
+        switchMap((hasAccess) => {
+          if (!hasAccess) return of([]);
+
+          const ref = collection(this.firestore, this.pathConfig.appointments);
+          const q = query(
+            ref,
+            where('datetime', '>=', start),
+            where('datetime', '<=', end),
+            orderBy('datetime', 'asc')
+          );
+
+          return (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
+            map((docs) => docs.map((doc) => this.mapToDomain(doc))),
+            catchError((err) => {
+              console.error('Error getting appointments by range:', err);
+              return of([]);
+            })
+          );
         })
       );
     });
