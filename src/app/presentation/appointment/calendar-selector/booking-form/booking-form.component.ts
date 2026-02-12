@@ -24,6 +24,8 @@ import { GetServicesUseCase } from '@application/services';
 import { TimeUtils } from '@domain/shared/utils/time.utils';
 import { PhoneInputComponent } from '@presentation/shared/components/phone-input/phone-input.component';
 import { getRandomValues } from 'node:crypto';
+import { IsBlockedUseCase } from '@application/blacklist';
+import { AlertService } from '@presentation/shared/alert/alert.service';
 
 @Component({
   selector: 'app-booking-form',
@@ -56,6 +58,8 @@ export class BookingFormComponent {
   private fb = inject(FormBuilder);
   private getServicesUseCase = inject(GetServicesUseCase);
   private preselectionService = inject(BookingPreselectionService);
+  private isBlockedUseCase = inject(IsBlockedUseCase);
+  private alertService = inject(AlertService);
 
   // State
   private businessState = inject(BusinessStateService);
@@ -186,13 +190,30 @@ export class BookingFormComponent {
     });
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.bookingForm.invalid) {
       this.bookingForm.markAllAsTouched();
       return;
     }
 
     const val = this.bookingForm.value;
+
+    // Validar si el número está bloqueado
+    if (val.phone) {
+      try {
+        const isBlocked = await this.isBlockedUseCase.execute(val.phone);
+        if (isBlocked) {
+          await this.alertService.error(
+            'Este número de teléfono está bloqueado y no puede realizar reservas. Por favor, contacte con nosotros para más información.'
+          );
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking blacklist:', error);
+        // Si hay error al verificar, permitimos continuar para no bloquear el flujo
+      }
+    }
+
     const service = this.services().find((s) => s.name === val.serviceId);
 
     if (!service) return;

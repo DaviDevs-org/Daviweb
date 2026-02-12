@@ -7,3 +7,4 @@ export * from './add-strike.use-case';
 export * from './delete-strike.use-case';
 export * from './update-strike.use-case';
 export * from './reset-strikes.use-case';
+export * from './is-blocked.use-case';
