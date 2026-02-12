@@ -1,7 +1,14 @@
 import { inject, Injectable } from '@angular/core';
-import { Auth, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
+import {
+  Auth,
+  authState,
+  signInWithEmailAndPassword,
+  signOut,
+} from '@angular/fire/auth';
 import { ActivatedRouteSnapshot, GuardResult, MaybeAsync, Router, RouterStateSnapshot } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
+import { firstValueFrom } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { TenantService } from '../../config/tenant.service';
 
 @Injectable({
@@ -109,10 +116,32 @@ export class AuthenticationService {
     }
   }
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): MaybeAsync<GuardResult> {
-    if (this.getIdToken()) {
+  async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<GuardResult> {
+    try {
+      const user = await firstValueFrom(authState(this.auth).pipe(take(1)));
+
+      if (!user) {
+        this.router.navigate(['login']);
+        return false;
+      }
+
+      const tokenResult = await user.getIdTokenResult();
+      const claims = tokenResult.claims;
+      const currentTenantId = this.tenantService.getTenantConfig().id;
+
+      const isOwner = claims['role'] === 'owner';
+      const isSameTenant = claims['tenantId'] === currentTenantId;
+
+      if (!isOwner || !isSameTenant) {
+        await signOut(this.auth);
+        this.cookies.delete('token', '/');
+        this.router.navigate(['login']);
+        return false;
+      }
+
       return true;
-    } else {
+    } catch (error) {
+      console.error('Error validating admin access:', error);
       this.router.navigate(['login']);
       return false;
     }

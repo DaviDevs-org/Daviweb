@@ -16,6 +16,8 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { catchError, of } from 'rxjs';
 
 // Domain Imports
 import {
@@ -36,6 +38,7 @@ import {
   DeleteAppointmentUseCase,
   UpdateAppointmentUseCase,
 } from '@application/appointments';
+import { GetBlacklistUseCase } from '@application/blacklist';
 import { BusinessStateService } from '@presentation/shared/business-state.service';
 
 // Presentation Imports
@@ -75,6 +78,7 @@ export class AppointmentManagementComponent
   private readonly addAppointmentUseCase = inject(AddAppointmentUseCase);
   private readonly updateAppointmentUseCase = inject(UpdateAppointmentUseCase);
   private readonly deleteAppointmentUseCase = inject(DeleteAppointmentUseCase);
+  private readonly getBlacklistUseCase = inject(GetBlacklistUseCase);
 
   // --- Signals State ---
 
@@ -83,6 +87,15 @@ export class AppointmentManagementComponent
   public exceptions = this.businessState.exceptions;
   public appointments = this.businessState.appointments;
   public services = this.businessState.services;
+
+  // Blacklist data
+  private blacklist$ = this.getBlacklistUseCase.execute().pipe(
+    catchError(err => {
+      console.error('Error loading blacklist:', err);
+      return of([]);
+    })
+  );
+  private blacklist = toSignal(this.blacklist$, { initialValue: [] });
 
   // 1. Citas (Source of Truth)
 
@@ -701,6 +714,12 @@ export class AppointmentManagementComponent
       long: 'Largo',
     };
     return length && map[length] ? map[length] : 'No especificado';
+  }
+
+  getStrikesForPhone(phone: string | null | undefined): number {
+    if (!phone) return 0;
+    const entry = this.blacklist().find(e => e.phone === phone);
+    return entry?.strikeCount || 0;
   }
 
   getCapacityForSlot(time: string): number {
