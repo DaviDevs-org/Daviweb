@@ -1,6 +1,6 @@
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { defineSecret } from 'firebase-functions/params';
-import { MoceanAdapter } from './infrastructure/mocean.adapter';
+import { GatewayApiAdapter } from './infrastructure/gatewayapi.adapter';
 import { SendSmsCancelationUsecase } from './application/send-sms-cancelation.usecase';
 import { Appointment } from './domain/appointment.entity';
 import { Timestamp } from 'firebase-admin/firestore';
@@ -8,7 +8,7 @@ import * as admin from 'firebase-admin';
 
 admin.initializeApp();
 
-const moceanApiKey = defineSecret('MOCEAN_API_KEY');
+const gatewayApiToken = defineSecret('GATEWAY_API_TOKEN');
 
 function normalizePhoneNumber(raw: string, defaultCountryCallingCode = '34'): string | null {
   if (!raw) return null;
@@ -47,7 +47,7 @@ export const sendSmsCancelation = onDocumentCreated(
   {
     document: 'hairdressers/{tenantId}/appointments/{citaId}',
     region: 'europe-west1',
-    secrets: [moceanApiKey],
+    secrets: [gatewayApiToken],
   },
   async (event) => {
     const snapshot = event.data;
@@ -73,9 +73,9 @@ export const sendSmsCancelation = onDocumentCreated(
       return;
     }
 
-    const apiToken = moceanApiKey.value();
+    const apiToken = gatewayApiToken.value();
     if (!apiToken) {
-      console.error('❌ Falta el secreto MOCEAN_API_KEY (Secret Manager).');
+      console.error('❌ Falta el secreto GATEWAY_API_TOKEN (Secret Manager).');
       return;
     }
 
@@ -129,7 +129,7 @@ export const sendSmsCancelation = onDocumentCreated(
 
     // 2. Send SMS via use case
     try {
-      const smsAdapter = new MoceanAdapter(apiToken, tenantFromName);
+      const smsAdapter = new GatewayApiAdapter(apiToken, tenantFromName);
       const sendSmsUsecase = new SendSmsCancelationUsecase(smsAdapter);
 
       await sendSmsUsecase.execute(
