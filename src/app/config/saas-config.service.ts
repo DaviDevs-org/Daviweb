@@ -1,5 +1,5 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { TenantService } from './tenant.service';
 import { TenantConfig } from '../domain/saas/tenant.config';
 
@@ -9,19 +9,14 @@ import { TenantConfig } from '../domain/saas/tenant.config';
 export class SaasConfigService {
   
   constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(DOCUMENT) private document: Document,
     private tenantService: TenantService
   ) {
-    // Theme initialization should happen after config is loaded.
-    // Since we use APP_INITIALIZER, config should be ready.
-    // However, to be safe, we can check or just let it throw if not ready.
-    // Better: Call this explicitly or ensure it runs.
-    // If this service is injected, it means app is running, so config is loaded.
-    try {
-      this.initializeTheme();
-    } catch (e) {
-      console.warn('SaasConfigService: Config not ready during initialization. Theme might not be applied yet.');
-    }
+    // APP_INITIALIZER garantiza que TenantService ya tiene la config cargada
+    // antes de que se instancie cualquier servicio o componente.
+    // Si getTenantConfig() lanza aquí es un fallo crítico de bootstrapping,
+    // no lo silenciamos: debe propagarse para que sea detectable.
+    this.initializeTheme();
   }
 
   private get config(): TenantConfig {
@@ -42,35 +37,44 @@ export class SaasConfigService {
     return this.config.database.storage;
   }
   /**
-   * Inicializa las variables CSS basadas en la configuración
-   * Esto permite cambiar los colores desde saas.config.ts sin tocar SCSS
+   * Inicializa las variables CSS basadas en la configuración inyectando un
+   * <style id="tenant-theme"> en el <head>.
+   * Al ejecutarse también en SSR, Angular Universal serializa ese nodo en el
+   * HTML estático enviado al navegador → el primer paint ya tiene los colores
+   * correctos → sin FOUC.
    */
   private initializeTheme(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
+    const css = this.buildThemeCss(this.config.theme);
+
+    const styleId = 'tenant-theme';
+    let styleEl = this.document.getElementById(styleId) as HTMLStyleElement | null;
+
+    if (!styleEl) {
+      styleEl = this.document.createElement('style');
+      styleEl.id = styleId;
+      this.document.head.appendChild(styleEl);
     }
-    const root = document.documentElement;
-    const colors = this.config.theme.colors;
 
-    // Asignar variables CSS
-    this.setColors(root, colors);
-
-    // Fuentes
-    root.style.setProperty('--font-main', this.config.theme.fonts.main);
-    root.style.setProperty('--font-headings', this.config.theme.fonts.headings);
+    styleEl.textContent = css;
   }
 
-  private setColors(root: HTMLElement, colors: any): void {
-    for (const [key, value] of Object.entries(colors)) {
-      const cssVarName = `--color-${this.camelToKebab(key)}`;
-      root.style.setProperty(cssVarName, value as string);
+  private buildThemeCss(theme: TenantConfig['theme']): string {
+    const parts: string[] = [];
 
-      // Generar versión RGB para transparencias
+    for (const [key, value] of Object.entries(theme.colors)) {
+      const cssVarName = `--color-${this.camelToKebab(key)}`;
+      parts.push(`${cssVarName}:${value as string}`);
+
       const rgb = this.hexToRgb(value as string);
       if (rgb) {
-        root.style.setProperty(`${cssVarName}-rgb`, rgb);
+        parts.push(`${cssVarName}-rgb:${rgb}`);
       }
     }
+
+    parts.push(`--font-main:${theme.fonts.main}`);
+    parts.push(`--font-headings:${theme.fonts.headings}`);
+
+    return `:root{${parts.join(';')}}`;
   }
 
   private camelToKebab(str: string): string {
