@@ -1,3 +1,5 @@
+import { TenantPaymentConfig } from './tenant.stripe';
+
 export interface TenantBusinessConfig {
   name: string;
   ownerName: string;
@@ -66,6 +68,7 @@ export interface TenantFeaturesConfig {
   enableGallery: boolean;
   maintenanceMode: boolean;
   enableSms: boolean;
+  enableStripe: boolean;
 }
 
 export interface TenantConfig {
@@ -74,4 +77,5 @@ export interface TenantConfig {
   theme: TenantThemeConfig;
   database: TenantDatabaseConfig;
   features: TenantFeaturesConfig;
+  payments?: TenantPaymentConfig;
 }

@@ -16,12 +16,16 @@ export class Appointment {
     public barber?: string | null,
     public barberId?: string | null,
     public barberName?: string | null,
-    public hairLengthChoice?: 'short' | 'medium' | 'long' | null
+    public hairLengthChoice?: 'short' | 'medium' | 'long' | null,
+    public cancelationToken?: string,
+    public paymentStatus: 'pending' | 'paid' | 'refunded' | null = null,
+    public stripePaymentIntentId?: string | null,
+    public amountPaid?: number | null,
   ) {
     this.dateISO = datetime.toISOString().split('T')[0];
     this.timeNormalized = `${String(datetime.getHours()).padStart(
       2,
-      '0'
+      '0',
     )}:${String(datetime.getMinutes()).padStart(2, '0')}`;
   }
 
@@ -31,7 +35,9 @@ export class Appointment {
       createdAt: new Date(),
       service:
         this.service instanceof Service
-          ? this.service.toAppointmentService()
+          ? this.service.toAppointmentService(
+              this.hairLengthChoice ?? undefined,
+            )
           : this.service, // si ya es AppointmentService
       description: this.description ?? null,
       name: this.name ?? null,
@@ -40,6 +46,10 @@ export class Appointment {
       barberId: this.barberId ?? null,
       barberName: this.barberName ?? null,
       hairLengthChoice: this.hairLengthChoice ?? null,
+      cancelationToken: this.cancelationToken,
+      paymentStatus: this.paymentStatus ?? null,
+      stripePaymentIntentId: this.stripePaymentIntentId ?? null,
+      amountPaid: this.amountPaid ?? null,
     };
     return base;
   }
@@ -55,7 +65,11 @@ export class Appointment {
       dto.barber,
       dto.barberId,
       dto.barberName,
-      dto.hairLengthChoice
+      dto.hairLengthChoice,
+      dto.cancelationToken,
+      dto.paymentStatus ?? null,
+      dto.stripePaymentIntentId ?? null,
+      dto.amountPaid ?? null,
     );
   }
 }

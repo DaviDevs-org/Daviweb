@@ -8,6 +8,7 @@ export interface TimeSegment {
 export interface HairLengthModifier {
   time: number; // sigue valiendo para los casos simples
   segments?: TimeSegment[]; // añadimos esto para los casos con segmentos específicos
+  price?: number;
 }
 
 // Solo guardamos extraTime ahora
@@ -35,7 +36,8 @@ export class Service {
     },
     public imageUrl?: string,
     public id?: string,
-    public hourRange?: HourRange
+    public hourRange?: HourRange,
+    public basePrice?: number,
   ) {}
 
   // Devuelve los timeSegments "materializados" para una longitud concreta
@@ -54,9 +56,27 @@ export class Service {
     return [];
   }
 
+  // Devuelve el precio del servicio (si lo hay)
+  getPrice(length?: 'short' | 'medium' | 'long'): number {
+    if (
+      this.requiresHairLength &&
+      length &&
+      this.hairLengthModifiers?.[length]
+    ) {
+      const specificPrice = this.hairLengthModifiers[length].price;
+      return specificPrice !== undefined && specificPrice > 0
+        ? specificPrice
+        : this.basePrice || 0;
+    } else {
+      return this.basePrice || 0;
+    }
+  }
+
   // Crea una instancia equivalente a un "servicio normal" para esa longitud
   materializeForLength(length: 'short' | 'medium' | 'long'): Service {
     const segments = this.getTimeSegmentsForLength(length);
+    const priceForLength = this.getPrice(length);
+
     return new Service(
       this.name,
       this.description,
@@ -65,7 +85,8 @@ export class Service {
       this.hairLengthModifiers,
       this.imageUrl,
       this.id,
-      this.hourRange
+      this.hourRange,
+      priceForLength,
     );
   }
 
@@ -80,7 +101,7 @@ export class Service {
       if (modifier.segments?.length) {
         return modifier.segments.reduce(
           (sum, seg) => sum + seg.duration + (seg.breakAfter || 0),
-          0
+          0,
         );
       }
       return modifier.time;
@@ -89,7 +110,7 @@ export class Service {
     if (this.timeSegments?.length) {
       return this.timeSegments.reduce(
         (sum, seg) => sum + seg.duration + (seg.breakAfter || 0),
-        0
+        0,
       );
     }
 
@@ -128,7 +149,7 @@ export class Service {
         if (modifier.segments?.length) {
           const total = modifier.segments.reduce(
             (sum, seg) => sum + seg.duration + (seg.breakAfter || 0),
-            0
+            0,
           );
           if (total > 0) times.push(total);
         } else if (typeof modifier.time === 'number' && modifier.time > 0) {
@@ -144,7 +165,7 @@ export class Service {
       if (this.timeSegments?.length) {
         const totalGlobal = this.timeSegments.reduce(
           (sum, seg) => sum + seg.duration + (seg.breakAfter || 0),
-          0
+          0,
         );
         return `${totalGlobal} min`;
       }
@@ -155,11 +176,11 @@ export class Service {
     if (this.timeSegments?.length) {
       const active = this.timeSegments.reduce(
         (sum, seg) => sum + seg.duration,
-        0
+        0,
       );
       const total = this.timeSegments.reduce(
         (sum, seg) => sum + seg.duration + (seg.breakAfter || 0),
-        0
+        0,
       );
       return active === total ? `${total} min` : `${active}-${total} min`;
     }
@@ -176,6 +197,7 @@ export class Service {
       imageUrl: this.imageUrl,
       requiresHairLength: this.requiresHairLength,
       hairLengthModifiers: this.hairLengthModifiers,
+      basePrice: this.basePrice,
     };
     if (this.hourRange) {
       base.hourRange = { ...this.hourRange };
@@ -184,10 +206,13 @@ export class Service {
   }
 
   // Exporta al formato que guarda Appointment
-  toAppointmentService(): AppointmentService {
+  toAppointmentService(
+    length?: 'short' | 'medium' | 'long',
+  ): AppointmentService {
     const out: AppointmentService = {
       name: this.name,
       timeSegments: this.timeSegments,
+      priceAtBooking: this.getPrice(length),
     };
     return out;
   }
@@ -201,7 +226,8 @@ export class Service {
       dto.hairLengthModifiers || Service.defaultHairLengthModifiers(),
       dto.imageUrl,
       id || dto.id,
-      dto.hourRange
+      dto.hourRange,
+      dto.basePrice,
     );
   }
 
@@ -219,7 +245,7 @@ export class Service {
       '',
       [{ duration: 30, breakAfter: 0 }],
       false,
-      Service.defaultHairLengthModifiers()
+      Service.defaultHairLengthModifiers(),
     );
   }
 
@@ -243,7 +269,7 @@ export class Service {
         const mod = this.hairLengthModifiers[l];
         const segsTotal = (mod.segments ?? []).reduce(
           (a, s) => a + (s.duration || 0) + (s.breakAfter || 0),
-          0
+          0,
         );
         const total = segsTotal > 0 ? segsTotal : mod.time || 0;
         if (total <= 0) {

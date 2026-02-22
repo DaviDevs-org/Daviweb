@@ -13,4 +13,7 @@ export interface AppointmentDTO {
   hairLengthChoice?: 'short' | 'medium' | 'long' | null;
   tenantId?: string;
   cancelationToken?: string;
+  paymentStatus?: 'pending' | 'paid' | 'refunded' | null;
+  stripePaymentIntentId?: string | null;
+  amountPaid?: number | null;
 }

@@ -1,4 +1,9 @@
-import { TimeSegment, HairLengthModifier, HairLengthModifiers, HourRange } from './service.entity';
+import {
+  TimeSegment,
+  HairLengthModifier,
+  HairLengthModifiers,
+  HourRange,
+} from './service.entity';
 
 export interface ServiceDTO {
   id?: string;
@@ -9,6 +14,7 @@ export interface ServiceDTO {
   requiresHairLength?: boolean;
   hairLengthModifiers?: HairLengthModifiers;
   hourRange?: HourRange;
+  basePrice?: number;
 }
 
 export interface NewService {
@@ -18,6 +24,7 @@ export interface NewService {
   requiresHairLength?: boolean;
   hairLengthModifiers?: HairLengthModifiers;
   hourRange?: HourRange;
+  basePrice?: number;
 }
 
 export interface AppointmentService {
@@ -25,4 +32,5 @@ export interface AppointmentService {
   timeSegments: TimeSegment[];
   requiresHairLength?: boolean;
   hairLengthModifiers?: HairLengthModifiers;
+  priceAtBooking?: number;
 }

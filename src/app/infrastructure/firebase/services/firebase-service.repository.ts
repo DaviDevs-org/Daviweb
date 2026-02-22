@@ -42,13 +42,13 @@ export class FirebaseServiceRepository implements ServiceRepository {
         catchError((err) => {
           if (err.code === 'permission-denied') {
             console.warn(
-              'Permisos insuficientes para leer servicios. Usando lista vacía.'
+              'Permisos insuficientes para leer servicios. Usando lista vacía.',
             );
           } else {
             console.error('Error getting services:', err);
           }
           return of([]);
-        })
+        }),
       );
     });
   }
@@ -64,7 +64,12 @@ export class FirebaseServiceRepository implements ServiceRepository {
   async updateService(id: string, service: Service): Promise<void> {
     return runInInjectionContext(this.injector, async () => {
       const serviceRef = doc(this.firestore, `${this.path}/${id}`);
-      await updateDoc(serviceRef, { ...service.toDTO() });
+
+      const data = service.toDTO();
+
+      if (data.id) delete data.id;
+
+      await updateDoc(serviceRef, { ...data });
     });
   }
 

@@ -5,12 +5,19 @@ import { SendSmsCancelationUsecase } from './application/send-sms-cancelation.us
 import { Appointment } from './domain/appointment.entity';
 import { Timestamp } from 'firebase-admin/firestore';
 import * as admin from 'firebase-admin';
+import Stripe from 'stripe';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 
 admin.initializeApp();
 
 const moceanApiKey = defineSecret('MOCEAN_API_KEY');
+const stripeSecretKey = defineSecret('STRIPE_SECRET_KEY');
 
-function normalizePhoneNumber(raw: string, defaultCountryCallingCode = '34'): string | null {
+/* FUNCIONES AUXILIARES */
+function normalizePhoneNumber(
+  raw: string,
+  defaultCountryCallingCode = '34',
+): string | null {
   if (!raw) return null;
 
   let value = raw.trim();
@@ -38,6 +45,69 @@ function normalizeBaseUrl(url: string): string {
   const trimmed = url.trim();
   return trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed;
 }
+
+/**
+ * STRIPE: Crear cuenta conectada y link de onboarding
+ * Se dispara manualmente desde el panel de Angular
+ */
+
+export const createConnectAccount = onCall(
+  {
+    region: 'europe-west1',
+    secrets: [stripeSecretKey],
+  },
+  async (request) => {
+    // 1. Validar auth
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Usuario no autenticado');
+    }
+
+    const { tenantId } = request.data;
+    if (!tenantId) {
+      throw new HttpsError('invalid-argument', 'Falta el tenantId');
+    }
+
+    const stripe = new Stripe(stripeSecretKey.value(), {
+      apiVersion: '2023-10-16' as any, // Ajusta a la versión que prefieras
+    });
+
+    try {
+      // 2. Crear cuenta en Stripe
+      const account = await stripe.accounts.create({
+        type: 'standard',
+      });
+
+      // 3. Guardar en Firestore (Usando tu ruta 'hairdressers/')
+      await admin
+        .firestore()
+        .collection('hairdressers')
+        .doc(tenantId)
+        .set(
+          {
+            payments: {
+              stripeAccountId: account.id,
+              stripeStatus: 'pending',
+            },
+          },
+          { merge: true },
+        );
+
+      // 4. Crear link de onboarding
+      // Nota: Cambia estas URLs por las de tu dominio real o configúralas dinámicamente
+      const accountLink = await stripe.accountLinks.create({
+        account: account.id,
+        refresh_url: `https://tu-dominio.com/admin/pagos?status=retry`,
+        return_url: `https://tu-dominio.com/admin/pagos?status=success`,
+        type: 'account_onboarding',
+      });
+
+      return { url: accountLink.url };
+    } catch (error: any) {
+      console.error('❌ Error Stripe Connect:', error);
+      throw new HttpsError('internal', error.message);
+    }
+  },
+);
 
 /**
  * Cloud Function starts when an appointment is created
@@ -108,7 +178,8 @@ export const sendSmsCancelation = onDocumentCreated(
     const localName = tenantData?.business?.name || tenantId;
 
     // Sender por tenant (multi-tenant). Si no está, usamos el nombre del negocio.
-    const tenantFromName = tenantData?.sms?.fromName || tenantData?.business?.name || 'Peluqueria';
+    const tenantFromName =
+      tenantData?.sms?.fromName || tenantData?.business?.name || 'Peluqueria';
 
     // Expiration time for cancellation link
     const expirationTime = datetime.getTime() - 24 * 60 * 60 * 1000; // 24 hours before appointment
@@ -120,11 +191,15 @@ export const sendSmsCancelation = onDocumentCreated(
       e: expirationTime,
     };
 
-    const cancelationToken = Buffer.from(JSON.stringify(tokenData)).toString('base64url');
+    const cancelationToken = Buffer.from(JSON.stringify(tokenData)).toString(
+      'base64url',
+    );
 
     // Generate cancellation link
     const configuredDomain = tenantData?.domain;
-    const baseUrl = normalizeBaseUrl(configuredDomain || 'http://localhost:4200');
+    const baseUrl = normalizeBaseUrl(
+      configuredDomain || 'http://localhost:4200',
+    );
     const cancelationLink = `${baseUrl}/cancelar/${cancelationToken}`;
 
     // 2. Send SMS via use case

@@ -18,11 +18,13 @@
         "angular-calendar": "^0.31.1",
         "axios": "^1.13.2",
         "bootstrap-icons": "^1.13.1",
+        "country-flag-icons": "^1.6.4",
         "date-fns": "^4.1.0",
         "express": "^4.18.2",
         "firebase": "^11.8.0",
         "firebase-admin": "^13.6.0",
         "firebase-functions": "^7.0.3",
+        "libphonenumber-js": "^1.12.34",
         "ngx-cookie-service": "^19.0.0",
         "rxjs": "~7.8.0",
         "tslib": "^2.3.0",
@@ -1015,6 +1017,8 @@
 
     "cosmiconfig": ["cosmiconfig@9.0.0", "", { "dependencies": { "env-paths": "^2.2.1", "import-fresh": "^3.3.0", "js-yaml": "^4.1.0", "parse-json": "^5.2.0" }, "peerDependencies": { "typescript": ">=4.9.5" }, "optionalPeers": ["typescript"] }, "sha512-itvL5h8RETACmOTFc4UfIyB2RfEHi71Ax6E/PivVxq9NseKbOWpeyHEOIbmAw1rs8Ak0VursQNww7lf7YtUwzg=="],
 
+    "country-flag-icons": ["country-flag-icons@1.6.13", "", {}, "sha512-mR9GoTXtj3zAXoZXBkb3J4QvyDllFEPtEfZvHb9U23TAHYXfkJyP03pRtZiR0spxo6Ibja3R/hn6a68T4LHBuA=="],
+
     "cross-spawn": ["cross-spawn@7.0.6", "", { "dependencies": { "path-key": "^3.1.0", "shebang-command": "^2.0.0", "which": "^2.0.1" } }, "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA=="],
 
     "css-loader": ["css-loader@7.1.2", "", { "dependencies": { "icss-utils": "^5.1.0", "postcss": "^8.4.33", "postcss-modules-extract-imports": "^3.1.0", "postcss-modules-local-by-default": "^4.0.5", "postcss-modules-scope": "^3.2.0", "postcss-modules-values": "^4.0.0", "postcss-value-parser": "^4.2.0", "semver": "^7.5.4" }, "peerDependencies": { "@rspack/core": "0.x || 1.x", "webpack": "^5.27.0" }, "optionalPeers": ["@rspack/core", "webpack"] }, "sha512-6WvYYn7l/XEGN8Xu2vWFt9nVzrCn39vKyTEFf/ExEyoksJjjSZV/0/35XPlMbpnr6VGhZIUg5yJrL8tGfes/FA=="],
@@ -1450,6 +1454,8 @@
     "less": ["less@4.2.2", "", { "dependencies": { "copy-anything": "^2.0.1", "parse-node-version": "^1.0.1", "tslib": "^2.3.0" }, "optionalDependencies": { "errno": "^0.1.1", "graceful-fs": "^4.1.2", "image-size": "~0.5.0", "make-dir": "^2.1.0", "mime": "^1.4.1", "needle": "^3.1.0", "source-map": "~0.6.0" }, "bin": { "lessc": "bin/lessc" } }, "sha512-tkuLHQlvWUTeQ3doAqnHbNn8T6WX1KA8yvbKG9x4VtKtIjHsVKQZCH11zRgAfbDAXC2UNIg/K9BYAAcEzUIrNg=="],
 
     "less-loader": ["less-loader@12.2.0", "", { "peerDependencies": { "@rspack/core": "0.x || 1.x", "less": "^3.5.0 || ^4.0.0", "webpack": "^5.0.0" }, "optionalPeers": ["@rspack/core", "webpack"] }, "sha512-MYUxjSQSBUQmowc0l5nPieOYwMzGPUaTzB6inNW/bdPEG9zOL3eAAD1Qw5ZxSPk7we5dMojHwNODYMV1hq4EVg=="],
+
+    "libphonenumber-js": ["libphonenumber-js@1.12.37", "", {}, "sha512-rDU6bkpuMs8YRt/UpkuYEAsYSoNuDEbrE41I3KNvmXREGH6DGBJ8Wbak4by29wNOQ27zk4g4HL82zf0OGhwRuw=="],
 
     "license-webpack-plugin": ["license-webpack-plugin@4.0.2", "", { "dependencies": { "webpack-sources": "^3.0.0" } }, "sha512-771TFWFD70G1wLTC4oU2Cw4qvtmNrIw+wRvBtn+okgHl7slJVi7zfNcdmqDL72BojM30VNJ2UHylr1o77U37Jw=="],
 
