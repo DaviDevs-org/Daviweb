@@ -1,23 +1,43 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  effect,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Functions, httpsCallable } from '@angular/fire/functions';
+import { FormsModule } from '@angular/forms';
+import {
+  Functions,
+  getFunctions,
+  httpsCallable,
+} from '@angular/fire/functions';
+import { FirebaseApp } from '@angular/fire/app';
 import { TenantService } from '../../../../config/tenant.service';
 import { ActivatedRoute } from '@angular/router';
+import { TenantPaymentConfig } from '../../../../domain/saas/tenant.stripe';
 
 @Component({
   selector: 'app-payment-management',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './payment-management.component.html',
   styleUrls: ['./payment-management.component.scss'],
 })
 export class PaymentManagementComponent implements OnInit {
-  private functions = inject(Functions);
+  private app = inject(FirebaseApp);
+  private functions = getFunctions(this.app, 'europe-west1');
   private tenantService = inject(TenantService);
   private route = inject(ActivatedRoute);
 
   loading = signal(false);
   proccessing = signal(false);
+  saving = signal(false);
+
+  // Policy configuration signals
+  policy = signal<'none' | 'fixed' | 'percentage' | 'full'>('none');
+  prePaymentValue = signal<number>(0);
 
   // Computed signal to get Stripe status from Tenant config
   stripeAccountId = computed(
@@ -28,6 +48,20 @@ export class PaymentManagementComponent implements OnInit {
   );
 
   isConnected = computed(() => this.stripeStatus() === 'active');
+
+  constructor() {
+    // Sync local state with tenant config when it changes
+    effect(
+      () => {
+        const tenant = this.tenantService.tenant();
+        if (tenant?.payments) {
+          this.policy.set(tenant.payments.prePaymentPolicy || 'none');
+          this.prePaymentValue.set(tenant.payments.prePaymentValue || 0);
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
@@ -44,8 +78,8 @@ export class PaymentManagementComponent implements OnInit {
 
   async checkStatus() {
     if (this.loading()) return;
-
     this.loading.set(true);
+
     try {
       const checkStripeAccountStatus = httpsCallable(
         this.functions,
@@ -61,7 +95,6 @@ export class PaymentManagementComponent implements OnInit {
       // Update local tenant state
       const currentTenant = this.tenantService.tenant();
       if (currentTenant) {
-        // Ensure payments object exists
         const currentPayments = currentTenant.payments || {
           prePaymentPolicy: 'none',
           prePaymentValue: 0,
@@ -92,7 +125,6 @@ export class PaymentManagementComponent implements OnInit {
         'createConnectAccount',
       );
       const tenantId = this.tenantService.tenant()?.id;
-
       if (!tenantId) {
         console.error('No tenant ID found');
         return;
@@ -102,7 +134,7 @@ export class PaymentManagementComponent implements OnInit {
       const url = result.data.url;
 
       if (url) {
-        window.location.href = url; // Redirect to Stripe onboarding
+        window.location.href = url;
       }
     } catch (error) {
       console.error('Error creating Stripe Connect account:', error);
@@ -111,6 +143,35 @@ export class PaymentManagementComponent implements OnInit {
       );
     } finally {
       this.proccessing.set(false);
+    }
+  }
+
+  async saveConfig(event: Event) {
+    event.preventDefault();
+    if (this.saving()) return;
+
+    this.saving.set(true);
+    try {
+      const currentTenant = this.tenantService.tenant();
+      if (!currentTenant) return;
+
+      const currentPayments = currentTenant.payments || {
+        prePaymentPolicy: 'none',
+        prePaymentValue: 0,
+      };
+
+      const newConfig: TenantPaymentConfig = {
+        ...currentPayments,
+        prePaymentPolicy: this.policy(),
+        prePaymentValue: this.prePaymentValue(),
+      };
+
+      await this.tenantService.updatePaymentConfig(newConfig);
+      // Optional: Add success notification here
+    } catch (error) {
+      console.error('Error saving configuration:', error);
+    } finally {
+      this.saving.set(false);
     }
   }
 }

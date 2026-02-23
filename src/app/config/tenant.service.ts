@@ -7,10 +7,10 @@ import {
   signal,
 } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
+import { Firestore, doc, getDoc, updateDoc } from '@angular/fire/firestore';
 import { TenantConfig } from '../domain/saas/tenant.config';
 import { SAAS_CONFIG } from './saas.config'; // Fallback/Initial config
-
+import { TenantPaymentConfig } from '../domain/saas/tenant.stripe';
 const TENANT_CONFIG_KEY = makeStateKey<TenantConfig>('tenant.config');
 
 @Injectable({
@@ -100,6 +100,26 @@ export class TenantService {
       );
     }
     return this.tenantConfig;
+  }
+
+  async updatePaymentConfig(paymentConfig: TenantPaymentConfig): Promise<void> {
+    if (!this.tenantConfig) return;
+
+    try {
+      const configRef = doc(
+        this.firestore,
+        `hairdressers/${this.tenantConfig.id}`,
+      );
+      await updateDoc(configRef, { payments: paymentConfig });
+
+      const newConfig = { ...this.tenantConfig, payments: paymentConfig };
+      this.tenantConfig = newConfig;
+      this.tenant.set(newConfig);
+      console.log('[TenantService] Payment config updated');
+    } catch (error) {
+      console.error('[TenantService] Error updating payment config', error);
+      throw error;
+    }
   }
 
   private resolveTenantId(): string {
