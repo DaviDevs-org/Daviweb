@@ -94,7 +94,8 @@ export const createConnectAccount = onCall(
 
       // 4. Crear link de onboarding
       // Nota: Cambia estas URLs por las de tu dominio real o configúralas dinámicamente
-      const origin = request.rawRequest.headers.origin || 'http://localhost:4200';
+      const origin =
+        request.rawRequest.headers.origin || 'http://localhost:4200';
       const accountLink = await stripe.accountLinks.create({
         account: account.id,
         refresh_url: `${origin}/admin?tab=payments&status=retry`,
@@ -140,7 +141,7 @@ export const checkStripeAccountStatus = onCall(
       }
 
       const account = await stripe.accounts.retrieve(accountId);
-      
+
       const isEnabled = account.charges_enabled && account.details_submitted;
       const newStatus = isEnabled ? 'active' : 'pending'; // or 'restricted'
 
@@ -149,22 +150,24 @@ export const checkStripeAccountStatus = onCall(
         await docRef.set(
           {
             payments: {
-               stripeStatus: newStatus
-            }
+              stripeStatus: newStatus,
+            },
           },
-          { merge: true }
+          { merge: true },
         );
       }
 
-      return { status: newStatus, details_submitted: account.details_submitted, charges_enabled: account.charges_enabled };
-
+      return {
+        status: newStatus,
+        details_submitted: account.details_submitted,
+        charges_enabled: account.charges_enabled,
+      };
     } catch (error: any) {
       console.error('❌ Error checking Stripe status:', error);
       throw new HttpsError('internal', error.message);
     }
-  }
+  },
 );
-
 
 /**
  * Cloud Function starts when an appointment is created

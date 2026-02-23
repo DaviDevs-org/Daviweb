@@ -1,4 +1,11 @@
-import { Injectable, Inject, PLATFORM_ID, makeStateKey, TransferState, signal } from '@angular/core';
+import {
+  Injectable,
+  Inject,
+  PLATFORM_ID,
+  makeStateKey,
+  TransferState,
+  signal,
+} from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { Firestore, doc, getDoc } from '@angular/fire/firestore';
 import { TenantConfig } from '../domain/saas/tenant.config';
@@ -7,7 +14,7 @@ import { SAAS_CONFIG } from './saas.config'; // Fallback/Initial config
 const TENANT_CONFIG_KEY = makeStateKey<TenantConfig>('tenant.config');
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TenantService {
   private tenantConfig: TenantConfig | null = null;
@@ -18,15 +25,15 @@ export class TenantService {
   // Manual mapping for custom domains: subdomain/SLD -> tenantId
   // Example: 'midominio' maps 'midominio.com', 'midominio.es', 'www.midominio.com' to 'tenant-id-real'
   private readonly TENANT_MAPPING: Record<string, string> = {
-    'midominio': 'tenant-id-real',
-    'otrocliente': 'otro-tenant-id',
+    midominio: 'tenant-id-real',
+    otrocliente: 'otro-tenant-id',
   };
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     @Inject(DOCUMENT) private document: Document,
     private firestore: Firestore,
-    private transferState: TransferState
+    private transferState: TransferState,
   ) {}
 
   async load(): Promise<void> {
@@ -44,20 +51,22 @@ export class TenantService {
     try {
       // 1. Try to fetch config from Firestore
       // Path: /{tenantId}/config (Collection: {tenantId}, Document: 'config')
-      const configDoc = await getDoc(doc(this.firestore, 'hairdressers', tenantId));
-      
+      const configDoc = await getDoc(
+        doc(this.firestore, 'hairdressers', tenantId),
+      );
+
       if (configDoc.exists()) {
         console.log(`[TenantService] Config found for ${tenantId}`);
         const data = configDoc.data();
-        
+
         // Merge with default config to ensure all properties exist (deep merge would be better, but shallow for now)
         // We prioritize DB data, but keep structure of SAAS_CONFIG for missing fields if any.
         // Note: This is a simple merge. For nested objects like 'theme', you might want a deeper merge if DB only has partials.
-        
-        this.tenantConfig = { 
+
+        this.tenantConfig = {
           ...this.createConfigFromDefault(tenantId), // Start with defaults
           ...data, // Override with DB data
-          id: tenantId // Ensure ID is correct
+          id: tenantId, // Ensure ID is correct
         } as TenantConfig;
 
         // Ensure database paths are set correctly based on ID, even if config comes from DB
@@ -66,7 +75,9 @@ export class TenantService {
         this.tenantConfig.database = this.generateDatabasePaths(tenantId);
       } else {
         // Fallback to local config but with dynamic ID
-        console.warn(`[TenantService] Config for ${tenantId} not found in Firestore. Using default config with dynamic ID.`);
+        console.warn(
+          `[TenantService] Config for ${tenantId} not found in Firestore. Using default config with dynamic ID.`,
+        );
         this.tenantConfig = this.createConfigFromDefault(tenantId);
       }
     } catch (error) {
@@ -84,7 +95,9 @@ export class TenantService {
 
   getTenantConfig(): TenantConfig {
     if (!this.tenantConfig) {
-      throw new Error('Tenant configuration not loaded. Ensure TenantService.load() is called during app initialization.');
+      throw new Error(
+        'Tenant configuration not loaded. Ensure TenantService.load() is called during app initialization.',
+      );
     }
     return this.tenantConfig;
   }
@@ -95,9 +108,12 @@ export class TenantService {
     }
 
     let hostname = this.document.location.hostname;
-    
+
     // Localhost or IP -> Default Tenant
-    if (hostname.includes('localhost') || hostname.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
+    if (
+      hostname.includes('localhost') ||
+      hostname.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)
+    ) {
       return this.DEFAULT_TENANT_ID;
     }
 
@@ -110,7 +126,9 @@ export class TenantService {
 
     // Check Manual Mapping (override resolved ID)
     if (this.TENANT_MAPPING[tenantId]) {
-      console.log(`[TenantService] Mapped ID ${tenantId} to ${this.TENANT_MAPPING[tenantId]}`);
+      console.log(
+        `[TenantService] Mapped ID ${tenantId} to ${this.TENANT_MAPPING[tenantId]}`,
+      );
       return this.TENANT_MAPPING[tenantId];
     }
 
@@ -120,12 +138,12 @@ export class TenantService {
   private createConfigFromDefault(tenantId: string): TenantConfig {
     // Clone the default config
     const config = JSON.parse(JSON.stringify(SAAS_CONFIG));
-    
+
     // Override ID and Database Paths
     return {
       ...config,
       id: tenantId,
-      database: this.generateDatabasePaths(tenantId)
+      database: this.generateDatabasePaths(tenantId),
     };
   }
 
@@ -142,8 +160,8 @@ export class TenantService {
         services: `/hairdressers/${tenantId}/services`,
       },
       storage: {
-        general: `/hairdressers/${tenantId}/`
-      }
+        general: `/hairdressers/${tenantId}/`,
+      },
     };
   }
 }

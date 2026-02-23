@@ -4,7 +4,10 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AdminHeaderComponent } from './components/admin-header/admin-header.component';
-import { AdminNavComponent, AdminTab } from './components/admin-nav/admin-nav.component';
+import {
+  AdminNavComponent,
+  AdminTab,
+} from './components/admin-nav/admin-nav.component';
 import { GalleryManagementComponent } from './components/gallery-management/gallery-management.component';
 import { ServicesManagementComponent } from './components/services-management/services-management.component';
 import { InfoManagementComponent } from './components/info-management/info-management.component';
@@ -25,10 +28,10 @@ import { PaymentManagementComponent } from './components/payment-management/paym
     InfoManagementComponent,
     AppointmentManagementComponent,
     BlacklistManagementComponent,
-    PaymentManagementComponent
+    PaymentManagementComponent,
   ],
-  templateUrl: "./admin-panel.component.html",
-  styleUrls: ['./admin-panel.component.scss']
+  templateUrl: './admin-panel.component.html',
+  styleUrls: ['./admin-panel.component.scss'],
 })
 export class AdminPanelComponent implements OnInit {
   private auth = inject(AuthenticationService);
@@ -38,7 +41,7 @@ export class AdminPanelComponent implements OnInit {
   activeTab: AdminTab = 'gallery';
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       if (params['tab']) {
         this.activeTab = params['tab'] as AdminTab;
       }
@@ -56,6 +59,6 @@ export class AdminPanelComponent implements OnInit {
   }
 
   onLogout(): void {
-    this.auth.logOut()
+    this.auth.logOut();
   }
 }

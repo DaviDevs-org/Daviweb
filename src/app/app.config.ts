@@ -1,4 +1,9 @@
-import { ApplicationConfig, provideZoneChangeDetection, provideAppInitializer, inject } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideZoneChangeDetection,
+  provideAppInitializer,
+  inject,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { environment } from './environments/environment';
@@ -10,7 +15,10 @@ import { getStorage, provideStorage } from '@angular/fire/storage';
 import { getFunctions, provideFunctions } from '@angular/fire/functions';
 import { provideClientHydration } from '@angular/platform-browser';
 import { AppointmentRepository } from '@application/appointments';
-import { BusinessInfoRepository, ScheduleRepository } from '@application/business';
+import {
+  BusinessInfoRepository,
+  ScheduleRepository,
+} from '@application/business';
 import { ServiceRepository } from '@application/services';
 import { GalleryRepository } from '@application/gallery';
 import { FirebaseAppointmentRepository } from '@infrastructure/firebase/appointments/firebase-appointment.repository';
@@ -27,8 +35,9 @@ export function initializeTenant(tenantService: TenantService) {
 }
 
 export const appConfig: ApplicationConfig = {
-  providers:
-    [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes),
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
@@ -36,14 +45,17 @@ export const appConfig: ApplicationConfig = {
     provideStorage(() => getStorage()),
     provideClientHydration(),
     provideAppInitializer(() => {
-        const initializerFn = (initializeTenant)(inject(TenantService));
-        return initializerFn();
-      }),
-    {provide: AppointmentRepository, useClass: FirebaseAppointmentRepository},
-    {provide: BusinessInfoRepository, useClass: FirebaseBusinessInfoRepository},
-    {provide: ScheduleRepository, useClass: FirebaseScheduleRepository},
-    {provide: ServiceRepository, useClass: FirebaseServiceRepository},
-    {provide: GalleryRepository, useClass: FirebaseGalleryRepository},
-    {provide: BlacklistRepository, useClass: FirebaseBlacklistRepository}
-  ]
+      const initializerFn = initializeTenant(inject(TenantService));
+      return initializerFn();
+    }),
+    { provide: AppointmentRepository, useClass: FirebaseAppointmentRepository },
+    {
+      provide: BusinessInfoRepository,
+      useClass: FirebaseBusinessInfoRepository,
+    },
+    { provide: ScheduleRepository, useClass: FirebaseScheduleRepository },
+    { provide: ServiceRepository, useClass: FirebaseServiceRepository },
+    { provide: GalleryRepository, useClass: FirebaseGalleryRepository },
+    { provide: BlacklistRepository, useClass: FirebaseBlacklistRepository },
+  ],
 };
