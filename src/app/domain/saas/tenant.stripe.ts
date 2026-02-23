@@ -1,6 +1,6 @@
 export interface TenantPaymentConfig {
   stripeAccountId?: string;
   stripeStatus?: 'pending' | 'active' | 'restricted';
-  prePaymentPolicy: 'none' | 'percentage' | 'fixed';
+  prePaymentPolicy: 'none' | 'percentage' | 'fixed' | 'full';
   prePaymentValue: number;
 }

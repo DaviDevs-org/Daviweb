@@ -1,32 +1,81 @@
 <div class="stripe-container">
-  <h2>Gestión de Pagos (Stripe)</h2>
   
   @if (loading()) {
-    <p>Cargando información...</p>
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando información...</p>
+    </div>
   } @else {
-    <div class="status-card" [class.connected]="isConnected()">
-      <h3>Estado de la conexión</h3>
-      <p>
-        @if (isConnected()) {
-          <span class="badge success">Conectado con Stripe</span>
-        } @else {
-          <span class="badge warning">No conectado</span>
-        }
-      </p>
+    <!-- Connection Status -->
+    <div class="status-section">
+      <div class="header-row">
+        <h2>Pasarela de Pagos (Stripe)</h2>
+        <span class="badge" [class.success]="isConnected()" [class.warning]="!isConnected()">
+          {{ isConnected() ? 'Conectado' : 'No conectado' }}
+        </span>
+      </div>
 
       @if (!isConnected()) {
-        <p>Conecta tu cuenta de Stripe para recibir pagos de tus clientes.</p>
-        <button (click)="connectStripe()" [disabled]="proccessing()">
+        <div class="connect-card">
+          <p>Conecta tu cuenta de Stripe para empezar a recibir pagos de forma segura y automática.</p>
+          <button (click)="connectStripe()" [disabled]="proccessing()" class="btn-primary">
             @if (proccessing()) {
-                Procesando...
+                <span class="spinner-small"></span> Conectando...
             } @else {
                 Conectar con Stripe
             }
-        </button>
+          </button>
+        </div>
       } @else {
-        <p>Tu cuenta de Stripe está activa y lista para recibir pagos.</p>
-        <p>ID de cuenta: {{ stripeAccountId() }}</p>
+        <div class="stripe-info">
+          <p class="account-id">ID de cuenta: {{ stripeAccountId() }}</p>
+          <a href="https://dashboard.stripe.com/" target="_blank" class="stripe-link">
+             Ir a mi Panel de Stripe <i class="bi bi-box-arrow-up-right"></i>
+          </a>
+        </div>
       }
     </div>
+
+    @if (isConnected()) {
+        <hr class="divider">
+
+        <div class="config-section">
+            <div class="section-header">
+                <h3>Configuración de Cobros</h3>
+                <p>Define cuánto deben pagar tus clientes al momento de reservar una cita online.</p>
+            </div>
+            
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="policy">Política de Cobro</label>
+                    <div class="select-wrapper">
+                        <select id="policy" [ngModel]="policy()" (ngModelChange)="policy.set($event)">
+                            <option value="none">Sin prepago (Pago en el local)</option>
+                            <option value="fixed">Señal Fija (€)</option>
+                            <option value="percentage">Porcentaje del servicio (%)</option>
+                            <option value="full">Pago Total (100%)</option>
+                        </select>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </div>
+
+                @if (policy() === 'fixed' || policy() === 'percentage') {
+                    <div class="form-group">
+                        <label for="value">
+                            @if (policy() === 'fixed') { Importe de la señal (€) }
+                            @if (policy() === 'percentage') { Porcentaje a cobrar (%) }
+                        </label>
+                        <input type="number" id="value" [ngModel]="prePaymentValue()" (ngModelChange)="prePaymentValue.set($event)" min="0" placeholder="0">
+                    </div>
+                }
+
+                <div class="actions">
+                    <button (click)="saveConfig($event)" [disabled]="saving()" class="btn-save">
+                        @if (saving()) { Guardando... } @else { Guardar Configuración }
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
   }
 </div>
