@@ -2,7 +2,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export type AdminTab = 'gallery' | 'services' | 'info' | 'appointment' | 'blacklist';
+export type AdminTab =
+  | 'gallery'
+  | 'services'
+  | 'info'
+  | 'appointment'
+  | 'blacklist'
+  | 'payments';
 
 interface NavTab {
   id: AdminTab;
@@ -14,8 +20,8 @@ interface NavTab {
   selector: 'app-admin-nav',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: "./admin-nav.component.html",
-  styleUrls: ['./admin-nav.component.scss']
+  templateUrl: './admin-nav.component.html',
+  styleUrls: ['./admin-nav.component.scss'],
 })
 export class AdminNavComponent {
   @Input() activeTab: AdminTab = 'gallery';
@@ -28,7 +34,8 @@ export class AdminNavComponent {
     { id: 'services', icon: 'bi bi-scissors', label: 'Servicios y Precios' },
     { id: 'info', icon: 'bi bi-info-circle', label: 'Información General' },
     { id: 'appointment', icon: 'bi bi-calendar-event', label: 'Citas' },
-    { id: 'blacklist', icon: 'bi bi-shield-lock', label: 'Lista Negra' }
+    { id: 'blacklist', icon: 'bi bi-slash-circle', label: 'Lista Negra' },
+    { id: 'payments', icon: 'bi bi-credit-card', label: 'Pagos (Stripe)' },
   ];
 
   onTabChange(tab: AdminTab): void {

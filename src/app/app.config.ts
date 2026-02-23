@@ -7,6 +7,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
+import { getFunctions, provideFunctions } from '@angular/fire/functions';
 import { provideClientHydration } from '@angular/platform-browser';
 import { AppointmentRepository } from '@application/appointments';
 import { BusinessInfoRepository, ScheduleRepository } from '@application/business';
@@ -31,6 +32,7 @@ export const appConfig: ApplicationConfig = {
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
+    provideFunctions(() => getFunctions(undefined, 'europe-west1')),
     provideStorage(() => getStorage()),
     provideClientHydration(),
     provideAppInitializer(() => {

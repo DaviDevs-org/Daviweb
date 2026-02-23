@@ -1,4 +1,4 @@
-import { Injectable, Inject, PLATFORM_ID, makeStateKey, TransferState } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID, makeStateKey, TransferState, signal } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { Firestore, doc, getDoc } from '@angular/fire/firestore';
 import { TenantConfig } from '../domain/saas/tenant.config';
@@ -11,6 +11,8 @@ const TENANT_CONFIG_KEY = makeStateKey<TenantConfig>('tenant.config');
 })
 export class TenantService {
   private tenantConfig: TenantConfig | null = null;
+  public tenant = signal<TenantConfig | null>(null);
+
   private readonly DEFAULT_TENANT_ID = 'development';
 
   // Manual mapping for custom domains: subdomain/SLD -> tenantId
@@ -32,6 +34,7 @@ export class TenantService {
     if (this.transferState.hasKey(TENANT_CONFIG_KEY)) {
       console.log('[TenantService] Config restored from TransferState');
       this.tenantConfig = this.transferState.get(TENANT_CONFIG_KEY, null);
+      this.tenant.set(this.tenantConfig);
       return;
     }
 
@@ -75,6 +78,7 @@ export class TenantService {
     // Save to TransferState for client hydration
     if (this.tenantConfig) {
       this.transferState.set(TENANT_CONFIG_KEY, this.tenantConfig);
+      this.tenant.set(this.tenantConfig);
     }
   }
 

@@ -71,5 +71,7 @@ export const SAAS_CONFIG: TenantConfig = {
     enableGallery: true,
     maintenanceMode: false,
     enableSms: true,
+    enableStripe: false,
+    enablePrices: true,
   },
 };

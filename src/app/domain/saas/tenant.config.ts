@@ -69,6 +69,7 @@ export interface TenantFeaturesConfig {
   maintenanceMode: boolean;
   enableSms: boolean;
   enableStripe: boolean;
+  enablePrices: boolean;
 }
 
 export interface TenantConfig {

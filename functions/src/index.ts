@@ -94,10 +94,11 @@ export const createConnectAccount = onCall(
 
       // 4. Crear link de onboarding
       // Nota: Cambia estas URLs por las de tu dominio real o configúralas dinámicamente
+      const origin = request.rawRequest.headers.origin || 'http://localhost:4200';
       const accountLink = await stripe.accountLinks.create({
         account: account.id,
-        refresh_url: `https://tu-dominio.com/admin/pagos?status=retry`,
-        return_url: `https://tu-dominio.com/admin/pagos?status=success`,
+        refresh_url: `${origin}/admin?tab=payments&status=retry`,
+        return_url: `${origin}/admin?tab=payments&status=success`,
         type: 'account_onboarding',
       });
 
@@ -108,6 +109,62 @@ export const createConnectAccount = onCall(
     }
   },
 );
+
+export const checkStripeAccountStatus = onCall(
+  {
+    region: 'europe-west1',
+    secrets: [stripeSecretKey],
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Usuario no autenticado');
+    }
+
+    const { tenantId } = request.data;
+    if (!tenantId) {
+      throw new HttpsError('invalid-argument', 'Falta el tenantId');
+    }
+
+    const stripe = new Stripe(stripeSecretKey.value(), {
+      apiVersion: '2023-10-16' as any,
+    });
+
+    try {
+      const docRef = admin.firestore().collection('hairdressers').doc(tenantId);
+      const docSnap = await docRef.get();
+      const data = docSnap.data();
+
+      const accountId = data?.payments?.stripeAccountId;
+      if (!accountId) {
+        return { status: 'not_created' };
+      }
+
+      const account = await stripe.accounts.retrieve(accountId);
+      
+      const isEnabled = account.charges_enabled && account.details_submitted;
+      const newStatus = isEnabled ? 'active' : 'pending'; // or 'restricted'
+
+      // Update Firestore if changed
+      if (data?.payments?.stripeStatus !== newStatus) {
+        await docRef.set(
+          {
+            payments: {
+               stripeStatus: newStatus
+            }
+          },
+          { merge: true }
+        );
+      }
+
+      return { status: newStatus, details_submitted: account.details_submitted, charges_enabled: account.charges_enabled };
+
+    } catch (error: any) {
+      console.error('❌ Error checking Stripe status:', error);
+      throw new HttpsError('internal', error.message);
+    }
+  }
+);
+
 
 /**
  * Cloud Function starts when an appointment is created
