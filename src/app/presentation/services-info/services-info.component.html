@@ -44,10 +44,21 @@
               <div class="service-meta">
                 <span class="duration">
                   <i class="bi bi-clock"></i>
-                  <!-- Mostrar rango si existe, si no duración total -->
                   {{ hasRange(service) ? (getMinTime(service) + '-' + getMaxTime(service) + ' min') :
                   (service.computeTotalTime() + ' min') }}
                 </span>
+                @if (tenantConfig.enablePrices && service.getEstimatedPriceRange()) {
+                  <span class="price-tag">
+                    <i class="bi bi-tag"></i>
+                    {{ service.getEstimatedPriceRange() }}
+                  </span>
+                }
+                @if (tenantConfig.enablePrices && !service.requiresHairLength && service.basePrice != null) {
+                  <span class="price-tag">
+                    <i class="bi bi-tag"></i>
+                    {{ service.basePrice }}€
+                  </span>
+                }
                 @if (service.hourRange) {
                 <span class="hour-range">
                   <i class="bi bi-calendar-range"></i>
@@ -106,6 +117,26 @@
                   selectedService()!.hourRange!.end }}</span>
               </div>
             </div>
+            }
+            @if (tenantConfig.enablePrices) {
+              @if (selectedService()!.requiresHairLength && selectedService()!.getEstimatedPriceRange()) {
+                <div class="feature feature-price">
+                  <i class="bi bi-tag"></i>
+                  <div>
+                    <span class="feature-label">Precio</span>
+                    <span class="feature-value price-highlight">{{ selectedService()!.getEstimatedPriceRange() }}</span>
+                  </div>
+                </div>
+              }
+              @if (!selectedService()!.requiresHairLength && selectedService()!.basePrice != null) {
+                <div class="feature feature-price">
+                  <i class="bi bi-tag"></i>
+                  <div>
+                    <span class="feature-label">Precio</span>
+                    <span class="feature-value price-highlight">{{ selectedService()!.basePrice }}€</span>
+                  </div>
+                </div>
+              }
             }
           </div>
 

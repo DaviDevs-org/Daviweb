@@ -26,6 +26,7 @@ import { PhoneInputComponent } from '@presentation/shared/components/phone-input
 import { getRandomValues } from 'node:crypto';
 import { IsBlockedUseCase } from '@application/blacklist';
 import { AlertService } from '@presentation/shared/alert/alert.service';
+import { TenantService } from 'src/app/config/tenant.service';
 
 @Component({
   selector: 'app-booking-form',
@@ -60,6 +61,8 @@ export class BookingFormComponent {
   private preselectionService = inject(BookingPreselectionService);
   private isBlockedUseCase = inject(IsBlockedUseCase);
   private alertService = inject(AlertService);
+  private tenantService = inject(TenantService);
+  public tenantConfig = this.tenantService.getTenantConfig().features;
 
   // State
   private businessState = inject(BusinessStateService);
@@ -137,6 +140,19 @@ export class BookingFormComponent {
     const service = this.services().find((s) => s.name === id);
     if (!service) return 0;
     return service.computeTotalTime(length as any);
+  });
+
+  public currentPrice = computed(() => {
+    const id = this.selectedServiceId();
+    const length = this.hairLength() as 'short' | 'medium' | 'long';
+    const service = this.services().find((s) => s.name === id);
+    if (!service) return null;
+    if (service.requiresHairLength) {
+      const mod = service.hairLengthModifiers?.[length];
+      if (mod?.price != null) return mod.price;
+      return service.basePrice ?? null;
+    }
+    return service.basePrice ?? null;
   });
 
   constructor() {
@@ -300,6 +316,13 @@ export class BookingFormComponent {
 
   getServiceDuration(service: Service): number {
     return service.computeTotalTime('medium');
+  }
+
+  getServicePriceLabel(service: Service): string {
+    if (service.requiresHairLength) {
+      return service.getEstimatedPriceRange() ?? '';
+    }
+    return service.basePrice != null ? `${service.basePrice}€` : '';
   }
 
   handleImageError(event: any, fallbackSrc: string) {

@@ -11,6 +11,7 @@ import { effect } from '@angular/core';
 import { CommonModule, ViewportScroller } from '@angular/common';
 import { BookingPreselectionService } from '@presentation/shared/booking-preselection.service';
 import { BusinessStateService } from '@presentation/shared/business-state.service';
+import { TenantService } from 'src/app/config/tenant.service';
 
 @Component({
   selector: 'app-services-info',
@@ -24,6 +25,8 @@ export class ServicesInfoComponent {
   private businessState = inject(BusinessStateService);
   private viewportScroller = inject(ViewportScroller);
   private preselectionService = inject(BookingPreselectionService);
+  private tenantService = inject(TenantService);
+  public tenantConfig = this.tenantService.getTenantConfig().features;
 
   categories = signal<ServiceCategory[]>([]);
   selectedCategory = signal<ServiceCategory | null>(null);

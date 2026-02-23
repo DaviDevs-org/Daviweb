@@ -249,6 +249,20 @@ export class Service {
     );
   }
 
+  // Devuelve el rango de precios por longitud (ej: "5€-15€" o "10€")
+  getEstimatedPriceRange(): string | null {
+    if (!this.requiresHairLength || !this.hairLengthModifiers) return null;
+    const prices: number[] = [];
+    for (const length of ['short', 'medium', 'long'] as const) {
+      const mod = this.hairLengthModifiers[length];
+      if (mod && mod.price != null) prices.push(mod.price);
+    }
+    if (!prices.length) return null;
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return min === max ? `${min}€` : `${min}€-${max}€`;
+  }
+
   validate(): string | null {
     if (!this.name.trim()) {
       return 'Por favor, ingresa el nombre del servicio.';

@@ -49,6 +49,7 @@ import {
 import { AlertService } from '@presentation/shared/alert/alert.service';
 import { getErrorMessage } from '@domain/shared/utils/error.utils';
 import { PhoneInputComponent } from '@presentation/shared/components/phone-input/phone-input.component';
+import { TenantService } from 'src/app/config/tenant.service';
 
 type EditableAppointment = Partial<Appointment>;
 
@@ -79,6 +80,9 @@ export class AppointmentManagementComponent
   private readonly updateAppointmentUseCase = inject(UpdateAppointmentUseCase);
   private readonly deleteAppointmentUseCase = inject(DeleteAppointmentUseCase);
   private readonly getBlacklistUseCase = inject(GetBlacklistUseCase);
+  private readonly tenantService = inject(TenantService);
+
+  public readonly tenantConfig = this.tenantService.getTenantConfig().features;
 
   // --- Signals State ---
 
@@ -619,6 +623,10 @@ export class AppointmentManagementComponent
       const [h, min] = formData.time.split(':').map(Number);
       const datetime = new Date(y, m - 1, d, h, min);
 
+      // El select almacena barber.name — resolvemos el id real
+      const selectedBarberName = formData.barberId || null;
+      const selectedBarber = this.barbers().find(b => b.name === selectedBarberName);
+
       const appointmentDomain: Appointment = new Appointment(
         datetime,
         serviceInstance!,
@@ -626,8 +634,10 @@ export class AppointmentManagementComponent
         formData.description,
         formData.name,
         formData.phone,
-        formData.barberId,
-        formData.hairLength || null
+        selectedBarberName,              // barber (nombre)
+        selectedBarber?.id ?? null,      // barberId (id real)
+        selectedBarberName,              // barberName
+        formData.hairLength || null      // hairLengthChoice
       );
 
       if (this.isEditing && this.editedAppointment?.id) {
@@ -795,8 +805,22 @@ export class AppointmentManagementComponent
       service.hairLengthModifiers,
       service.imageUrl,
       service.id,
-      service.hourRange
+      service.hourRange,
+      service.basePrice,
     );
+  }
+
+  getPriceForAppointment(appointment: AppointmentView): number | null {
+    const service = this.ensureServiceInstance(appointment.service);
+    const price = service.getPrice(appointment.hairLengthChoice as any);
+    return price > 0 ? price : (price === 0 && service.basePrice != null ? 0 : null);
+  }
+
+  getServicePriceLabel(service: Service): string {
+    if (service.requiresHairLength) {
+      return service.getEstimatedPriceRange() ?? '';
+    }
+    return service.basePrice != null ? `${service.basePrice}€` : '';
   }
 
   private validateSelectedAppointmentForCurrentDay() {

@@ -211,6 +211,17 @@
                   <i class="bi bi-plus-circle"></i> Añadir segmento
                 </button>
 
+                <!-- Precio por longitud -->
+                @if (tenantConfig.enablePrices) {
+                  <div class="form-group compact price-field">
+                    <label>Precio {{ lengthMap[length] }}</label>
+                    <div class="number-input">
+                      <input type="number" [(ngModel)]="newService.hairLengthModifiers[length].price" [name]="'price_' + length" min="0" step="1" class="form-input small">
+                      <span class="suffix">€</span>
+                    </div>
+                  </div>
+                }
+
 
                 <!-- Resumen de tiempo -->
                 <div class="time-summary" *ngIf="newService.hairLengthModifiers[length].segments?.length">
@@ -248,7 +259,15 @@
         </div>
         <small class="help-text">Las citas de este servicio deberán empezar y terminar dentro de este rango.</small>
       </div>
-
+      @if (tenantConfig.enablePrices && !newService.requiresHairLength) {
+        <div class="form-group compact price-field">
+          <label>Precio</label>
+          <div class="number-input">
+            <input type="number" [(ngModel)]="newService.basePrice" name="servicePrice" min="0" step="1" class="form-input small">
+            <span class="suffix">€</span>
+          </div>
+        </div>
+      }
       <!-- Descripción -->
       <div class="form-group">
         <label>Descripción</label>
@@ -292,6 +311,12 @@
               <span class="chip chip-duration" *ngIf="!service.requiresHairLength" title="Duración total (incluye pausas)">{{ service.computeTotalTime() }} min</span>
               <span class="chip chip-estimated" *ngIf="service.requiresHairLength" title="Rango estimado según longitud">{{ service.getEstimatedTimeRange() }}</span>
               <span class="chip chip-hour" *ngIf="service.hourRange" title="Rango horario permitido"><i class="bi bi-clock"></i> {{ service.hourRange.start }}-{{ service.hourRange.end }}</span>
+              @if (tenantConfig.enablePrices && !service.requiresHairLength && service.basePrice != null) {
+                <span class="chip chip-price" title="Precio"><i class="bi bi-tag"></i> {{ service.basePrice }}€</span>
+              }
+              @if (tenantConfig.enablePrices && service.requiresHairLength && service.getEstimatedPriceRange()) {
+                <span class="chip chip-price" title="Rango de precios"><i class="bi bi-tag"></i> {{ service.getEstimatedPriceRange() }}</span>
+              }
             </div>
             <button type="button"
                     class="details-toggle"
@@ -321,6 +346,9 @@
                   <span>Activo: {{ service.getActiveTime() }} min</span>
                   <span *ngIf="(service.computeTotalTime() - service.getActiveTime()) > 0">Pausas: {{ service.computeTotalTime() - service.getActiveTime() }} min</span>
                   <span>Total: {{ service.computeTotalTime() }} min</span>
+                  @if (tenantConfig.enablePrices && service.basePrice) {
+                    <span class="price-highlight">{{ service.basePrice }}€</span>
+                  }
                 </div>
               </div>
               <!-- Detalles para servicio por longitud de pelo -->
@@ -334,6 +362,9 @@
                       <span class="length-segments" *ngIf="service.hairLengthModifiers[length].segments?.length">
                         ({{ service.hairLengthModifiers[length].segments?.length }} segmentos)
                       </span>
+                      @if (tenantConfig.enablePrices && service.hairLengthModifiers[length].price != null) {
+                        <span class="length-price">— {{ service.hairLengthModifiers[length].price }}€</span>
+                      }
                     </ng-container>
                   </div>
                 </div>

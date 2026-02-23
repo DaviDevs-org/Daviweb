@@ -1,6 +1,7 @@
 @use "sass:color";
 @use "../../../styles/variables" as *;
 @use "../../../styles/mixins" as *;
+@use "../../../styles/functions" as *;
 
 
 .services-section {
@@ -378,6 +379,7 @@
 
                     .duration,
                     .price,
+                    .price-tag,
                     .hour-range {
                         color: $primary-dark !important;
                         background: $white !important;
@@ -446,6 +448,19 @@
                             font-size: 12px;
                         }
                     }
+
+                    .price-tag {
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        background: alpha($success-green, 0.12);
+                        color: $success-green;
+                        padding: 4px 8px;
+                        border-radius: 6px;
+                        font-size: 12px;
+                        font-weight: 700;
+                        font-family: Inter, sans-serif;
+                    }
                 }
             }
 
@@ -477,7 +492,8 @@
                         gap: 12px;
 
                         .duration,
-                        .hour-range {
+                        .hour-range,
+                        .price-tag {
                             font-size: 11px;
                         }
                     }
@@ -647,6 +663,19 @@
                 padding: 12px 16px;
                 background: $primary-lighter;
                 border-radius: 8px;
+
+                &.feature-price {
+                    background: alpha($success-green, 0.08);
+                    border: 1px solid alpha($success-green, 0.2);
+
+                    i { color: $success-green; }
+
+                    .price-highlight {
+                        font-size: 16px;
+                        font-weight: 700;
+                        color: $success-green;
+                    }
+                }
 
                 i {
                     font-size: 16px;

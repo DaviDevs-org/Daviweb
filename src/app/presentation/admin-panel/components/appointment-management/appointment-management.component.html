@@ -313,7 +313,7 @@
                                     <option value="">Seleccionar servicio</option>
                                     @for (service of services(); track service.name) {
                                         <option [value]="service.name">
-                                            {{ service.name }} ({{ this.getServiceDurationLabel(service) }})
+                                            {{ service.name }} ({{ this.getServiceDurationLabel(service) }}{{ tenantConfig.enablePrices && getServicePriceLabel(service) ? ' · ' + getServicePriceLabel(service) : '' }})
                                         </option>
                                     }
                                 </select>
@@ -622,6 +622,12 @@
                                 <span>No especificado</span>
                             }
                         </div>
+                        @if (tenantConfig.enablePrices && getPriceForAppointment(selected) != null) {
+                            <div class="detail-item">
+                                <strong>Precio:</strong>
+                                <span class="price-value">{{ getPriceForAppointment(selected) }}€</span>
+                            </div>
+                        }
                         @if (selected.service?.requiresHairLength) {
                             <div class="detail-item">
                                 <strong>Longitud de pelo:</strong>

@@ -223,6 +223,41 @@ select {
     }
 }
 
+.price-field {
+    .number-input {
+        display: flex;
+        align-items: center;
+        background: $white;
+        border: 2px solid $border-color;
+        border-radius: 8px;
+        overflow: hidden;
+        max-width: 160px;
+
+        input {
+            border: none;
+            background: none;
+            padding: 0.5rem;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+
+            &:focus {
+                outline: none;
+                box-shadow: none;
+            }
+        }
+
+        .suffix {
+            background: alpha($primary, 0.1);
+            padding: 0.5rem 0.75rem;
+            color: $text-gray;
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+    }
+}
+
 .add-service-btn,
 .save-btn {
     @include button-style($success-green);
@@ -584,6 +619,13 @@ select {
     border: 1px solid $border-color;
 }
 
+.chip-price {
+    background: alpha($success-green, 0.12);
+    color: darken($success-green, 10%);
+    border: 1px solid alpha($success-green, 0.3);
+    font-weight: 600;
+}
+
 .chip-break {
     background: $text-gray;
     color: $white;
@@ -710,6 +752,7 @@ select {
 .length-label { font-weight: 600; }
 .length-time { font-weight: 500; }
 .length-segments { color: $text-gray; }
+.length-price { color: $primary; font-weight: 600; }
 
 .total-line {
     display: flex;
@@ -724,6 +767,11 @@ select {
 }
 
 .total-line.range { justify-content: flex-start; }
+
+.total-line .price-highlight {
+    color: darken($success-green, 10%);
+    margin-left: auto; // empuja el precio al extremo derecho
+}
 
 .no-segments {
     font-size: 0.75rem;

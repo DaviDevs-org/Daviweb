@@ -17,12 +17,13 @@ import {
   UpdateServiceUseCase,
   DeleteServiceUseCase,
 } from '@application/services';
-import { UploadPhotoUseCase } from '@application/gallery';
+import { DeletePhotoUseCase, UploadPhotoUseCase } from '@application/gallery';
 import { Service } from '@domain/services';
 import { GalleryPhoto, PhotoType } from '@domain/gallery';
 import { AlertService } from '@presentation/shared/alert/alert.service';
 import { BusinessStateService } from '@presentation/shared/business-state.service';
 import { getErrorMessage } from '@domain/shared/utils/error.utils';
+import { TenantService } from 'src/app/config/tenant.service';
 
 @Component({
   selector: 'app-services-management',
@@ -43,16 +44,19 @@ export class ServicesManagementComponent implements OnDestroy {
   // ==========================================================================
   private injector = inject(Injector);
   private businessState = inject(BusinessStateService);
+  private tenantService = inject(TenantService);
   private createServiceUseCase = inject(CreateServiceUseCase);
   private updateServiceUseCase = inject(UpdateServiceUseCase);
   private deleteServiceUseCase = inject(DeleteServiceUseCase);
   private uploadPhotoUseCase = inject(UploadPhotoUseCase);
+  private deletePhotoUseCase = inject(DeletePhotoUseCase);
   private toast = inject(AlertService);
 
   // ==========================================================================
   // State Signals & Properties
   // ==========================================================================
   services = this.businessState.services;
+  tenantConfig = this.tenantService.getTenantConfig().features;
   uploadProgress = signal('0%');
   isUploading = signal(false);
   hasBreaks = signal(false);
@@ -104,11 +108,32 @@ export class ServicesManagementComponent implements OnDestroy {
   }
 
   async onSubmit() {
+    const priceError = this.validatePrices();
+    if (priceError) {
+      this.toast.error(priceError);
+      return;
+    }
     if (this.isEditing()) {
       await this.updateServiceFromForm();
     } else {
       await this.addService();
     }
+  }
+
+  private validatePrices(): string | null {
+    if (!this.tenantConfig.enablePrices) return null;
+    if (this.newService.requiresHairLength) {
+      for (const l of this.lengths) {
+        if (this.newService.hairLengthModifiers[l].price == null) {
+          return `Indica el precio para la longitud "${this.lengthMap[l]}".`;
+        }
+      }
+    } else {
+      if (this.newService.basePrice == null) {
+        return 'Indica el precio del servicio.';
+      }
+    }
+    return null;
   }
 
   cancelEditing() {
@@ -182,10 +207,27 @@ export class ServicesManagementComponent implements OnDestroy {
     }
 
     try {
+      const oldImageUrl = this.existingImageUrl;
       this.newService.imageUrl =
         (this.selectedFile
           ? await this.uploadImageIfSelected()
-          : this.existingImageUrl) ?? undefined;
+          : oldImageUrl) ?? undefined;
+
+      // Si se subió imagen nueva y había una anterior, borrar la antigua de Storage
+      if (this.selectedFile && oldImageUrl) {
+        const oldId = this.extractStorageIdFromUrl(oldImageUrl);
+        if (oldId) {
+          try {
+            await this.deletePhotoUseCase.execute(
+              new GalleryPhoto(oldId, oldId, oldImageUrl, true, PhotoType.SERVICE)
+            );
+          } catch (e) {
+            // No bloqueamos la actualización si el borrado falla
+            console.warn('No se pudo borrar la imagen anterior de Storage:', e);
+          }
+        }
+      }
+
       await this.updateServiceUseCase.execute(
         this.editServiceId,
         this.newService
@@ -357,12 +399,31 @@ export class ServicesManagementComponent implements OnDestroy {
   // ==========================================================================
   // Helpers / Utilities
   // ==========================================================================
+  // Extrae el nombre del fichero (id) desde una URL de Firebase Storage
+  private extractStorageIdFromUrl(url: string): string | null {
+    try {
+      // URL formato: .../o/PATH_ENCODED?alt=media...
+      const match = url.match(/\/o\/([^?]+)/);
+      if (!match) return null;
+      const fullPath = decodeURIComponent(match[1]);
+      return fullPath.split('/').pop() ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   private async uploadImageIfSelected(): Promise<string | null> {
     if (!this.selectedFile) return null;
 
+    const sanitizedName = this.selectedFile.name
+      .toLowerCase()
+      .replace(/[^a-z0-9.]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${sanitizedName}`;
+
     const photo = new GalleryPhoto(
       this.selectedFile.name,
-      'temp-id',
+      uniqueId,
       undefined,
       false,
       PhotoType.SERVICE

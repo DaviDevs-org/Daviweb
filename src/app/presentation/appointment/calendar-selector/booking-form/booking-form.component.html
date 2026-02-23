@@ -65,7 +65,7 @@
         <option value="" disabled selected>-- Selecciona servicio --</option>
         @for (s of availableServices(); track s.name) {
           <option [value]="s.name">
-            {{s.name}} ({{ getServiceDuration(s) }} min)
+            {{s.name}} ({{ getServiceDuration(s) }} min{{ tenantConfig.enablePrices && getServicePriceLabel(s) ? ' · ' + getServicePriceLabel(s) : '' }})
           </option>
         }
       </select>
@@ -107,7 +107,18 @@
       <div class="length-time-hint">
         <span class="time-label">Duración estimada:</span>
         <span class="time-value">{{ currentDuration() }} min</span>
+        @if (tenantConfig.enablePrices && currentPrice() != null) {
+          <span class="time-separator">·</span>
+          <span class="price-value">{{ currentPrice() }}€</span>
+        }
       </div>
+    </div>
+  }
+
+  @if (tenantConfig.enablePrices && currentPrice() != null) {
+    <div class="price-summary">
+      <span class="price-summary-label">Precio del servicio:</span>
+      <span class="price-summary-value">{{ currentPrice() }}€</span>
     </div>
   }
 

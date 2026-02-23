@@ -1431,6 +1431,11 @@
         word-break: break-word;
         overflow-wrap: break-word;
 
+        .price-value {
+            color: color.adjust($success-green, $lightness: -10%);
+            font-weight: 700;
+        }
+
         @include mobile {
             padding: 0.5rem;
             margin-bottom: 0.5rem;
