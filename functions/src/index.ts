@@ -169,6 +169,106 @@ export const checkStripeAccountStatus = onCall(
   },
 );
 
+export const createPaymentIntent = onCall(
+  {
+    region: 'europe-west1',
+    secrets: [stripeSecretKey],
+  },
+  async (request) => {
+    // 1. Validar auth (Opcional, pero recomendado)
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Usuario no autenticado');
+    }
+
+    const { serviceId, tenantId } = request.data;
+    if (!serviceId || !tenantId) {
+      throw new HttpsError(
+        'invalid-argument',
+        'Faltan parámetros: serviceId o tenantId.',
+      );
+    }
+
+    // Inicializar Stripe con el secreto de v2
+    const stripe = new Stripe(stripeSecretKey.value(), {
+      apiVersion: '2023-10-16' as any,
+    });
+
+    try {
+      // 2. Obtener info del local y del servicio (Seguridad: precio desde DB)
+      const tenantDoc = await admin
+        .firestore()
+        .doc(`hairdressers/${tenantId}`)
+        .get();
+      const serviceDoc = await admin
+        .firestore()
+        .doc(`hairdressers/${tenantId}/services/${serviceId}`)
+        .get();
+
+      if (!tenantDoc.exists || !serviceDoc.exists) {
+        throw new HttpsError('not-found', 'Local o servicio no encontrado.');
+      }
+
+      const tenantData = tenantDoc.data();
+      const serviceData = serviceDoc.data();
+      const stripeAccountId = tenantData?.payments?.stripeAccountId;
+
+      if (!stripeAccountId || tenantData?.payments?.stripeStatus !== 'active') {
+        throw new HttpsError(
+          'failed-precondition',
+          'El local no tiene los pagos activos.',
+        );
+      }
+
+      // 3. CÁLCULO DEL IMPORTE
+      const fullPrice = serviceData?.price || 0;
+      const policy = tenantData?.payments?.prePaymentPolicy || 'none';
+      const policyValue = tenantData?.payments?.prePaymentValue || 0;
+
+      let amountToCharge = 0;
+
+      if (policy === 'full') {
+        amountToCharge = fullPrice;
+      } else if (policy === 'fixed') {
+        amountToCharge = policyValue;
+      } else if (policy === 'percentage') {
+        amountToCharge = (fullPrice * policyValue) / 100;
+      }
+
+      // Stripe trabaja en céntimos (ej: 10€ = 1000)
+      const finalAmount = Math.round(amountToCharge * 100);
+
+      if (finalAmount < 50) {
+        throw new HttpsError(
+          'out-of-range',
+          'El importe debe ser al menos de 0.50€.',
+        );
+      }
+
+      // 4. CREAR EL INTENTO DE PAGO (Direct Charge a la cuenta conectada)
+      const paymentIntent = await stripe.paymentIntents.create(
+        {
+          amount: finalAmount,
+          currency: 'eur',
+          automatic_payment_methods: { enabled: true },
+          // Aquí puedes cobrar una comisión por reserva (ej: 1€ fijo = 100 céntimos)
+          application_fee_amount: 100,
+        },
+        {
+          stripeAccount: stripeAccountId,
+        },
+      );
+
+      return {
+        clientSecret: paymentIntent.client_secret,
+        amount: amountToCharge,
+      };
+    } catch (error: any) {
+      console.error('❌ Error en createPaymentIntent:', error);
+      throw new HttpsError('internal', error.message);
+    }
+  },
+);
+
 /**
  * Cloud Function starts when an appointment is created
  * Firestore Route: tenants/{tenantId}/citas/{citaId}

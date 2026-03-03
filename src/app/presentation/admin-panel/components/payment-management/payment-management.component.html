@@ -1,81 +1,91 @@
 <div class="stripe-container">
-  
+
   @if (loading()) {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Cargando información...</p>
-    </div>
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando información...</p>
+  </div>
   } @else {
-    <!-- Connection Status -->
-    <div class="status-section">
-      <div class="header-row">
-        <h2>Pasarela de Pagos (Stripe)</h2>
-        <span class="badge" [class.success]="isConnected()" [class.warning]="!isConnected()">
-          {{ isConnected() ? 'Conectado' : 'No conectado' }}
-        </span>
+  <!-- Connection Status -->
+  <div class="status-section">
+    <div class="header-row">
+      <h2>Pasarela de Pagos (Stripe)</h2>
+      <span class="badge" [class.success]="isConnected()" [class.warning]="!isConnected()">
+        {{ isConnected() ? 'Conectado' : 'No conectado' }}
+      </span>
+    </div>
+
+    @if (!isConnected()) {
+    <div class="connect-card">
+      <p>Conecta tu cuenta de Stripe para empezar a recibir pagos de forma segura y automática.</p>
+      <button (click)="connectStripe()" [disabled]="proccessing()" class="btn-primary">
+        @if (proccessing()) {
+        <span class="spinner-small"></span> Conectando...
+        } @else {
+        Conectar con Stripe
+        }
+      </button>
+    </div>
+    } @else {
+    <div class="stripe-info">
+      <p class="account-id">ID de cuenta: {{ stripeAccountId() }}</p>
+      <a href="https://dashboard.stripe.com/" target="_blank" class="stripe-link">
+        Ir a mi Panel de Stripe <i class="bi bi-box-arrow-up-right"></i>
+      </a>
+    </div>
+    }
+  </div>
+
+  @if (isConnected()) {
+  <hr class="divider">
+
+  <div class="config-section">
+    <div class="section-header">
+      <h3>Configuración de Cobros</h3>
+      <p>Define cuánto deben pagar tus clientes al momento de reservar una cita online.</p>
+    </div>
+
+    <div class="form-container">
+      <div class="form-group">
+        <label for="policy">Política de Cobro</label>
+        <div class="select-wrapper">
+          <select id="policy" [ngModel]="policy()" (ngModelChange)="policy.set($event)">
+            <option value="none">Sin prepago (Pago en el local)</option>
+            <option value="fixed">Señal Fija (€)</option>
+            <option value="percentage">Porcentaje del servicio (%)</option>
+            <option value="full">Pago Total (100%)</option>
+          </select>
+          <i class="bi bi-chevron-down"></i>
+        </div>
       </div>
 
-      @if (!isConnected()) {
-        <div class="connect-card">
-          <p>Conecta tu cuenta de Stripe para empezar a recibir pagos de forma segura y automática.</p>
-          <button (click)="connectStripe()" [disabled]="proccessing()" class="btn-primary">
-            @if (proccessing()) {
-                <span class="spinner-small"></span> Conectando...
-            } @else {
-                Conectar con Stripe
-            }
-          </button>
-        </div>
-      } @else {
-        <div class="stripe-info">
-          <p class="account-id">ID de cuenta: {{ stripeAccountId() }}</p>
-          <a href="https://dashboard.stripe.com/" target="_blank" class="stripe-link">
-             Ir a mi Panel de Stripe <i class="bi bi-box-arrow-up-right"></i>
-          </a>
-        </div>
+      @if (policy() === 'fixed' || policy() === 'percentage') {
+      <div class="form-group">
+        <label for="value">
+          @if (policy() === 'fixed') { Importe de la señal (€) }
+          @if (policy() === 'percentage') { Porcentaje a cobrar (%) }
+        </label>
+        <input type="number" id="value" [ngModel]="prePaymentValue()" (ngModelChange)="prePaymentValue.set($event)"
+          min="0" placeholder="0">
+      </div>
       }
+
+      <div class="actions">
+        <button (click)="saveConfig($event)" [disabled]="saving()" class="btn-save">
+          @if (saving()) { Guardando... } @else { Guardar Configuración }
+        </button>
+      </div>
     </div>
-
-    @if (isConnected()) {
-        <hr class="divider">
-
-        <div class="config-section">
-            <div class="section-header">
-                <h3>Configuración de Cobros</h3>
-                <p>Define cuánto deben pagar tus clientes al momento de reservar una cita online.</p>
-            </div>
-            
-            <div class="form-container">
-                <div class="form-group">
-                    <label for="policy">Política de Cobro</label>
-                    <div class="select-wrapper">
-                        <select id="policy" [ngModel]="policy()" (ngModelChange)="policy.set($event)">
-                            <option value="none">Sin prepago (Pago en el local)</option>
-                            <option value="fixed">Señal Fija (€)</option>
-                            <option value="percentage">Porcentaje del servicio (%)</option>
-                            <option value="full">Pago Total (100%)</option>
-                        </select>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                </div>
-
-                @if (policy() === 'fixed' || policy() === 'percentage') {
-                    <div class="form-group">
-                        <label for="value">
-                            @if (policy() === 'fixed') { Importe de la señal (€) }
-                            @if (policy() === 'percentage') { Porcentaje a cobrar (%) }
-                        </label>
-                        <input type="number" id="value" [ngModel]="prePaymentValue()" (ngModelChange)="prePaymentValue.set($event)" min="0" placeholder="0">
-                    </div>
-                }
-
-                <div class="actions">
-                    <button (click)="saveConfig($event)" [disabled]="saving()" class="btn-save">
-                        @if (saving()) { Guardando... } @else { Guardar Configuración }
-                    </button>
-                </div>
-            </div>
-        </div>
-    }
+  </div>
+  <div class="danger-zone">
+    <div class="section-header">
+      <h3 class="text-danger">Zona de Peligro</h3>
+      <p>Al desvincular la cuenta, se detendrán todos los cobros online de forma inmediata.</p>
+    </div>
+    <button (click)="disconnect()" [disabled]="saving()" class="btn-outline-danger">
+      Desvincular cuenta de Stripe
+    </button>
+  </div>
+  }
   }
 </div>

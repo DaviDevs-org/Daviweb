@@ -27,9 +27,12 @@ import { FirebaseBusinessInfoRepository } from '@infrastructure/firebase/busines
 import { FirebaseScheduleRepository } from '@infrastructure/firebase/business/firebase-schedule.repository';
 import { FirebaseServiceRepository } from '@infrastructure/firebase/services/firebase-service.repository';
 import { FirebaseGalleryRepository } from '@infrastructure/firebase/gallery/firebase-gallery.repository';
+import { FirebasePaymentRepository } from '@infrastructure/firebase/payment/firebase-payment.repository';
+
 import { BlacklistRepository } from '@application/blacklist/blacklist.repository.interface';
 import { FirebaseBlacklistRepository } from '@infrastructure/firebase/blacklist/firebase-blacklist.repository';
 import { TenantService } from './config/tenant.service';
+import { PaymentRepository } from '@application/payment/payment.repository.interface';
 
 export function initializeTenant(tenantService: TenantService) {
   return () => tenantService.load();
@@ -58,5 +61,6 @@ export const appConfig: ApplicationConfig = {
     { provide: ServiceRepository, useClass: FirebaseServiceRepository },
     { provide: GalleryRepository, useClass: FirebaseGalleryRepository },
     { provide: BlacklistRepository, useClass: FirebaseBlacklistRepository },
+    { provide: PaymentRepository, useClass: FirebasePaymentRepository },
   ],
 };
