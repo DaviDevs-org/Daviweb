@@ -1,0 +1,13 @@
+<div id="payment-element">
+  <!-- Stripe Elements will be inserted here -->
+</div>
+<button id="submit" (click)="confirmPayment()" [disabled]="isProcessing()" class="btn-primary">
+  <span id="button-text">
+    @if (isProcessing()) {
+      Procesando...
+    } @else {
+      Pagar
+    }
+  </span>
+</button>
+<div id="payment-message" class="hidden"></div>

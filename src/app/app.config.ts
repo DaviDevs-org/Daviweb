@@ -45,7 +45,7 @@ export const appConfig: ApplicationConfig = {
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore(getApp())),
-    provideFunctions(() => getFunctions(undefined, 'europe-west1')),
+    provideFunctions(() => getFunctions(getApp(), 'europe-west1')),
     provideStorage(() => getStorage()),
     provideClientHydration(),
     provideAppInitializer(() => {

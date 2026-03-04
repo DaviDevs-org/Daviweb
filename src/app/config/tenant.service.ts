@@ -63,10 +63,17 @@ export class TenantService {
         // We prioritize DB data, but keep structure of SAAS_CONFIG for missing fields if any.
         // Note: This is a simple merge. For nested objects like 'theme', you might want a deeper merge if DB only has partials.
 
+        const defaultConfig = this.createConfigFromDefault(tenantId);
+        
         this.tenantConfig = {
-          ...this.createConfigFromDefault(tenantId), // Start with defaults
+          ...defaultConfig, // Start with defaults
           ...data, // Override with DB data
           id: tenantId, // Ensure ID is correct
+          // Merge explícito para payments, para no perder valores por defecto si DB trae un objeto parcial
+          payments: {
+            ...defaultConfig.payments,
+            ...(data['payments'] || {})
+          }
         } as TenantConfig;
 
         // Ensure database paths are set correctly based on ID, even if config comes from DB

@@ -92,5 +92,26 @@
         </app-booking-form>
       </div>
     }
+
+    @case ('payment') {
+  <div class="payment-container">
+    <button class="back-button" (click)="onBackToBooking()">← Volver a mis datos</button>
+    
+    <div class="payment-info">
+      <h3>Confirmar y Pagar</h3>
+      <p>Para confirmar tu cita de <strong>{{ pendingAppointment()?.service?.name }}</strong>, 
+         es necesario realizar un pago de <strong>{{ amountToPay() | currency:'EUR' }}</strong>.</p>
+    </div>
+
+    @if (clientSecret(); as secret) {
+      <app-stripe-payment 
+        [clientSecret]="secret" 
+        [stripeAccountId]="stripeAccountId() || undefined"
+        (paymentSuccess)="onPaymentSuccess($event)"
+        (paymentError)="onPaymentError($event)">
+      </app-stripe-payment>
+    }
+  </div>
+}
   }
 </div>

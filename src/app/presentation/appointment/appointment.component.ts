@@ -10,5 +10,4 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./appointment.component.scss']
 })
 export class AppointmentComponent {
-  // Logic moved to CalendarSelectorComponent
 }

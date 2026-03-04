@@ -195,7 +195,14 @@ export class FirebaseScheduleRepository implements ScheduleRepository {
           ReservedSlotDTO[]
         >
       ).pipe(
-        map((dtos) => dtos.map((dto) => ReservedSlot.fromDTO(dto))),
+        // Filtrar DTOs inválidos antes de mapear
+        map((dtos) => 
+          dtos
+            .filter(dto => dto.dateTime) // Solo procesamos si tiene fecha
+            .map((dto) => ReservedSlot.fromDTO(dto))
+            // Filtrar también si la fecha mapeada resultó inválida (opcional, pero seguro)
+            .filter(slot => !isNaN(slot.dateTime.getTime()))
+        ),
         catchError((err) => {
           if (err.code === 'permission-denied') {
             console.warn(

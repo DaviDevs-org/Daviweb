@@ -14,7 +14,6 @@ import {
 } from '@angular/fire/functions';
 import { FirebaseApp } from '@angular/fire/app';
 import { ActivatedRoute } from '@angular/router';
-import { TenantPaymentConfig } from '../../../../domain/saas/tenant.stripe';
 
 //Application layer
 import { GetPaymentSettingsUseCase } from '@application/payment/get-payment-settings.use-case';

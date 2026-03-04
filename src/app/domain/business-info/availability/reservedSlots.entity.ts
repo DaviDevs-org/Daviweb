@@ -44,13 +44,21 @@ export class ReservedSlot {
 
     let dateTime: Date;
 
-    if (raw && typeof raw.toDate === 'function') {
+    if (!raw) {
+      // Si no hay fecha, asumimos ahora (para evitar crash), pero esto debería filtrarse antes
+      dateTime = new Date();
+    } else if (raw && typeof raw.toDate === 'function') {
       const result = raw.toDate();
       dateTime = result instanceof Date ? result : new Date(result);
     } else if (raw instanceof Date) {
       dateTime = raw;
     } else {
       dateTime = new Date(raw);
+    }
+    
+    // Safety check final
+    if (isNaN(dateTime.getTime())) {
+      dateTime = new Date();
     }
 
     return new ReservedSlot(dto.appointmentId, dateTime, dto.id, dto.barberId);

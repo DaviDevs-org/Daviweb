@@ -176,11 +176,11 @@ export const createPaymentIntent = onCall(
   },
   async (request) => {
     // 1. Validar auth (Opcional, pero recomendado)
-    if (!request.auth) {
-      throw new HttpsError('unauthenticated', 'Usuario no autenticado');
-    }
+    // if (!request.auth) {
+    //   throw new HttpsError('unauthenticated', 'Usuario no autenticado');
+    // }
 
-    const { serviceId, tenantId } = request.data;
+    const { serviceId, tenantId, hairLength } = request.data;
     if (!serviceId || !tenantId) {
       throw new HttpsError(
         'invalid-argument',
@@ -220,7 +220,20 @@ export const createPaymentIntent = onCall(
       }
 
       // 3. CÁLCULO DEL IMPORTE
-      const fullPrice = serviceData?.price || 0;
+      let fullPrice = serviceData?.basePrice || serviceData?.price || 0;
+
+      // Si el servicio requiere longitud de pelo y se ha proporcionado
+      if (
+        serviceData?.requiresHairLength &&
+        hairLength &&
+        serviceData?.hairLengthModifiers
+      ) {
+        const modifier = serviceData.hairLengthModifiers[hairLength];
+        if (modifier && modifier.price) {
+          fullPrice = modifier.price;
+        }
+      }
+
       const policy = tenantData?.payments?.prePaymentPolicy || 'none';
       const policyValue = tenantData?.payments?.prePaymentValue || 0;
 
@@ -261,6 +274,7 @@ export const createPaymentIntent = onCall(
       return {
         clientSecret: paymentIntent.client_secret,
         amount: amountToCharge,
+        stripeAccountId,
       };
     } catch (error: any) {
       console.error('❌ Error en createPaymentIntent:', error);

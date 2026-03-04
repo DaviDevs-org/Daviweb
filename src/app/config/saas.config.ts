@@ -74,4 +74,9 @@ export const SAAS_CONFIG: TenantConfig = {
     enableStripe: false,
     enablePrices: true,
   },
+  payments: {
+    stripeStatus: 'disconnected',
+    prePaymentPolicy: 'none',
+    prePaymentValue: 0,
+  },
 };

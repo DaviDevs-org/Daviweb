@@ -24,6 +24,9 @@ import { GetAvailableSlotsForDayService } from '@domain/business-info/availabili
 import { AlertService } from '../../shared/alert/alert.service';
 import { BusinessStateService } from '@presentation/shared/business-state.service';
 import { AddAppointmentUseCase } from '@application/appointments/add-appointment.use-case';
+import { CreatePaymentIntentUseCase } from '@application/payment/create-payment-intent.use-case';
+import { TenantService } from 'src/app/config/tenant.service';
+import { StripePaymentComponent } from '../stripe-payment/stripe-payment.component';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -34,6 +37,7 @@ import { firstValueFrom } from 'rxjs';
     FormsModule,
     HourSelectorComponent,
     BookingFormComponent,
+    StripePaymentComponent
   ],
   templateUrl: './calendar-selector.component.html',
   styleUrls: ['./calendar-selector.component.scss'],
@@ -42,6 +46,8 @@ export class CalendarSelectorComponent implements AfterViewInit {
   // Dependencies
   public readonly businessState = inject(BusinessStateService);
   private addAppointmentUseCase = inject(AddAppointmentUseCase);
+  private createPaymentIntentUseCase = inject(CreatePaymentIntentUseCase);
+  public tenantService = inject(TenantService);
   private toast = inject(AlertService);
 
   // State Signals
@@ -53,6 +59,12 @@ export class CalendarSelectorComponent implements AfterViewInit {
 
   public selectedDate = signal<Date | null>(null);
   public selectedHour = signal<string | null>(null);
+  
+  // Payment State
+  public clientSecret = signal<string | null>(null);
+  public stripeAccountId = signal<string | null>(null); // Añadido
+  public amountToPay = signal<number>(0);
+  public pendingAppointment = signal<Appointment | null>(null);
 
   // Data Signals
   public schedule = this.businessState.rawSchedule;
@@ -121,6 +133,7 @@ export class CalendarSelectorComponent implements AfterViewInit {
   );
 
   public currentView = computed(() => {
+    if (this.clientSecret()) return 'payment';
     if (this.selectedHour()) return 'booking';
     if (this.selectedDate()) return 'hours';
     return 'calendar';
@@ -230,33 +243,120 @@ export class CalendarSelectorComponent implements AfterViewInit {
       const appointmentDate = new Date(date);
       appointmentDate.setHours(hours, minutes, 0, 0);
       const phone = new Phone(data.phone);
+      
       // Create Appointment entity
       const appointment = new Appointment(
         appointmentDate,
-        data.service, // Assuming Service is compatible with AppointmentService
+        data.service, 
         undefined, // id
         data.description,
         data.name,
         phone.getValue(),
-        data.barberName, // Legacy barber field
+        data.barberName, 
         data.barberId,
         data.barberName,
         data.hairLength || undefined
       );
 
-      await this.addAppointmentUseCase.execute(appointment);
+      // --- PAGOS ---
+      const tenant = this.tenantService.tenant();
+      const payments = tenant?.payments;
+      
+      if (payments?.stripeStatus === 'active' && payments.prePaymentPolicy && payments.prePaymentPolicy !== 'none' && tenant?.id) {
+        const fullPrice = data.service.getPrice(data.hairLength || undefined);
+        let amount = 0;
 
-      this.toast.success('Reserva confirmada con éxito');
-      // Reset or redirect
-      this.selectedDate.set(null);
-      this.selectedHour.set(null);
+        if (payments.prePaymentPolicy === 'full') {
+          amount = fullPrice;
+        } else if (payments.prePaymentPolicy === 'fixed') {
+          amount = payments.prePaymentValue;
+        } else if (payments.prePaymentPolicy === 'percentage') {
+          amount = (fullPrice * payments.prePaymentValue) / 100;
+        }
+
+        // Solo si el importe supera el mínimo de Stripe (0.50€)
+        if (amount >= 0.5) {
+          try {
+            const { clientSecret, stripeAccountId } = await this.createPaymentIntentUseCase.execute(
+              data.service.id!,
+              tenant.id,
+              data.hairLength || undefined
+            );
+            
+            this.amountToPay.set(amount);
+            this.pendingAppointment.set(appointment);
+            this.clientSecret.set(clientSecret);
+            // Usamos el ID retornado por el backend, que es el source of truth para este intento de pago
+            this.stripeAccountId.set(stripeAccountId || tenant.payments.stripeAccountId || null); 
+            this.isSubmitting.set(false);
+            return; // Detenemos aquí para mostrar la pasarela
+          } catch (err: any) {
+            console.error('Error iniciando pago:', err);
+            this.toast.error('Error al iniciar el pago: ' + err.message);
+            this.isSubmitting.set(false);
+            return;
+          }
+        }
+      }
+
+      await this.addAppointmentUseCase.execute(appointment);
+      this.handleSuccess();
+      
     } catch (error) {
       console.error('Error creating appointment:', error);
       this.toast.error(`Error al intentar crear la reserva: ${error instanceof Error ? error.message : 'Desconocido'}`);
-    } finally {
       this.isSubmitting.set(false);
     }
   }
+
+  public async onPaymentSuccess(paymentIntentId: string) {
+    this.isSubmitting.set(true);
+    const appointment = this.pendingAppointment();
+    
+    if (!appointment) {
+      this.toast.error('Error crítico: Se perdió la información de la cita');
+      this.isSubmitting.set(false);
+      return;
+    }
+
+    try {
+      appointment.paymentStatus = 'paid';
+      appointment.stripePaymentIntentId = paymentIntentId;
+      appointment.amountPaid = this.amountToPay();
+
+      await this.addAppointmentUseCase.execute(appointment);
+      this.handleSuccess();
+    
+    } catch (error) {
+       console.error('Error saving paid appointment:', error);
+       // Aquí lo ideal sería intentar reintentar o guardar un log de error crítico
+       this.toast.error('El pago se ha realizado, pero hubo un error al guardar la cita. Por favor contacta con el negocio.');
+       this.isSubmitting.set(false);
+    }
+  }
+
+  public onPaymentError(errorMsg: string) {
+    this.toast.error(errorMsg);
+    // No reseteamos submitting aquí porque el usuario puede reintentar
+  }
+
+  public onBackToBooking() {
+    this.clientSecret.set(null);
+    this.pendingAppointment.set(null);
+    this.amountToPay.set(0);
+    this.isSubmitting.set(false);
+  }
+
+  private handleSuccess() {
+      this.toast.success('Reserva confirmada con éxito');
+      this.selectedDate.set(null);
+      this.selectedHour.set(null);
+      this.clientSecret.set(null);
+      this.pendingAppointment.set(null);
+      this.amountToPay.set(0);
+      this.isSubmitting.set(false);
+  }
+
 
   // Helpers
   public isToday(date: Date | null): boolean {
