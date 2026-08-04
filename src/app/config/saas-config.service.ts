@@ -16,7 +16,9 @@ export class SaasConfigService {
     // antes de que se instancie cualquier servicio o componente.
     // Si getTenantConfig() lanza aquí es un fallo crítico de bootstrapping,
     // no lo silenciamos: debe propagarse para que sea detectable.
-    this.initializeTheme();
+    
+    // Desactivamos la inicialización dinámica del tema para guiarnos por los SCSS
+    // this.initializeTheme();
   }
 
   private get config(): TenantConfig {

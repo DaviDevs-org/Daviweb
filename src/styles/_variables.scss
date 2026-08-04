@@ -1,10 +1,41 @@
 // ============================================
-// COLORES PRINCIPALES (DINÁMICOS)
+// COLORES PRINCIPALES (ESTÁTICOS)
 // ============================================
-// Las variables CSS del tenant se inyectan en runtime por SaasConfigService
-// mediante un <style id="tenant-theme"> escrito en el <head> tanto en SSR
-// como en cliente. NO pongas fallbacks hardcodeados aquí: causarían FOUC
-// al pintarse antes de que Angular aplique los colores reales del tenant.
+// Definimos las variables de tema directamente en :root aquí para que se guíe
+// por lo configurado en este archivo SCSS.
+
+:root {
+  // Colores principales
+  --color-primary: #e673B4;
+  --color-primary-rgb: 230, 115, 180;
+  --color-primary-light: #e673B4;
+  --color-primary-light-rgb: 230, 115, 180;
+  --color-primary-lighter: #fce8ed;
+  --color-primary-lighter-rgb: 252, 232, 237;
+  --color-primary-dark: #d4708f;
+  --color-primary-dark-rgb: 212, 112, 143;
+  --color-accent: #ef51aA;
+  --color-accent-rgb: 239, 81, 170;
+  --color-secondary: #aca7a3;
+  --color-secondary-rgb: 172, 167, 163;
+  --color-secondary-dark: #3d4a56;
+  --color-secondary-dark-rgb: 61, 74, 86;
+  --color-secondary-light: #8a9ba8;
+  --color-secondary-light-rgb: 138, 155, 168;
+  --color-background: #ffffff;
+  --color-background-secondary: #f0f4f8;
+  --color-text: #3d4a56;
+  --color-border: #cbd5e0;
+  --color-background-section: #e8eff5;
+  --color-background-calendar: #EA76B8;
+  --color-background-accent: #e88fa7;
+  --color-border-accent: #f5c5d4;
+  --color-text-pink: #dc5b7d;
+
+  // Fuentes principales
+  --font-main: 'Roboto', sans-serif;
+  --font-headings: 'Montserrat', sans-serif;
+}
 
 $primary: var(--color-primary); 
 $primary-rgb: var(--color-primary-rgb); // Para uso en rgba()
